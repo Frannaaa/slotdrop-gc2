@@ -1,11 +1,11 @@
 # Fran: finish October28 CP0
 
-Group1. Active PR: https://github.com/Frannaaa/slotdrop-gc2/pull/22
+Group 1. Active PR: https://github.com/Frannaaa/slotdrop-gc2/pull/22
 Branch: g1/m1-cp0-contract
 This PR contains the author-side CP0 materials, not a complete booking app.
 
 ## 1. Review the agreed direction
-Read docs/business.md: young professionals primary, students secondary; recurring leisure sessions with real spare seats; provider-set offer prices. Scope assumptions for review:72h window, draft10% fee, multi-seat allocations and owner offer controls. No partner demand/availability is asserted.
+Read docs/business.md: young professionals primary, students secondary; recurring leisure sessions with real spare seats; provider-set offer prices. Scope assumptions for review:72 hours window, draft 10% fee, multi-seat allocations and owner offer controls. No partner demand/availability is asserted.
 
 ## 2. Run and understand the starter
 
@@ -26,7 +26,7 @@ If already cloned, fetch/switch in that existing folder after checking git statu
 ## 3. Close external handoffs
 All five teammates and knee-rel were invited. They must accept the new repo invitation; old-repo access does not carry over. Finish actual Issue sidebar assignments to the intended owners after acceptance. Ask Janelle through the agreed group coordination channel to accept and review; no message was sent by this package.
 
-Bring docs/cp0-instructor-clarification.md to October28: manual provider offers are a custom second revenue feature and need instructor clearance. This requirement is not satisfied by merely documenting it. If a replacement is required, agree it before feature work.
+The two revenue features now use the brief’s listed availability and tiered-pricing categories. Review docs/revenue-features.md; the earlier custom manual-offer clearance question has been replaced.
 
 ## 4. Human review and merge
 Janelle follows docs/human-review.md: inspect, run, leave a substantive comment, approve after resolution. Fran must understand every line and supply the team's own business reasoning. After required approval, Fran resolves comments and merges PR22 without bypassing protections.
@@ -45,10 +45,10 @@ Verify docs/routes.md, docs/schema.md, docs/business.md and root workflow files 
 - [ ] Routes and schema merged.
 - [ ] One assigned Issue per screen, route and revenue feature.
 - [ ] First business traceability/rules draft merged.
-- [ ] Instructor clears the custom second feature, or agrees a replacement.
+- [ ] Confirm feature mapping in docs/revenue-features.md: availability plus bring-a-friend tiered pricing.
 - [ ] Share repo via the announced checkpoint channel; no separate CP0 upload destination was specified in the brief.
 
 No finished booking API, deployed site, final PDF or recordings are required for October28.
 
 ## Next phase
-Oct30 shared visual reference; Nov1 first working code PR each; Nov4 deployed database-backed Browse; Nov7 integrated flow; Nov9 final. Three substantive merged code PRs, two genuine reviews and code merged across two grading windows per person.
+Oct 30 shared visual reference; Nov 1 first working code PR each; Nov 4 deployed database-backed Browse; Nov 7 integrated flow; Nov 9 final. Three substantive merged code PRs, two genuine reviews and code merged across two grading windows per person.

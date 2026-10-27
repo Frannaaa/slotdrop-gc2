@@ -1,6 +1,6 @@
 # SlotDrop: Empty slot, better price.
 
-Group1, ITMGT45.03-YZW. Last-minute provider-controlled deals on seats in recurring local leisure sessions. Primary planning audience: young professionals; students secondary. Initial demo is fictional QC-area activity inventory, not a real partner network.
+Group 1, ITMGT45.03-YZW. Last-minute provider-controlled deals on seats in recurring local leisure sessions. Primary planning audience: young professionals; students secondary. Initial demo is fictional QC-area activity inventory, not a real partner network.
 
 Customer flow: Browse -> choose session/quantity -> confirm -> saved booking/receipt. Six customer screens plus owner dashboard/offer manager.
 
@@ -10,7 +10,7 @@ Implemented: modular Express app, static starter and JSON health route.
 Prepared for review: route/schema contracts, eight dated synthetic sessions, first business tables, task ownership and workflow.
 Not implemented: business APIs, connected PostgreSQL, full UI, real payments or partner synchronization.
 PR22: https://github.com/Frannaaa/slotdrop-gc2/pull/22
-Custom manual-offer revenue feature requires instructor clearance at CP0; see docs/cp0-instructor-clarification.md.
+GC2 revenue features: allocated-seat availability and provider-approved bring-a-friend tiered pricing. See docs/revenue-features.md. Paid activity add-ons are deferred to the Final Project.
 
 ## Roster and ownership
 
@@ -54,7 +54,7 @@ PORT, DATABASE_URL. Values only in local .env/host settings. .env.example has em
 
 ## Changes since GC1 and initial scaffold
 
-Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set prices replace global automatic tiers. Draft commission is10%, not12%; listing window72h, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
+Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set normal and optional bring-a-friend prices replace global time-based tiers. Draft commission is10%, not12%; listing window72 hours, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
 
 ## Reading order
 START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/human-review.md.

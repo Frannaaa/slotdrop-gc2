@@ -20,7 +20,7 @@ Do not duplicate Issues3-21. Their refreshed specifications are in tools/issues.
 - #18 API: GET /api/metrics | Frannaaa
 - #19 API: GET /api/health | Frannaaa
 - #20 Revenue feature: allocated-seat availability | janellereonal
-- #21 Revenue feature: provider-controlled session offers | janellereonal
+- #21 Revenue feature: bring-a-friend tiered pricing | janellereonal
 
 - #23 API: POST /api/slots provider session offers | Frannaaa
 - #24 API: PATCH /api/slots/:id offer and allocation edits | Frannaaa
