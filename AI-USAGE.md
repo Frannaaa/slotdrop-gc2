@@ -8,13 +8,24 @@
 
 ## Fran's verification
 
-Date:
+**Status: Suggested response for Fran to confirm. This is not yet a completed verification record.**
 
-Checks personally performed:
+**Date:** [Enter the date you actually review and test the work.]
 
-What I kept or changed after review:
+**Checks personally performed:** Pending. After completing the checks, adapt this suggested wording to your actual results:
+
+> I ran `npm run check`, `npm test` and `npm run check:sql` and reviewed the results. I opened the owner dashboard at desktop and phone widths, checked the activity-default cutoff and a manual session override, and tried creating, editing and pausing a fictional session. I checked that an unavailable session could not be resumed without correcting its deadline or capacity. My actual results were: [record what happened, including any failure or skipped check].
+
+**What I kept or changed after review — suggested wording:**
+
+> I kept booking cutoffs separate from the 72-hour discovery window because different activities need different preparation times. I requested corrections so the cutoff guidance follows the selected activity and the owner is not told sales have resumed when the session is still unavailable. I also kept the distinction between platform commission, total booking value and provider proceeds. Any further changes I personally made: [enter changes, or say none].
 
 ## Team business review
 
-Decisions and reasoning confirmed or revised by the team:
+**Status: Pending team discussion. The following is a proposed response, not a claim that the group has agreed.**
 
+**Decisions and reasoning confirmed or revised by the team — proposed wording:**
+
+> We propose a focused catalog of nearby recurring leisure activities so the MVP has a clear use case and manageable supply. The 72-hour window supports near-term planning, while providers control the deadline for each session according to preparation needs. We propose a 10% provider-paid commission as a simple model rate, subject to checking provider costs and willingness to participate. Buddy pricing stays optional for bookings of two or more seats in the same session, so providers can decide whether the lower rate is worthwhile. We will distinguish filling an additional seat from discounting people who would already have booked.
+
+**After discussion:** Record the date, who participated, which choices were accepted or revised, and the team's own reasons.
