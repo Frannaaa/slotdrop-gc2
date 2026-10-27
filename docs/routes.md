@@ -39,7 +39,7 @@ discountPercent, status, recurrenceNote, runsAsScheduled, defaultBookingCutoffMi
 
 Prices are per seat. discountPercent describes the standard offer versus the regular price. A null buddyPriceCentavos disables buddy pricing. A known unavailable session still returns 200 detail; the customer must not be allowed to book it.
 
-The owner catalog includes paused and expired inventory. Its services include id, providerId, providerName, name, active and defaultBookingCutoffMinutes.
+The owner catalog includes paused and expired inventory. Its services include id, providerId, providerName, name, active and defaultBookingCutoffMinutes. Its discoveryHours value comes from the server configuration so the owner page can distinguish future inventory from offers already in discovery.
 
 ## Session creation and edits
 
@@ -52,7 +52,7 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - Capacity cannot fall below confirmed seats.
 - A new standard offer cannot leave an incompatible buddy rate; update or disable the buddy rate in the same request.
 - A passed cutoff can close sales immediately.
-- Resuming from paused requires a future cutoff/start, available allocation and active activity.
+- Reopening paused or cancelled inventory requires a future cutoff/start, available allocation, an active activity and a session confirmed to run. Read the current time after acquiring the database lock.
 - Cancelling with confirmed bookings returns 409.
 - Changing the start time is unsupported and returns 400.
 - Existing receipt amounts and times stay unchanged.
