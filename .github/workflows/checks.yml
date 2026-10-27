@@ -32,7 +32,24 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run check:sql
-      - name: PostgreSQL HTTP and locking tests
+      - name: API tests
         run: npm test
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+      - name: Build and initialize production image
+        if: ${{ hashFiles('Dockerfile') != '' }}
+        run: |
+          docker build -t slotdrop-ci .
+          docker run --rm --network host -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci node tools/db-init.mjs
+      - name: Verify persistence across production-container restart
+        if: ${{ hashFiles('tools/check-release.mjs') != '' }}
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+        run: |
+          docker run -d --name slotdrop-ci --network host -e PORT=3100 -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci
+          node tools/check-release.mjs before
+          docker restart slotdrop-ci
+          node tools/check-release.mjs after
+      - name: Stop production test container
+        if: ${{ always() && hashFiles('tools/check-release.mjs') != '' }}
+        run: docker rm -f slotdrop-ci || true
