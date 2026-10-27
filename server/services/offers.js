@@ -44,12 +44,12 @@ export async function createOffer(db, body, now) {
     return findSlot(client, slot.id);
   }));
 }
-export async function editOffer(db, id, body) {
+export async function editOffer(db, id, body, now = new Date()) {
   object(body, fields);
   if (!Object.keys(body).length) invalid('Provide at least one supported edit.');
   return translate(() => db.transaction(async client => {
     // Booking must lock this same row before checking/inserting seats.
-    const { rows: [slot] } = await client.query('SELECT * FROM slots WHERE id=$1 FOR UPDATE', [id]);
+    const { rows: [slot] } = await client.query('SELECT sl.*,s.active AS service_active FROM slots sl JOIN services s ON s.id=sl.service_id WHERE sl.id=$1 FOR UPDATE OF sl', [id]);
     if (!slot) throw new ApiError(404, 'SLOT_NOT_FOUND', 'Session not found.');
     const { rows: [sum] } = await client.query("SELECT COALESCE(SUM(quantity),0) AS sold FROM bookings WHERE slot_id=$1 AND status='confirmed'", [id]);
     const sold = Number(sum.sold);
@@ -63,6 +63,9 @@ export async function editOffer(db, id, body) {
     if (status === 'cancelled' && sold > 0) throw new ApiError(409, 'BOOKINGS_EXIST', 'Cannot cancel a session with confirmed bookings.');
     const cutoff = body.bookingClosesAt === undefined ? new Date(slot.booking_closes_at) : timestamp(body.bookingClosesAt, 'bookingClosesAt');
     if (cutoff >= new Date(slot.starts_at)) invalid('Booking cutoff must precede the session start.');
+    if (slot.status === 'paused' && status === 'open' && (cutoff <= now || new Date(slot.starts_at) <= now || sold >= capacity || !slot.service_active)) {
+      throw new ApiError(409, 'SESSION_NOT_BOOKABLE', 'Set a future booking deadline and ensure the activity has available seats before resuming sales.');
+    }
     await client.query('UPDATE slots SET offer_price_centavos=$2,buddy_price_centavos=$3,capacity=$4,status=$5,booking_closes_at=$6 WHERE id=$1', [id,offer,buddy,capacity,status,cutoff]);
     return findSlot(client, id);
   }));

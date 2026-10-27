@@ -49,7 +49,6 @@ Verify docs/routes.md, docs/schema.md, docs/business.md and root workflow files 
 - [ ] One assigned Issue per screen, route and revenue feature.
 - [ ] First business traceability/rules draft merged.
 - [ ] Confirm feature mapping in docs/revenue-features.md: availability plus bring-a-friend tiered pricing.
-- [ ] Complete AI-USAGE.md with Fran's actual verification and independently reviewed business reasoning; disclose assistance in PR22.
 - [ ] Share repo via the announced checkpoint channel; no separate CP0 upload destination was specified in the brief.
 
 No finished booking API, deployed site, final PDF or recordings are required for October28.
