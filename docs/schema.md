@@ -50,7 +50,7 @@ BIGINT IDs and totals must be converted to safe JSON integers. PostgreSQL's pg d
 
 ## Owner edits
 
-The API accepts price, capacity, cutoff and status edits. It rejects unknown fields, including start-time changes, with 400. Cancelling a session with confirmed bookings or reducing capacity below confirmed seats returns 409. Resuming a paused session also requires a future cutoff/start, an active activity and available allocation.
+The API accepts price, capacity, cutoff and status edits. It rejects unknown fields, including start-time changes, with 400. Cancelling a session with confirmed bookings or reducing capacity below confirmed seats returns 409. Reopening paused or cancelled inventory requires a future cutoff/start, an active activity, available allocation and a session confirmed to run.
 
 ## Seed and setup
 
@@ -59,3 +59,4 @@ The API accepts price, capacity, cutoff and status edits. It rejects unknown fie
 Schema creation refuses existing tables. Seeding refuses existing data. Neither script resets a shared database or migrates an older schema. Restarting the app preserves saved rows and does not refresh their timestamps.
 
 PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local demo and SQL checks. Public database hosting is not yet configured.
+
