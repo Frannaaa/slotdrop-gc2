@@ -34,6 +34,8 @@ test("a paused session cannot imply resumed sales after its cutoff, start or cap
     salesState({ ...slot, serviceActive: false }, now).canResume,
     false,
   );
+  assert.equal(salesState({ ...slot, runsAsScheduled: false }, now).canResume, false);
+  assert.equal(salesState({ ...slot, status: 'open', runsAsScheduled: false }, now).label, 'Session not confirmed');
 });
 test("editing only a price does not truncate seconds from an unchanged booking deadline", () => {
   const original = "2026-10-28T11:41:37.123Z";
@@ -42,4 +44,13 @@ test("editing only a price does not truncate seconds from an unchanged booking d
     cutoffRequestValue("2026-10-28T19:42", original),
     "2026-10-28T11:42:00.000Z",
   );
+});
+
+test('future inventory is not described as bookable before its discovery window', () => {
+  const now = Date.parse('2026-11-01T00:00:00Z');
+  const slot = {status:'open',startsAt:'2026-11-04T00:00:00Z',bookingClosesAt:'2026-11-03T22:00:00Z',remainingSeats:4,serviceActive:true,runsAsScheduled:true};
+  assert.equal(salesState(slot,now,72).label,'Not listed yet');
+  assert.equal(salesState(slot,now+1,72).label,'Bookable');
+  assert.equal(salesState(slot,now,96).label,'Bookable');
+  assert.equal(salesState({...slot,status:'paused'},now,72).canResume,true);
 });

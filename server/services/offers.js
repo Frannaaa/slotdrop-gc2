@@ -23,7 +23,7 @@ async function translate(run) {
     throw error;
   }
 }
-export async function createOffer(db, body, now) {
+export async function createOffer(db, body, clock = () => new Date()) {
   object(body, ['serviceId','startsAt','bookingClosesAt','capacity','originalPriceCentavos','offerPriceCentavos','buddyPriceCentavos','runsAsScheduled']);
   const serviceId = numeric(body.serviceId, 'serviceId', Number.MAX_SAFE_INTEGER);
   const startsAt = timestamp(body.startsAt, 'startsAt');
@@ -31,11 +31,13 @@ export async function createOffer(db, body, now) {
   const buddy = body.buddyPriceCentavos ?? null;
   rates(body.originalPriceCentavos, body.offerPriceCentavos, buddy);
   if (body.runsAsScheduled !== true) invalid('Only sessions already going ahead may be offered.');
-  if (startsAt <= now) invalid('Session start must be in the future.');
   return translate(() => db.transaction(async client => {
     const { rows: [service] } = await client.query('SELECT * FROM services WHERE id=$1 FOR SHARE', [serviceId]);
     if (!service) throw new ApiError(404, 'SERVICE_NOT_FOUND', 'Activity not found.');
     if (!service.active) throw new ApiError(409, 'SERVICE_INACTIVE', 'This activity is inactive.');
+    // Read time after the lock; a request may have waited past its deadline.
+    const now = clock();
+    if (startsAt <= now) invalid('Session start must be in the future.');
     const cutoff = body.bookingClosesAt === undefined ? new Date(startsAt.getTime() - Number(service.default_booking_cutoff_minutes) * 60000) : timestamp(body.bookingClosesAt, 'bookingClosesAt');
     if (cutoff <= now || cutoff >= startsAt) invalid('Booking cutoff must be in the future and before the session.');
     const { rows: [slot] } = await client.query(`INSERT INTO slots
@@ -44,7 +46,7 @@ export async function createOffer(db, body, now) {
     return findSlot(client, slot.id);
   }));
 }
-export async function editOffer(db, id, body, now = new Date()) {
+export async function editOffer(db, id, body, clock = () => new Date()) {
   object(body, fields);
   if (!Object.keys(body).length) invalid('Provide at least one supported edit.');
   return translate(() => db.transaction(async client => {
@@ -63,7 +65,8 @@ export async function editOffer(db, id, body, now = new Date()) {
     if (status === 'cancelled' && sold > 0) throw new ApiError(409, 'BOOKINGS_EXIST', 'Cannot cancel a session with confirmed bookings.');
     const cutoff = body.bookingClosesAt === undefined ? new Date(slot.booking_closes_at) : timestamp(body.bookingClosesAt, 'bookingClosesAt');
     if (cutoff >= new Date(slot.starts_at)) invalid('Booking cutoff must precede the session start.');
-    if (slot.status === 'paused' && status === 'open' && (cutoff <= now || new Date(slot.starts_at) <= now || sold >= capacity || !slot.service_active)) {
+    const now = clock();
+    if (slot.status !== 'open' && status === 'open' && (cutoff <= now || new Date(slot.starts_at) <= now || sold >= capacity || !slot.service_active || !slot.runs_as_scheduled)) {
       throw new ApiError(409, 'SESSION_NOT_BOOKABLE', 'Set a future booking deadline and ensure the activity has available seats before resuming sales.');
     }
     await client.query('UPDATE slots SET offer_price_centavos=$2,buddy_price_centavos=$3,capacity=$4,status=$5,booking_closes_at=$6 WHERE id=$1', [id,offer,buddy,capacity,status,cutoff]);

@@ -46,3 +46,11 @@ The following results are from the owner development build, not every earlier br
 This checks storage and owner readback. The receipt fixture was not created through a customer booking page.
 
 The owner branch also contains the compact records in docs/evidence/fran-api-local.json and docs/evidence/fran-production-ci.json. These are local/CI results; public-URL challenge screenshots, the full customer flow and the deployed baseline remain pending.
+
+## October 28 bug review
+
+Two new HTTP regression tests failed before the fix: an expired cancelled session reopened with 200 instead of 409, and creation accepted a deadline that passed during a simulated database-lock wait (201 instead of 400). Reopening now checks paused and cancelled inventory, including whether the session is confirmed to run. Creation and reopening read the clock after acquiring the lock.
+
+The owner form and inventory actions are locked while requests are pending. Offers outside the server-configured discovery horizon show “Not listed yet.” A disposable browser check confirmed pause, editing, a server price-validation error and a successful retry. No saved user demo records were changed.
+
+After these fixes, local syntax checks passed; 14 tests passed with zero failures and the PostgreSQL-only concurrency test skipped. All eight SQL scenario groups passed. npm audit --omit=dev reported zero known production dependency vulnerabilities. These results do not complete the public booking challenges or the team's own reasoning and recording requirements.

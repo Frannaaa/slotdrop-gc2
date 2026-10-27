@@ -5,7 +5,7 @@ import { COMMISSION_BASIS_POINTS, DISCOVERY_HOURS } from '../config/business.js'
 export async function ownerCatalog(db) {
   const {rows: services} = await db.query(`SELECT s.*,p.name AS provider_name FROM services s JOIN providers p ON p.id=s.provider_id ORDER BY s.id`);
   const {rows: slots} = await db.query(SLOT_SELECT + ' ORDER BY sl.starts_at,sl.id');
-  return { commissionBasisPoints: COMMISSION_BASIS_POINTS,
+  return { commissionBasisPoints: COMMISSION_BASIS_POINTS, discoveryHours: DISCOVERY_HOURS,
     services: services.map(row => ({ id:safeNumber(row.id),providerId:safeNumber(row.provider_id),providerName:row.provider_name,name:row.name,active:row.active,defaultBookingCutoffMinutes:row.default_booking_cutoff_minutes })),
     slots: slots.map(slotResponse) };
 }

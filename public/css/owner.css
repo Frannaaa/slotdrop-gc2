@@ -133,6 +133,12 @@
   font-weight: 600;
   margin: 14px 0 5px;
 }
+.owner-page fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
 .owner-page input,
 .owner-page select {
   box-sizing: border-box;

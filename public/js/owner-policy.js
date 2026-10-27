@@ -14,7 +14,7 @@ export function cutoffRequestValue(input, original) {
     ? original
     : new Date(input + "+08:00").toISOString();
 }
-export function salesState(slot, now = Date.now()) {
+export function salesState(slot, now = Date.now(), discoveryHours) {
   if (slot.status === "cancelled")
     return { label: "Cancelled", canResume: false };
   if (Date.parse(slot.startsAt) <= now)
@@ -33,6 +33,12 @@ export function salesState(slot, now = Date.now()) {
     };
   if (slot.serviceActive === false)
     return { label: "Activity inactive", canResume: false };
+  if (slot.runsAsScheduled === false)
+    return { label: "Session not confirmed", canResume: false,
+      help: "This session is not confirmed to run. Sales are unavailable." };
+  if (Date.parse(slot.startsAt) >= now + discoveryHours * 3600000)
+    return { label: "Not listed yet", canResume: slot.status === "paused",
+      help: `This offer appears in customer discovery less than ${discoveryHours} hours before it starts.` };
   return {
     label: slot.status === "paused" ? "Paused" : "Bookable",
     canResume: slot.status === "paused",

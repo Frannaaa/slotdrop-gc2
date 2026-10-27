@@ -17,7 +17,7 @@ const time = (value) =>
   }).format(new Date(value));
 const localTime = (value) =>
   new Date(new Date(value).getTime() + 8 * 3600000).toISOString().slice(0, 16);
-let catalog = { services: [], slots: [], commissionBasisPoints: null },
+let catalog = { services: [], slots: [], commissionBasisPoints: null, discoveryHours: null },
   editing = null,
   manualCutoff = false,
   busy = false;
@@ -32,6 +32,15 @@ function element(tag, text, className) {
 function message(id, text, error = false) {
   $(id).textContent = text;
   $(id).classList.toggle("error", error);
+}
+function setBusy(value) {
+  busy = value;
+  $("offer-fields").disabled = value;
+  $("reset").disabled = value;
+  $("refresh").disabled = value;
+  $("sessions").inert = value;
+  $("save").disabled = value || !loaded ||
+    (editing === null && !catalog.services.some(service => service.active));
 }
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -118,8 +127,10 @@ function reset() {
   defaultCutoff();
   preview();
   message("form-message", "");
+  setBusy(false);
 }
 function edit(slot) {
+  if (busy) return;
   reset();
   editingCutoff = slot.bookingClosesAt;
   editing = slot.id;
@@ -155,6 +166,7 @@ function edit(slot) {
   preview();
   $("editor-title").scrollIntoView({ behavior: "smooth", block: "start" });
   $("cutoff").focus({ preventScroll: true });
+  setBusy(false);
 }
 function renderMetrics(metrics) {
   $("metrics").replaceChildren();
@@ -209,7 +221,7 @@ function renderSessions() {
       serviceActive: catalog.services.find(
         (service) => service.id === slot.serviceId,
       )?.active,
-    });
+    }, Date.now(), catalog.discoveryHours);
     const card = element("article", undefined, "session"),
       heading = element("h3", slot.serviceName),
       tag = element("span", state.label, "tag");
@@ -249,6 +261,7 @@ function renderSessions() {
       if (slot.status === "paused" && !state.canResume) toggle.disabled = true;
       toggle.addEventListener("click", async () => {
         if (busy) return;
+        setBusy(true);
         toggle.disabled = true;
         try {
           await api("/api/slots/" + slot.id, {
@@ -257,10 +270,12 @@ function renderSessions() {
               status: slot.status === "paused" ? "open" : "paused",
             }),
           });
+          setBusy(false);
           await load();
         } catch (error) {
           message("page-message", error.message, true);
         } finally {
+          setBusy(false);
           toggle.disabled = false;
         }
       });
@@ -317,10 +332,8 @@ function renderBookings(rows) {
 }
 async function load() {
   if (busy) return;
-  busy = true;
   loaded = false;
-  $("refresh").disabled = true;
-  $("save").disabled = true;
+  setBusy(true);
   message("page-message", "Loading your workspace…");
   try {
     const [next, metrics, bookings] = await Promise.all([
@@ -355,9 +368,7 @@ async function load() {
       "Sessions could not be loaded. Use Refresh data to retry.";
     $("bookings").textContent = "Bookings could not be loaded.";
   } finally {
-    busy = false;
-    $("refresh").disabled = false;
-    $("save").disabled = !loaded || !catalog.services.length;
+    setBusy(false);
   }
 }
 form.addEventListener("submit", async (event) => {
@@ -378,22 +389,20 @@ form.addEventListener("submit", async (event) => {
         originalPriceCentavos: cents(field("originalPriceCentavos").value),
         runsAsScheduled: field("runsAsScheduled").checked,
       });
-    busy = true;
-    $("save").disabled = true;
+    setBusy(true);
     message("form-message", "Saving…");
     await api(editing ? "/api/slots/" + editing : "/api/slots", {
       method: editing ? "PATCH" : "POST",
       body: JSON.stringify(body),
     });
-    busy = false;
+    setBusy(false);
     reset();
     await load();
     message("form-message", "Session saved.");
   } catch (error) {
     message("form-message", error.message, true);
   } finally {
-    busy = false;
-    $("save").disabled = !loaded || !catalog.services.length;
+    setBusy(false);
   }
 });
 $("service").addEventListener("change", defaultCutoff);

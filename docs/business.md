@@ -55,7 +55,7 @@ These are proposed funnel measures. Event analytics and the full customer flow a
 | Ask again when the price changes | Planned booking comparison with expectedTotalCentavos | Planned 409 PRICE_CHANGED and a fresh confirmation |
 | A network retry must not create a second booking | Unique request_id exists; HTTP retry handling awaits the booking service | Planned same receipt for an identical retry |
 | Offer edits must not change existing receipts | Implemented offer edits do not update bookings | Saved prices and fees remain unchanged |
-| Resuming sales must not bypass availability | Implemented in editOffer() | Passed cutoffs, started sessions, full allocations and inactive activities cannot be resumed from paused |
+| Reopening sales must not bypass availability | Implemented in editOffer() | Passed cutoffs, started sessions, full allocations, inactive activities and unconfirmed sessions prevent reopening paused or cancelled inventory |
 
 ## Revenue features and examples
 
@@ -88,3 +88,4 @@ Sources checked October 27, 2026:
 - [ClassPass](https://classpass.com/partners/faqs) describes excess-capacity distribution and integrated inventory tools. Its model does not validate SlotDrop's manual allocation, commission or expected results.
 
 The GC1 feedback raised ghost slots, unwilling providers, deal-only customers and a lack of supplier pipeline. SlotDrop addresses the design side with explicit allocations, cutoff/pause controls, optional prices and visible proceeds. Provider interviews are still needed to establish actual schedules, spare seats, costs and willingness to participate. External calendar accuracy remains an operational dependency.
+

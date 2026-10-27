@@ -15,7 +15,7 @@ test('owner catalog includes paused inventory; metrics use saved confirmed recei
     assert.deepEqual(metrics.topSellingService,{serviceId:1,serviceName:'Beginner Mug Handbuilding',seatsSold:2}); assert.equal(metrics.nearlyFullSessionCount,1);
     await f.database.query("UPDATE slots SET status='paused' WHERE id=1");
     assert.equal((await get('/api/metrics')).nearlyFullSessionCount,0);
-    const catalog=await get('/api/owner/catalog');assert.equal(catalog.services.length,4);assert.equal(catalog.slots.length,8);assert.equal(catalog.slots[0].status,'paused');
+    const catalog=await get('/api/owner/catalog');assert.equal(catalog.discoveryHours,72);assert.equal(catalog.services.length,4);assert.equal(catalog.slots.length,8);assert.equal(catalog.slots[0].status,'paused');
     const receipts=await get('/api/bookings');assert.equal(receipts[0].totalPriceCentavos,304000);assert.equal(receipts[0].pricingType,'buddy');
     await f.database.query("UPDATE bookings SET status='cancelled'");
     assert.equal((await get('/api/metrics')).bookingCount,0);
