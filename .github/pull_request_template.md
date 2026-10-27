@@ -15,3 +15,8 @@ State what you actually ran and what happened.
 - [ ] I ran or checked the relevant behavior.
 - [ ] I left a specific comment based on actual review.
 - [ ] Concerns resolved before approval.
+
+## AI assistance
+AI assistance:
+
+Verification personally performed:
