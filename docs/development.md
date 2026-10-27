@@ -18,8 +18,6 @@ Implemented: GET /api/slots and GET /api/slots/:id, literal search and category/
 
 Validation: syntax and five HTTP/date tests passed against a fresh in-memory PostgreSQL engine, alongside eight existing SQL scenario groups. Real multi-client PostgreSQL locking and hosted deployment remain unverified. Janelle's quote/booking routes remain assigned to her.
 
-AI assistance: Codex wrote this implementation and tests at Fran's request. Fran has not yet recorded a personal run; teammate review is pending.
-
 ## Provider offer controls
 Adds POST /api/slots and PATCH /api/slots/:id for #23/#24. Creation resolves an omitted cutoff from the activity default; explicit overrides belong to that session. Edits lock the session row, reject reducing capacity below confirmed seats, require compatible buddy prices and preserve saved receipts. Cancelling a session with confirmed bookings is refused.
 

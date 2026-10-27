@@ -2,11 +2,14 @@ import pg from 'pg';
 import { ApiError } from '../lib/validation.js';
 
 // Lazily open the pool so the static site and health endpoint work without a DB.
-export function postgresDatabase(connectionString = process.env.DATABASE_URL) {
+export function postgresDatabase(connectionString = process.env.DATABASE_URL, options = {}) {
   let pool;
   function getPool() {
     if (!connectionString) throw new ApiError(503, 'DATABASE_UNAVAILABLE', 'Configure DATABASE_URL or run npm run demo.');
-    pool ??= new pg.Pool({ connectionString, max: 5, connectionTimeoutMillis: 5000 });
+    if (!pool) {
+      pool = new pg.Pool({ connectionString, max: 5, connectionTimeoutMillis: 5000, query_timeout: 10000, ...options });
+      pool.on('error', error => console.error('Idle database connection failed:', error.code || 'UNKNOWN'));
+    }
     return pool;
   }
   return {

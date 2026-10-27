@@ -30,8 +30,10 @@ test('locked edits reject overshrinking/cancellation, preserve receipts and adju
     assert.equal((await edit({offerPriceCentavos:150000,buddyPriceCentavos:null,status:'paused'}))[0],200);
     const saved=(await f.database.query('SELECT * FROM bookings')).rows[0];
     assert.equal(saved.unit_price_centavos,152000);assert.equal(saved.offer_unit_price_centavos,160000);
-    assert.equal((await edit({bookingClosesAt:new Date(f.now.getTime()-1000).toISOString(),status:'open'}))[0],200);
+    assert.equal((await edit({bookingClosesAt:new Date(f.now.getTime()-1000).toISOString()}))[0],200);
+    assert.equal((await edit({status:'open'}))[0],409);
     const list=await (await fetch(f.base+'/api/slots')).json(); assert.ok(!list.some(row=>row.id===1));
+    assert.equal((await edit({bookingClosesAt:new Date(f.now.getTime()+3600000).toISOString(),status:'open'}))[0],200);
     assert.equal((await edit({capacity:2}))[1].remainingSeats,0);
   } finally { await f.close(); }
 });
