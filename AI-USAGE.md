@@ -8,24 +8,14 @@
 
 ## Fran's verification
 
-**Status: Suggested response for Fran to confirm. This is not yet a completed verification record.**
+**Date:** October 27, 2026. Fran's personal review date has not been recorded.
 
-**Date:** [Enter the date you actually review and test the work.]
+**Checks personally performed:** Fran's personal checks have not been recorded. Completed automated verification includes 12 passing PostgreSQL tests, eight SQL scenario groups, 21 Postman requests with 26 passing assertions, and a production-container restart check confirming that saved data and owner metrics persisted. The actual evidence is linked in docs/final-verification.md.
 
-**Checks personally performed:** Pending. After completing the checks, adapt this suggested wording to your actual results:
-
-> I ran `npm run check`, `npm test` and `npm run check:sql` and reviewed the results. I opened the owner dashboard at desktop and phone widths, checked the activity-default cutoff and a manual session override, and tried creating, editing and pausing a fictional session. I checked that an unavailable session could not be resumed without correcting its deadline or capacity. My actual results were: [record what happened, including any failure or skipped check].
-
-**What I kept or changed after review — suggested wording:**
-
-> I kept booking cutoffs separate from the 72-hour discovery window because different activities need different preparation times. I requested corrections so the cutoff guidance follows the selected activity and the owner is not told sales have resumed when the session is still unavailable. I also kept the distinction between platform commission, total booking value and provider proceeds. Any further changes I personally made: [enter changes, or say none].
+**What was kept or changed after review:** Booking cutoffs remain separate from the 72-hour discovery window so each provider can account for preparation time. The cutoff guidance was corrected to follow the selected activity while preserving a session override. Sales resumption now rejects unavailable sessions, unchanged deadlines retain their full precision, and the owner display distinguishes platform commission, booking value and provider proceeds.
 
 ## Team business review
 
-**Status: Pending team discussion. The following is a proposed response, not a claim that the group has agreed.**
+**Decisions and reasoning confirmed or revised by the team:** Team confirmation has not been recorded.
 
-**Decisions and reasoning confirmed or revised by the team — proposed wording:**
-
-> We propose a focused catalog of nearby recurring leisure activities so the MVP has a clear use case and manageable supply. The 72-hour window supports near-term planning, while providers control the deadline for each session according to preparation needs. We propose a 10% provider-paid commission as a simple model rate, subject to checking provider costs and willingness to participate. Buddy pricing stays optional for bookings of two or more seats in the same session, so providers can decide whether the lower rate is worthwhile. We will distinguish filling an additional seat from discounting people who would already have booked.
-
-**After discussion:** Record the date, who participated, which choices were accepted or revised, and the team's own reasons.
+The current GC2 build uses a focused catalog of nearby recurring leisure activities, a 72-hour discovery window, provider-controlled session deadlines, a 10% model commission and optional buddy pricing for two or more seats in one booking. These choices keep the MVP focused and let providers control participation and preparation requirements. The commission is a model assumption; provider costs and willingness to participate still require validation. Filling an additional seat is distinguished from discounting customers who would already have booked.
