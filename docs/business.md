@@ -28,7 +28,7 @@ The source files retain their original names, `Group 3 - GC1.pdf` and `GC1_feedb
 - Make buddy pricing optional. A provider can set a lower per-person rate for two or more seats booked together in the same session.
 - Keep paid add-ons, accounts, real payments and React for the separate Final Project.
 
-Provider proceeds are not profit. Materials, instruction, processing and other costs still have to be covered. The team needs to confirm these choices and its own reasons before submission.
+Provider proceeds still have to cover materials, instruction and other costs. The team needs to confirm the proposed choices and its own reasons before submission.
 
 ## Funnel
 
@@ -69,17 +69,17 @@ Availability and tiered pricing are the two proposed revenue features. They are 
 
 | Metric | Definition | Decision it supports |
 |---|---|---|
-| Booking count | Confirmed transactions, not seats | Check whether the booking flow is producing orders |
-| Platform revenue | Sum of saved commission | Compare fee income with acquisition and support costs |
-| Average booking value | Average full transaction total | Check whether companion bookings change order size |
-| Top activity | Activity with the most confirmed seats | Decide which supply to investigate or recruit |
-| Nearly full sessions | Eligible sessions with at most 25% of released allocation remaining, including sold-out sessions | Decide where to add supply |
+| Booking count | Confirmed transactions, not seats | If completed bookings are low, check where customers leave before adding another discount |
+| Platform revenue | Sum of saved commission | Compare the example ₱304 fee with actual acquisition and support costs before paying for a campaign |
+| Average booking value | Average full transaction total | Compare one-person ₱1,600 bookings with two-person ₱3,040 bookings before expanding buddy offers |
+| Top activity | Activity with the most confirmed seats | If an activity continues to lead with real bookings, approach more studios offering it |
+| Nearly full sessions | Eligible sessions with at most 25% of released allocation remaining, including sold-out sessions | One seat left out of four is 25%; ask the studio whether it can release more before changing the allocation |
 
-Fictional bookings demonstrate calculations; they do not measure real demand.
+These are example decisions. Fictional bookings demonstrate the calculations; they do not measure real demand.
 
 ## Research and feedback
 
-Sources checked October 27, 2026:
+Sources rechecked October 28, 2026:
 
 - [Laro Ceramics](https://laro-ceramics.com/) lists a Katipunan branch, beginner classes and group offers. Its [mug-making page](https://laro-ceramics.com/products/mug-making-class-manila) lists ₱3,000 and describes a three-hour class. This supports researching local activities and companion offers, but does not establish spare inventory or a partnership.
 - [Bumi & Ashe's catalog](https://bumiandashe.com/collections/single-session) lists mug-making at ₱2,650 and free-form pottery at ₱3,200. These are product examples, not a market average. Several seed prices are lower and must remain labeled fictional.

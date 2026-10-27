@@ -12,18 +12,18 @@ flowchart LR
   API -->|JSON| Browser
 ```
 
-## Implemented in the development PRs
+## Working offer flow
 
-The owner form in public/js/owner.js sends POST /api/slots or PATCH /api/slots/:id. server/routes/slots.js calls createOffer() or editOffer() in server/services/offers.js.
+1. The form handler in public/js/owner.js sends POST /api/slots or PATCH /api/slots/:id. Edits include only changed fields.
+2. server/routes/slots.js calls createOffer() or editOffer() in server/services/offers.js.
+3. Creation validates the offer, locks the activity, resolves its booking deadline and inserts the session. Editing locks the session, counts confirmed seats and checks the requested changes.
+4. server/repositories/slots.js returns the saved session, provider details and remaining seats.
+5. The page refreshes catalog, metrics and saved bookings in parallel.
 
-Creation validates fields and prices, reads the activity default, resolves the cutoff and inserts the session. Editing locks the session row, checks confirmed booked quantities and updates the allowed fields. Both use a database transaction. server/repositories/slots.js returns the saved session with provider details and derived remaining seats.
+Discovery uses listSlots() in server/services/discovery.js. Its time, cutoff and capacity filters apply to customer results. The owner catalog also includes paused and expired inventory.
 
-The owner page then loads catalog, metrics and saved bookings in parallel. Its displayed total and provider proceeds are previews; booking amounts must come from the server.
+## Booking flow to integrate
 
-Customer discovery uses listSlots() in server/services/discovery.js. It applies cutoff, date and capacity rules. The owner catalog includes paused and expired sessions so they can still be managed.
+Janelle owns quote, booking creation and receipt-by-ID. On one database client, booking must lock the same session row, recheck eligibility and seats, select the stored price tier, compute totals, compare the acknowledged amount, insert the receipt and commit. An identical retry returns the existing receipt.
 
-## Booking flow still to integrate
-
-Janelle owns quote, booking creation and receipt-by-ID. The booking transaction must lock the same session row, recheck confirmed seats, choose the stored rate, compute totals, compare the customer's acknowledged amount, insert the receipt and commit. An identical retry should return the existing receipt.
-
-The six customer screens and these booking routes are not complete in Fran's PRs. The final Network trace and hand-drawn diagram must follow an actual deployed booking.
+The browser's price is a preview. Confirmation must read the saved booking by ID. The final Network trace and hand-drawn diagram must follow a booking through the completed public app.

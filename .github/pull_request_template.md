@@ -5,8 +5,8 @@
 ## Checks
 Commands, results and any checks still needed:
 
-## AI assistance
-AI assistance:
+## Assistance
+AI assistance: <!-- Tool, task and what you kept or changed; write None if unused. -->
 
 ## Review
 - [ ] I can explain the change.
