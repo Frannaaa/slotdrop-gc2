@@ -1,31 +1,61 @@
-# Group 1 data contract
+# Database schema
 
-Four entities: providers -> services -> slots -> bookings. Exact SQL is db/schema.sql. All data is fictional; this contract does not claim partner availability.
+The SQL is in [db/schema.sql](../db/schema.sql). It defines four tables:
 
-| Entity | Responsibility |
+| Table | Stores |
 |---|---|
-| providers | Business name and manually entered city/area |
-| services | Activity, category, duration, beginner suitability and recurrence note |
-| slots | One dated session, provider-set regular/offer prices, released seats and cutoff |
-| bookings | Quantity, customer demo details, retry key and immutable receipt/fee snapshots |
+| providers | Business name, city and area |
+| services | Activity, provider, category, duration, recurrence note, active status and default booking lead time |
+| slots | Dated session, actual booking deadline, released capacity, regular/offer/buddy prices and status |
+| bookings | Quantity, demo customer details, retry key, status and saved time/price/fee fields |
 
-A slot is now a group session. capacity is seats allocated exclusively to SlotDrop, not the studio's total capacity. seatsBooked = SUM(quantity) for confirmed bookings. remainingSeats = capacity - seatsBooked. Do not store a second mutable remaining-seats counter. Serialize and validate BIGINT IDs and money totals as safe integers at API boundaries; pg commonly returns BIGINT as a string.
+Relationships: providers → services → slots → bookings. One session can have several bookings.
 
-Eligibility: active service, open slot, session already going ahead, startsAt strictly after now and strictly before now+72 hours, now strictly before bookingClosesAt, remainingSeats > 0. At exactly 72 hours or at the cutoff the offer is unavailable.
+## Seats and availability
 
-All per-seat prices, including receipt snapshots, are limited to 1..100,000,000 centavos by SQL and API validation. SQL verifies the saved fee equals the per-seat rounded commission multiplied by quantity, as well as the total/payout identity. services.default_booking_cutoff_minutes is a required positive activity default. On creation the API derives booking_closes_at from starts_at when no explicit cutoff is supplied. Each slot stores its own resolved cutoff strictly before starts_at, with no global minimum lead time. A changed activity default never silently rewrites existing sessions.
+capacity is the allocation released to SlotDrop, not the venue's total capacity.
 
-The price is a provider-entered CUSTOMER price per seat. No time-based automatic discount engine or minimum-price field remains. Optional buddy_price_centavos stores the provider-approved quantity tier for a booking of at least 2 seats. Null disables that tier; a non-null rate must be positive and below the normal offer price. Show the provider the fee and net payout before saving an offer. Automated discounts and negotiated payout floors are deferred. The server validates 0 < offer price < legitimate original price and derives savings.
+```text
+seatsBooked = sum of confirmed booking quantities
+remainingSeats = capacity - seatsBooked
+```
 
-A booking transaction locks the slot, rechecks confirmed seat totals, recalculates prices, checks acknowledged total and writes the receipt. A unique request_id prevents duplicate retry bookings; it does not replace capacity validation. The old one-confirmed-booking-per-slot index has been removed because multiple customers can fill one session.
+There is no separate remaining-seats counter. Booking and capacity edits must lock the same slots row before checking quantities. Owner edits already do this in the development PRs; the booking transaction still needs integration. SQL constraints alone do not enforce capacity across all booking rows.
 
-Limit owner edits: capacity cannot fall below sold seats; pause blocks new bookings without deleting existing ones; changes to offer price affect future bookings only; changing start time or cancelling a session with confirmed bookings returns 409 in this MVP. Customer cancellation/refunds and external-calendar synchronization are deferred.
+Discovery requires an active activity, an open session that will run, a start after now but before now + 72 hours, a cutoff after now, and enough remaining seats. At the cutoff or exactly 72 hours away, the offer is excluded.
 
-SQL was executed in an ephemeral PGlite0.5.12 PostgreSQL18.6 engine for author checks; no hosted database is connected. Fresh-schema files are not migrations. schema.sql deliberately refuses existing tables instead of pretending CREATE IF NOT EXISTS upgrades an old schema. Use a new disposable demo database. Seed is one-shot and refuses existing data; no destructive reset is supplied. Fresh seeds cover the next two Philippine calendar days; saved timestamps expire normally and do not prove recurring real-world supply.
+## Cutoffs
 
-## Bring-a-friend schema additions
+services.default_booking_cutoff_minutes is positive. Creation uses it when no explicit bookingClosesAt is supplied. Each slot saves its resolved deadline, strictly before its start. A later change to an activity default does not rewrite existing sessions.
 
-slots.buddy_price_centavos is optional per session. bookings.offer_unit_price_centavos stores the normal offer at purchase, pricing_type records standard/buddy, and unit_price_centavos records what was actually charged per seat. The SQL receipt check requires standard price=offer snapshot; buddy price<offer snapshot and quantity>=2. The application additionally checks the correct rate from the locked session row.
+A provider may set a different deadline for a particular session. There is no platform-wide minimum lead time.
 
-Multiple customers can book one session until the allocated capacity is exhausted. No paid add-on entity is included in GC2. This is four tables, not five.
+## Prices and receipts
 
+Money uses integer PHP centavos. Per-seat values range from 1 to 100,000,000 centavos. Standard offer < regular price; a non-null buddy price must be below the standard offer.
+
+bookings stores the regular price, standard offer, charged rate, pricing type, quantity, commission rate, total, fee, payout and session time. SQL checks that:
+
+- standard pricing uses the saved standard offer;
+- buddy pricing has quantity ≥ 2 and a lower charged rate;
+- total = charged rate × quantity;
+- fee = rounded per-seat commission × quantity;
+- fee + provider payout = total.
+
+The booking service must also select the correct stored rate; the receipt constraints do not choose it. Later owner edits leave saved booking money and time unchanged.
+
+request_id is unique. It prevents duplicate keys at the database level; the booking API must still compare an identical retry with a conflicting reused key.
+
+BIGINT IDs and totals must be converted to safe JSON integers. PostgreSQL's pg driver can return them as strings.
+
+## Owner edits
+
+The API accepts price, capacity, cutoff and status edits. It rejects unknown fields, including start-time changes, with 400. Cancelling a session with confirmed bookings or reducing capacity below confirmed seats returns 409. Resuming a paused session also requires a future cutoff/start, an active activity and available allocation.
+
+## Seed and setup
+
+[db/seed.sql](../db/seed.sql) creates three fictional providers, four activities and eight sessions on the next two Philippine calendar days. Session times are 10 AM, 1 PM, 4 PM and 6:30 PM, with activity-specific cutoffs.
+
+Schema creation refuses existing tables. Seeding refuses existing data. Neither script resets a shared database or migrates an older schema. Restarting the app preserves saved rows and does not refresh their timestamps.
+
+PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local demo and SQL checks. Public database hosting is not yet configured.

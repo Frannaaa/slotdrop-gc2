@@ -1,21 +1,9 @@
 # Assistance log
 
-| Date | Member | Tool | What we asked for | What we kept or changed | How we checked it |
+| Date | Member | Tool | Request | Kept or changed | Verification |
 |---|---|---|---|---|---|
-| October 27, 2026 | Fran | ChatGPT/Codex | Technical consultation and checkpoint preparation | Stack, route/schema planning, starter code and documentation support | Automated checks recorded in the repo; Fran's own verification pending |
-| October 27, 2026 | Fran | ChatGPT/Codex | Code assistance, debugging and technical review | Session/offer APIs, owner workspace and tests | PostgreSQL CI, restart checks and Postman run recorded in docs/final-verification.md; Fran's own verification pending |
-| October 27, 2026 | Fran | ChatGPT/Codex | Desk research and recommendations for the business draft | Source notes and proposed business rules/rationale | Sources linked in docs/research.md; team review pending |
+| October 27, 2026 | Fran | ChatGPT/Codex | Technical planning and checkpoint preparation | Stack and route/schema planning, starter code and documentation support | Automated results are recorded in docs/challenges.md |
+| October 27, 2026 | Fran | ChatGPT/Codex | Code support and debugging | Session/offer APIs, owner workspace and tests | PostgreSQL CI, restart check and Postman run; see docs/challenges.md |
+| October 27, 2026 | Fran | ChatGPT/Codex | Desk research and business recommendations | Source notes and proposed rules/rationale | Sources are in docs/business.md; team confirmation is not recorded |
 
-## Fran's verification
-
-**Date:** October 27, 2026.
-
-**Verification:** Automated tests, API checks and persistence checks passed. Results are recorded in `docs/final-verification.md`.
-
-**What was kept or changed after review:** Booking cutoffs remain separate from the 72-hour discovery window so each provider can account for preparation time. The cutoff guidance was corrected to follow the selected activity while preserving a session override. Sales resumption now rejects unavailable sessions, unchanged deadlines retain their full precision, and the owner display distinguishes platform commission, booking value and provider proceeds.
-
-## Team business review
-
-**Decisions and reasoning confirmed or revised by the team:** Team confirmation has not been recorded.
-
-The current GC2 build uses a focused catalog of nearby recurring leisure activities, a 72-hour discovery window, provider-controlled session deadlines, a 10% model commission and optional buddy pricing for two or more seats in one booking. These choices keep the MVP focused and let providers control participation and preparation requirements. The commission is a model assumption; provider costs and willingness to participate still require validation. Filling an additional seat is distinguished from discounting customers who would already have booked.
+The completed verification above is automated. No personal recording or teammate approval is recorded here. Members should add their own checks and changes when completed.

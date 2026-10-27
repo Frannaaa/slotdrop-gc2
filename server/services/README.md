@@ -1,3 +1,0 @@
-Later feature PRs: Janelle owns one pricing/quote function and booking service. Price inputs come from stored provider offers, not client totals. Draft commission1000 basis points is one server config value. Slot allocation is multi-seat, quantity-aware, checked under a row lock. Handle PRICE_CHANGED before writes and idempotent retries. No automatic discount-tier engine.
-
-Provider-approved buddy rate applies to all seats when quantity>=2; otherwise normal offer price. Read the stored rate; never accept a client-selected pricing tier. Persist normal-offer and charged-price snapshots plus pricing type. Paid add-ons are out of GC2 scope.
