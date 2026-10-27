@@ -2,7 +2,7 @@
 
 ## 1. Break the API
 
-The [Postman collection](SlotDrop-Fran.postman_collection.json) in the owner branch covers session validation, unknown IDs, empty search and owner edits. A local Newman 6.2.1 run completed 21 requests and 26 assertions with no failures.
+The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/SlotDrop-Fran.postman_collection.json) in the owner branch covers session validation, unknown IDs, empty search and owner edits. A local Newman 6.2.1 run completed 21 requests and 26 assertions with no failures.
 
 The required deployed booking checks are still pending: invalid quantity, a wrong browser total, insufficient seats, unknown ID, missing required details and an empty search. Record the expected and actual status, response screenshot and any fix for each request.
 
@@ -63,5 +63,5 @@ The owner form and inventory actions are locked while requests are pending. Offe
 
 After these fixes, local syntax checks passed; 14 tests passed with zero failures and the PostgreSQL-only concurrency test skipped. All eight SQL scenario groups passed. npm audit --omit=dev reported zero known production dependency vulnerabilities. These results do not complete the public booking challenges or the team's own reasoning and recording requirements.
 
-The updated code at commit 2f4e384eb52c284d5481e31843b2a8ff03f27be3 also passed [PostgreSQL and production-container CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40543382241): syntax, SQL scenarios, PostgreSQL HTTP/locking tests, Docker build/initialization and restart persistence. The compact review record is [fran-review-2026-10-28.json](evidence/fran-review-2026-10-28.json).
+The updated code at commit 2f4e384eb52c284d5481e31843b2a8ff03f27be3 also passed [PostgreSQL and production-container CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40543382241): syntax, SQL scenarios, PostgreSQL HTTP/locking tests, Docker build/initialization and restart persistence. The compact review record is [fran-review-2026-10-28.json](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/evidence/fran-review-2026-10-28.json).
 
