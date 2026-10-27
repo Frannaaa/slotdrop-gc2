@@ -13,7 +13,7 @@ These are SQL contract scenarios. They do not prove HTTP idempotency, transactio
 
 ## Seed lifetime
 
-All times are relative to the transaction's NOW() when seeding. The first cutoff is two hours later; the last is 69.5 hours later. A database seeded for CP0 will not provide a usable Browse demonstration indefinitely.
+The schedule is generated from the transaction's NOW() and Asia/Manila calendar dates when seeding. Fresh seeds schedule sessions at 10 AM, 1 PM, 4 PM and 6:30 PM Philippine time across the next two calendar days. Cutoffs use each activity's configured lead time. A database seeded for CP0 will not provide a usable Browse demonstration indefinitely.
 
 For a new local demonstration, create a new disposable database and apply schema and seed there. The files refuse existing tables/data; they are not migrations and do not contain a destructive reset. Never drop a shared database to refresh sample times. In the later implementation, the owner creates new dated sessions through the assigned offer API.
 

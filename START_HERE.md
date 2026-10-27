@@ -57,4 +57,5 @@ No finished booking API, deployed site, final PDF or recordings are required for
 Oct 30 shared visual reference; Nov 1 first working code PR each; Nov 4 deployed database-backed Browse; Nov 7 integrated flow; Nov 9 final. Three substantive merged code PRs, two genuine reviews and code merged across two grading windows per person.
 
 ## Keeping the demo usable later
-Seed data expires: the earliest booking cutoff is two hours after seeding, and the last is 69.5 hours after seeding. Use a fresh disposable database for each fresh-seed demonstration. Existing-data seed refusal protects saved bookings; do not delete or reset a shared database. Later offer-management routes can add future dated sessions. See docs/database-checks.md.
+Seed data expires: fresh seeds cover the next two Philippine calendar days, with each activity's lead time. Use a fresh disposable database for each fresh-seed demonstration. Existing-data seed refusal protects saved bookings; do not delete or reset a shared database. Later offer-management routes can add future dated sessions. See docs/database-checks.md.
+
