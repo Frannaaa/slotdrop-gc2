@@ -1,29 +1,29 @@
-# SlotDrop system and data flow
+# System and data flow
 
 ```mermaid
 flowchart LR
-  Browser[Plain HTML/CSS/JavaScript] -->|fetch JSON over HTTP| Routes[Express routes]
-  Routes --> Services[Validation and business services]
-  Services --> Repositories[Parameterized SQL repositories]
-  Repositories --> PostgreSQL[(PostgreSQL)]
-  PostgreSQL --> Repositories
-  Repositories --> Services
-  Services --> Routes
-  Routes -->|JSON response| Browser
+  Browser[HTML/CSS/JavaScript] -->|fetch JSON| API[Express routes]
+  API --> Services[Validation and business services]
+  Services --> Data[SQL repositories]
+  Data --> DB[(PostgreSQL)]
+  DB --> Data
+  Data --> Services
+  Services --> API
+  API -->|JSON| Browser
 ```
 
-## Fran's implemented session offer flow
+## Implemented in the development PRs
 
-1. public/js/owner.js handles the form and sends POST /api/slots or PATCH /api/slots/:id.
-2. server/routes/slots.js parses the route ID and invokes createOffer or editOffer in server/services/offers.js.
-3. Create validates JSON fields and prices, reads the activity, resolves the session cutoff and inserts the offer in one transaction. Edit locks the session row, counts confirmed booked seats, validates the new values and updates that session.
-4. server/repositories/slots.js joins activity/provider details and derives remaining seats from confirmed saved quantities.
-5. Express returns JSON. The owner page reloads catalog, metrics and bookings in parallel and renders the current data.
+The owner form in public/js/owner.js sends POST /api/slots or PATCH /api/slots/:id. server/routes/slots.js calls createOffer() or editOffer() in server/services/offers.js.
 
-GET /api/slots uses server/services/discovery.js to apply provider cutoff, 72-hour discovery, date and people filters. GET /api/slots/:id can show a known unavailable session. GET /api/owner/catalog deliberately includes inventory absent from customer discovery.
+Creation validates fields and prices, reads the activity default, resolves the cutoff and inserts the session. Editing locks the session row, checks confirmed booked quantities and updates the allowed fields. Both use a database transaction. server/repositories/slots.js returns the saved session with provider details and derived remaining seats.
 
-## Team booking integration
+The owner page then loads catalog, metrics and saved bookings in parallel. Its displayed total and provider proceeds are previews; booking amounts must come from the server.
 
-The required end-to-end flow is Browse → Select → Confirm → Save → read the saved receipt by ID. Janelle owns quote, booking creation and confirmation readback. Her booking transaction must acquire the same slots-row lock before recomputing seat availability, prices and totals, inserting immutable receipt fields, and committing. A retry key prevents duplicate requests; a changed price requires reconfirmation before an insert.
+Customer discovery uses listSlots() in server/services/discovery.js. It applies cutoff, date and capacity rules. The owner catalog includes paused and expired sessions so they can still be managed.
 
-Those customer transactions are not implemented by Fran's owner PRs. This system diagram documents the code interfaces; it does not replace the brief's hand-drawn diagram or actual Network-tab trace of a deployed booking.
+## Booking flow still to integrate
+
+Janelle owns quote, booking creation and receipt-by-ID. The booking transaction must lock the same session row, recheck confirmed seats, choose the stored rate, compute totals, compare the customer's acknowledged amount, insert the receipt and commit. An identical retry should return the existing receipt.
+
+The six customer screens and these booking routes are not complete in Fran's PRs. The final Network trace and hand-drawn diagram must follow an actual deployed booking.

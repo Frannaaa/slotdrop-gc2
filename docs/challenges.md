@@ -1,20 +1,48 @@
-# GC2 challenge evidence status
+# Challenges and test evidence
 
-This file separates reproducible engineering checks from the required deployed and personal evidence. Do not mark a deployed challenge complete using only a local or CI result.
+## 1. Break the API
 
-| Challenge | Prepared material | Still needed |
+The [Postman collection](SlotDrop-Fran.postman_collection.json) in the owner branch covers session validation, unknown IDs, empty search and owner edits. A local Newman 6.2.1 run completed 21 requests and 26 assertions with no failures.
+
+The required deployed booking checks are still pending: invalid quantity, a wrong browser total, insufficient seats, unknown ID, missing required details and an empty search. Record the expected and actual status, response screenshot and any fix for each request.
+
+## 2. Trace one request
+
+[system.md](system.md) names the offer-management files and functions and shows the architecture. The group still needs a Network-tab record and hand-drawn diagram for an actual customer booking on the deployed site.
+
+## 3. Review corrections
+
+These defects were found in the assisted implementation and corrected:
+
+| Problem | How it was identified | Correction |
 |---|---|---|
-| 1 — Break the deployed API | Fran's Postman export covers session input errors, unknown IDs, empty search and owner edits | Team booking requests for bad quantities/totals, overselling and missing customer fields, with actual public-URL screenshots |
-| 2 — Trace a real request | docs/system.md names the session-offer files/functions and planned booking handoff | Actual deployed customer booking Network record and the team's hand-drawn diagram |
-| 3 — Team review record | The cutoff guidance and misleading resumption defects were reproduced and corrected; their commits/tests are available | Team's own account of three actual review decisions and supporting evidence |
-| 4 — Change an owner rule | Active commission is centralized in server/config/business.js; browser reads the API value | Team's own before-change file/line inventory, explanation and reviewed PR evidence |
-| 5 — Predict, then run | Production functions are available in the assigned code | Fran's unaided predictions before running, observed outputs, mismatch explanation and unedited recording |
+| Cutoff guidance still showed the previous activity's default | Manual browser check: override a cutoff, then change activities | Update the guidance while preserving the session override |
+| Resume sales returned success after the booking cutoff | A request returned 200/open, but the session stayed out of discovery | Return 409 when a paused session is not bookable; show the actual sales state |
+| Saving another field rounded an unchanged cutoff to the minute | Review of datetime-local serialization | Preserve the original timestamp when the deadline was not edited |
 
-## Engineering checks available now
+Regression tests are in tests/owner-policy.test.js and tests/offers.test.js in the development branches. The team still needs to review these explanations and add its own account of the decisions.
 
-- tests/offers.test.js: rejects invalid prices and changes that would reduce capacity below confirmed seats; preserves saved receipts after offer edits.
-- tests/owner-policy.test.js: activity guidance updates with a preserved override; unavailable sessions do not offer misleading resumption.
-- tests/postgres-locking.test.js: on real PostgreSQL, an owner edit waits behind a transaction holding the session lock, then rejects reducing capacity below the newly committed booking.
-- tests/owner.test.js: metrics reconcile to confirmed saved receipts, including empty and paused-session behavior.
+## 4. Change an owner rule
 
-These checks are not a substitute for the deployed booking challenges. Booking retries, two customers competing for the final seats and customer confirmation readback must be tested after the assigned booking implementation is integrated.
+The active commission is COMMISSION_BASIS_POINTS in server/config/business.js. The owner preview reads it through the catalog API; it has no separate 10% fallback.
+
+Saved receipt rates are historical values and stay unchanged. Test fixtures may also contain fixed rates for specific examples. Before completing this challenge, record the exact file/line inventory and explain the difference between active configuration, saved data, examples and test expectations.
+
+## 5. Predict, then run
+
+Not completed. Each member supplies three predictions before running a chosen function, records the actual outputs and explains any mismatch. Fran's unedited voice recording, at most three minutes, must be made without assistance as required by the brief.
+
+## Completed automated checks
+
+The following results are from the owner development build, not every earlier branch.
+
+[PostgreSQL CI run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40527821450), commit 6401b8d5d83fbcf4b949c736372c428016b066b2:
+
+- Node 22 and PostgreSQL 16: 12 tests passed, none failed or skipped.
+- Eight SQL scenario groups and syntax checks passed.
+- A capacity edit waited behind a transaction holding the session lock, then rejected shrinking below the newly committed seats.
+- The production Docker image built and started. A saved session and a directly inserted fictional receipt fixture remained after restarting the Node container. Owner seat counts and metrics still matched.
+
+This checks storage and owner readback. The receipt fixture was not created through a customer booking page.
+
+The owner branch also contains the compact records in docs/evidence/fran-api-local.json and docs/evidence/fran-production-ci.json. These are local/CI results; public-URL challenge screenshots, the full customer flow and the deployed baseline remain pending.
