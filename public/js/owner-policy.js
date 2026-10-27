@@ -6,6 +6,14 @@ export function cutoffGuidance(minutes, override) {
       : "You can override this session.")
   );
 }
+export function cutoffRequestValue(input, original) {
+  const displayed = original
+    ? new Date(Date.parse(original) + 8 * 3600000).toISOString().slice(0, 16)
+    : null;
+  return original && input === displayed
+    ? original
+    : new Date(input + "+08:00").toISOString();
+}
 export function salesState(slot, now = Date.now()) {
   if (slot.status === "cancelled")
     return { label: "Cancelled", canResume: false };

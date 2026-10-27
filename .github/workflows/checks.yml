@@ -36,3 +36,18 @@ jobs:
         run: npm test
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+      - name: Build and initialize production image
+        run: |
+          docker build -t slotdrop-ci .
+          docker run --rm --network host -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci node tools/db-init.mjs
+      - name: Verify persistence across production-container restart
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+        run: |
+          docker run -d --name slotdrop-ci --network host -e PORT=3100 -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci
+          node tools/check-release.mjs before
+          docker restart slotdrop-ci
+          node tools/check-release.mjs after
+      - name: Stop production test container
+        if: always()
+        run: docker rm -f slotdrop-ci || true

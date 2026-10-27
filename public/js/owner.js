@@ -1,4 +1,8 @@
-import { cutoffGuidance, salesState } from "./owner-policy.js";
+import {
+  cutoffGuidance,
+  cutoffRequestValue,
+  salesState,
+} from "./owner-policy.js";
 const $ = (id) => document.getElementById(id);
 const form = $("offer-form");
 const money = (centavos) =>
@@ -13,11 +17,12 @@ const time = (value) =>
   }).format(new Date(value));
 const localTime = (value) =>
   new Date(new Date(value).getTime() + 8 * 3600000).toISOString().slice(0, 16);
-let catalog = { services: [], slots: [], commissionBasisPoints: 1000 },
+let catalog = { services: [], slots: [], commissionBasisPoints: null },
   editing = null,
   manualCutoff = false,
   busy = false;
 let loaded = false;
+let editingCutoff = null;
 function element(tag, text, className) {
   const item = document.createElement(tag);
   if (text !== undefined) item.textContent = text;
@@ -61,6 +66,11 @@ function field(name) {
 }
 function preview() {
   try {
+    if (!Number.isInteger(catalog.commissionBasisPoints)) {
+      $("net-preview").textContent =
+        "Load the workspace to preview provider proceeds.";
+      return;
+    }
     const standard = cents(field("offerPriceCentavos").value),
       buddy = cents(field("buddyPriceCentavos").value, true);
     const net = (price) =>
@@ -94,6 +104,7 @@ function defaultCutoff() {
   );
 }
 function reset() {
+  editingCutoff = null;
   editing = null;
   manualCutoff = false;
   form.reset();
@@ -110,6 +121,7 @@ function reset() {
 }
 function edit(slot) {
   reset();
+  editingCutoff = slot.bookingClosesAt;
   editing = slot.id;
   manualCutoff = true;
   $("editor-title").textContent = "Edit session #" + slot.id;
@@ -356,7 +368,7 @@ form.addEventListener("submit", async (event) => {
       capacity: Number(field("capacity").value),
       offerPriceCentavos: cents(field("offerPriceCentavos").value),
       buddyPriceCentavos: cents(field("buddyPriceCentavos").value, true),
-      bookingClosesAt: new Date($("cutoff").value + "+08:00").toISOString(),
+      bookingClosesAt: cutoffRequestValue($("cutoff").value, editingCutoff),
     };
     if (editing) body.status = field("status").value;
     else

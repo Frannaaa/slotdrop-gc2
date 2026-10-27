@@ -51,3 +51,8 @@ This revision uses Node 24.19.0 in the local review workspace.
 Earlier standard-only checks above describe earlier revisions. The current seeded cutoffs vary by activity; they no longer all use a two-hour offset. The first expires two hours after seeding, the last after 69.5 hours.
 
 Run instructions and limits are in docs/database-checks.md. No hosted PostgreSQL, multi-client locking, completed booking HTTP API, student verification or Janelle review is claimed by these checks. Source-based business research is in docs/research.md. The inherited GC1 quotations/page anchors still need checking against the original PDFs during the student's review.
+
+
+## Final-pass schedule and verification
+The latest fresh seed uses 10 AM, 1 PM, 4 PM and 6:30 PM Philippine sessions on the next two calendar days, with activity-specific cutoffs. Earlier seed timing notes above describe earlier revisions. Real PostgreSQL CI and Postman-compatible execution records are in docs/final-verification.md. Existing demo records are preserved rather than silently retimed.
+
