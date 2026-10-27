@@ -26,7 +26,15 @@ Regression tests are in tests/owner-policy.test.js and tests/offers.test.js in t
 
 The active commission is COMMISSION_BASIS_POINTS in server/config/business.js. The owner preview reads it through the catalog API; it has no separate 10% fallback.
 
-Saved receipt rates are historical values and stay unchanged. Test fixtures may also contain fixed rates for specific examples. Before completing this challenge, record the exact file/line inventory and explain the difference between active configuration, saved data, examples and test expectations.
+Current owner-build inventory, checked October 28 without changing the rate:
+
+| File/line | Role | Edit to change the active rate? |
+|---|---|---|
+| server/config/business.js:1 | COMMISSION_BASIS_POINTS = 1000 | Yes — the single active setting |
+| server/repositories/owner.js:3 and :8 | Import and return that setting in the catalog | No |
+| public/js/owner.js:86–88 | Read the API rate for the per-seat proceeds preview | No |
+
+Saved receipt rates are historical values and stay unchanged. SQL validates each saved rate and its arithmetic; it does not set the active commission. Fixed test inputs and worked examples describe specific rates rather than another live setting. There is no duplicate owner-preview fallback to refactor. After Janelle's booking service is integrated, check that it imports the same active setting and update this inventory before completing the group challenge.
 
 ## 5. Predict, then run
 
@@ -54,3 +62,6 @@ Two new HTTP regression tests failed before the fix: an expired cancelled sessio
 The owner form and inventory actions are locked while requests are pending. Offers outside the server-configured discovery horizon show “Not listed yet.” A disposable browser check confirmed pause, editing, a server price-validation error and a successful retry. No saved user demo records were changed.
 
 After these fixes, local syntax checks passed; 14 tests passed with zero failures and the PostgreSQL-only concurrency test skipped. All eight SQL scenario groups passed. npm audit --omit=dev reported zero known production dependency vulnerabilities. These results do not complete the public booking challenges or the team's own reasoning and recording requirements.
+
+The updated code at commit 2f4e384eb52c284d5481e31843b2a8ff03f27be3 also passed [PostgreSQL and production-container CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40543382241): syntax, SQL scenarios, PostgreSQL HTTP/locking tests, Docker build/initialization and restart persistence. The compact review record is [fran-review-2026-10-28.json](evidence/fran-review-2026-10-28.json).
+
