@@ -111,6 +111,8 @@
     "number": 21,
     "title": "Revenue feature: bring-a-friend tiered pricing",
     "owner": "janellereonal",
-    "body": "Owner: @janellereonal\nTarget: Nov 1 first shared pricing code;Nov 4 integration;Nov 7 edge cases.\n\nAcceptance criteria:\n- [ ] Provider-entered buddy rate optional per session;null disables;positive and below normal offer.\n- [ ] Shared quote/booking function selects buddy for quantity>=2 in same session/transaction;standard otherwise.\n- [ ] Server never trusts client rate/type and never oversells allocated seats.\n- [ ] Receipt stores normal offer,charged rate,pricing type,quantity,fee and payout.\n- [ ] Test quantity 1/2/3,disabled rate,insufficient seats,price change and later offer edits.\n- [ ] No stacking or paid add-ons. Maps to brief tiered-pricing option.\n\nFollow docs/routes.md,docs/schema.md and docs/revenue-features.md; reviewed code PR required."
+    "body": "Owner: @janellereonal\nTarget: Nov 1 first shared pricing code;Nov 4 integration;Nov 7 edge cases.\n\nAcceptance criteria:\n- [ ] Provider-entered buddy rate optional per session;null disables;positive and below normal offer.\n- [ ] Shared quote/booking function selects buddy for quantity>=2 in same session/transaction;standard otherwise.\n- [ ] Server never trusts client rate/type and never oversells allocated seats.\n- [ ] Receipt stores normal offer,charged rate,pricing type,quantity,fee and payout.\n- [ ] Test quantity 1/2/3,disabled rate,insufficient seats,price change and later offer edits.\n- [ ] No stacking or paid add-ons. Maps to brief tiered-pricing option.\n\nFollow docs/routes.md,docs/schema.md and docs/business.md; reviewed code PR required."
   }
 ]
+
+
