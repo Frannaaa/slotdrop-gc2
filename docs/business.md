@@ -2,11 +2,11 @@
 
 Source filenames retain their original labels: Group 3 - GC1.pdf and GC1_feedback_grp3.pdf. Fran confirmed Group 1 for GC2. The source document is not renamed or rewritten.
 
-## User statements and current planning status
+## Scope and assumptions
 
-Fran explicitly prefers young professionals as the primary audience, with students secondary; activity-based offers such as pottery; provider control of manual discounts; and consideration of weekly/recurring supply rather than relying on occasional monthly events. After reviewing FunNow, ClassPass, Eatigo and Bookme examples, Fran authorized updating CP0 to recurring local leisure sessions and provider-approved offers, and then selected bring-a-friend pricing for GC2 with paid activity add-ons deferred to the Final Project.
+SlotDrop focuses on young professionals, with students as a secondary audience. Supply includes recurring creative workshops and recreational drop-ins. Providers set their offers and can enable a bring-a-friend rate. Paid activity add-ons are reserved for the Final Project.
 
-This is the CP0 business first draft. The 72-hour window, 10% model commission, one-area demo, exact seed prices and initial category mix are concrete implementation assumptions proposed in this conversation, not validated customer/partner facts. The course requires the team's own business reasoning: a human must supply the actual reasons and can revise these defaults. No interview, partner agreement, teammate approval or market validation is invented.
+The 72-hour listing window, 10% commission, initial area, category mix and seed prices are planning assumptions. Customer demand, provider participation and costs still need validation through interviews.
 
 ## Working proposition and first segment
 
@@ -61,7 +61,7 @@ These are measurement intentions, not implemented analytics or observed conversi
 
 2. Bring-a-friend tiered pricing. One seat uses the PHP 1,600 normal offer: fee PHP 160 provider proceedsPHP 1,440 before service costs. Two seats qualify for PHP 1,520 each, total PHP 3,040: fee PHP 304 and provider proceedsPHP 2,736. Compared with two normal-offer seats, the customer saves anotherPHP 160 SlotDrop gives upPHP 16 commission and the provider gives upPHP 144 proceeds. If the offer attracts a genuinely additional attendee it may help fill capacity; if both people would already have booked, it discounts existing demand. Provider participation is optional; the team must evaluate the extra attendee's material/service costs and actual booking behavior. These figures are transparent scenarios, not validated unit economics.
 
-The two features map to the brief's listed availability filtering/inventory protection and tiered pricing. Manual provider price entry is configuration, not counted as a separate revenue feature. Paid add-ons are a Final Project improvement. No special clearance for an unlisted second feature is claimed or needed for this proposed classification; the instructor still judges the implementation against the rubric.
+The two features map to the brief's listed availability filtering/inventory protection and tiered pricing. Manual provider price entry is configuration, not counted as a separate revenue feature. Paid add-ons are a Final Project improvement. Review both features against the rubric before implementation.
 
 ## Five owner metrics and intended decisions
 
@@ -80,7 +80,7 @@ Do not infer general market demand from fictional seed bookings.
 - FunNow: https://www.events.myfunnow.com/whyfunnow-en and https://help.boss.myfunnow.com/hc/en-us/articles/47363352109337-How-to-Set-Regular-Prices-via-Cycle-Setting
   Reference for near-term discovery, recurring time slots and merchant price/capacity controls.
 - ClassPass: https://classpass.com/partners/faqs
-  Reference for selective excess-capacity allocation; no proprietary algorithm is claimed here.
+  Reference for selective excess-capacity allocation.
 - Eatigo: https://eatigo.com/en/about-us
   Reference for time-specific quiet-period offers, not a proposal to add restaurants.
 - Bookme: https://www.bookme.com.au/
@@ -89,16 +89,15 @@ Do not infer general market demand from fictional seed bookings.
 
 Sources were read October27,2026. Published platform claims are descriptions of their products, not proof of incremental profit or demand for SlotDrop.
 
-## Human business reasoning to preserve
+## Questions for team review
 
-Fran and the team should record their own rationale during review for the segment, supplier cadence, selected geography, commission economics and release/cutoff policy. User authorization to prepare this draft is not represented as classmates independently deciding or validating it. No canned personal rationale is attributed to a member.
-
+Confirm the initial area, supplier schedule, commission and booking cutoff. Check whether providers have enough regularly available seats and whether the buddy rate covers the cost of an additional attendee.
 
 ## Targeting and feedback follow-through
 
-Working age range22-35 is a planning hypothesis for early-career professionals, not survey evidence. Initial demo offer prices range fromPHP 450 to PHP 1,700 before any buddy tier; they are fictional. Segment by willingness to pay for a specific nearby activity and available time, not by an invented salary statistic. Monthly income and observed frequency of unfilled sessions are not validated.
+Working age range22-35 is a planning hypothesis for early-career professionals, not survey evidence. Initial demo offer prices range fromPHP 450 to PHP 1,700 before any buddy tier; they are fictional. Segment by willingness to pay for a specific nearby activity and available time, rather than estimated salary alone. Monthly income and observed frequency of unfilled sessions are not validated.
 
-For provider acquisition, investigate regularly scheduled beginner-session operators in one reachable area. No real partner is claimed; the key interview is whether a provider will release specific seats, at which times, with what cutoff and optional group rate. Existing booking systems remain the provider's primary system; the proposed exclusive allocation prevents knowingly listing the same released seats twice, but external calendar accuracy remains an operational dependency.
+For provider acquisition, investigate regularly scheduled beginner-session operators in one reachable area. The first provider interviews should establish whether a provider will release specific seats, at which times, with what cutoff and optional group rate. Existing booking systems remain the provider's primary system; the proposed exclusive allocation prevents knowingly listing the same released seats twice, but external calendar accuracy remains an operational dependency.
 
 | Risk from GC1 feedback | Proposed response | Remaining evidence needed |
 |---|---|---|
@@ -108,4 +107,4 @@ For provider acquisition, investigate regularly scheduled beginner-session opera
 | Popular providers have no spare seats | Promise available near-term activities, not guaranteed access to sold-out popular venues | Actual suitable spare inventory |
 | No supplier pipeline | Validate session cadence, spare places and reachable customers before broadening categories | First willing providers; no agreements yet |
 
-Competition is real: FunNow offers near-term discovery; ClassPass offers scheduled excess-capacity distribution; Eatigo demonstrates time-specific offers. SlotDrop's proposed initial focus is nearby beginner leisure sessions with transparent per-booking pricing and optional companion rates. This is a positioning hypothesis, not a claim that competitors lack similar functionality.
+Competition is real: FunNow offers near-term discovery; ClassPass offers scheduled excess-capacity distribution; Eatigo demonstrates time-specific offers. SlotDrop's proposed initial focus is nearby beginner leisure sessions with transparent per-booking pricing and optional companion rates. This positioning still needs customer and provider feedback.

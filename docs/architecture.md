@@ -20,4 +20,4 @@ Provider-set normal offers and optional bring-a-friend rates replace automatic t
 
 All data is fictional. No real inventory/calendar synchronization, authenticated provider roles, real payment, customer refund workflow or five-minute hold is claimed. Existing regular-price sales are not assumed to be incremental. Real supply cadence and demand still require interviews.
 
-Group quantity affects both inventory and pricing: quantity 1 uses the normal offer; quantity>=2 uses the opted-in stored buddy rate. Pricing lives in one future shared service owned by Janelle; CP0 does not pre-author her feature implementation. Paid activity add-ons are deferred to the Final Project.
+Group quantity affects both inventory and pricing: quantity 1 uses the normal offer; quantity>=2 uses the opted-in stored buddy rate. Pricing lives in one future shared service owned by Janelle; Implementation is scheduled for the next phase. Paid activity add-ons are deferred to the Final Project.

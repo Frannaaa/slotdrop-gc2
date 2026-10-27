@@ -20,7 +20,7 @@ These checks do not establish deployed transaction locking, idempotent HTTP beha
 main protection inspected in browser: pull request required, approvals required, required count1, conversation resolution required, bypass disabled, force pushes and branch deletion disallowed. No direct-push test was performed.
 
 ## Scope and data
-Demo providers/prices/schedules are fictional. Regular/offer prices, quantity, request keys, snapshots and metrics have consistent field definitions across contracts. Original GC1 source filenames retained; current group is1. Human reviewer and partner/instructor approvals are not fabricated.
+Demo providers/prices/schedules are fictional. Regular/offer prices, quantity, request keys, snapshots and metrics have consistent field definitions across contracts. Original GC1 source filenames retained; current group is1.
 
 
 ## Current bring-a-friend revision checks

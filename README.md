@@ -57,7 +57,7 @@ PORT, DATABASE_URL. Values only in local .env/host settings. .env.example has em
 Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set normal and optional bring-a-friend prices replace global time-based tiers. Draft commission is10%, not12%; listing window72 hours, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
 
 ## Reading order
-START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/human-review.md.
+START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/review-checklist.md.
 
 ## Deadlines
 CP0 October28; CP1 November4; final November9,2026 at11:59PM Philippine time. November9 is Monday despite the brief's inconsistent Wednesday label.

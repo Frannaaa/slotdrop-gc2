@@ -11,7 +11,7 @@ State what you actually ran and what happened.
 - [ ] Contracts match the change.
 - [ ] Relevant behavior/states/mobile layout checked, or reason not applicable.
 
-## Human reviewer
+## Reviewer
 - [ ] I ran or checked the relevant behavior.
 - [ ] I left a specific comment based on actual review.
 - [ ] Concerns resolved before approval.

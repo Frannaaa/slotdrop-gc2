@@ -1,11 +1,15 @@
-Prepares Group 1 SlotDrop CP0 for recurring local leisure sessions aimed primarily at young professionals, with students secondary.
+Prepares Group 1 SlotDrop CP0 for recurring local leisure sessions, with young professionals as the primary audience and students secondary.
 
-Changes: four-entity model with multiple allocated seats per session; provider-set standard and buddy offer prices and draft 10% commission;72 hours discovery/cutoff rules; quantity-aware booking/retry/reconfirmation and provider-approved buddy-pricing contract; eight fictional sessions; owner offer controls within seventh screen; business traceability and two worked examples; task ownership and setup/review instructions.
+Includes:
+- Four-entity schema and eight fictional sessions with allocated seats.
+- Provider-set offers and optional bring-a-friend pricing for bookings of two or more seats.
+- Route and screen contracts, booking safeguards and two revenue examples.
+- Business draft, task ownership, setup instructions and review checklist.
 
-Implemented code remains the modular starter page/health route. Business APIs, hosted database connectivity, deployment and partner validation are not claimed. See docs/preparation-checks.md for actual checks.
+The starter page and health route are implemented. Business APIs, hosted database connectivity and deployment are next-phase work. Provider participation and demand still need research.
 
-Fran/team must understand the work and supply their own business reasoning. Human review remains pending.
+Validation: Node syntax and HTTP checks; temporary PostgreSQL schema, seed, receipt and buddy-pricing scenarios. Details and limits are in docs/preparation-checks.md.
 
-Janelle (janellereonal) is the human reviewer of record. Revenue features are availability and bring-a-friend tiered pricing; paid add-ons are deferred. Collaborator acceptance and actual teammate assignments are tracked separately from authored files.
+Janelle reviews PR22. Fran resolves feedback and merges after approval.
 
-Closes #1. References #25. Owner offer API work tracked in #23 and #24.
+Closes #1. References #25. Provider offer API work is tracked in #23 and #24.

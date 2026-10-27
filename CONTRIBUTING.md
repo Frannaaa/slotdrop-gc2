@@ -1,6 +1,6 @@
 # Workflow
 
-Issue -> branch -> meaningful commits -> PR -> human comment and approval -> Fran merges.
+Issue -> branch -> meaningful commits -> PR -> review comment and approval -> Fran merges.
 
 GC2 is Group 1, confirmed by Fran. Preserve member numbers from README. Fran uses g1/m1-cp0-contract and title [G1-M1] Add CP0 contracts and modular starter.
 

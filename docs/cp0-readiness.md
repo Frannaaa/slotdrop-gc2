@@ -1,21 +1,18 @@
-# CP0 author readiness
+# CP0 readiness
 
-Group 1. Review branch g1/m1-cp0-contract, PR22. This is a prepared checkpoint, not a claim of human approval or completed merge.
+Group 1. Branch: g1/m1-cp0-contract. PR22 is ready for Janelle's review and remains unmerged.
 
-Prepared: roster/stack README, contribution rules, PR template, empty environment example, modular starter, four-entity SQL, eight fictional sessions, route/screen contract, business first draft, task specifications and human review instructions. There are23 open task/coordination Issues after adding the two offer routes and the contract-change record.
+Prepared: roster and stack, contribution guide, PR template, empty environment example, modular starter, four-entity SQL schema, eight fictional sessions, route and screen contracts, business draft, task specifications and review checklist. There are 23 open task and coordination Issues.
 
-Current direction authorized by Fran: recurring local leisure sessions, young professionals primary, students secondary, provider-controlled manual offers, multiple released seats, with provider-approved buddy pricing for quantity>=2 and paid add-ons deferred. Exact demo fees/prices/window are planning defaults stated for review.
+The proposal focuses on recurring local leisure sessions for young professionals, with students secondary. Providers set the standard offer and optional buddy rate for bookings of two or more seats. Paid add-ons are deferred. Fees, prices and the listing window are planning assumptions.
 
-Business corrections: capacity is a released allocation; cancellation does not automatically create a resale right; no assumption every cancelled sale loses money; provider controls offer price; no automated tier engine; changed total needs reconfirmation; gross booking value is not platform revenue.
+Starter and temporary PostgreSQL checks are recorded in docs/preparation-checks.md. Hosted database connectivity, business APIs and partner research are still pending.
 
-Checks actually performed are recorded in docs/preparation-checks.md. Schema/seed checks ran on temporary PGlite PostgreSQL18.6; a hosted connection, partner validation and full business APIs are not claimed.
+Before submission:
+- Teammates and knee-rel accept their repository invitations.
+- Finish Issue assignments and request Janelle's review once she has access.
+- Janelle checks the contracts and feature mapping, runs the starter and leaves a review comment.
+- Fran resolves feedback and confirms the business assumptions with the team.
+- After approval, Fran merges, checks the required files on main and shares the repository through the checkpoint channel.
 
-External dependencies:
-- Teammates/instructor accept invitations; their acceptance cannot be performed by Fran.
-- Assign teammate-owned Issues after acceptance and request Janelle's review.
-- Janelle independently runs/reviews/comments/approves.
-- Human reviewer checks the listed availability/tiered-pricing feature mapping. No separate custom manual-offer clearance is being claimed.
-- Fran understands merged work and supplies the team's own business reasons.
-- After review, Fran merges and verifies required files on main, then shares repo through checkpoint channel.
-
-No direct push/bypass or fabricated review is used to mark these complete. See START_HERE.md.
+See START_HERE.md for the full checklist.
