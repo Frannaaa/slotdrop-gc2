@@ -99,3 +99,22 @@ The verified owner build passed 12 PostgreSQL tests, eight SQL scenario groups, 
 - **November 9, 2026, 11:59 PM Philippine time:** integrated deployed flow, reviewed main tagged `gc2-v1.0`, two-page PDF, Postman export, system diagram, business/challenge/baseline evidence and individual recordings.
 
 Each member also needs three merged code PRs, two real reviews and merges in two grading windows. The group must complete the deployed challenges and phone test. Personal predictions and recordings are not completed by the automated checks.
+
+## Fran's remaining work — checked October 28
+
+**Today (CP0):**
+
+- Get the assigned teammate's real review on PR #22, resolve comments and merge the approved route/schema/business draft into main. They are still only on branches.
+- Finish collaborator access and assign #4, #10, #14, #15, #16, #20 and #21 in GitHub. Current checks report read access for janellereonal, 13kilograms and knee-rel; accepted collaborator access still needs confirmation.
+- Verify main's required PR, one-approval and no-force-push settings. The API confirms protection is enabled but has not exposed the full settings.
+- Check the inherited GC1 quotes/page references against the original PDF, then use the announced checkpoint submission channel.
+
+**Before the November 9 final:**
+
+- Review and merge the three feature PRs (#27–29), and give two genuine reviews of teammates' PRs with specific comments. No code PR is merged yet.
+- Have meaningful code merged in a second grading window after October 28; merging everything today would not meet that requirement.
+- Connect the public Node host and PostgreSQL database; integrate the customer screens and Janelle's quote/booking/readback routes. The repo link is not a deployed API URL.
+- Verify the complete public booking flow, saved owner figures and persistence across a server restart. Complete the deployed Postman challenges, request trace and hand-drawn diagram with the group.
+- Complete the commission-rule file/line inventory, deployed List baseline and outside-group phone test. Prepare the final two-page PDF, update the deployed URL/versions and tag the reviewed main build gc2-v1.0.
+- Make your own Challenge 5 predictions before running the function and record the unedited voice explanation (maximum three minutes) without assistance. This cannot be replaced by automated tests.
+
