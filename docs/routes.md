@@ -96,7 +96,6 @@ Optional display of gross booking value is derived separately and must not be la
 
 Each frontend owner implements their own phone layout, loading/empty/error states and API integration. All use Kirsten's shared CSS. No map integration, subscription, credits, waitlist or five-minute hold is included.
 
-
 ## Revenue feature 2: bring-a-friend quantity tier
 
 Provider opts in per session by storing buddyPriceCentavos; null opts out. It must be a positive integer strictly below the normal offer price. Threshold is exactly 2 seats, same session and same transaction; every seat in an eligible booking uses the stored buddy per-person rate. It is NOT a further automatic5% deduction, a promo code or a calculation on the original price. No stacking with other discount features.

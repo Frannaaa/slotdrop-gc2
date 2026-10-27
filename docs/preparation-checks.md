@@ -22,7 +22,6 @@ main protection inspected in browser: pull request required, approvals required,
 ## Scope and data
 Demo providers/prices/schedules are fictional. Regular/offer prices, quantity, request keys, snapshots and metrics have consistent field definitions across contracts. Original GC1 source filenames retained; current group is1.
 
-
 ## Current bring-a-friend revision checks
 
 Reran fresh four-table schema and eight-session seed on PGlite0.5.12/PostgreSQL18.6 after adding optional buddy rates and receipt snapshots.
@@ -38,7 +37,6 @@ Reran fresh four-table schema and eight-session seed on PGlite0.5.12/PostgreSQL1
 - Invalid new group offer and repeat seed refused; eight original sessions preserved.
 
 These are schema and SQL contract-scenario checks, not tests of a completed pricing API. Shared service implementation remains Janelle's next-phase work. Pinned starter syntax/HTTP checks from the preceding revision remain applicable; executable starter code was not changed in this revision.
-
 
 ## Reproducible CP0 correction checks, October 27, 2026
 

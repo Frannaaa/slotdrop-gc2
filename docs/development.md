@@ -17,5 +17,3 @@ Production uses the pg connection pool and DATABASE_URL instead of the embedded 
 Implemented: GET /api/slots and GET /api/slots/:id, literal search and category/area/date/people filters, Manila date boundaries, safe IDs and money, and independent cutoff/capacity/72-hour eligibility.
 
 Validation: syntax and five HTTP/date tests passed against a fresh in-memory PostgreSQL engine, alongside eight existing SQL scenario groups. Real multi-client PostgreSQL locking and hosted deployment remain unverified. Janelle's quote/booking routes remain assigned to her.
-
-AI assistance: Codex wrote this implementation and tests at Fran's request. Fran has not yet recorded a personal run; teammate review is pending.

@@ -12,4 +12,5 @@ Accept the repository invitation as janellereonal, then open PR22 on g1/m1-cp0-c
 
 Include the checks you ran in your review. Each member should also plan three substantive feature code PRs across Oct 29-Nov 4 and Nov 5-Nov 9; documentation-only PRs do not count toward that requirement.
 
-Run npm test and npm run check:sql. Verify 400/404/413/500 errors are structured JSON without stack traces. Review the per-session cutoff and activity default, price limits and fee rounding. Read AI-USAGE.md; record actual student verification and independent business reasoning before submission. Confirm the seeded inventory has not expired when demonstrating Browse later.
+
+Run npm test and npm run check:sql. Check structured error responses, activity defaults and session overrides, price bounds and fee rounding. Verify the demo inventory has not expired.
