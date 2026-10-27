@@ -111,7 +111,7 @@ Payments are simulated. Platform revenue is modeled commission, not cash collect
 
 ## Errors and screens
 
-Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversized bodies return 413 PAYLOAD_TOO_LARGE. Routes not implemented in the current branch return 404 ROUTE_NOT_IMPLEMENTED. Unexpected messages, SQL and stack traces are not sent to the browser.
+Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversized bodies return 413 PAYLOAD_TOO_LARGE. Malformed encoded path parameters return 400 INVALID_PATH. Unsupported JSON charsets or content encodings return 415 UNSUPPORTED_MEDIA_TYPE. Recognized database connection failures return 503 DATABASE_UNAVAILABLE; unexpected SQL/programming errors still return 500. Routes not implemented in the current branch return 404 ROUTE_NOT_IMPLEMENTED. Unexpected messages, SQL and stack traces are not sent to the browser.
 
 | Screen | URL | Frontend owner |
 |---|---|---|

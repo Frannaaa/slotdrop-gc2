@@ -54,3 +54,30 @@ test('unexpected failures conceal their original message and stack', async () =>
     });
   });
 });
+
+test('malformed encoded path parameters return 400 JSON instead of a server error', async () => {
+  const target = express();
+  target.get('/items/:id', (_req,res) => res.json({}));
+  target.use(errorHandler);
+  await withServer(target, async base => {
+    const response = await fetch(base + '/items/%E0%A4%A');
+    assert.equal(response.status,400);
+    assert.deepEqual(await response.json(), {error:{code:'INVALID_PATH',message:'The URL contains an invalid encoded value.'}});
+  });
+});
+
+test('unsupported JSON charset and content encoding return 415 JSON', async () => {
+  await withServer(app, async base => {
+    for (const headers of [
+      {'Content-Type':'application/json; charset=iso-8859-1'},
+      {'Content-Type':'application/json','Content-Encoding':'not-a-real-encoding'}
+    ]) {
+      const response = await fetch(base+'/api/not-implemented',{method:'POST',headers,body:'{}'});
+      assert.equal(response.status,415);
+      const body = await response.json();
+      assert.equal(body.error.code,'UNSUPPORTED_MEDIA_TYPE');
+      assert.doesNotMatch(JSON.stringify(body), /stack|node_modules|UnsupportedMediaTypeError/);
+    }
+  });
+});
+
