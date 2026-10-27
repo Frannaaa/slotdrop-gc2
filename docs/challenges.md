@@ -70,3 +70,9 @@ The updated code at commit 2f4e384eb52c284d5481e31843b2a8ff03f27be3 also passed 
 Three added regression tests failed before correction because malformed encoded path parameters, unsupported JSON encodings and an unreachable PostgreSQL server all returned 500. They now return structured 400, 415 and 503 responses respectively. Reads and transactions both handle connection failures without exposing connection details. A failed rollback discards its connection and preserves the original error.
 
 After correction, the owner build passed local syntax checks, 17 tests and all eight SQL scenario groups. The real-PostgreSQL concurrency test was skipped locally because TEST_DATABASE_URL was not configured. These checks supplement the earlier results and do not establish deployed customer-booking behavior.
+
+### Stale owner editor
+
+A further check reproduced an unintended overwrite: open the editor, pause that session and change its allocation elsewhere, then save a price from the old form. The previous full-field PATCH returned 200 but reopened the session and restored its old allocation. The editor now sends only fields changed from the values originally loaded. A price-only save preserves a later pause, capacity or deadline change. An unchanged form shows “No changes to save.”
+
+The new HTTP regression covers the stale editor payload. A disposable browser check also confirmed that a price draft stays intact through a pause, saves the new price while leaving sales paused, and handles an unchanged form without an error. No browser console warnings or errors were recorded. Additional metric checks passed for multiple bookings, tied top activities, cancellation, sold-out sessions and inactive activities. Local syntax checks and 19 tests passed; the PostgreSQL-only lock test remained skipped locally. These changes are in the owner PR.

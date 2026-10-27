@@ -14,6 +14,11 @@ export function cutoffRequestValue(input, original) {
     ? original
     : new Date(input + "+08:00").toISOString();
 }
+export function changedOfferFields(values, original) {
+  return Object.fromEntries(
+    Object.entries(values).filter(([key, value]) => value !== original[key]),
+  );
+}
 export function salesState(slot, now = Date.now(), discoveryHours) {
   if (slot.status === "cancelled")
     return { label: "Cancelled", canResume: false };

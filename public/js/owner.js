@@ -1,6 +1,7 @@
 import {
   cutoffGuidance,
   cutoffRequestValue,
+  changedOfferFields,
   salesState,
 } from "./owner-policy.js";
 const $ = (id) => document.getElementById(id);
@@ -23,6 +24,7 @@ let catalog = { services: [], slots: [], commissionBasisPoints: null, discoveryH
   busy = false;
 let loaded = false;
 let editingCutoff = null;
+let editingSnapshot = null;
 function element(tag, text, className) {
   const item = document.createElement(tag);
   if (text !== undefined) item.textContent = text;
@@ -114,6 +116,7 @@ function defaultCutoff() {
 }
 function reset() {
   editingCutoff = null;
+  editingSnapshot = null;
   editing = null;
   manualCutoff = false;
   form.reset();
@@ -132,6 +135,7 @@ function reset() {
 function edit(slot) {
   if (busy) return;
   reset();
+  editingSnapshot = { ...slot };
   editingCutoff = slot.bookingClosesAt;
   editing = slot.id;
   manualCutoff = true;
@@ -375,13 +379,20 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (busy || !loaded) return;
   try {
-    const body = {
+    let body = {
       capacity: Number(field("capacity").value),
       offerPriceCentavos: cents(field("offerPriceCentavos").value),
       buddyPriceCentavos: cents(field("buddyPriceCentavos").value, true),
       bookingClosesAt: cutoffRequestValue($("cutoff").value, editingCutoff),
     };
-    if (editing) body.status = field("status").value;
+    if (editing) {
+      body.status = field("status").value;
+      body = changedOfferFields(body, editingSnapshot);
+      if (!Object.keys(body).length) {
+        message("form-message", "No changes to save.");
+        return;
+      }
+    }
     else
       Object.assign(body, {
         serviceId: Number($("service").value),
