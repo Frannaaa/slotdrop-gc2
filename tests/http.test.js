@@ -29,7 +29,7 @@ test('unimplemented APIs and invalid bodies use safe, structured JSON', async ()
       { body: '{', status: 400, code: 'INVALID_JSON' },
       { body: JSON.stringify({ value: 'x'.repeat(17000) }), status: 413, code: 'PAYLOAD_TOO_LARGE' }
     ]) {
-      const response = await fetch(base + '/api/bookings', {
+      const response = await fetch(base + '/api/not-implemented', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: scenario.body
       });
       assert.equal(response.status, scenario.status);

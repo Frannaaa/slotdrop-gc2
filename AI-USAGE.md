@@ -29,3 +29,6 @@ Codex implemented Fran's PostgreSQL adapter, persistent local demo, initializati
 
 ## Next-phase offer implementation
 Codex implemented Fran's create/edit offer service and corresponding HTTP tests. Business inputs remain demo data. Student verification and teammate approval are pending.
+
+## Next-phase owner workspace
+Codex implemented Fran's dashboard, owner catalog, metrics and saved-booking list; added regression tests; and checked the local UI on desktop and phone widths. Database scenarios used PGlite; no hosted deployment, real customer flow, independent student contribution or teammate approval is claimed.

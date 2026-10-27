@@ -1,6 +1,6 @@
 # Group 1 API and screen contract
 
-Status: CP0 design for review. Only /api/health is implemented. Business routes below are assigned to later feature PRs. Browser -> own Express API -> PostgreSQL; never browser -> database. JSON field names are camelCase; SQL uses snake_case.
+Status on Fran's development branch: health, slot list/detail/create/edit, owner catalog, saved-booking list and metrics are implemented. Janelle's pricing/quote, booking create and booking-by-ID routes remain assigned work. Browser -> own Express API -> PostgreSQL; never browser -> database. JSON field names are camelCase; SQL uses snake_case.
 
 ## Required and supporting API routes
 
@@ -15,6 +15,7 @@ Status: CP0 design for review. Only /api/health is implemented. Business routes 
 | GET | /api/metrics | none | 200 five metrics | generic 500 on failure | Fran |
 | POST | /api/slots | provider offer/session fields below | 201 created session | 400 invalid, 404 service absent, 409 duplicate | Fran |
 | PATCH | /api/slots/:id | offerPriceCentavos, buddyPriceCentavos, capacity, bookingClosesAt or status=open/paused/cancelled | 200 updated offer | 400 invalid, 404 absent, 409 conflict with bookings | Fran |
+| GET | /api/owner/catalog | none; fictional owner demo | 200 {services,slots,commissionBasisPoints}; includes paused/expired inventory | generic 500 on failure | Fran (#26) |
 | GET | /api/health | none | 200 status ok/app SlotDrop | health does not imply database readiness | Fran |
 
 q matches provider/service names case-insensitively; category is creative/active; area matches a returned area; people is an integer 1-100 and requires enough seats. Unknown ordinary search text returns []; malformed supported filter values return 400. Validate repeated query keys rather than treating an array as a string.
