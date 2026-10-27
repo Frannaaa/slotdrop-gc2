@@ -42,6 +42,8 @@ try {
     assert.equal(tables.rows[0].n, 4);
     const slots = await db.query("SELECT count(*)::int AS n FROM slots WHERE starts_at > NOW() AND starts_at < NOW()+INTERVAL '72 hours' AND booking_closes_at > NOW() AND booking_closes_at < starts_at");
     assert.equal(slots.rows[0].n, 8);
+    const daytime = await db.query("SELECT count(*)::int AS n FROM slots WHERE EXTRACT(HOUR FROM starts_at AT TIME ZONE 'Asia/Manila') BETWEEN 9 AND 20");
+    assert.equal(daytime.rows[0].n,8);
   });
   await check('different activity defaults and a per-session override remain independent', async () => {
     const {rows} = await db.query('SELECT default_booking_cutoff_minutes FROM services ORDER BY id');

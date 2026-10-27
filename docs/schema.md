@@ -21,10 +21,11 @@ A booking transaction locks the slot, rechecks confirmed seat totals, recalculat
 
 Limit owner edits: capacity cannot fall below sold seats; pause blocks new bookings without deleting existing ones; changes to offer price affect future bookings only; changing start time or cancelling a session with confirmed bookings returns 409 in this MVP. Customer cancellation/refunds and external-calendar synchronization are deferred.
 
-SQL was executed in an ephemeral PGlite0.5.12 PostgreSQL18.6 engine for author checks; no hosted database is connected. Fresh-schema files are not migrations. schema.sql deliberately refuses existing tables instead of pretending CREATE IF NOT EXISTS upgrades an old schema. Use a new disposable demo database. Seed is one-shot and refuses existing data; no destructive reset is supplied. Seeded sessions expire after 72 hours and do not prove recurring real-world supply.
+SQL was executed in an ephemeral PGlite0.5.12 PostgreSQL18.6 engine for author checks; no hosted database is connected. Fresh-schema files are not migrations. schema.sql deliberately refuses existing tables instead of pretending CREATE IF NOT EXISTS upgrades an old schema. Use a new disposable demo database. Seed is one-shot and refuses existing data; no destructive reset is supplied. Fresh seeds cover the next two Philippine calendar days; saved timestamps expire normally and do not prove recurring real-world supply.
 
 ## Bring-a-friend schema additions
 
 slots.buddy_price_centavos is optional per session. bookings.offer_unit_price_centavos stores the normal offer at purchase, pricing_type records standard/buddy, and unit_price_centavos records what was actually charged per seat. The SQL receipt check requires standard price=offer snapshot; buddy price<offer snapshot and quantity>=2. The application additionally checks the correct rate from the locked session row.
 
 Multiple customers can book one session until the allocated capacity is exhausted. No paid add-on entity is included in GC2. This is four tables, not five.
+
