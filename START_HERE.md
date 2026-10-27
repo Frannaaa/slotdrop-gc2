@@ -5,7 +5,8 @@ Branch: g1/m1-cp0-contract
 This PR contains the CP0 contracts, business draft and starter app. Booking APIs are scheduled for the next phase.
 
 ## 1. Review the agreed direction
-Read docs/business.md: young professionals primary, students secondary; recurring leisure sessions with real spare seats; provider-set offer prices. Scope assumptions for review:72 hours window, draft 10% fee, multi-seat allocations and owner offer controls. Provider availability and customer demand still need research.
+Start with docs/research.md for current public-source evidence and its limits.
+Read docs/business.md: young professionals primary, students secondary; recurring leisure sessions with real spare seats; provider-set offer prices. Scope assumptions for review:72 hours window, model 10% fee, multi-seat allocations and owner offer controls. Provider availability and customer demand still need research.
 
 ## 2. Run and understand the starter
 
@@ -16,6 +17,8 @@ Read docs/business.md: young professionals primary, students secondary; recurrin
     npm ci
     Copy-Item .env.example .env
     npm run check
+    npm test
+    npm run check:sql
     npm start
 
 Open http://localhost:3000 and http://localhost:3000/api/health.
@@ -46,9 +49,13 @@ Verify docs/routes.md, docs/schema.md, docs/business.md and root workflow files 
 - [ ] One assigned Issue per screen, route and revenue feature.
 - [ ] First business traceability/rules draft merged.
 - [ ] Confirm feature mapping in docs/revenue-features.md: availability plus bring-a-friend tiered pricing.
+- [ ] Complete AI-USAGE.md with Fran's actual verification and independently reviewed business reasoning; disclose assistance in PR22.
 - [ ] Share repo via the announced checkpoint channel; no separate CP0 upload destination was specified in the brief.
 
 No finished booking API, deployed site, final PDF or recordings are required for October28.
 
 ## Next phase
 Oct 30 shared visual reference; Nov 1 first working code PR each; Nov 4 deployed database-backed Browse; Nov 7 integrated flow; Nov 9 final. Three substantive merged code PRs, two genuine reviews and code merged across two grading windows per person.
+
+## Keeping the demo usable later
+Seed data expires: the earliest booking cutoff is two hours after seeding, and the last is 69.5 hours after seeding. Use a fresh disposable database for each fresh-seed demonstration. Existing-data seed refusal protects saved bookings; do not delete or reset a shared database. Later offer-management routes can add future dated sessions. See docs/database-checks.md.

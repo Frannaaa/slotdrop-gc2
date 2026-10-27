@@ -1,6 +1,6 @@
 # Existing task board
 
-Do not duplicate Issues3-21. Their refreshed specifications are in tools/issues.json. Owner offer routes have separate Fran-assigned Issues23 and24; contract change is Issue25. Twelve existing teammate-owned Issues await sidebar assignment after acceptance. Issue1 coordinates CP0.
+Do not duplicate Issues3-21. Their refreshed specifications are in tools/issues.json. Owner offer routes have separate Fran-assigned Issues23 and24; contract change is Issue25. As checked October 27, #5-8 are assigned to kattgrass/sonatiina. Eight Issues still await collaborator access and assignment: #3, #4, #10, #14, #15, #16, #20 and #21. Issue1 coordinates CP0.
 
 - #3 Screen: Home | chukwunyeluukgabrielokolo-cmyk
 - #4 Screen: Browse | 13kilograms

@@ -16,3 +16,5 @@ Example, fictional session1:
 - Additional discountPHP 160 = PHP 16 commission reduction + PHP 144 provider-proceeds reduction.
 
 This is the listed tiered-pricing option, replacing the earlier proposed custom manual-offer feature. It does not represent instructor approval or a guarantee of marks. Paid activity add-ons are deferred to the Final Project. No custom-feature clearance question remains for manual price entry as feature2.
+
+Working MVP policies: model commission 10%; discovery strictly less than 72 hours away; provider-set cutoff per session, with an activity default and no universal minimum lead time. Full rationale and unvalidated assumptions are in docs/business.md. Rates are model amounts, not actual collected cash.

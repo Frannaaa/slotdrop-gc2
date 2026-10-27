@@ -11,3 +11,5 @@ Reviewer checks changed files, runs relevant behavior, leaves a specific actual 
 Every member needs 3 merged substantive code PRs, 2 reviews each with a real comment, and work merged in 2 of the windows Oct 14-28, Oct 29-Nov 4, Nov 5-9. Documentation-only PRs do not count toward three code PRs. No one authors another member's work.
 
 Contract edits need a Contract change: Issue. Separate UI/routes/services/repositories. Calculate money once on the server. Never commit secrets or node_modules. Understand all merged lines.
+
+Disclose AI/tool assistance in each relevant PR and update AI-USAGE.md. Do not claim assistant checks as your own, or AI-drafted business reasons as independently authored student reasoning. Run npm test for HTTP/error changes and npm run check:sql for schema/seed changes.

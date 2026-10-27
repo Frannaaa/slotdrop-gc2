@@ -5,7 +5,7 @@ The uploaded proposal/feedback retain their original Group3 filenames. Current G
 | Feedback | Current CP0 response | Status/limit |
 |---|---|---|
 | Target too broad | Young professionals primary,students secondary; initial nearby recurring leisure;22-35 planning age hypothesis | Income and demand still need validation |
-| Missing monetization/features/stack | Draft10% commission; availability plus provider-approved buddy tier; declared Node/Express/PostgreSQL/plain JS | Rate/seed prices are model assumptions; feature implementation later |
+| Missing monetization/features/stack | Model 10% commission; availability plus provider-approved buddy tier; declared Node/Express/PostgreSQL/plain JS | 10% is the selected model rate with reasons in business.md; seed prices and provider economics remain unvalidated; implementation later |
 | No competitors/differentiation | FunNow,ClassPass,Eatigo,Bookme references and provisional positioning | Differentiation still needs validation |
 | Role-duplicated stores | Four entities:providers,services,sessions,bookings | SQL executed in temporary PostgreSQL,hosted connection later |
 | Missing end-to-end flow | docs/architecture.md describes UI->API->services->SQL->receipt | Production API flow not yet implemented |

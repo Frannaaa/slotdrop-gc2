@@ -6,7 +6,26 @@ Source filenames retain their original labels: Group 3 - GC1.pdf and GC1_feedbac
 
 SlotDrop focuses on young professionals, with students as a secondary audience. Supply includes recurring creative workshops and recreational drop-ins. Providers set their offers and can enable a bring-a-friend rate. Paid activity add-ons are reserved for the Final Project.
 
-The 72-hour listing window, 10% commission, initial area, category mix and seed prices are planning assumptions. Customer demand, provider participation and costs still need validation through interviews.
+Fran selected the following working defaults for the CP0 proposal on October 27, 2026. They are decisions for the course MVP, not evidence of customer demand or provider agreement. Customer demand, provider participation and costs still need validation through interviews.
+
+## Decisions and reasons
+
+| Decision | Why this is the working choice | Boundary |
+|---|---|---|
+| Young professionals first; students secondary | A nearby activity and companion booking give the product a specific use case. Choosing by activity budget and available time is more useful than assuming a salary. | The 22-35 age range is a planning guide, not a customer qualification or survey result. |
+| Start in Katipunan and UP Village, Quezon City | A small service area keeps the fictional catalog coherent and makes later supplier interviews manageable. | No local partnership or supply volume has been established. |
+| Recurring beginner creative sessions first; dance drop-ins as adjacent inventory | Sessions that already run can release spare seats without relying on rare events or forming a class from scratch. | The provider must confirm each dated session will run regardless of SlotDrop sales. |
+| List sessions strictly less than 72 hours away | Three days supports near-term leisure planning while keeping the offer tied to perishable inventory. | This horizon is a testable product choice, not an industry benchmark. |
+| Provider sets each session's booking cutoff, starting from an activity default | Different activities need different preparation times, even at the same business. A pottery session and a drop-in need not share a policy. | Store the resolved bookingClosesAt on the session, strictly before startsAt. No platform-wide minimum lead time. At the cutoff the session is not bookable. |
+| Deduct a 10% platform commission from the accepted customer price | One rate keeps the prototype understandable and makes the fee and provider proceeds easy to audit. No extra checkout fee. | This is a model rate; actual acquisition, support, payment and service costs are unknown. |
+| Providers enter the standard offer and optionally a lower buddy rate | Providers can weigh their own costs. Buddy pricing applies to every seat only when 2+ seats are booked together in the same session. | No mandatory 5% reduction, automatic time markdowns, stacking or retroactive merging of separate bookings. |
+| Release an explicit allocation and pause it when necessary | A bounded allocation plus one locked booking transaction can prevent internal overselling. | Providers must reserve those released seats operationally; the prototype has no external-calendar synchronization. |
+| Keep payments simulated and use fictional customer/provider data | Demonstrates a saved booking without adding payment processing or identity systems to CP0. | Receipts show modeled amounts, not proof that money was collected or paid out. |
+| Availability and buddy pricing are GC2's two revenue features | Quantity affects capacity and price independently, with both saved in the booking contract. | Paid add-ons, subscriptions and live commercial operation remain later work. |
+
+The 10% fee is rounded per seat to the nearest centavo, then multiplied by quantity. At the standard PHP 1,600 rate, provider proceeds are PHP 1,440 per seat. At the PHP 1,520 buddy rate, provider proceeds are PHP 1,368 per seat. Providers should compare those amounts with their additional materials/service cost before approving an offer. Neither amount is claimed as profit.
+
+These reasons were drafted with AI assistance at Fran's request. Team review and the required AI disclosure remain explicit in AI-USAGE.md; this text is not represented as independently authored group reasoning.
 
 ## Working proposition and first segment
 
@@ -25,7 +44,7 @@ Only sessions already going ahead are listed in this model. Unsold seats or prov
 | Target | GC1 p1 describes people seeking quick/cheap last-minute service and providers with unused appointments | Narrows discovery to young professionals and recurring leisure; students secondary |
 | Problem | GC1 p2: providers can “profit off of cancelled/empty appointment slots” | Tracks actual provider-released seats; no claim that every cancellation loses revenue |
 | Value proposition | GC1 p1: “Empty slot, better price.” | Home proposition; session time, availability and regular/offer price visible |
-| Monetization | Commission and featured placements in GC1, without an established rate in feedback | Draft10% provider-paid commission on discounted/group bookings; featured placement and paid add-ons deferred |
+| Monetization | Commission and featured placements in GC1, without an established rate in feedback | Model 10% provider-paid commission on discounted/group bookings; featured placement and paid add-ons deferred |
 | Core flow | GC1 p6: customer selects “Book Now” | Browse -> select session and quantity -> confirm -> persist -> read receipt |
 | Provider slot manager | GC1 provider posts/edits slots | Small session/offer manager within owner screen; seeded provider/activity catalog |
 | Roles/integrations | GC1 includes roles, real integrations and later payments | GC2 demo without login; fictional data and simulated payment; integration deferred |
@@ -45,11 +64,11 @@ These are measurement intentions, not implemented analytics or observed conversi
 
 | Plain-language rule | Server/data enforcement | Customer/provider sees |
 |---|---|---|
-| Show only released seats in sessions within 72 hours, before cutoff and already going ahead | List/quote eligibility; service and slot records | No promise of an unconfirmed workshop |
+| Show only released seats in sessions within 72 hours, before its provider-set session cutoff and already going ahead | List/quote eligibility; service and slot records | No promise of an unconfirmed workshop |
 | Never sell more seats than the allocation | Lock slot and check SUM confirmed quantities during booking/edit | 409 SLOT_UNAVAILABLE instead of false confirmation |
 | Provider sets the customer offer price per seat | Owner offer API validates and stores 0<offer<original | Regular price, offer, savings and net proceeds |
 | Apply the provider-approved group rate only when at least 2 seats are booked together for the same session | Shared quote/booking service reads stored buddy rate; receipt stores pricing type | Clear per-person rate, group savings and whole-booking total |
-| Charge the draft 10% fee only on the confirmed discounted amount | One shared server money function; immutable booking fee snapshot | Provider payout separate from SlotDrop fee |
+| Charge the model 10% fee only on the confirmed discounted amount | One shared server money function; immutable booking fee snapshot | Provider payout separate from SlotDrop fee |
 | Ask again if the amount changes before saving | Booking compares acknowledged total to own recomputation before writes | Fresh quote and explicit reconfirmation |
 | Retrying a request must not create another booking | UNIQUE request_id, normalized payload comparison | Same receipt for identical retry |
 | Offer edits never rewrite an existing receipt | Saved date/price/fee snapshots | Stable confirmation |
@@ -87,11 +106,21 @@ Do not infer general market demand from fictional seed bookings.
   Reference for operator-controlled activity listings.
 - Local schedule caution: https://lemonlab.ph/product/mugoctober/ advertises two October dates; https://linktr.ee/laro_ceramics advertises regular classes. Neither is evidence of a SlotDrop partnership or discounted available inventory.
 
-Sources were read October27,2026. Published platform claims are descriptions of their products, not proof of incremental profit or demand for SlotDrop.
+The earlier preparation cited these sources on October 27, 2026. ClassPass's partner FAQ and FunNow's overview were rechecked during this revision. ClassPass uses integrated excess-capacity allocation; it does not validate SlotDrop's manual exclusive-allocation process, 10% rate or provider-specific lead times. Published platform claims are descriptions of their products, not proof of incremental profit or demand for SlotDrop.
 
-## Questions for team review
+## Research findings applied to the decision
 
-Confirm the initial area, supplier schedule, commission and booking cutoff. Check whether providers have enough regularly available seats and whether the buddy rate covers the cost of an additional attendee.
+The [October 27 desk research](research.md) supports a local creative-activity catalog and optional companion pricing, while exposing limits on same-day supply. Laro advertises beginner classes and group savings; Studio Matisse publishes a two-day reservation lead time. Neither has agreed to supply SlotDrop.
+
+Accordingly, the 72-hour discovery window remains separate from the session cutoff. Providers with long lead times remain subject to them; a session with a 48-hour cutoff will be available only during the overlap between 48 and 72 hours before start. A provider whose cutoff has passed is excluded even if seats remain. Demo lead times of 180/120/60/30 minutes are fictional values, not policies attributed to any real studio.
+
+Published pottery prices are above several synthetic seed prices. Keep the seed explicitly fictional and do not present its regular prices or discount percentages as surveyed market offers. The primary audience is defined by leisure budget, location and available time; age and employment are targeting hypotheses, not measured demand.
+
+## Validation after CP0
+
+The choices above define the MVP. Next, interview providers about session frequency, released seats, cutoff and material costs; interview potential customers about suitable times and willingness to pay. Revise the contract through a linked change Issue if findings contradict a choice. No interviews or teammate approvals are recorded as completed.
+
+The first pilot should compare offered versus booked allocation, standard versus buddy bookings, and provider proceeds versus additional attendee cost. The existing five dashboard metrics describe the demo; they do not establish causal uplift or real demand.
 
 ## Targeting and feedback follow-through
 

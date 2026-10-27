@@ -39,7 +39,7 @@
     "number": 9,
     "title": "Screen: Owner dashboard and offer manager",
     "owner": "Frannaaa",
-    "body": "Owner: @Frannaaa\nTarget: Oct 30 shared UI; Nov 1 first code PR; Nov 4 deployed DB Browse; Nov 7 integrated flow\n\nAcceptance criteria:\n- [ ] Saved bookings and five metrics\n- [ ] Session offer/create/edit/pause controls on same seventh screen\n- [ ] Net preview, allocated seats, no real customer data\n\nGroup 1 contract: docs/routes.md, docs/schema.md, docs/business.md. Link this Issue in your PR, test your changes and request a teammate's review.\n- [ ] Provider can opt in/set/disable buddy rate per session; show net proceeds, validate positive rate below normal offer."
+    "body": "Owner: @Frannaaa\nTarget: Oct 30 shared UI; Nov 1 first code PR; Nov 4 deployed DB Browse; Nov 7 integrated flow\n\nAcceptance criteria:\n- [ ] Saved bookings and five metrics\n- [ ] Session offer/create/edit/pause controls on same seventh screen\n- [ ] Net preview, allocated seats, no real customer data\n\nGroup 1 contract: docs/routes.md, docs/schema.md, docs/business.md. Link this Issue in your PR, test your changes and request a teammate's review.\n- [ ] Provider can opt in/set/disable buddy rate per session; show net proceeds, validate positive rate below normal offer.\n- [ ] Show editable session cutoff prefilled from the chosen activity default; different activities/providers can use different lead times. Clearly display actual closes-at time."
   },
   {
     "number": 10,
@@ -51,7 +51,7 @@
     "number": 11,
     "title": "Database: four-entity schema connection and seed",
     "owner": "Frannaaa",
-    "body": "Owner: @Frannaaa\nTarget: Oct 30 shared UI; Nov 1 first code PR; Nov 4 deployed DB Browse; Nov 7 integrated flow\n\nAcceptance criteria:\n- [ ] Fresh PostgreSQL schema and eight fictional sessions\n- [ ] Multiple confirmed bookings per session; SUM quantities under lock\n- [ ] No old one-booking index/tier table; preserve data on seed refusal\n\nGroup 1 contract: docs/routes.md, docs/schema.md, docs/business.md. Link this Issue in your PR, test your changes and request a teammate's review.\n- [ ] Add slots.buddy_price_centavos; bookings.offer_unit_price_centavos and pricing_type; test enabled/disabled and quantity constraints."
+    "body": "Owner: @Frannaaa\nTarget: Oct 30 shared UI; Nov 1 first code PR; Nov 4 deployed DB Browse; Nov 7 integrated flow\n\nAcceptance criteria:\n- [ ] Fresh PostgreSQL schema and eight fictional sessions\n- [ ] Multiple confirmed bookings per session; SUM quantities under lock\n- [ ] No old one-booking index/tier table; preserve data on seed refusal\n\nGroup 1 contract: docs/routes.md, docs/schema.md, docs/business.md. Link this Issue in your PR, test your changes and request a teammate's review.\n- [ ] Add slots.buddy_price_centavos; bookings.offer_unit_price_centavos and pricing_type; test enabled/disabled and quantity constraints.\n- [ ] Add positive services.default_booking_cutoff_minutes; each slot retains its independent booking_closes_at. Apply price bounds and per-seat fee arithmetic constraints. Run npm run check:sql."
   },
   {
     "number": 12,

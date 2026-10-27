@@ -14,7 +14,7 @@ Status: CP0 design for review. Only /api/health is implemented. Business routes 
 | GET | /api/bookings | none | 200 saved demo receipts | generic 500 on failure | Fran |
 | GET | /api/metrics | none | 200 five metrics | generic 500 on failure | Fran |
 | POST | /api/slots | provider offer/session fields below | 201 created session | 400 invalid, 404 service absent, 409 duplicate | Fran |
-| PATCH | /api/slots/:id | offerPriceCentavos, buddyPriceCentavos, capacity or status=open/paused/cancelled | 200 updated offer | 400 invalid, 404 absent, 409 conflict with bookings | Fran |
+| PATCH | /api/slots/:id | offerPriceCentavos, buddyPriceCentavos, capacity, bookingClosesAt or status=open/paused/cancelled | 200 updated offer | 400 invalid, 404 absent, 409 conflict with bookings | Fran |
 | GET | /api/health | none | 200 status ok/app SlotDrop | health does not imply database readiness | Fran |
 
 q matches provider/service names case-insensitively; category is creative/active; area matches a returned area; people is an integer 1-100 and requires enough seats. Unknown ordinary search text returns []; malformed supported filter values return 400. Validate repeated query keys rather than treating an array as a string.
@@ -29,7 +29,7 @@ A list is a JSON array. Each object has id, serviceId, providerId, providerName,
 
 GET /api/pricing/quote?slotId=1&quantity=2 returns slotId, quantity, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, groupSavingsCentavos, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, discountPercent, quotedAt.
 
-Draft GC2 commission: 1000 basis points (10%), centralized in server/config/business.js during implementation. It is deducted from the offer price; no separate customer surcharge. It is a model assumption, not a tested commercial rate.
+Selected GC2 model commission: 1000 basis points (10%), centralized in server/config/business.js during implementation. It is deducted from the offer price; no separate customer surcharge. It is the selected MVP rate, not a tested commercial rate.
 
 unitPriceCentavos = quantity >= 2 AND stored buddyPriceCentavos is not null ? buddyPriceCentavos : offerPriceCentavos
 pricingType = buddy when that group rate applies; otherwise standard
@@ -59,13 +59,17 @@ The same requestId and normalized payload returns the original receipt (200), ev
 
 201/200 booking response contains id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt; GET confirmation returns these saved fields plus provider/service labels. Never rebuild confirmation from localStorage. Date/time and money snapshots do not change when an offer is edited.
 
-Error shape: {error:{code,message}}; PRICE_CHANGED also includes quote. Invalid JSON is400; malformed IDs400; valid unknown IDs404; conflicts409; unexpected failures generic500 without SQL/credentials.
+Error shape: {error:{code,message}}; PRICE_CHANGED also includes quote. Invalid JSON is400; malformed IDs400; valid unknown IDs404; conflicts409; unexpected failures generic500 without SQL/credentials. Oversized JSON bodies return 413 PAYLOAD_TOO_LARGE. The CP0 fallback returns 404 ROUTE_NOT_IMPLEMENTED; malformed JSON returns 400 INVALID_JSON, all using this same nested shape.
 
 ## Offer-management inputs
 
-POST /api/slots: serviceId, startsAt, bookingClosesAt, capacity, originalPriceCentavos, offerPriceCentavos, optional buddyPriceCentavos (null disables), runsAsScheduled=true. Provider/location are derived from serviceId, not trusted duplicated fields. Service/provider catalog is seeded for GC2. Validate legitimate regular price manually during onboarding; code checks cannot prove an advertised original price is genuine.
+POST /api/slots: serviceId, startsAt, bookingClosesAt, capacity, originalPriceCentavos, offerPriceCentavos, optional buddyPriceCentavos (null disables), runsAsScheduled=true. bookingClosesAt is optional on creation: if omitted, derive it from startsAt minus the service's defaultBookingCutoffMinutes. A provider may set a different explicit cutoff per session. Require now < bookingClosesAt < startsAt when creating; no platform-wide minimum lead time. Return 400 for an invalid cutoff. All per-seat price fields must be positive integers no greater than 100,000,000 centavos, with buddy below offer below original. Provider/location are derived from serviceId, not trusted duplicated fields. Service/provider catalog is seeded for GC2. Validate legitimate regular price manually during onboarding; code checks cannot prove an advertised original price is genuine.
+
+PATCH may change bookingClosesAt under the same slot lock, but it must remain strictly before startsAt. A cutoff in the past closes sales immediately. A future cutoff may reopen sales only when status, capacity and other eligibility rules also permit; old receipts are unaffected. Changing a service's default does not rewrite existing slots. Each service's defaultBookingCutoffMinutes is positive and configured in the seeded catalog for GC2; a self-service catalog editor is deferred. Detail returns defaultBookingCutoffMinutes and the session's actual bookingClosesAt.
 
 PATCH is restricted to the allowlisted offer/capacity/status fields; reject unknown edits. Lock the slot while editing and compare sold seats. No login is required by the brief; this public owner manager is a fictional-data course demonstration, not a production permission system. Real partner/customer data and commercial operation require authenticated ownership.
+
+Commission here is modeled revenue on confirmed demo bookings, not a cash-reconciliation record. Both payment methods are simulated; no payment gateway, settlement or real card collection is implemented.
 
 ## Metrics
 

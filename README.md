@@ -45,6 +45,8 @@ Dependencies are pinned in package-lock.json. Current authored runtime checks us
     npm ci
     Copy-Item .env.example .env
     npm run check
+    npm test
+    npm run check:sql
     npm start
 
 Open http://localhost:3000 and /api/health. Stop Ctrl+C. Empty PORT defaults3000; DATABASE_URL stays empty for CP0. macOS/Linux: cp .env.example .env. Never commit .env or node_modules.
@@ -54,7 +56,10 @@ PORT, DATABASE_URL. Values only in local .env/host settings. .env.example has em
 
 ## Changes since GC1 and initial scaffold
 
-Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set normal and optional bring-a-friend prices replace global time-based tiers. Draft commission is10%, not12%; listing window72 hours, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
+Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set normal and optional bring-a-friend prices replace global time-based tiers. Model commission is 10%, not12%; listing window72 hours, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
+
+## Review and disclosure
+The MVP choices and reasons are recorded in docs/business.md, with linked public-source evidence in docs/research.md. Each session has a provider-set cutoff, initialized from an activity default; there is no universal minimum lead time. Read AI-USAGE.md and complete the actual student verification/reasoning record before submission. npm run check:sql uses a disposable in-memory PostgreSQL engine and never DATABASE_URL.
 
 ## Reading order
 START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/review-checklist.md.

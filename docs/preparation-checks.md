@@ -38,3 +38,18 @@ Reran fresh four-table schema and eight-session seed on PGlite0.5.12/PostgreSQL1
 - Invalid new group offer and repeat seed refused; eight original sessions preserved.
 
 These are schema and SQL contract-scenario checks, not tests of a completed pricing API. Shared service implementation remains Janelle's next-phase work. Pinned starter syntax/HTTP checks from the preceding revision remain applicable; executable starter code was not changed in this revision.
+
+
+## Reproducible CP0 correction checks, October 27, 2026
+
+This revision uses Node 24.19.0 in the local review workspace.
+- npm ci: dependency installation passed.
+- npm run check: starter and error middleware syntax passed.
+- npm test: three HTTP regression tests passed (page/CSS/health; structured 400/404/413 errors; safe unexpected 500).
+- npm run check:sql: eight SQL scenario groups passed in a fresh in-memory PGlite 0.5.12 database, including independent activity defaults and per-session cutoff overrides.
+- SQL enforces positive activity defaults, a session cutoff before its start, per-seat money bounds, receipt quantity/tier consistency, per-seat fee rounding and gross/fee/payout arithmetic.
+- npm audit reported zero known vulnerabilities at installation. This is a point-in-time dependency result, not a guarantee.
+
+Earlier standard-only checks above describe earlier revisions. The current seeded cutoffs vary by activity; they no longer all use a two-hour offset. The first expires two hours after seeding, the last after 69.5 hours.
+
+Run instructions and limits are in docs/database-checks.md. No hosted PostgreSQL, multi-client locking, completed booking HTTP API, student verification or Janelle review is claimed by these checks. Source-based business research is in docs/research.md. The inherited GC1 quotations/page anchors still need checking against the original PDFs during the student's review.

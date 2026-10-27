@@ -9,6 +9,7 @@ The proposal focuses on recurring local leisure sessions for young professionals
 Starter and temporary PostgreSQL checks are recorded in docs/preparation-checks.md. Hosted database connectivity, business APIs and partner research are still pending.
 
 Before submission:
+- Fran/team complete their independent business reasoning and actual verification in AI-USAGE.md, and disclose AI assistance in PR22.
 - Teammates and knee-rel accept their repository invitations.
 - Finish Issue assignments and request Janelle's review once she has access.
 - Janelle checks the contracts and feature mapping, runs the starter and leaves a review comment.

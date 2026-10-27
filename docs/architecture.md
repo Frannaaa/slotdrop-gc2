@@ -12,9 +12,11 @@ Capacity safety comes from serializing booking/edit operations on the same slot 
 
 ## Provider flow
 
-Demo owner selects seeded activity -> enters dated session, original price, offer price, released seat quantity and cutoff -> server validates and saves -> Browse shows it only within 72 hours and before cutoff -> booking consumes allocated seats -> owner sees updated receipts and metrics. Pause blocks new bookings while preserving receipts.
+Demo owner selects seeded activity -> enters dated session, original price, offer price, released seat quantity and per-session cutoff (prefilled from that activity's default) -> server validates and saves -> Browse shows it only within 72 hours and before cutoff -> booking consumes allocated seats -> owner sees updated receipts and metrics. Pause blocks new bookings while preserving receipts.
 
 Provider-set normal offers and optional bring-a-friend rates replace automatic time-based discount tiers. Recurrence notes explain the type of activity; every dated session is a separate inventory record. No recurring-calendar engine is needed for GC2. Provider offer controls share the seventh owner screen rather than adding another page.
+
+Activity defaults may differ within the same provider. Saving a session persists its resolved cutoff; changing a default does not change existing sessions. Discovery horizon and booking cutoff are independent.
 
 ## Honest scope
 

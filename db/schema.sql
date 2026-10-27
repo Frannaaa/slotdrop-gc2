@@ -16,6 +16,8 @@ CREATE TABLE services (
  category TEXT NOT NULL CHECK (category IN ('creative','active')),
  duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
  recurrence_note TEXT NOT NULL,
+ -- Activity default only; each slot stores its own resolved absolute cutoff.
+ default_booking_cutoff_minutes INTEGER NOT NULL CHECK (default_booking_cutoff_minutes > 0),
  beginner_friendly BOOLEAN NOT NULL DEFAULT TRUE,
  active BOOLEAN NOT NULL DEFAULT TRUE,
  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -27,11 +29,11 @@ CREATE TABLE slots (
  booking_closes_at TIMESTAMPTZ NOT NULL,
  -- Only seats allocated to SlotDrop; not the venue's complete class capacity.
  capacity INTEGER NOT NULL CHECK (capacity BETWEEN 1 AND 100),
- original_price_centavos INTEGER NOT NULL CHECK (original_price_centavos > 0),
+ original_price_centavos INTEGER NOT NULL CHECK (original_price_centavos BETWEEN 1 AND 100000000),
  -- Manually approved CUSTOMER price per seat, before platform commission.
- offer_price_centavos INTEGER NOT NULL CHECK (offer_price_centavos > 0),
+ offer_price_centavos INTEGER NOT NULL CHECK (offer_price_centavos BETWEEN 1 AND 100000000),
  -- Optional provider-approved per-person rate for quantity >= 2 in one session.
- buddy_price_centavos INTEGER CHECK (buddy_price_centavos > 0),
+ buddy_price_centavos INTEGER CHECK (buddy_price_centavos BETWEEN 1 AND 100000000),
  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','paused','cancelled')),
  runs_as_scheduled BOOLEAN NOT NULL DEFAULT TRUE,
  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -52,10 +54,10 @@ CREATE TABLE bookings (
  status TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed','cancelled')),
  -- Immutable receipt fields; later offer edits do not rewrite a saved booking.
  session_starts_at TIMESTAMPTZ NOT NULL,
- original_unit_price_centavos INTEGER NOT NULL CHECK (original_unit_price_centavos > 0),
- offer_unit_price_centavos INTEGER NOT NULL CHECK (offer_unit_price_centavos > 0),
+ original_unit_price_centavos INTEGER NOT NULL CHECK (original_unit_price_centavos BETWEEN 1 AND 100000000),
+ offer_unit_price_centavos INTEGER NOT NULL CHECK (offer_unit_price_centavos BETWEEN 1 AND 100000000),
  pricing_type TEXT NOT NULL CHECK (pricing_type IN ('standard','buddy')),
- unit_price_centavos INTEGER NOT NULL CHECK (unit_price_centavos > 0),
+ unit_price_centavos INTEGER NOT NULL CHECK (unit_price_centavos BETWEEN 1 AND 100000000),
  commission_basis_points INTEGER NOT NULL CHECK (commission_basis_points BETWEEN 0 AND 10000),
  total_price_centavos BIGINT NOT NULL CHECK (total_price_centavos > 0),
  platform_fee_centavos BIGINT NOT NULL CHECK (platform_fee_centavos >= 0),
@@ -65,6 +67,7 @@ CREATE TABLE bookings (
  CHECK ((pricing_type = 'standard' AND unit_price_centavos = offer_unit_price_centavos)
      OR (pricing_type = 'buddy' AND quantity >= 2 AND unit_price_centavos < offer_unit_price_centavos)),
  CHECK (total_price_centavos = unit_price_centavos::BIGINT * quantity),
+ CHECK (platform_fee_centavos = ROUND(unit_price_centavos::NUMERIC * commission_basis_points / 10000)::BIGINT * quantity),
  CHECK (platform_fee_centavos + provider_payout_centavos = total_price_centavos)
 );
 CREATE INDEX idx_slots_status_start ON slots(status, starts_at);

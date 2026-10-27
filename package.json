@@ -9,11 +9,16 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node --check server/index.js && node --check server/app.js && node --check server/routes/health.js"
+    "check": "node --check server/index.js && node --check server/app.js && node --check server/routes/health.js && node --check server/middleware/errors.js",
+    "test": "node --test tests/http.test.js",
+    "check:sql": "node tools/check-sql.mjs"
   },
   "dependencies": {
     "dotenv": "18.0.9",
     "express": "5.3.0",
     "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.12"
   }
 }

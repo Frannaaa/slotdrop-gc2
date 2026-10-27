@@ -1,15 +1,13 @@
-Prepares Group 1 SlotDrop CP0 for recurring local leisure sessions, with young professionals as the primary audience and students secondary.
+Prepares Group 1 SlotDrop CP0 with a four-entity session/booking contract, fictional seed inventory, assigned task specifications and a modular Express starter.
 
-Includes:
-- Four-entity schema and eight fictional sessions with allocated seats.
-- Provider-set offers and optional bring-a-friend pricing for bookings of two or more seats.
-- Route and screen contracts, booking safeguards and two revenue examples.
-- Business draft, task ownership, setup instructions and review checklist.
+Business direction: near-term local creative activities, provider-set offers, optional 2+ seat buddy pricing, a selected 10% model fee and a 72-hour discovery window. Each session has an independent provider-set booking cutoff initialized from an activity default. Published local-studio and competitor evidence, rationale and unresolved research limits are in docs/research.md and docs/business.md.
 
-The starter page and health route are implemented. Business APIs, hosted database connectivity and deployment are next-phase work. Provider participation and demand still need research.
+Fixes the starter's HTML/stack-trace error responses by returning structured JSON for invalid JSON, oversized requests, unimplemented APIs and unexpected failures. Adds repeatable HTTP and disposable PostgreSQL contract checks, price bounds and fee arithmetic constraints. Business APIs, hosted connectivity and deployment remain next-phase work.
 
-Validation: Node syntax and HTTP checks; temporary PostgreSQL schema, seed, receipt and buddy-pricing scenarios. Details and limits are in docs/preparation-checks.md.
+Validation: npm ci; npm run check; npm test (3 passing); npm run check:sql (8 scenario groups passing). See docs/preparation-checks.md for environment and limits.
 
-Janelle reviews PR22. Fran resolves feedback and merges after approval.
+AI assistance: ChatGPT/Codex helped author/revise code, schema, documentation, business recommendations and desk research at Fran's request. AI-USAGE.md distinguishes assistant checks from pending student verification and the assignment's independent business-reasoning requirement.
 
-Closes #1. References #25. Provider offer API work is tracked in #23 and #24.
+Janelle reviews; Fran resolves feedback and merges after approval. Invitation acceptance and remaining Issue assignments are tracked in #1.
+
+Closes #1. Also closes #19 after approval/merge. References #25. Provider API implementation remains tracked in #23 and #24.
