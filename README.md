@@ -2,21 +2,19 @@
 
 Group 1 · ITMGT 45.03-YZW
 
-SlotDrop helps people find available seats in nearby leisure sessions, with provider-set offers and optional bring-a-friend pricing. GC2 uses fictional data and simulated payments.
+SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. GC2 uses fictional providers and simulated payments.
 
-## Current build
+## Build status
 
-Session discovery/detail, offer controls, the owner workspace, saved-booking list and metrics are implemented here. Customer quote, booking creation and receipt-by-ID are still assigned to Janelle. The remaining customer screens are also under development. The full Browse → Select → Confirm → Save flow is not complete.
+This branch: **Owner workspace — PR #29**. Session/offer APIs, the branded owner dashboard, saved-booking list and five metrics.
 
-Public URL: not deployed yet.
+Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
-Design reference: [SlotDrop brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype). The prototype stores its sample data in the browser; it is separate from this API-backed build. The owner workspace follows its paper/ink/blue/lime identity and uses locally served DM Sans and Space Grotesk fonts. Font licenses are included in public/fonts/.
-
-Review order: [CP0 #22](https://github.com/Frannaaa/slotdrop-gc2/pull/22) → [data #27](https://github.com/Frannaaa/slotdrop-gc2/pull/27) → [offers #28](https://github.com/Frannaaa/slotdrop-gc2/pull/28) → [owner #29](https://github.com/Frannaaa/slotdrop-gc2/pull/29). After a reviewed merge, retarget the next PR to main.
+Merge order: [setup #22](https://github.com/Frannaaa/slotdrop-gc2/pull/22) → [data #27](https://github.com/Frannaaa/slotdrop-gc2/pull/27) → [offers #28](https://github.com/Frannaaa/slotdrop-gc2/pull/28) → [owner #29](https://github.com/Frannaaa/slotdrop-gc2/pull/29). Retarget the next PR to main after each approved merge.
 
 ## Run locally
 
-Node 22 or later is required.
+Use Node 22 or later.
 
 ```powershell
 npm ci
@@ -26,96 +24,78 @@ npm run check:sql
 npm run demo
 ```
 
-Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The explicit demo command stores its PGlite database in ignored .local-data/. Restarting preserves its records.
+Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
-Fresh seeds use daytime/evening sessions on the next two Philippine calendar days. Existing rows keep their saved times; restarting does not refresh expired offers.
+Fresh seeds create eight sessions on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
 
 ## PostgreSQL and deployment
 
-The database tools and Dockerfile are available from PR #27 onward.
+Database tools and Docker are available from PR #27.
 
-1. Put DATABASE_URL in a local .env or the host's private environment settings.
-2. Use a NEW disposable course database and run `npm run db:init` once. Existing tables/data cause refusal; it does not reset or migrate them.
-3. Run `npm start`. Without Docker, production installation is `npm ci --omit=dev`; a Docker-capable host can use the included Dockerfile.
-4. Set NODE_ENV=production. PORT comes from the host or defaults to 3000. Keep the database provider's TLS verification enabled.
-5. Check /api/health for process liveness and /api/slots for a database-backed response. Health alone does not check the database.
-6. Run the Postman collection against the public URL after deployment. Once booking integration is complete, save a booking, restart the Node service and read the same receipt back.
+1. Set DATABASE_URL privately in .env or the host's environment settings.
+2. Run `npm run db:init` once against a new, empty course database. It refuses existing tables or data.
+3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
+4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
+5. Check /api/health for liveness and /api/slots for a database response. Health does not test the database.
+6. Run Postman against the public URL. After booking integration, save a booking, restart the server and read the same receipt back.
 
-GitHub stores the source; it does not host this Node API. The local .local-data directory is not the public deployment database.
+.env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 
-.env.example lists PORT and DATABASE_URL with empty values. Never commit .env, credentials, node_modules or local data. TEST_DATABASE_URL is used only for isolated tests. On macOS/Linux, use `cp .env.example .env` when a local environment file is needed.
+TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. Without it, local tests use PGlite and skip the PostgreSQL lock test.
 
-## Members
+## Team
 
-| Member | GitHub | Number | Ownership |
+| Member | GitHub | Number | Owns |
 |---|---|---|---|
-| Fran | Frannaaa | 1 | Architecture, database, session/offer APIs, owner dashboard/metrics, integration/deployment |
+| Fran | Frannaaa | 1 | Architecture, database, session/offer APIs, owner dashboard/metrics, integration and deployment |
 | Cholo | chukwunyeluukgabrielokolo-cmyk | 2 | Home and featured sessions |
-| Janelle | janellereonal | 3 | Quote/pricing, booking/retries and confirmation read API |
+| Janelle | janellereonal | 3 | Pricing quote, booking/retries and receipt API |
 | Kaitlyn | sonatiina | 4 | Booking form and confirmation frontend |
-| Kaithlyn | kattgrass | 5 | Detail and selection-summary frontend |
-| Kirsten | 13kilograms | 6 | Shared styling and Browse integration |
+| Kaithlyn | kattgrass | 5 | Detail and selection frontend |
+| Kirsten | 13kilograms | 6 | Shared styling and Browse |
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, reviews and merge rules. Current tasks and assignees are in [Issues](https://github.com/Frannaaa/slotdrop-gc2/issues).
+[Issues](https://github.com/Frannaaa/slotdrop-gc2/issues) track the work. [CONTRIBUTING.md](CONTRIBUTING.md) covers branches, reviews and each member's Git requirements.
 
 ## Stack
 
-| Tool | Version | Reason |
+| Tool | Version | Why |
 |---|---|---|
-| HTML/CSS/plain JavaScript | GC2 frontend | Fetch JSON, transform it and render each page |
-| Node.js | 22 in CI/image; local checks on 24.19.0 | JavaScript server |
-| Express | 5.3.0 | Own API between browser and database |
-| PostgreSQL | 16 verified in CI; public host pending | Persistent tables, constraints and transactions |
-| pg | 8.23.1 | Parameterized SQL and transaction clients |
+| HTML, CSS and JavaScript | GC2 frontend | Fetch JSON and render each page; prepare for the later React upgrade |
+| Node.js | 22 in CI/Docker; local checks on 24.19.0 | JavaScript server |
+| Express | 5.3.0 | API between the browser and database |
+| PostgreSQL | 16 in CI | Persistent tables, constraints and transactions |
+| pg | 8.23.1 | SQL queries and checked-out transaction clients |
 | dotenv | 18.0.9 | Local environment settings |
-| PGlite | 0.5.12, demo/test only | Local PostgreSQL-compatible database |
-| Git/GitHub Actions | Reviewed PRs and CI | Task history and repeatable checks |
-| Postman/Newman | v2.1 export; tested with Newman 6.2.1 | API checks |
+| PGlite | 0.5.12, demo/tests only | Local PostgreSQL-compatible database |
+| GitHub Actions | Node 22 workflow | Repeatable checks for each PR |
+| Postman/Newman | v2.1 collection; Newman 6.2.1 | API checks |
 
 package-lock.json pins dependencies. Add the actual public runtime/database versions after deployment.
 
 ## Changes since GC1
 
-The build focuses on recurring leisure sessions and multi-seat allocations. Providers control standard and optional buddy offers; the model commission is 10%. Discovery covers the next 72 hours, with a separate deadline for each session.
+The build focuses on recurring leisure sessions and released seat allocations. Discovery covers the next 72 hours; each session has its own booking deadline. Studios control standard and optional buddy offers. The course commission is 10%.
 
-Availability and buddy pricing are the two proposed revenue features. The booking service still needs to enforce them at purchase. Paid add-ons, accounts, real payments, React and optimization belong to the separate Final Project.
+Availability and buddy pricing are the two revenue features. The booking API still needs to enforce them when saving a purchase. Paid add-ons, accounts, real payments, React and optimization are deferred.
 
-## Documents
+## Design and documents
 
-- [Business case, worked examples and sources](docs/business.md)
+The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. That prototype saves sample data in the browser; it is separate from this API-backed app. The owner branch serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
+
+- [Business case and sources](docs/business.md)
 - [Route contract](docs/routes.md)
 - [Database schema](docs/schema.md)
 - [System diagram and data flow](docs/system.md)
-- [Challenges and test evidence](docs/challenges.md)
+- [Challenges and test results](docs/challenges.md)
 - [Deployed List baseline](docs/baseline.md)
 - [Assistance log](AI-USAGE.md)
 
-The Postman export is docs/SlotDrop-Fran.postman_collection.json; set baseUrl before running it. Compact test records are in docs/evidence/.
-The verified owner build passed 12 PostgreSQL tests, eight SQL scenario groups, a production-container restart check and 21 Postman requests with 26 assertions. See docs/challenges.md for the run link and scope.
+The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/SlotDrop-Fran.postman_collection.json) is in the owner branch. Set baseUrl and serviceId before running it against fictional data. Test records are in that branch's docs/evidence/.
 
-## Checkpoints and submission
+## Dates and remaining work
 
-- **October 28:** collaborators/access, protected main, contribution/PR files, environment example, README, assigned Issues, reviewed and merged routes/schema and first business draft.
-- **November 4:** deployed Browse loads database items through the API.
-- **November 9, 2026, 11:59 PM Philippine time:** integrated deployed flow, reviewed main tagged `gc2-v1.0`, two-page PDF, Postman export, system diagram, business/challenge/baseline evidence and individual recordings.
+- **October 28:** finish access/assignments, verify main's protection settings, review and merge routes/schema/business draft. [Issue #1](https://github.com/Frannaaa/slotdrop-gc2/issues/1) tracks the remaining CP0 steps.
+- **November 4:** deployed Browse must load database sessions through the API.
+- **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
-Each member also needs three merged code PRs, two real reviews and merges in two grading windows. The group must complete the deployed challenges and phone test. Personal predictions and recordings are not completed by the automated checks.
-
-## Fran's remaining work — checked October 28
-
-**Today (CP0):**
-
-- Get the assigned teammate's real review on PR #22, resolve comments and merge the approved route/schema/business draft into main. They are still only on branches.
-- Finish collaborator access and assign #4, #10, #14, #15, #16, #20 and #21 in GitHub. Current checks report read access for janellereonal, 13kilograms and knee-rel; accepted collaborator access still needs confirmation.
-- Verify main's required PR, one-approval and no-force-push settings. The API confirms protection is enabled but has not exposed the full settings.
-- Check the inherited GC1 quotes/page references against the original PDF, then use the announced checkpoint submission channel.
-
-**Before the November 9 final:**
-
-- Review and merge the three feature PRs (#27–29), and give two genuine reviews of teammates' PRs with specific comments. No code PR is merged yet.
-- Have meaningful code merged in a second grading window after October 28; merging everything today would not meet that requirement.
-- Connect the public Node host and PostgreSQL database; integrate the customer screens and Janelle's quote/booking/readback routes. The repo link is not a deployed API URL.
-- Verify the complete public booking flow, saved owner figures and persistence across a server restart. Complete the deployed Postman challenges, request trace and hand-drawn diagram with the group.
-- Complete the commission-rule file/line inventory, deployed List baseline and outside-group phone test. Prepare the final two-page PDF, update the deployed URL/versions and tag the reviewed main build gc2-v1.0.
-- Make your own Challenge 5 predictions before running the function and record the unedited voice explanation (maximum three minutes) without assistance. This cannot be replaced by automated tests.
-
+Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.

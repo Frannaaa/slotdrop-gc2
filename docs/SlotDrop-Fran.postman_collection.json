@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "SlotDrop — Fran GC2 APIs",
+    "name": "SlotDrop: Fran's APIs",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run against a fresh fictional demo database. Set baseUrl to the deployed URL for final evidence. Covers Fran-owned APIs; booking creation, quote and confirmation-by-ID remain team integration work. No response screenshots or deployed results are claimed by this export."
+    "description": "Checks the implemented session and owner APIs using fictional data. Set baseUrl to the target app and serviceId to an active seeded activity. Quote, booking creation and receipt-by-ID are still to be integrated. Deployed challenge screenshots are recorded separately."
   },
   "variable": [
     {
@@ -275,7 +275,7 @@
             "url": "{{baseUrl}}/api/slots",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"serviceId\": 1,\n  \"startsAt\": \"{{newSessionStart}}\",\n  \"capacity\": 4,\n  \"originalPriceCentavos\": 200000,\n  \"offerPriceCentavos\": 160000,\n  \"buddyPriceCentavos\": 152000,\n  \"runsAsScheduled\": true\n}",
+              "raw": "{\n  \"serviceId\": {{serviceId}},\n  \"startsAt\": \"{{newSessionStart}}\",\n  \"capacity\": 4,\n  \"originalPriceCentavos\": 200000,\n  \"offerPriceCentavos\": 160000,\n  \"buddyPriceCentavos\": 152000,\n  \"runsAsScheduled\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -290,7 +290,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set(\"createdSlotId\",String(pm.response.json().id));"
+                  "pm.collectionVariables.set(\"createdSlotId\",String(pm.response.json().id));",
+                  "const created=pm.response.json();",
+                  "pm.test(\"Activity cutoff applied\",()=>pm.expect(Date.parse(created.startsAt)-Date.parse(created.bookingClosesAt)).to.eql(created.defaultBookingCutoffMinutes*60000));"
                 ]
               }
             }
@@ -363,7 +365,7 @@
           ]
         },
         {
-          "name": "Lower offer and disable buddy atomically",
+          "name": "Lower the offer and turn off buddy pricing",
           "request": {
             "method": "PATCH",
             "header": [
@@ -429,7 +431,7 @@
           ]
         },
         {
-          "name": "Refuse misleading resumption after cutoff",
+          "name": "Reject reopening after the cutoff",
           "request": {
             "method": "PATCH",
             "header": [
