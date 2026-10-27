@@ -1,68 +1,101 @@
-# SlotDrop: Empty slot, better price.
+# SlotDrop
 
-Group 1, ITMGT45.03-YZW. Last-minute provider-controlled deals on seats in recurring local leisure sessions. Primary planning audience: young professionals; students secondary. Initial demo is fictional QC-area activity inventory, not a real partner network.
+Group 1 · ITMGT 45.03-YZW
 
-Customer flow: Browse -> choose session/quantity -> confirm -> saved booking/receipt. Six customer screens plus owner dashboard/offer manager.
+SlotDrop helps people find available seats in nearby leisure sessions, with provider-set offers and optional bring-a-friend pricing. GC2 uses fictional data and simulated payments.
 
-## Current CP0 status
+## Current build
 
-Implemented: modular Express app, static starter and JSON health route.
-Prepared for review: route/schema contracts, eight dated synthetic sessions, first business tables, task ownership and workflow.
-Not implemented: business APIs, connected PostgreSQL, full UI, real payments or partner synchronization.
-PR22: https://github.com/Frannaaa/slotdrop-gc2/pull/22
-GC2 revenue features: allocated-seat availability and provider-approved bring-a-friend tiered pricing. See docs/revenue-features.md. Paid activity add-ons are deferred to the Final Project.
+Only the starter page and GET /api/health are implemented here. Session APIs and the owner workspace are in PRs #27–29. Customer quote, booking creation and receipt-by-ID are still assigned to Janelle. The remaining customer screens are also under development. The full Browse → Select → Confirm → Save flow is not complete.
 
-## Roster and ownership
+Public URL: not deployed yet.
 
-| Member | GitHub | Member number | Build ownership |
+Review order: [CP0 #22](https://github.com/Frannaaa/slotdrop-gc2/pull/22) → [data #27](https://github.com/Frannaaa/slotdrop-gc2/pull/27) → [offers #28](https://github.com/Frannaaa/slotdrop-gc2/pull/28) → [owner #29](https://github.com/Frannaaa/slotdrop-gc2/pull/29). After a reviewed merge, retarget the next PR to main.
+
+## Run locally
+
+Node 22 or later is required.
+
+```powershell
+npm ci
+Copy-Item .env.example .env
+npm run check
+npm test
+npm run check:sql
+npm start
+```
+
+Open http://localhost:3000 and /api/health. The starter does not need a database. The database demo command is introduced in PR #27.
+
+Fresh seeds use daytime/evening sessions on the next two Philippine calendar days. Existing rows keep their saved times; restarting does not refresh expired offers.
+
+## PostgreSQL and deployment
+
+The database tools and Dockerfile are available from PR #27 onward.
+
+1. Put DATABASE_URL in a local .env or the host's private environment settings.
+2. Use a NEW disposable course database and run `npm run db:init` once. Existing tables/data cause refusal; it does not reset or migrate them.
+3. Run `npm start`. Without Docker, production installation is `npm ci --omit=dev`; a Docker-capable host can use the included Dockerfile.
+4. Set NODE_ENV=production. PORT comes from the host or defaults to 3000. Keep the database provider's TLS verification enabled.
+5. Check /api/health for process liveness and /api/slots for a database-backed response. Health alone does not check the database.
+6. Run the Postman collection against the public URL after deployment. Once booking integration is complete, save a booking, restart the Node service and read the same receipt back.
+
+GitHub stores the source; it does not host this Node API. The local .local-data directory is not the public deployment database.
+
+.env.example lists PORT and DATABASE_URL with empty values. Never commit .env, credentials, node_modules or local data. TEST_DATABASE_URL is used only for isolated tests. On macOS/Linux, use `cp .env.example .env` when a local environment file is needed.
+
+## Members
+
+| Member | GitHub | Number | Ownership |
 |---|---|---|---|
-| Fran | Frannaaa | 1 | Architecture, schema/seed, slots and offer APIs, owner dashboard/metrics, integration/deployment |
-| Cholo | chukwunyeluukgabrielokolo-cmyk | 2 | Home, featured sessions, own loading/empty/error/mobile states |
-| Janelle | janellereonal | 3 | Quote/pricing, capacity-safe booking/retry transaction, confirmation read API |
-| Kaitlyn | sonatiina | 4 | Booking form and confirmation frontend, retries and price-change messages |
-| Kaithlyn | kattgrass | 5 | Detail and quantity/selection summary frontend |
-| Kirsten | 13kilograms | 6 | Shared visual foundation, Browse filters and API integration |
+| Fran | Frannaaa | 1 | Architecture, database, session/offer APIs, owner dashboard/metrics, integration/deployment |
+| Cholo | chukwunyeluukgabrielokolo-cmyk | 2 | Home and featured sessions |
+| Janelle | janellereonal | 3 | Quote/pricing, booking/retries and confirmation read API |
+| Kaitlyn | sonatiina | 4 | Booking form and confirmation frontend |
+| Kaithlyn | kattgrass | 5 | Detail and selection-summary frontend |
+| Kirsten | 13kilograms | 6 | Shared styling and Browse integration |
 
-Fran authors CP0. Janelle is the independent reviewer of record; Fran merges after real comment/approval and resolved concerns. Each member authors and understands their own feature work. Kirsten sets common styles; every frontend owner implements their own screens.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, reviews and merge rules. Current tasks and assignees are in [Issues](https://github.com/Frannaaa/slotdrop-gc2/issues).
 
-## Stack and reason
+## Stack
 
-| Tool | Reason |
-|---|---|
-| HTML/CSS/plain JavaScript | Fetch/DOM workflow now; future React migration |
-| Node.js22+ and Express | Own server between browser/database; one language |
-| PostgreSQL | Persistent entities, constraints and transactions |
-| pg | Parameterized SQL and one-client transactions |
-| dotenv | Local environment config |
-| Git/GitHub | Assigned Issues, protected main and reviewed PRs |
-| Postman/DevTools | API checks and Network/Console traces |
-| Public Node host and PostgreSQL host | To be selected before CP1; same-origin frontend/API deployment |
+| Tool | Version | Reason |
+|---|---|---|
+| HTML/CSS/plain JavaScript | GC2 frontend | Fetch JSON, transform it and render each page |
+| Node.js | 22 in CI/image; local checks on 24.19.0 | JavaScript server |
+| Express | 5.3.0 | Own API between browser and database |
+| PostgreSQL | 16 verified in CI; public host pending | Persistent tables, constraints and transactions |
+| pg | 8.23.1 | Parameterized SQL and transaction clients |
+| dotenv | 18.0.9 | Local environment settings |
+| PGlite | 0.5.12, demo/test only | Local PostgreSQL-compatible database |
+| Git/GitHub Actions | Reviewed PRs and CI | Task history and repeatable checks |
+| Postman/Newman | v2.1 export; tested with Newman 6.2.1 | API checks |
 
-Dependencies are pinned in package-lock.json. Current authored runtime checks used Node24.22.1. Record actual deployed runtime/database versions before final submission.
+package-lock.json pins dependencies. Add the actual public runtime/database versions after deployment.
 
-## Local run
+## Changes since GC1
 
-    npm ci
-    Copy-Item .env.example .env
-    npm run check
-    npm test
-    npm run check:sql
-    npm start
+The build focuses on recurring leisure sessions and multi-seat allocations. Providers control standard and optional buddy offers; the model commission is 10%. Discovery covers the next 72 hours, with a separate deadline for each session.
 
-Open http://localhost:3000 and /api/health. Stop Ctrl+C. Empty PORT defaults3000; DATABASE_URL stays empty for CP0. macOS/Linux: cp .env.example .env. Never commit .env or node_modules.
+Availability and buddy pricing are the two proposed revenue features. The booking service still needs to enforce them at purchase. Paid add-ons, accounts, real payments, React and optimization belong to the separate Final Project.
 
-## Environment names
-PORT, DATABASE_URL. Values only in local .env/host settings. .env.example has empty values.
+## Documents
 
-## Changes since GC1 and initial scaffold
+- [Business case, worked examples and sources](docs/business.md)
+- [Route contract](docs/routes.md)
+- [Database schema](docs/schema.md)
+- [System diagram and data flow](docs/system.md)
+- [Challenges and test evidence](docs/challenges.md)
+- [Deployed List baseline](docs/baseline.md)
+- [Assistance log](AI-USAGE.md)
 
-Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set normal and optional bring-a-friend prices replace global time-based tiers. Model commission is 10%, not12%; listing window72 hours, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
+The Postman export and compact test records are in the owner branch (#29).
+The verified owner build passed 12 PostgreSQL tests, eight SQL scenario groups, a production-container restart check and 21 Postman requests with 26 assertions. See docs/challenges.md for the run link and scope.
 
-## Review
-The MVP choices and source-based rationale are in docs/business.md and docs/research.md. Each session has its own booking cutoff. Complete the team's verification before submission.
+## Checkpoints and submission
 
-## Reading order
-START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/review-checklist.md.
+- **October 28:** collaborators/access, protected main, contribution/PR files, environment example, README, assigned Issues, reviewed and merged routes/schema and first business draft.
+- **November 4:** deployed Browse loads database items through the API.
+- **November 9, 2026, 11:59 PM Philippine time:** integrated deployed flow, reviewed main tagged `gc2-v1.0`, two-page PDF, Postman export, system diagram, business/challenge/baseline evidence and individual recordings.
 
-## Deadlines
-CP0 October28; CP1 November4; final November9,2026 at11:59PM Philippine time. November9 is Monday despite the brief's inconsistent Wednesday label.
+Each member also needs three merged code PRs, two real reviews and merges in two grading windows. The group must complete the deployed challenges and phone test. Personal predictions and recordings are not completed by the automated checks.
