@@ -2,14 +2,18 @@
 
 ## PostgreSQL CI
 
-[Verified GitHub Actions run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40525224871) for commit 2702750b146ed4e03e443bc9effb93afd325e71c passed on Node 22 with a PostgreSQL 16 service container:
+[Verified GitHub Actions run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40527821450) for commit 6401b8d5d83fbcf4b949c736372c428016b066b2 passed on Node 22 with a PostgreSQL 16 service container:
 
 - Syntax check passed.
 - Eight disposable SQL scenario groups passed.
-- All 11 HTTP, policy and PostgreSQL tests passed; zero failed or skipped.
+- All 12 HTTP, policy and PostgreSQL tests passed; zero failed or skipped.
 - The competing-connection test held a session row lock during a booking insert. A capacity edit waited, then returned 409 after seeing the committed seats.
 
 The test creates isolated schemas and removes only its generated schemas afterward. It does not access a hosted production database or prove the team's customer booking handler is complete.
+
+## Production container and restart
+
+The same run built the Node 22 Docker image, initialized its separate PostgreSQL service, started the production entry point, saved a session through the API and inserted a fictional receipt fixture. After restarting the Node container, owner readback retained the receipt, derived remaining seats and commission metric. This verifies the production package and storage across a server restart; it is not the team's unimplemented customer booking flow or a provisioned public host.
 
 ## Postman-compatible collection
 
