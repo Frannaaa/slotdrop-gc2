@@ -1,0 +1,97 @@
+[
+  {
+    "title": "Screen: Home",
+    "owner": "chukwunyeluukgabrielokolo-cmyk",
+    "body": "Owner: @chukwunyeluukgabrielokolo-cmyk\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Value proposition and Browse navigation\n- [ ] Featured cards fetch slots and link to detail\n- [ ] Loading/empty/error states and phone width\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Screen: Browse",
+    "owner": "13kilograms",
+    "body": "Owner: @13kilograms\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Fetch own deployed API backed by DB by CP1\n- [ ] Search/filter results; original/current price and appointment time\n- [ ] Loading/empty/error states and phone width\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Screen: Detail",
+    "owner": "kattgrass",
+    "body": "Owner: @kattgrass\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Fetch slot detail by id\n- [ ] Provider, service, date/time and price; handle unknown/unavailable\n- [ ] Selection action preserves slotId\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Screen: Selection summary",
+    "owner": "kattgrass",
+    "body": "Owner: @kattgrass\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Selected service/date/time and quote preview\n- [ ] Proceed to checkout with slotId\n- [ ] Unavailable and changed-price states\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Screen: Booking form",
+    "owner": "sonatiina",
+    "body": "Owner: @sonatiina\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Validate synthetic customer fields and mock payment\n- [ ] Submit booking, show 400/409; prevent duplicate UI submit\n- [ ] Navigate using returned id, phone layout\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Screen: Confirmation",
+    "owner": "sonatiina",
+    "body": "Owner: @sonatiina\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Fetch saved booking by UUID\n- [ ] Render persisted amount and appointment\n- [ ] Loading/404/error states\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Screen: Owner dashboard",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Fetch bookings and five metrics\n- [ ] Distinguish platform commission from gross booking value\n- [ ] Fictional data, phone and loading/empty/error states\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Visual foundation: shared CSS",
+    "owner": "13kilograms",
+    "body": "Owner: @13kilograms\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Colors/type/spacing/buttons/cards shared by Oct 30\n- [ ] One Browse reference using GC1 wireframes\n- [ ] Page owners reuse styles; actual CSS code contribution\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Database: schema connection and seed",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Real PostgreSQL setup with version recorded\n- [ ] Execute schema and seed; eight synthetic slots\n- [ ] Env credentials only, parameterized SQL\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/slots",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] 200 array, q/category filter and empty array\n- [ ] Time/status/confirmed-booking eligibility\n- [ ] Contract field names and pricing service\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/slots/:id",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] 200 detail, malformed 400, unknown 404\n- [ ] Join provider/service labels\n- [ ] Shared pricing calculation\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/pricing/quote",
+    "owner": "janellereonal",
+    "body": "Owner: @janellereonal\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Server quote with centavos/floor\n- [ ] Exact tier/window boundary checks\n- [ ] 400/404/409 and quotedAt\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: POST /api/bookings",
+    "owner": "janellereonal",
+    "body": "Owner: @janellereonal\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Validate and recompute price, 201/400/404/409\n- [ ] One-client transaction, row lock, booking insert, slot update\n- [ ] Rollback/release; concurrent conflict safe\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/bookings/:id",
+    "owner": "janellereonal",
+    "body": "Owner: @janellereonal\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Read saved snapshot by UUID\n- [ ] 200/400/404\n- [ ] Confirmation is database-backed\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/bookings",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] 200 saved summary array\n- [ ] Real database, fictional customers\n- [ ] Empty array behavior\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/metrics",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Five numbers from persisted records\n- [ ] Zero, ties and nearly-full definition from contract\n- [ ] Commission separate from gross value\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "API: GET /api/health",
+    "owner": "Frannaaa",
+    "body": "Owner: @Frannaaa\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] 200 status ok/app SlotDrop\n- [ ] Separate app, entrypoint and health route\n- [ ] Do not equate health with database readiness\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Revenue feature: availability filtering",
+    "owner": "janellereonal",
+    "body": "Owner: @janellereonal\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Persist booking and slot change atomically\n- [ ] Taken slot rejected with 409\n- [ ] Coordinate eligible list query with Fran\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  },
+  {
+    "title": "Revenue feature: tier pricing and floor",
+    "owner": "janellereonal",
+    "body": "Owner: @janellereonal\nTarget: Nov 1 first working code; Nov 4 deployed DB Browse; Nov 7 integrated flow. Visual foundation target Oct 30.\n\nAcceptance criteria:\n- [ ] Database tier rules, shared pricing function\n- [ ] Persist price/commission/payout snapshot\n- [ ] Team decision on rate and floor meaning\n\nFollow docs/routes.md and docs/schema.md. Link the Issue in a PR. Complete means running, checked and human-reviewed/merged. Disclose AI assistance. Each owner authors and understands their code."
+  }
+]
