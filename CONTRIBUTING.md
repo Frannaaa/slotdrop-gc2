@@ -1,16 +1,26 @@
-# Workflow
+# Contributing
 
-Issue -> branch -> meaningful commits -> PR -> review comment and approval -> Fran merges.
+Use this workflow: Issue → branch → commits → PR → teammate review → captain merges.
 
-GC2 is Group 1, confirmed by Fran. Preserve member numbers from README. Fran uses g1/m1-cp0-contract and title [G1-M1] Add CP0 contracts and modular starter.
+## Before coding
 
-Start from current main: git switch main, git pull, then feature branch. Before review: git pull --no-edit origin main. No direct main pushes after initial skeleton, no force pushes to main.
+Start from the latest main. Use a branch named `g1/m<member>-<feature>` and a PR title starting with `[G1-M<member>]`. Member numbers and ownership are in README.
 
-Reviewer checks changed files, runs relevant behavior, leaves a specific actual finding/comment, then approves after concerns are resolved. Janelle (janellereonal) reviews Fran's CP0. Fran cannot approve her own PR.
+Give each screen, route and revenue feature an assigned Issue. Change an agreed route or schema through a separate Issue titled `Contract change: …`.
 
-Every member needs 3 merged substantive code PRs, 2 reviews each with a real comment, and work merged in 2 of the windows Oct 14-28, Oct 29-Nov 4, Nov 5-9. Documentation-only PRs do not count toward three code PRs. No one authors another member's work.
+## Before review
 
-Contract edits need a Contract change: Issue. Separate UI/routes/services/repositories. Calculate money once on the server. Never commit secrets or node_modules. Understand all merged lines.
+- Bring in the latest main with `git pull --no-edit origin main`.
+- Run the checks that cover your change and record the results in the PR.
+- Check the affected loading, empty and error states, plus the phone layout.
+- Fill in the assistance field and update AI-USAGE.md.
+- Make sure .env, credentials, node_modules and local demo data are not staged.
+- Be ready to explain the code you submit.
 
+The reviewer runs the branch, leaves a specific comment and approves after any issues are resolved. Janelle reviews Fran's CP0 work. Authors do not approve their own PRs. The captain merges after approval.
 
-Run npm test for API changes and npm run check:sql for schema/seed changes. Record actual checks before requesting review.
+## Required contribution record
+
+Each member needs three merged code PRs, two reviews with real comments, and work merged in two of these windows: October 14–28, October 29–November 4, November 5–9. Documentation-only PRs do not count as code PRs.
+
+Keep main protected: PR required, one approval and no force pushes. Tag the reviewed final build `gc2-v1.0`.
