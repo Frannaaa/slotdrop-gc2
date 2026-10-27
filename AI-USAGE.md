@@ -23,3 +23,6 @@ Pending Fran's own verification. Record the date, commands actually run, results
 ## Janelle's review
 
 Pending an actual review on PR22. Janelle records her own checks and findings. Neither invitation acceptance nor approval is inferred from this log.
+
+## Next-phase database and discovery implementation
+Codex implemented Fran's PostgreSQL adapter, persistent local demo, initialization tooling and session read routes at Fran's request. The assistant ran syntax, discovery/HTTP and SQL checks. Fran's own verification and teammate review remain pending; no hosted PostgreSQL run is claimed.

@@ -4,7 +4,10 @@ Group 1, ITMGT45.03-YZW. Last-minute provider-controlled deals on seats in recur
 
 Customer flow: Browse -> choose session/quantity -> confirm -> saved booking/receipt. Six customer screens plus owner dashboard/offer manager.
 
-## Current CP0 status
+## Development branch
+Fran's database connection, persistent local demo and session read APIs are implemented on this branch. Run npm run demo, then open /api/slots. See docs/development.md. This work depends on the unmerged CP0 contract.
+
+## CP0 baseline status
 
 Implemented: modular Express app, static starter and JSON health route.
 Prepared for review: route/schema contracts, eight dated synthetic sessions, first business tables, task ownership and workflow.
