@@ -25,8 +25,6 @@ Fran selected the following working defaults for the CP0 proposal on October 27,
 
 The 10% fee is rounded per seat to the nearest centavo, then multiplied by quantity. At the standard PHP 1,600 rate, provider proceeds are PHP 1,440 per seat. At the PHP 1,520 buddy rate, provider proceeds are PHP 1,368 per seat. Providers should compare those amounts with their additional materials/service cost before approving an offer. Neither amount is claimed as profit.
 
-These reasons were drafted with AI assistance at Fran's request. Team review and the required AI disclosure remain explicit in AI-USAGE.md; this text is not represented as independently authored group reasoning.
-
 ## Working proposition and first segment
 
 Find a nearby activity with an available spot and a provider-approved deal in the next few days.

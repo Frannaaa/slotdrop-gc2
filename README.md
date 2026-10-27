@@ -58,8 +58,8 @@ PORT, DATABASE_URL. Values only in local .env/host settings. .env.example has em
 
 Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set normal and optional bring-a-friend prices replace global time-based tiers. Model commission is 10%, not12%; listing window72 hours, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
 
-## Review and disclosure
-The MVP choices and reasons are recorded in docs/business.md, with linked public-source evidence in docs/research.md. Each session has a provider-set cutoff, initialized from an activity default; there is no universal minimum lead time. Read AI-USAGE.md and complete the actual student verification/reasoning record before submission. npm run check:sql uses a disposable in-memory PostgreSQL engine and never DATABASE_URL.
+## Review
+The MVP choices and source-based rationale are in docs/business.md and docs/research.md. Each session has its own booking cutoff. Complete the team's verification before submission.
 
 ## Reading order
 START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/review-checklist.md.

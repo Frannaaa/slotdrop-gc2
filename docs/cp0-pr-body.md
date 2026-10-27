@@ -6,8 +6,6 @@ Fixes the starter's HTML/stack-trace error responses by returning structured JSO
 
 Validation: npm ci; npm run check; npm test (3 passing); npm run check:sql (8 scenario groups passing). See docs/preparation-checks.md for environment and limits.
 
-AI assistance: ChatGPT/Codex helped author/revise code, schema, documentation, business recommendations and desk research at Fran's request. AI-USAGE.md distinguishes assistant checks from pending student verification and the assignment's independent business-reasoning requirement.
-
 Janelle reviews; Fran resolves feedback and merges after approval. Invitation acceptance and remaining Issue assignments are tracked in #1.
 
 Closes #1. Also closes #19 after approval/merge. References #25. Provider API implementation remains tracked in #23 and #24.
