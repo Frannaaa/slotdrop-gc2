@@ -1,6 +1,6 @@
 # Existing task board
 
-Do not duplicate Issues3-21. Their refreshed specifications are in tools/issues.json. Owner offer routes have separate Fran-assigned Issues23 and24; contract change is Issue25. As checked October 27, #5-8 are assigned to kattgrass/sonatiina. Eight Issues still await collaborator access and assignment: #3, #4, #10, #14, #15, #16, #20 and #21. Issue1 coordinates CP0.
+Do not duplicate Issues3-21. Their refreshed specifications are in tools/issues.json. Owner offer routes have separate Fran-assigned Issues23 and24; contract change is Issue25. Assignment snapshot, October 27: #3 is assigned to Cholo; #5/#6 to kattgrass; #7/#8 to sonatiina. Seven Issues still await collaborator access and assignment: #4, #10, #14, #15, #16, #20 and #21.
 
 - #3 Screen: Home | chukwunyeluukgabrielokolo-cmyk
 - #4 Screen: Browse | 13kilograms
@@ -25,3 +25,5 @@ Do not duplicate Issues3-21. Their refreshed specifications are in tools/issues.
 - #23 API: POST /api/slots provider session offers | Frannaaa
 - #24 API: PATCH /api/slots/:id offer and allocation edits | Frannaaa
 - #25 Contract change: recurring leisure sessions and provider-set offers | Frannaaa
+
+- #26 API: GET /api/owner/catalog | Frannaaa

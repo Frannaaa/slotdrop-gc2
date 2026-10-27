@@ -2,7 +2,7 @@
 
 Group 1. Branch: g1/m1-cp0-contract. PR22 is ready for Janelle's review and remains unmerged.
 
-Prepared: roster and stack, contribution guide, PR template, empty environment example, modular starter, four-entity SQL schema, eight fictional sessions, route and screen contracts, business draft, task specifications and review checklist. There are 23 open task and coordination Issues.
+Prepared: roster and stack, contribution guide, PR template, empty environment example, modular starter, four-entity SQL schema, eight fictional sessions, route and screen contracts, business draft, task specifications and review checklist. Task ownership and current status are tracked in GitHub Issues.
 
 The proposal focuses on recurring local leisure sessions for young professionals, with students secondary. Providers set the standard offer and optional buddy rate for bookings of two or more seats. Paid add-ons are deferred. Fees, prices and the listing window are planning assumptions.
 
