@@ -6,7 +6,7 @@ A last-minute discounted appointment marketplace. GC2 flow: Browse -> Select -> 
 
 Implemented: static starter page and JSON health route. Planned: business routes, live database connection, seven screens, pricing and bookings. The schema/seed SQL is a design contract, not evidence of a running database.
 
-Group-number discrepancy: GC1 submission says Group 3; the earlier Git activity profiles say Group 1. Confirm the current GC2 roster before naming branches and PRs. Existing member numbers are retained below.
+Group 1, ITMGT 45.03-YZW. Confirmed by Fran on October 27, 2026. Existing member numbers are retained below.
 
 ## Roster and proposed feature ownership
 

@@ -4,8 +4,8 @@ Repository: https://github.com/Frannaaa/slotdrop-gc2
 
 The CP0 package contains the route table, five-entity schema, first-draft business tables, modular runnable starter, environment example, contribution rules, PR template and task inventory. The server only implements health and static files. Feature code comes later.
 
-## 1. Check the current class group number
-The GC1 PDF says Group 3. Your earlier Git activity files say Group 1. This package uses Group 3 for the CP0 branch based on the business submission. If GC2's actual roster is Group 1, correct the branch/title and README before merging. Member numbers: Fran 1, Cholo 2, Janelle 3, Kaitlyn 4, Kaithlyn 5, Kirsten 6.
+## 1. Use Group 1
+Fran confirmed Group 1 on October 27, 2026. Use g1 branch prefixes and G1 PR titles. Member numbers: Fran 1, Cholo 2, Janelle 3, Kaitlyn 4, Kaithlyn 5, Kirsten 6.
 
 ## 2. Review the PR yourself before Janelle approves
 Open README.md, docs/architecture.md, docs/routes.md, docs/schema.md and db/schema.sql. Be able to explain: the browser calls your API; the API calls shared business functions; repositories query PostgreSQL; booking and availability update atomically. The database has not been deployed at CP0.
@@ -21,7 +21,7 @@ Install Git and Node.js 22+ if needed. In VS Code Terminal (PowerShell), use:
     git clone https://github.com/Frannaaa/slotdrop-gc2.git
     cd slotdrop-gc2
     git fetch origin
-    git switch g3/m1-cp0-contract
+    git switch g1/m1-cp0-contract
     npm ci
     Copy-Item .env.example .env
     npm run check
@@ -36,7 +36,7 @@ If you already cloned, do not clone into it again. Open the existing folder, run
 ## 5. Accept invites and finish task assignments
 All five teammates need to accept the invitation to THIS new repo; old-repo access does not carry over. The owner names in Issues describe who should do the work. GitHub assignees may remain pending until each person accepts; verify the sidebar rather than assuming a name in the text is an assignment.
 
-Instructor knee-rel is required by the course brief. Its invite remains separate if not yet authorized/sent.
+Instructor knee-rel was invited on October 27, 2026 after Fran authorized it. All six invitations were pending acceptance when checked.
 
 ## 6. Janelle reviews
 Janelle uses janellereonal, accepts the invite, opens the CP0 PR and follows docs/human-review.md. She checks changed files, runs the branch, leaves an actual specific comment, and uses Review changes > Approve after any fixes. Do not copy a prewritten review.

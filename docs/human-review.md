@@ -2,7 +2,7 @@
 
 Accept the invite with janellereonal. Open Fran's PR and Files changed.
 
-1. Confirm current group number and roster. Check API fields/status codes and entity relationships.
+1. Confirm Group 1 roster and member numbers. Check API fields/status codes and entity relationships.
 2. Explain the unique confirmed-booking index and transactional booking plan. Do not claim SQL was run if it was not.
 3. Discuss the proposed rate, tiers and customer-price versus provider-net floor with Fran. Record actual decisions.
 4. Clone the repo, fetch and switch to Fran's branch. Run npm ci, npm run check and npm start. Load Home and /api/health, then Ctrl+C.

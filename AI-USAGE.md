@@ -5,3 +5,5 @@
 | 2026-10-27 | Fran, draft for review | ChatGPT/Codex | Revise existing CP0 kit using course brief, GC1 and GitHub profiles | Modular health scaffold, contracts, task templates, verified profile usernames. Existing generated business proposals retained for human decisions. | Preparation results in docs/preparation-checks.md. Fran must understand and review every line; Janelle must review independently. No approval/deployment claimed. |
 
 Add meaningful uses as they happen. Business reasoning, challenge evidence and the unaided individual recording must be the team's own. Never describe AI-prepared expected outcomes as actual tests.
+
+October 27 update: Fran explicitly confirmed Group 1 and authorized the instructor invitation. Docs/branch labels were corrected; original GC1 source filenames retained for traceability.

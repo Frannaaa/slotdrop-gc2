@@ -2,7 +2,7 @@
 
 Issue -> branch -> meaningful commits -> PR -> human comment and approval -> Fran merges.
 
-Confirm current GC2 group number first (GC1 says 3, earlier Git activity says 1). Preserve member numbers from README. For Group 3, Fran uses g3/m1-cp0-contract and title [G3-M1] Add CP0 contracts and modular starter.
+GC2 is Group 1, confirmed by Fran. Preserve member numbers from README. Fran uses g1/m1-cp0-contract and title [G1-M1] Add CP0 contracts and modular starter.
 
 Start from current main: git switch main, git pull, then feature branch. Before review: git pull --no-edit origin main. No direct main pushes after initial skeleton, no force pushes to main.
 

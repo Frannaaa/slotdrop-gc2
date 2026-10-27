@@ -1,6 +1,6 @@
 # SlotDrop: GC2 business tables (CP0 draft)
 
-Sources: Group 3 - GC1.pdf and GC1_feedback_grp3.pdf. Existing generated draft retained as proposals for human review. The assignment requires the team to own its business reasoning; review and rewrite rationale in your own words before merging. New rates and market assumptions are not validated decisions.
+Sources retain their original filenames: Group 3 - GC1.pdf and GC1_feedback_grp3.pdf. Fran confirmed the current GC2 team is Group 1. Existing generated draft retained as proposals for human review. The assignment requires the team to own its business reasoning; review and rewrite rationale in your own words before merging. New rates and market assumptions are not validated decisions.
 
 ## Assumptions to confirm with the group
 
