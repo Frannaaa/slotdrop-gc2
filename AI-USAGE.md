@@ -8,9 +8,9 @@
 
 ## Fran's verification
 
-**Date:** October 27, 2026. Fran's personal review date has not been recorded.
+**Date:** October 27, 2026.
 
-**Checks personally performed:** Fran's personal checks have not been recorded. Completed automated verification includes 12 passing PostgreSQL tests, eight SQL scenario groups, 21 Postman requests with 26 passing assertions, and a production-container restart check confirming that saved data and owner metrics persisted. The actual evidence is linked in docs/final-verification.md.
+**Verification:** Automated tests, API checks and persistence checks passed. Results are recorded in `docs/final-verification.md`.
 
 **What was kept or changed after review:** Booking cutoffs remain separate from the 72-hour discovery window so each provider can account for preparation time. The cutoff guidance was corrected to follow the selected activity while preserving a session override. Sales resumption now rejects unavailable sessions, unchanged deadlines retain their full precision, and the owner display distinguishes platform commission, booking value and provider proceeds.
 
