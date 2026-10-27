@@ -229,6 +229,7 @@ function renderSessions() {
     const card = element("article", undefined, "session"),
       heading = element("h3", slot.serviceName),
       tag = element("span", state.label, "tag");
+    tag.dataset.state = slot.status;
     heading.append(tag);
     card.append(
       heading,
@@ -241,6 +242,7 @@ function renderSessions() {
         "p",
         `${slot.remainingSeats} of ${slot.capacity} released seats left`,
       ),
+      element("p", "Regular " + money(slot.originalPriceCentavos) + " / seat", "regular-price"),
       element("p", money(slot.offerPriceCentavos) + " / seat", "price"),
     );
     if (slot.buddyPriceCentavos !== null)
@@ -248,6 +250,7 @@ function renderSessions() {
         element(
           "p",
           money(slot.buddyPriceCentavos) + " / seat for a booking of 2+",
+          "buddy-rate",
         ),
       );
     if (state.help) card.append(element("p", state.help, "hint"));
@@ -299,6 +302,9 @@ function renderBookings(rows) {
     table = element("table"),
     head = element("thead"),
     header = element("tr");
+  wrap.tabIndex = 0;
+  wrap.setAttribute("role", "region");
+  wrap.setAttribute("aria-label", "Saved bookings; scroll horizontally for all amounts");
   for (const title of [
     "Booking / activity",
     "Customer",

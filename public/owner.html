@@ -3,25 +3,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Owner dashboard · SlotDrop</title>
+    <title>Studio workspace · SlotDrop</title>
+    <meta name="theme-color" content="#F5F2EA" />
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/owner.css" />
     <script src="/js/owner.js" type="module"></script>
   </head>
   <body class="owner-page">
+    <a class="skip-link" href="#main-content">Skip to workspace</a>
+    <div class="demo-bar"><span>GROUP 1 / COURSE DEMONSTRATION</span><span>STUDIO OPERATIONS</span></div>
     <header>
-      <a class="brand" href="/">SlotDrop<span>Provider workspace</span></a
-      ><button id="refresh" type="button">Refresh data</button>
+      <a class="brand" href="/" aria-label="SlotDrop home">
+        <svg class="brand-symbol" viewBox="0 0 28 36" aria-hidden="true"><path d="M2 10v24h24V10" /><rect x="9" y="0" width="10" height="10" rx="2" /></svg>
+        slotdrop
+      </a>
+      <button id="refresh" type="button">Refresh data</button>
     </header>
-    <main>
+    <main id="main-content" tabindex="-1">
       <section class="intro">
-        <p class="eyebrow">YOUR NEXT SESSION</p>
-        <h1>Make room for something good.</h1>
-        <p>Manage your released seats, session offers and booking receipts.</p>
+        <p class="eyebrow">SLOTDROP / STUDIO WORKSPACE</p>
+        <h1>Bookings and open seats.</h1>
+        <p>Manage the seats released to SlotDrop and see what each booking contributes.</p>
       </section>
       <p class="demo-note">
-        Course demonstration · Fictional providers and customers · Payments are
-        simulated. All session times below are Philippine time.
+        <strong>Course demonstration</strong>
+        Fictional providers and customers. Payments are simulated. All session times below are Philippine time.
       </p>
       <p id="page-message" role="status" aria-live="polite">
         Loading your workspace…
@@ -31,6 +37,12 @@
         aria-label="Booking metrics"
         id="metrics"
       ></section>
+      <section class="receipts" aria-labelledby="receipts-title">
+        <p class="eyebrow">SAVED TRANSACTIONS</p>
+        <h2 id="receipts-title">Your bookings.</h2>
+        <p class="hint">Amounts and session dates are saved at booking time. Later offer edits leave these receipts unchanged.</p>
+        <div id="bookings" class="panel">Loading bookings…</div>
+      </section>
       <div class="workspace">
         <section class="panel editor" aria-labelledby="editor-title">
           <div class="section-heading">
@@ -76,6 +88,7 @@
                   value="2000.00"
               /></label>
             </div>
+            <p class="hint">Released seats are your SlotDrop allocation, not the venue's total capacity.</p>
             <div class="form-grid">
               <label
                 >Offer price / seat (₱)<input
@@ -115,20 +128,19 @@
         </section>
         <section class="panel inventory" aria-labelledby="sessions-title">
           <div class="section-heading">
-            <h2 id="sessions-title">Session offers</h2>
+            <div><p class="eyebrow">PROVIDER-RELEASED INVENTORY</p><h2 id="sessions-title">Your session offers.</h2></div>
             <span id="session-count"></span>
           </div>
           <div id="sessions">Loading sessions…</div>
         </section>
       </div>
-      <section class="panel receipts" aria-labelledby="receipts-title">
-        <h2 id="receipts-title">Saved bookings</h2>
-        <p class="hint">
-          Amounts are saved at booking time. Later offer edits leave these
-          receipts unchanged.
-        </p>
-        <div id="bookings">Loading bookings…</div>
-      </section>
     </main>
+    <footer>
+      <div class="footer-inner">
+        <a class="brand" href="/" aria-label="SlotDrop home"><svg class="brand-symbol" viewBox="0 0 28 36" aria-hidden="true"><path d="M2 10v24h24V10" /><rect x="9" y="0" width="10" height="10" rx="2" /></svg>slotdrop</a>
+        <p>Good plans for the gaps in your day.</p>
+        <small>Fictional providers. Simulated payments.</small>
+      </div>
+    </footer>
   </body>
 </html>

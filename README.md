@@ -10,6 +10,8 @@ Session discovery/detail, offer controls, the owner workspace, saved-booking lis
 
 Public URL: not deployed yet.
 
+Design reference: [SlotDrop brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype). The prototype stores its sample data in the browser; it is separate from this API-backed build. The owner workspace follows its paper/ink/blue/lime identity and uses locally served DM Sans and Space Grotesk fonts. Font licenses are included in public/fonts/.
+
 Review order: [CP0 #22](https://github.com/Frannaaa/slotdrop-gc2/pull/22) → [data #27](https://github.com/Frannaaa/slotdrop-gc2/pull/27) → [offers #28](https://github.com/Frannaaa/slotdrop-gc2/pull/28) → [owner #29](https://github.com/Frannaaa/slotdrop-gc2/pull/29). After a reviewed merge, retarget the next PR to main.
 
 ## Run locally
