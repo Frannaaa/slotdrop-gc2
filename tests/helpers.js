@@ -4,7 +4,7 @@ import { createApp } from '../server/app.js';
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { postgresDatabase } from '../server/repositories/database.js';
-export async function fixture() {
+export async function fixture({ clock } = {}) {
   let database, db, cleanup;
   if (process.env.TEST_DATABASE_URL) {
     const schema = 'test_' + randomUUID().replaceAll('-','');
@@ -21,7 +21,7 @@ export async function fixture() {
   await database.exec(await readFile(new URL('../db/schema.sql', import.meta.url), 'utf8'));
   await database.exec(await readFile(new URL('../db/seed.sql', import.meta.url), 'utf8'));
   const now = new Date((await database.query('SELECT NOW() AS time')).rows[0].time);
-  const server = createApp({ db, clock: () => now }).listen(0, '127.0.0.1');
+  const server = createApp({ db, clock: clock || (() => now) }).listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   const base = 'http://127.0.0.1:' + server.address().port;
   return { database, db, now, base,

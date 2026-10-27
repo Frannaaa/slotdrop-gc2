@@ -2,6 +2,59 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fixture } from './helpers.js';
 import { insertDemoReceipt } from './receipts.js';
+
+test('reopening cancelled or paused inventory checks every sales prerequisite', async () => {
+  const f = await fixture();
+  try {
+    const original = (await f.database.query('SELECT * FROM slots WHERE id=1')).rows[0];
+    const reopen = async () => fetch(f.base + '/api/slots/1', {
+      method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({status:'open'})
+    });
+    for (const status of ['cancelled', 'paused']) {
+      await f.database.query('UPDATE slots SET status=$1,booking_closes_at=$2 WHERE id=1', [status, f.now]);
+      assert.equal((await reopen()).status, 409, status + ' after cutoff');
+      await f.database.query('UPDATE slots SET booking_closes_at=$1,runs_as_scheduled=false WHERE id=1', [original.booking_closes_at]);
+      assert.equal((await reopen()).status, 409, status + ' without a confirmed running session');
+      await f.database.query('UPDATE slots SET runs_as_scheduled=true WHERE id=1');
+      await f.database.query('UPDATE services SET active=false WHERE id=1');
+      assert.equal((await reopen()).status, 409, status + ' with an inactive activity');
+      await f.database.query('UPDATE services SET active=true WHERE id=1');
+      assert.equal((await reopen()).status, 200, status + ' with valid inventory');
+    }
+  } finally { await f.close(); }
+});
+
+test('creation and reopening recheck time after waiting for a database lock', async () => {
+  let current;
+  const f = await fixture({clock: () => current});
+  current = f.now;
+  const cutoff = new Date(f.now.getTime() + 1000);
+  const transaction = f.db.transaction;
+  f.db.transaction = run => transaction(client => run({
+    async query(sql, values) {
+      const result = await client.query(sql, values);
+      if (/FOR (SHARE|UPDATE)/.test(sql)) current = new Date(cutoff.getTime() + 1);
+      return result;
+    }
+  }));
+  try {
+    const response = await fetch(f.base + '/api/slots', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+        serviceId:1,startsAt:new Date(f.now.getTime()+10*3600000).toISOString(),bookingClosesAt:cutoff.toISOString(),
+        capacity:4,originalPriceCentavos:200000,offerPriceCentavos:160000,runsAsScheduled:true
+      })
+    });
+    assert.equal(response.status,400);
+    assert.equal(Number((await f.database.query('SELECT COUNT(*) AS count FROM slots')).rows[0].count),8);
+    await f.database.query("UPDATE slots SET status='paused',booking_closes_at=$1 WHERE id=1", [cutoff]);
+    current = f.now;
+    const edit = await fetch(f.base+'/api/slots/1', {
+      method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'open'})
+    });
+    assert.equal(edit.status,409);
+    assert.equal((await f.database.query('SELECT status FROM slots WHERE id=1')).rows[0].status,'paused');
+  } finally { await f.close(); }
+});
 test('creation resolves activity defaults and explicit cutoffs without changing the default', async () => {
   const f = await fixture();
   try {
