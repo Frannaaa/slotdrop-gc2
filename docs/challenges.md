@@ -65,3 +65,8 @@ After these fixes, local syntax checks passed; 14 tests passed with zero failure
 
 The updated code at commit 2f4e384eb52c284d5481e31843b2a8ff03f27be3 also passed [PostgreSQL and production-container CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40543382241): syntax, SQL scenarios, PostgreSQL HTTP/locking tests, Docker build/initialization and restart persistence. The compact review record is [fran-review-2026-10-28.json](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/evidence/fran-review-2026-10-28.json).
 
+### Second edge-case pass
+
+Three added regression tests failed before correction because malformed encoded path parameters, unsupported JSON encodings and an unreachable PostgreSQL server all returned 500. They now return structured 400, 415 and 503 responses respectively. Reads and transactions both handle connection failures without exposing connection details. A failed rollback discards its connection and preserves the original error.
+
+After correction, the owner build passed local syntax checks, 17 tests and all eight SQL scenario groups. The real-PostgreSQL concurrency test was skipped locally because TEST_DATABASE_URL was not configured. These checks supplement the earlier results and do not establish deployed customer-booking behavior.
