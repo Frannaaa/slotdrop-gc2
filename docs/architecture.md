@@ -1,13 +1,21 @@
-# Modular architecture and planned data flow
+# Group 1 modular architecture
 
-Browser HTML/CSS/page JavaScript calls Express HTTP routes. Routes validate requests and call services. Services own pricing and booking rules; repositories own parameterized SQL. PostgreSQL stores entities and constraints. The browser never queries PostgreSQL directly.
+Browser page JavaScript fetches JSON from Express routes. Routes validate HTTP inputs and call services. Services own booking, offer and money rules. Repositories own parameterized SQL and PostgreSQL transactions. Each module has one responsibility.
 
-CP0 implements only the static page and health route. The service/repository directories explain ownership for later PRs.
+CP0 implemented modules: server/index.js entrypoint, server/app.js app wiring and server/routes/health.js. Business service/repository modules remain assigned feature work; directory README files describe their ownership.
 
-## Planned booking transaction
+## Planned booking flow
 
-Checkout handler -> POST /api/bookings -> field validation -> booking service -> one checked-out database client -> BEGIN -> lock slot -> check time/status/confirmed booking -> shared price calculation -> insert booking snapshot -> mark slot booked -> COMMIT -> 201 with booking id -> confirmation fetch by id -> render database record.
+Select session and seat quantity -> fetch quote -> explicitly confirm amount -> POST booking with stable retry key -> validate -> acquire one SQL client -> BEGIN -> lock session -> check current allocation minus confirmed seat quantities -> calculate server total -> check customer acknowledgement -> insert price/time snapshot -> COMMIT -> return booking ID -> fetch confirmation from database -> render saved receipt.
 
-On failure: ROLLBACK and release the client. A conflicting booking returns 409. A partial unique index also prevents two confirmed bookings for one slot.
+Capacity safety comes from serializing booking/edit operations on the same slot row and checking booked quantities under that lock. Multiple customers can book the same session. request_id uniqueness handles repeated submissions, not overall capacity. Rollback/release on errors. A changed amount returns409 and requires reconfirmation before writes.
 
-No five-minute hold is implemented or promised. Provider cancellation/reopening is deferred; adding it needs a contract change and coherent booking history. Owner data is demo-only because login is outside this phase.
+## Provider flow
+
+Demo owner selects seeded activity -> enters dated session, original price, offer price, released seat quantity and cutoff -> server validates and saves -> Browse shows it only within72h and before cutoff -> booking consumes allocated seats -> owner sees updated receipts and metrics. Pause blocks new bookings while preserving receipts.
+
+Provider-set offers replace automatic discount tiers. Recurrence notes explain the type of activity; every dated session is a separate inventory record. No recurring-calendar engine is needed for GC2. Provider offer controls share the seventh owner screen rather than adding another page.
+
+## Honest scope
+
+All data is fictional. No real inventory/calendar synchronization, authenticated provider roles, real payment, customer refund workflow or five-minute hold is claimed. Existing regular-price sales are not assumed to be incremental. Real supply cadence and demand still require interviews.

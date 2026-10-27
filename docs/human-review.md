@@ -1,13 +1,13 @@
-# Janelle: CP0 independent review
+# Janelle: independent CP0 review
 
-Accept the invite with janellereonal. Open Fran's PR and Files changed.
+Use janellereonal, accept invitation, open PR22. Review the latest Group1 g1/m1-cp0-contract branch, not closed PR2.
 
-1. Confirm Group 1 roster and member numbers. Check API fields/status codes and entity relationships.
-2. Explain the unique confirmed-booking index and transactional booking plan. Do not claim SQL was run if it was not.
-3. Discuss the proposed rate, tiers and customer-price versus provider-net floor with Fran. Record actual decisions.
-4. Clone the repo, fetch and switch to Fran's branch. Run npm ci, npm run check and npm start. Load Home and /api/health, then Ctrl+C.
-5. Check .env is ignored, .env.example contains empty values and node_modules is not staged.
-6. Leave a specific comment describing your actual check/finding. Request changes where needed. Review changes > Approve only after resolution.
-7. Fran then merges; contracts and business tables must appear on main by October 28.
+1. Read the business update: recurring leisure, manual offers, multi-seat allocation; fictional supply only.
+2. Check four entities and routes. Explain why one booking per slot is now wrong, how transaction locking protects capacity, how retry keys differ from capacity checks and how receipt snapshots remain stable.
+3. Check the two-seat example: PHP3200 total, PHP320 fee, PHP2880 provider proceeds at draft10%. Check reconfirmation before writing a changed-price booking.
+4. Run npm ci, npm run check and npm start. Open Home and /api/health. Temporary PostgreSQL schema/seed checks are recorded in preparation-checks.md; hosted connectivity and business API execution are not claimed.
+5. Check secrets ignore rules, empty env example, no node_modules, ownership and actual task sidebar assignments.
+6. Fran/team supply their own business rationale. Instructor must clear the custom manual-offer feature; documentation is not approval.
+7. Leave at least one specific finding based on your actual review. Request changes where needed. Approve only after concerns are resolved. Fran then merges.
 
-Do not paste a canned positive review. AI cannot serve as reviewer of record. This package does not guarantee the instructor will count the scaffold toward the three substantial code PRs; plan three genuine feature PRs across the later windows.
+Base your review comment on checks you actually performed. Plan three genuine feature code PRs each across Oct29-Nov4 and Nov5-Nov9 regardless of whether this scaffold counts.

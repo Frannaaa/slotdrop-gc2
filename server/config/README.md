@@ -1,1 +1,1 @@
-Configuration goes here in feature PRs. Keep the commission rate in one server config value. Never expose DATABASE_URL to the browser.
+Later feature PR: server/config/business.js contains one COMMISSION_BASIS_POINTS value, draft1000. Listing window72h and validation bounds are centralized server constants. No automatic tier schedule. Keep DATABASE_URL private. Changes require a Contract change: Issue and reviewed PR.

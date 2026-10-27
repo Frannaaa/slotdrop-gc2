@@ -1,82 +1,93 @@
-# SlotDrop: GC2 business tables (CP0 draft)
+# Group 1 business first draft for CP0
 
-Sources retain their original filenames: Group 3 - GC1.pdf and GC1_feedback_grp3.pdf. Fran confirmed the current GC2 team is Group 1. Existing generated draft retained as proposals for human review. The assignment requires the team to own its business reasoning; review and rewrite rationale in your own words before merging. New rates and market assumptions are not validated decisions.
+Source filenames retain their original labels: Group 3 - GC1.pdf and GC1_feedback_grp3.pdf. Fran confirmed Group1 for GC2. The source document is not renamed or rewritten.
 
-## Assumptions to confirm with the group
+## User statements and current planning status
 
-- Initial launch hypothesis: price-sensitive students and young professionals (approximately ages 18–35) looking for salon/spa appointments around Quezon City/Katipunan. This narrows GC1's very broad target; **not validated demand**.
-- Booking inventory: provider-posted upcoming appointments within 48 hours. The GC2 demo will start with synthetic seeded slots; this is **not a live partner network**.
-- Pricing: illustrative 10% off at 24–48h, 20% at 6–24h, and 30% below 6h; provider minimum price overrides any too-low discount.
-- Monetization hypothesis: SlotDrop receives 12% of the *discounted* booking price. Real payments and sponsored listings are deferred.
+Fran explicitly prefers young professionals as the primary audience, with students secondary; activity-based offers such as pottery; provider control of manual discounts; and consideration of weekly/recurring supply rather than relying on occasional monthly events. After reviewing FunNow, ClassPass, Eatigo and Bookme examples, Fran authorized updating CP0 to recurring local leisure sessions and provider-approved offers.
+
+This is the CP0 business first draft. The 72-hour window, 10% model commission, one-area demo, exact seed prices and initial category mix are concrete implementation assumptions proposed in this conversation, not validated customer/partner facts. The course requires the team's own business reasoning: a human must supply the actual reasons and can revise these defaults. No interview, partner agreement, teammate approval or market validation is invented.
+
+## Working proposition and first segment
+
+Find a nearby activity with an available spot and a provider-approved deal in the next few days.
+
+Primary planning segment: young professionals with discretionary leisure spending, flexible near-term plans, and interest in beginner-friendly activities alone or with a companion. Students remain a secondary segment. The initial demo uses Quezon City/Katipunan and nearby areas; geographic scope is a test hypothesis, not evidence of secured suppliers.
+
+Supply focus: regularly scheduled beginner creative sessions, with selected recreational drop-ins as adjacent variety. Occasional workshops are supplementary. Prioritize a provider only after verifying actual session frequency, spare seats, suitable times, late-booking cutoff and willingness to release a specific allocation. A studio being open does not establish that sessions run or seats are available.
+
+Only sessions already going ahead are listed in this model. Unsold seats or provider-authorized reopened seats may be released. An attendee cancellation does not automatically establish lost provider revenue, refundable payment or resale rights.
 
 ## GC1 traceability
 
-| GC1 item | What GC1 proposed | GC2 implementation / change |
+| GC1 element | Source anchor or documented proposal | GC2 implementation/change |
 |---|---|---|
-| Target market | Last-minute price-sensitive customers; appointment providers with idle slots | QC/Katipunan focus **hypothesis**, browsable sample salon and spa deals |
-| Problem | Providers lose value from late cancellations; consumers struggle to find convenient near-term appointments | Browse only eligible open future slots; booking makes slot unavailable |
-| Value proposition | **“Empty slot, better price.”** | Home copy; original/current price comparison and booking confirmation |
-| Revenue model | Commission on successful bookings; sponsored featured spots in future | Proposed 12% commission computed and stored on server; sponsored placement deferred |
-| Core features | Slot manager, marketplace, simulated booking, schedules | Seeded provider appointments, marketplace, booking & owner saved-booking list; provider self-service and login deferred |
+| Target | GC1 p1 describes people seeking quick/cheap last-minute service and providers with unused appointments | Narrows discovery to young professionals and recurring leisure; students secondary |
+| Problem | GC1 p2: providers can “profit off of cancelled/empty appointment slots” | Tracks actual provider-released seats; no claim that every cancellation loses revenue |
+| Value proposition | GC1 p1: “Empty slot, better price.” | Home proposition; session time, availability and regular/offer price visible |
+| Monetization | Commission and featured placements in GC1, without an established rate in feedback | Draft10% provider-paid commission on discounted bookings; featured placement deferred |
+| Core flow | GC1 p6: customer selects “Book Now” | Browse -> select session and quantity -> confirm -> persist -> read receipt |
+| Provider slot manager | GC1 provider posts/edits slots | Small session/offer manager within owner screen; seeded provider/activity catalog |
+| Roles/integrations | GC1 includes roles, real integrations and later payments | GC2 demo without login; fictional data and simulated payment; integration deferred |
 
-## Browse → Select → Confirm → Save funnel
+## Funnel and element choices
 
-| Stage | Screen / element | API | Metric moved and why |
+| Stage | Screen/elements and reason | Endpoint | Intended number |
 |---|---|---|---|
-| Browse | Searchable cards show original/current price and time until slot | GET /api/slots | Browse-to-detail clicks; transparent prices invite consideration |
-| Select | Detail and summary show provider, appointment and price | GET /api/slots/:id; GET /api/pricing/quote | Detail-to-selection rate; avoid booking ambiguity |
-| Confirm | Customer details + mock payment, field-level errors | POST /api/bookings | Checkout completion; concise required fields reduce drop-off |
-| Save | Database-backed confirmation with booking ID | GET /api/bookings/:id | Completed bookings, average order value; no false confirmations |
+| Browse | Date/area/people filters restrict to usable choices; cards show exact time and per-seat price before a click | GET /api/slots | Eligible Browse-to-detail visits |
+| Select | Detail shows duration/inclusions context; quantity control lets a customer check whether a companion can join | GET /api/slots/:id and /api/pricing/quote | Detail-to-selection rate |
+| Confirm | Short customer form, visible quantity/total, inline validation; changed total requires a new explicit confirmation | POST /api/bookings | Booking completion |
+| Save | Confirmation ID and receipt fetched from saved record instead of displaying a browser-only success | GET /api/bookings/:id | Confirmed bookings and average booking value |
 
-## Business rules (plain-language wording)
+These are measurement intentions, not implemented analytics or observed conversion effects.
 
-| Owner says | Enforced where | Customer experience |
+## Business rules and enforcement
+
+| Plain-language rule | Server/data enforcement | Customer/provider sees |
 |---|---|---|
-| Only advertise appointments happening within 48 hours that haven't already been booked. | GET /api/slots | No expired or booked appointment shown |
-| We can sell each one-person appointment only once. | POST /api/bookings + PostgreSQL row lock/index | Second booking attempt gets 409 and retry prompt |
-| Never discount below a provider's accepted minimum. | Shared server pricing function | Actual price/savings displayed, even if smaller than advertised tier |
-| When a customer confirms, keep the agreed price for their receipt. | Booking creation + bookings table | Confirmation shows server-stored price |
-| SlotDrop charges a proposed 12% commission on a confirmed booking, never the original list price. | Shared server pricing function + bookings table | Owner view separates gross booking value and commission |
-| Never trust a price sent by the browser. | POST /api/bookings | Server recomputes and validates |
+| Show only released seats in sessions within72h, before cutoff and already going ahead | List/quote eligibility; service and slot records | No promise of an unconfirmed workshop |
+| Never sell more seats than the allocation | Lock slot and check SUM confirmed quantities during booking/edit | 409 SLOT_UNAVAILABLE instead of false confirmation |
+| Provider sets the customer offer price per seat | Owner offer API validates and stores 0<offer<original | Regular price, offer, savings and net proceeds |
+| Charge the draft10% fee only on the confirmed discounted amount | One shared server money function; immutable booking fee snapshot | Provider payout separate from SlotDrop fee |
+| Ask again if the amount changes before saving | Booking compares acknowledged total to own recomputation before writes | Fresh quote and explicit reconfirmation |
+| Retrying a request must not create another booking | UNIQUE request_id, normalized payload comparison | Same receipt for identical retry |
+| Offer edits never rewrite an existing receipt | Saved date/price/fee snapshots | Stable confirmation |
+| Pause sales without deleting prior bookings | Status and edit validation under lock | Existing bookings retained; new sales disabled |
 
-## Two revenue features, with worked numbers
+## Two revenue features with worked numbers
 
-1. **Availability filtering / inventory counter.** Suppose a provider posts 3 one-person appointment slots. After one is confirmed, 2 remain available; another attempt for that same booked time is refused. This supports reliable inventory, but it does not guarantee that a slot posted here is also available in the provider's external calendar. *Conclusion:* SlotDrop must validate provider inventory or add synchronization before claiming guaranteed availability.
-2. **Time-based discount / provider price floor.** A ₱1,000 haircut 4 hours away qualifies for a 30% discount (₱700), but the provider's price floor is ₱750. The customer pays **₱750**, actual savings **25%**. Proposed 12% commission = **₱90**; provider receives **₱660 before service costs**. *Conclusion:* A price floor protects the provider but the platform still needs evidence the booking would not have sold at full price; it cannot assume this is all incremental revenue.
+1. Availability allocation and capacity protection. Fictional seeded session1 has four SlotDrop seats, regular PHP2,000 per seat, offer PHP1,600. Booking two seats records PHP3,200 gross value, PHP320 fee and PHP2,880 provider proceeds before service costs, leaving two released seats. A request for three more seats returns409 and adds no revenue or booking. An identical network retry returns the same receipt, not another PHP320 fee. These are design expectations, not executed API tests.
 
-## Five owner metrics → operational decisions
+2. Provider-controlled limited-session offer. At the same session, one seat at PHP1,600 saves the customer PHP400 (20%) versus PHP2,000. Draft10% fee is PHP160; provider proceeds PHP1,440 before costs. This is a provider-entered offer, not automated tier pricing. Whether PHP1,440 is attractive depends on incremental costs, what direct sale it may replace, and the provider's own decision. The team must supply its own commercial conclusion.
 
-| Metric | Owner decision |
-|---|---|
-| Number of bookings | Are last-minute deals actually converting? If low, revise discovery and slot mix. |
-| Platform revenue (commissions, not gross sales) | Does commission income justify acquiring and supporting providers? |
-| Average order value | Are discounted deals too cheap for the commission to cover operating costs? |
-| Top-selling service | Which provider/service category should we recruit more of? |
-| Services almost full / scarce slots | Which category has insufficient upcoming supply? |
+Feature2 is a custom revenue feature under the brief's “Your own” option. Instructor clearance is REQUIRED at CP0 and is not yet obtained. The draft does not count commission as an unrelated third feature or label manual offers “tiered pricing.” See docs/cp0-instructor-clarification.md.
 
-## GC1 feedback addressed, with unresolved risks
+## Five owner metrics and intended decisions
 
-- **Narrow market.** Start with a localized segment, but validate age, location, and actual customer demand.
-- **Commission missing from GC1.** Add a proposed 12% provider-paid commission; verify unit economics later.
-- **Ghost slots.** Internal double-booking checks are planned; external calendar discrepancies are still a risk. The MVP must not claim real partner synchronization.
-- **Premium providers.** Minimum accepted price prevents involuntary below-floor sales.
-- **Popular providers rarely have empty slots.** Position SlotDrop as near-term, discounted discovery rather than promising access to fully booked premium providers.
-- **Competition.** GC1 feedback cites Fresha, ClassPass, and HotelTonight as comparison examples. Local Philippine alternatives and providers still require independent research for the Final Project.
-
-
-## Exact GC1 anchors
-
-| Source | Short wording from GC1 | Contract treatment |
+| Metric | Meaning | Decision supported |
 |---|---|---|
-| p.1 name/tagline | "Empty slot, better price." | Home proposition |
-| p.1 category | "bookings that are last-minute in nature" | Proposed 48-hour window, not specified in GC1 |
-| p.2 provider value | "profit off of cancelled/empty appointment slots" | Persist booking and reduce availability |
-| p.6 flow | Customer selects "Book Now" | Detail and selection lead to booking form |
+| bookingCount | Confirmed transactions, not seats | Whether the flow generates bookings |
+| platformRevenueCentavos | Saved commission, not gross value | Whether fee income can support acquisition/service costs |
+| averageOrderValueCentavos | Average full booking value, including quantity | Whether companion bookings change ticket size |
+| topSellingService | Activity with most confirmed seats | Which activity supply to investigate/recruit |
+| nearlyFullSessionCount | Sessions at <=25% of their released allocation remaining | Whether useful supply needs replenishment |
 
-## Human decisions to record before approval
+Do not infer general market demand from fictional seed bookings.
 
-After discussing, record the actual decision, names and date here. Do not pre-fill acceptance. Confirm segment, 12% commission, who bears it, tier boundaries and the meaning of provider floor.
+## Real-world references and limits
 
-Current contract treats minimum_price_centavos as a CUSTOMER-PRICE floor. A PHP750 floor at 12% commission yields PHP660 to provider before costs. It does not guarantee PHP750 NET to provider. If the team intends a net floor, change the contract first.
+- FunNow: https://www.events.myfunnow.com/whyfunnow-en and https://help.boss.myfunnow.com/hc/en-us/articles/47363352109337-How-to-Set-Regular-Prices-via-Cycle-Setting
+  Reference for near-term discovery, recurring time slots and merchant price/capacity controls.
+- ClassPass: https://classpass.com/partners/faqs
+  Reference for selective excess-capacity allocation; no proprietary algorithm is claimed here.
+- Eatigo: https://eatigo.com/en/about-us
+  Reference for time-specific quiet-period offers, not a proposal to add restaurants.
+- Bookme: https://www.bookme.com.au/
+  Reference for operator-controlled activity listings.
+- Local schedule caution: https://lemonlab.ph/product/mugoctober/ advertises two October dates; https://linktr.ee/laro_ceramics advertises regular classes. Neither is evidence of a SlotDrop partnership or discounted available inventory.
 
-GC1 feedback did not approve 12%; it asked for a rate. The 18-35 segment, 48h window and discount tiers are also proposals. Retaining them requires the team's own rationale.
+Sources were read October27,2026. Published platform claims are descriptions of their products, not proof of incremental profit or demand for SlotDrop.
+
+## Human business reasoning to preserve
+
+Fran and the team should record their own rationale during review for the segment, supplier cadence, selected geography, commission economics and release/cutoff policy. User authorization to prepare this draft is not represented as classmates independently deciding or validating it. No canned personal rationale is attributed to a member.

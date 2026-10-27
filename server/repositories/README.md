@@ -1,1 +1,1 @@
-Parameterized SQL goes here in feature PRs. A booking transaction uses one checked-out pg client for BEGIN, row lock, insert, slot update, COMMIT/ROLLBACK and release.
+Later feature PRs: parameterized SQL and pg pool here. One checked-out client per transaction. Lock a slot for both booking and offer/capacity edits; query SUM confirmed quantities. request_id unique prevents duplicate retry writes. Do not use the removed one-confirmed-booking-per-slot index.

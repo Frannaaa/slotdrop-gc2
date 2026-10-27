@@ -1,19 +1,22 @@
-# Entity schema contract
+# Group 1 data contract
 
-Exact columns and constraints are in db/schema.sql. Five entities: providers -> services -> slots -> bookings, plus discount_tiers. API fields are camelCase; SQL columns are snake_case.
+Four entities: providers -> services -> slots -> bookings. Exact SQL is db/schema.sql. All data is fictional; this contract does not claim partner availability.
 
-- providers: id, name, category, city, created_at.
-- services: id, provider_id FK, name, category, duration_minutes > 0, original_price_centavos > 0, active, created_at.
-- slots: id, service_id FK, starts_at timestamptz, capacity fixed at 1, minimum_price_centavos >= 0, status open/booked/cancelled, created_at. Unique service/start time.
-- discount_tiers: id, min_hours_inclusive, max_hours_exclusive, discount_percent 0-100. Seed: 0-6h 30%, 6-24h 20%, 24-48h 10%.
-- bookings: UUID id, slot_id FK, synthetic customer details, simulated payment method, status, original/tier/final price snapshots, commission/payout and timestamp. One confirmed booking per slot; final price = fee + payout.
+| Entity | Responsibility |
+|---|---|
+| providers | Business name and manually entered city/area |
+| services | Activity, category, duration, beginner suitability and recurrence note |
+| slots | One dated session, provider-set regular/offer prices, released seats and cutoff |
+| bookings | Quantity, customer demo details, retry key and immutable receipt/fee snapshots |
 
-## Invariants for application validation
+A slot is now a group session. capacity is seats allocated exclusively to SlotDrop, not the studio's total capacity. seatsBooked = SUM(quantity) for confirmed bookings. remainingSeats = capacity - seatsBooked. Do not store a second mutable remaining-seats counter. Serialize and validate BIGINT IDs and money totals as safe integers at API boundaries; pg commonly returns BIGINT as a string.
 
-Service active; floor <= original price; tier intervals non-overlapping and covering eligible times. Simple SQL checks do not enforce these cross-row/table rules. Validate them in seed review and any future rule editing. Availability queries check both status and absence of confirmed booking.
+Eligibility: active service, open slot, session already going ahead, startsAt strictly after now and strictly before now+72h, now strictly before bookingClosesAt, remainingSeats > 0. At exactly 72h or at the cutoff the offer is unavailable.
 
-## Seed policy
+The price is a provider-entered CUSTOMER price per seat. No automatic tiers or minimum-price field remains. Show the provider the fee and net payout before saving an offer. Automated discounts and negotiated payout floors are deferred. The server validates 0 < offer price < legitimate original price and derives savings.
 
-Use a new empty demo database. Apply schema.sql then seed.sql. Seed is one-shot and refuses populated tables. Do not clear shared data to refresh expired times. Slots expire after 48h; use a fresh demo database or a reviewed refresh plan.
+A booking transaction locks the slot, rechecks confirmed seat totals, recalculates prices, checks acknowledged total and writes the receipt. A unique request_id prevents duplicate retry bookings; it does not replace capacity validation. The old one-confirmed-booking-per-slot index has been removed because multiple customers can fill one session.
 
-CP0 merges this design. SQL has not been executed during package preparation; execute on selected PostgreSQL version before CP1 and record actual outcomes.
+Limit owner edits: capacity cannot fall below sold seats; pause blocks new bookings without deleting existing ones; changes to offer price affect future bookings only; changing start time or cancelling a session with confirmed bookings returns 409 in this MVP. Customer cancellation/refunds and external-calendar synchronization are deferred.
+
+SQL was executed in an ephemeral PGlite0.5.12 PostgreSQL18.6 engine for author checks; no hosted database is connected. Fresh-schema files are not migrations. schema.sql deliberately refuses existing tables instead of pretending CREATE IF NOT EXISTS upgrades an old schema. Use a new disposable demo database. Seed is one-shot and refuses existing data; no destructive reset is supplied. Seeded sessions expire after 72h and do not prove recurring real-world supply.

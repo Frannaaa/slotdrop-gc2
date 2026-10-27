@@ -5,9 +5,6 @@
 ## Validation performed
 State what you actually ran and what happened.
 
-## AI assistance
-Tool, scope, what was retained/changed and how checked; or None.
-
 ## Author
 - [ ] I understand and can explain all changed lines.
 - [ ] No secrets, node_modules or real customer data.

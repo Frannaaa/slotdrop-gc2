@@ -1,22 +1,13 @@
-# October 28 CP0: exact remaining steps for Fran
+# Fran: finish October28 CP0
 
-Repository: https://github.com/Frannaaa/slotdrop-gc2
+Group1. Active PR: https://github.com/Frannaaa/slotdrop-gc2/pull/22
+Branch: g1/m1-cp0-contract
+This PR contains the author-side CP0 materials, not a complete booking app.
 
-The CP0 package contains the route table, five-entity schema, first-draft business tables, modular runnable starter, environment example, contribution rules, PR template and task inventory. The server only implements health and static files. Feature code comes later.
+## 1. Review the agreed direction
+Read docs/business.md: young professionals primary, students secondary; recurring leisure sessions with real spare seats; provider-set offer prices. Scope assumptions for review:72h window, draft10% fee, multi-seat allocations and owner offer controls. No partner demand/availability is asserted.
 
-## 1. Use Group 1
-Fran confirmed Group 1 on October 27, 2026. Use g1 branch prefixes and G1 PR titles. Member numbers: Fran 1, Cholo 2, Janelle 3, Kaitlyn 4, Kaithlyn 5, Kirsten 6.
-
-## 2. Review the PR yourself before Janelle approves
-Open README.md, docs/architecture.md, docs/routes.md, docs/schema.md and db/schema.sql. Be able to explain: the browser calls your API; the API calls shared business functions; repositories query PostgreSQL; booking and availability update atomically. The database has not been deployed at CP0.
-
-## 3. Decide the business proposals with Janelle
-Open docs/business.md. Discuss the 12% provider-paid commission, proposed 48-hour window, 30/20/10% tiers and QC/Katipunan segment. These were not fixed by GC1. Record actual decisions and your own reasons in the human decision section before approval.
-
-The minimum-price field currently means minimum CUSTOMER price. At PHP750 and 12% commission, the provider receives PHP660 before costs. If the intended minimum is provider NET proceeds, revise the contract first.
-
-## 4. Run the PR branch on your PC
-Install Git and Node.js 22+ if needed. In VS Code Terminal (PowerShell), use:
+## 2. Run and understand the starter
 
     git clone https://github.com/Frannaaa/slotdrop-gc2.git
     cd slotdrop-gc2
@@ -28,38 +19,36 @@ Install Git and Node.js 22+ if needed. In VS Code Terminal (PowerShell), use:
     npm start
 
 Open http://localhost:3000 and http://localhost:3000/api/health.
-Expected health JSON: {"status":"ok","app":"SlotDrop"}.
-Stop with Ctrl+C. Empty PORT uses 3000. No database URL is needed for CP0.
+Expected JSON: {"status":"ok","app":"SlotDrop"}.
+Stop Ctrl+C. No database URL needed yet.
+If already cloned, fetch/switch in that existing folder after checking git status; do not overwrite local edits.
 
-If you already cloned, do not clone into it again. Open the existing folder, run git status, then git fetch origin and switch to the PR branch. Preserve any local changes.
+## 3. Close external handoffs
+All five teammates and knee-rel were invited. They must accept the new repo invitation; old-repo access does not carry over. Finish actual Issue sidebar assignments to the intended owners after acceptance. Ask Janelle through the agreed group coordination channel to accept and review; no message was sent by this package.
 
-## 5. Accept invites and finish task assignments
-All five teammates need to accept the invitation to THIS new repo; old-repo access does not carry over. The owner names in Issues describe who should do the work. GitHub assignees may remain pending until each person accepts; verify the sidebar rather than assuming a name in the text is an assignment.
+Bring docs/cp0-instructor-clarification.md to October28: manual provider offers are a custom second revenue feature and need instructor clearance. This requirement is not satisfied by merely documenting it. If a replacement is required, agree it before feature work.
 
-Instructor knee-rel was invited on October 27, 2026 after Fran authorized it. All six invitations were pending acceptance when checked.
+## 4. Human review and merge
+Janelle follows docs/human-review.md: inspect, run, leave a substantive comment, approve after resolution. Fran must understand every line and supply the team's own business reasoning. After required approval, Fran resolves comments and merges PR22 without bypassing protections.
 
-## 6. Janelle reviews
-Janelle uses janellereonal, accepts the invite, opens the CP0 PR and follows docs/human-review.md. She checks changed files, runs the branch, leaves an actual specific comment, and uses Review changes > Approve after any fixes. Do not copy a prewritten review.
-
-## 7. Fran merges
-Once the required human approval is present, resolve all comments, then Merge pull request > Confirm merge. Do not bypass the protection or approve your own PR. Verify docs/routes.md, docs/schema.md and docs/business.md are on main.
-
-On your PC:
     git switch main
     git pull origin main
 
-## 8. CP0 completion checklist
-- [ ] Repo exists and all five teammates plus knee-rel are collaborators/invited as required; teammates can clone.
-- [ ] main requires a PR and one approval, including admins; force pushes blocked.
-- [ ] CONTRIBUTING.md and .github/pull_request_template.md present.
-- [ ] .gitignore excludes .env/node_modules; .env.example has names only.
-- [ ] README declares app, roster, ownership and stack reasons.
-- [ ] Route table and schema MERGED to main.
-- [ ] One Issue per screen, route and revenue feature, each actually assigned.
-- [ ] docs/business.md traceability and rules MERGED.
-- [ ] Share repo link through the instructor's announced checkpoint channel. Brief does not identify a separate CP0 upload destination; do not assume a final-submission upload is needed now.
+Verify docs/routes.md, docs/schema.md, docs/business.md and root workflow files appear on main. Until then the contract is not merged.
 
-No finished booking backend, deployed app or final PDF is required for October 28.
+## 5. CP0 checklist
+- [ ] All members plus knee-rel have access; invitations accepted as needed.
+- [ ] main protected: PR, one approval, force pushes blocked.
+- [ ] CONTRIBUTING.md and .github/pull_request_template.md visible.
+- [ ] .gitignore excludes .env/node_modules; env example contains names only.
+- [ ] README declares app, roster, ownership and stack.
+- [ ] Routes and schema merged.
+- [ ] One assigned Issue per screen, route and revenue feature.
+- [ ] First business traceability/rules draft merged.
+- [ ] Instructor clears the custom second feature, or agrees a replacement.
+- [ ] Share repo via the announced checkpoint channel; no separate CP0 upload destination was specified in the brief.
+
+No finished booking API, deployed site, final PDF or recordings are required for October28.
 
 ## Next phase
-Oct30 shared UI reference; Nov1 first code PR each; Nov4 deployed database-backed Browse; Nov7 integrated booking flow; Nov9 final. Each person needs 3 genuine merged code PRs, 2 substantive reviews, work merged across 2 grading windows. Plan work in Oct29-Nov4 and Nov5-Nov9 even if CP0 gets reviewed now.
+Oct30 shared visual reference; Nov1 first working code PR each; Nov4 deployed database-backed Browse; Nov7 integrated flow; Nov9 final. Three substantive merged code PRs, two genuine reviews and code merged across two grading windows per person.

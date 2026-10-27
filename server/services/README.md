@@ -1,1 +1,1 @@
-Business logic goes here in feature PRs. Janelle owns one shared pricing function. Routes call services; services call repositories. Never duplicate money math across pages.
+Later feature PRs: Janelle owns one pricing/quote function and booking service. Price inputs come from stored provider offers, not client totals. Draft commission1000 basis points is one server config value. Slot allocation is multi-seat, quantity-aware, checked under a row lock. Handle PRICE_CHANGED before writes and idempotent retries. No automatic discount-tier engine.

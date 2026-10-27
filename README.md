@@ -1,69 +1,63 @@
 # SlotDrop: Empty slot, better price.
 
-A last-minute discounted appointment marketplace. GC2 flow: Browse -> Select -> Confirm -> Save, with simulated payment and a demo owner dashboard.
+Group1, ITMGT45.03-YZW. Last-minute provider-controlled deals on seats in recurring local leisure sessions. Primary planning audience: young professionals; students secondary. Initial demo is fictional QC-area activity inventory, not a real partner network.
+
+Customer flow: Browse -> choose session/quantity -> confirm -> saved booking/receipt. Six customer screens plus owner dashboard/offer manager.
 
 ## Current CP0 status
 
-Implemented: static starter page and JSON health route. Planned: business routes, live database connection, seven screens, pricing and bookings. The schema/seed SQL is a design contract, not evidence of a running database.
+Implemented: modular Express app, static starter and JSON health route.
+Prepared for review: route/schema contracts, eight dated synthetic sessions, first business tables, task ownership and workflow.
+Not implemented: business APIs, connected PostgreSQL, full UI, real payments or partner synchronization.
+PR22: https://github.com/Frannaaa/slotdrop-gc2/pull/22
+Custom manual-offer revenue feature requires instructor clearance at CP0; see docs/cp0-instructor-clarification.md.
 
-Group 1, ITMGT 45.03-YZW. Confirmed by Fran on October 27, 2026. Existing member numbers are retained below.
+## Roster and ownership
 
-## Roster and proposed feature ownership
-
-| Member | GitHub | Member number | Ownership |
+| Member | GitHub | Member number | Build ownership |
 |---|---|---|---|
-| Fran | Frannaaa | 1 | Architecture, schema/seed, slots APIs, owner dashboard/metrics, integration/deployment |
-| Cholo | chukwunyeluukgabrielokolo-cmyk | 2 | Homepage, featured slots, own page responsiveness |
-| Janelle | janellereonal | 3 | Pricing/quote, booking transaction and confirmation read API |
-| Kaitlyn | sonatiina | 4 | Checkout and confirmation frontend |
-| Kaithlyn | kattgrass | 5 | Detail and selection summary frontend |
-| Kirsten | 13kilograms | 6 | Visual direction, shared CSS, Browse frontend and filters |
+| Fran | Frannaaa | 1 | Architecture, schema/seed, slots and offer APIs, owner dashboard/metrics, integration/deployment |
+| Cholo | chukwunyeluukgabrielokolo-cmyk | 2 | Home, featured sessions, own loading/empty/error/mobile states |
+| Janelle | janellereonal | 3 | Quote/pricing, capacity-safe booking/retry transaction, confirmation read API |
+| Kaitlyn | sonatiina | 4 | Booking form and confirmation frontend, retries and price-change messages |
+| Kaithlyn | kattgrass | 5 | Detail and quantity/selection summary frontend |
+| Kirsten | 13kilograms | 6 | Shared visual foundation, Browse filters and API integration |
 
-Fran authors CP0. Janelle (janellereonal) reviews independently. Fran merges after human approval and resolved comments. Kirsten establishes shared visual styles; each frontend owner implements their own pages. These build assignments need team confirmation.
+Fran authors CP0. Janelle is the independent reviewer of record; Fran merges after real comment/approval and resolved concerns. Each member authors and understands their own feature work. Kirsten sets common styles; every frontend owner implements their own screens.
 
 ## Stack and reason
 
 | Tool | Reason |
 |---|---|
-| Plain HTML/CSS/JavaScript | Fetch/DOM workflow, separate presentation, future React migration |
-| Node.js 22+ | Same language on client and server |
-| Express | Own JSON API between browser and database |
-| PostgreSQL, hosting to be selected | Persistent entities, constraints and transactions |
-| pg | Parameterized SQL and one-client transactions in next phase |
-| dotenv | Local environment configuration |
-| Git/GitHub | Issues, protected main, branches and reviewed PRs |
-| Postman, DevTools | API status checks, Network tracing and Console debugging |
-| Public Node host, to be selected | Serve static frontend and API from one origin |
+| HTML/CSS/plain JavaScript | Fetch/DOM workflow now; future React migration |
+| Node.js22+ and Express | Own server between browser/database; one language |
+| PostgreSQL | Persistent entities, constraints and transactions |
+| pg | Parameterized SQL and one-client transactions |
+| dotenv | Local environment config |
+| Git/GitHub | Assigned Issues, protected main and reviewed PRs |
+| Postman/DevTools | API checks and Network/Console traces |
+| Public Node host and PostgreSQL host | To be selected before CP1; same-origin frontend/API deployment |
 
-Exact npm dependency versions are pinned in package-lock.json. Record actual deployed Node/PostgreSQL and host versions before final submission. No deployment is needed at CP0.
+Dependencies are pinned in package-lock.json. Current authored runtime checks used Node24.22.1. Record actual deployed runtime/database versions before final submission.
 
 ## Local run
 
-1. Install Node.js 22+ and Git.
-2. Run npm ci.
-3. Windows PowerShell: Copy-Item .env.example .env
-4. Run npm run check, then npm start.
-5. Open http://localhost:3000 and http://localhost:3000/api/health.
-6. Stop with Ctrl+C.
+    npm ci
+    Copy-Item .env.example .env
+    npm run check
+    npm start
 
-On macOS/Linux, use cp .env.example .env. Empty PORT defaults to 3000. DATABASE_URL remains empty until real database setup.
+Open http://localhost:3000 and /api/health. Stop Ctrl+C. Empty PORT defaults3000; DATABASE_URL stays empty for CP0. macOS/Linux: cp .env.example .env. Never commit .env or node_modules.
 
-## Environment variable names
+## Environment names
+PORT, DATABASE_URL. Values only in local .env/host settings. .env.example has empty values.
 
-PORT and DATABASE_URL. Store real values in .env or host settings. Never commit values in .env.example.
+## Changes since GC1 and initial scaffold
 
-## Contracts
+Recurring activity sessions replace a salon/spa-only demo. Multiple allocated seats replace one-person capacity. Provider-set prices replace global automatic tiers. Draft commission is10%, not12%; listing window72h, not48h. Provider offer controls share the owner screen. Payment/login/integration remain deferred. Dates/prices/commission are saved per booking; no guaranteed external-calendar availability is claimed.
 
-See docs/routes.md, docs/schema.md, db/schema.sql and docs/architecture.md. Contract changes need a Contract change: Issue and reviewed PR.
+## Reading order
+START_HERE.md; docs/business.md; docs/routes.md; docs/schema.md; docs/architecture.md; docs/cp0-readiness.md; docs/human-review.md.
 
-## Changes since GC1
-
-Login, real payments, external calendar sync and sponsored placements are deferred. Inventory is organized by entity instead of duplicated by role. The 12% commission, segment narrowing, 48-hour window and discount tiers are proposals for the team's decision, not facts already established by GC1. Do not promise availability synchronized with providers' other calendars.
-
-## Checkpoints
-
-CP0 October 28; CP1 November 4; final November 9, 2026 at 11:59 PM Philippine time. November 9 is Monday; the brief's Wednesday label is inconsistent with that date.
-
-## Demo data
-
-All provider names and bookings are synthetic. Do not collect real customer data in an unauthenticated owner dashboard. See START_HERE.md for publication and human review.
+## Deadlines
+CP0 October28; CP1 November4; final November9,2026 at11:59PM Philippine time. November9 is Monday despite the brief's inconsistent Wednesday label.
