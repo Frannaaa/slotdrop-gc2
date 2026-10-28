@@ -4,19 +4,19 @@ SlotDrop helps people find nearby activities with available seats and a provider
 
 All seed providers, prices and schedules are fictional. No supplier agreement or customer interview has been completed.
 
-## GC1 traceability
+## Changes from GC1
 
-The source files retain their original names, `Group 3 - GC1.pdf` and `GC1_feedback_grp3.pdf`; the GC2 team is Group 1. The page references below come from the existing GC1 notes and still need checking against the submitted PDF.
+The original files are named `Group 3 - GC1.pdf` and `GC1_feedback_grp3.pdf`; the GC2 team is Group 1. The text references below were checked against the eight-page proposal and two-page feedback on October 28, 2026. The monetization summary comes from the feedback's description of the original canvas.
 
 | GC1 element | Source anchor | Where it appears in GC2 |
 |---|---|---|
 | Target market | Page 1 describes people looking for quick, affordable services and providers with unused appointments | A small local activity catalog with date, area and people filters |
 | Problem | Page 2: “profit off of cancelled/empty appointment slots” | Provider-released seats, visible deadlines and capacity checks |
 | Value proposition | Page 1: “Empty slot, better price.” | Planned Home message and visible regular/offer prices |
-| Monetization | Commission and featured placements | A 10% model commission; featured placements are deferred |
+| Monetization | GC1 feedback, page 1: commission and featured placements appear in the canvas | A 10% model commission; featured placements are deferred |
 | Core flow | Page 6: “Book Now” | Browse → choose a session/quantity → confirm → save → read the receipt |
-| Provider controls | Providers post and edit slots | Owner session/offer manager |
-| Accounts and integrations | Roles, external integrations and payments | Deferred; GC2 has no login and uses simulated payment |
+| Provider controls | Proposal pages 4 and 6: providers post and edit slots | Owner session/offer manager |
+| Accounts and integrations | Proposal pages 4–5: roles, external integrations and payments | Deferred; GC2 has no login and uses simulated payment |
 
 ## Main choices
 
@@ -87,5 +87,5 @@ Sources rechecked October 28, 2026:
 - [FunNow](https://www.events.myfunnow.com/whyfunnow-en) already offers near-term experience discovery. Last-minute booking alone is not unique.
 - [ClassPass](https://classpass.com/partners/faqs) describes excess-capacity distribution and integrated inventory tools. Its model does not validate SlotDrop's manual allocation, commission or expected results.
 
-The GC1 feedback raised ghost slots, unwilling providers, deal-only customers and a lack of supplier pipeline. SlotDrop addresses the design side with explicit allocations, cutoff/pause controls, optional prices and visible proceeds. Provider interviews are still needed to establish actual schedules, spare seats, costs and willingness to participate. External calendar accuracy remains an operational dependency.
+The GC1 feedback raised ghost slots, unwilling providers, deal-only customers and a lack of supplier pipeline. Allocation limits, booking deadlines and pause controls help prevent unavailable offers. We still need to ask providers about schedules, spare seats, costs and willingness to participate, including how they would keep SlotDrop seats in sync with other bookings.
 

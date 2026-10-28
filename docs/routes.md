@@ -22,7 +22,7 @@ Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is
 
 ## Discovery and session responses
 
-q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys and unsupported filters return 400.
+q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
@@ -34,10 +34,10 @@ List and detail use the same session shape:
 id, serviceId, providerId, providerName, serviceName, category, city, area,
 durationMinutes, beginnerFriendly, startsAt, bookingClosesAt, capacity,
 remainingSeats, originalPriceCentavos, offerPriceCentavos, buddyPriceCentavos,
-discountPercent, status, recurrenceNote, runsAsScheduled, defaultBookingCutoffMinutes
+discountPercent, status, serviceActive, recurrenceNote, runsAsScheduled, defaultBookingCutoffMinutes
 ```
 
-Prices are per seat. discountPercent describes the standard offer versus the regular price. A null buddyPriceCentavos disables buddy pricing. A known unavailable session still returns 200 detail; the customer must not be allowed to book it.
+Prices are per seat. discountPercent describes the standard offer versus the regular price. A null buddyPriceCentavos disables buddy pricing. A known unavailable session still returns 200 detail; the customer must not be allowed to book it. serviceActive identifies inactive activities, including when a session is opened through a direct link.
 
 The owner catalog includes paused and expired inventory. Its services include id, providerId, providerName, name, active and defaultBookingCutoffMinutes. Its discoveryHours value comes from the server configuration so the owner page can distinguish future inventory from offers already in discovery.
 
