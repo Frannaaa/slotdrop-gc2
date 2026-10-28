@@ -30,3 +30,33 @@ test('Manila date boundaries retain the current weekend on Sundays', () => {
   assert.deepEqual(dateRange('today', new Date('2026-10-27T18:00:00Z')).map(date=>date.toISOString()), ['2026-10-27T16:00:00.000Z','2026-10-28T16:00:00.000Z']);
   assert.deepEqual(dateRange('weekend', new Date('2026-11-01T03:00:00Z')).map(date=>date.toISOString()), ['2026-10-30T16:00:00.000Z','2026-11-01T16:00:00.000Z']);
 });
+
+test('detail exposes inactive activity state for direct session links', async () => {
+  const f = await fixture();
+  try {
+    const detail = async () => (await fetch(f.base + '/api/slots/1')).json();
+    assert.equal((await detail()).serviceActive, true);
+    await f.database.query('UPDATE services SET active=false WHERE id=1');
+    const response = await fetch(f.base + '/api/slots/1');
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).serviceActive, false);
+    const list = await (await fetch(f.base + '/api/slots')).json();
+    assert.ok(list.every(slot => slot.serviceId !== 1));
+  } finally { await f.close(); }
+});
+
+test('null characters in search filters return input errors before SQL', async () => {
+  const f = await fixture();
+  try {
+    for (const key of ['q', 'area']) {
+      for (const value of ['%00', 'pot%00tery']) {
+        const response = await fetch(f.base + '/api/slots?' + key + '=' + value);
+        assert.equal(response.status, 400);
+        assert.equal((await response.json()).error.code, 'INVALID_INPUT');
+      }
+    }
+    const response = await fetch(f.base + '/api/slots?q=Beginner');
+    assert.equal(response.status, 200);
+    assert.ok((await response.json()).length > 0);
+  } finally { await f.close(); }
+});

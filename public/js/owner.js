@@ -25,6 +25,7 @@ let catalog = { services: [], slots: [], commissionBasisPoints: null, discoveryH
 let loaded = false;
 let editingCutoff = null;
 let editingSnapshot = null;
+let salesViews = [];
 function element(tag, text, className) {
   const item = document.createElement(tag);
   if (text !== undefined) item.textContent = text;
@@ -43,6 +44,7 @@ function setBusy(value) {
   $("sessions").inert = value;
   $("save").disabled = value || !loaded ||
     (editing === null && !catalog.services.some(service => service.active));
+  refreshSalesStates();
 }
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -212,7 +214,19 @@ function renderMetrics(metrics) {
     $("metrics").append(card);
   }
 }
+function refreshSalesStates() {
+  if (!loaded) return;
+  const now = Date.now();
+  for (const { slot, tag, help, toggle } of salesViews) {
+    const state = salesState(slot, now, catalog.discoveryHours);
+    tag.textContent = state.label;
+    help.textContent = state.help || "";
+    help.hidden = !state.help;
+    if (toggle) toggle.disabled = busy || (slot.status === "paused" && !state.canResume);
+  }
+}
 function renderSessions() {
+  salesViews = [];
   $("sessions").replaceChildren();
   $("session-count").textContent = catalog.slots.length + " sessions";
   if (!catalog.slots.length) {
@@ -253,7 +267,14 @@ function renderSessions() {
           "buddy-rate",
         ),
       );
-    if (state.help) card.append(element("p", state.help, "hint"));
+    const help = element("p", state.help || "", "hint");
+    help.hidden = !state.help;
+    card.append(help);
+    const view = { slot: {
+      ...slot,
+      serviceActive: catalog.services.find(service => service.id === slot.serviceId)?.active,
+    }, tag, help, toggle: null };
+    salesViews.push(view);
     const actions = element("div", undefined, "actions"),
       editButton = element("button", "Edit offer");
     editButton.type = "button";
@@ -265,6 +286,7 @@ function renderSessions() {
         slot.status === "paused" ? "Resume sales" : "Pause sales",
       );
       toggle.type = "button";
+      view.toggle = toggle;
       if (slot.status === "paused" && !state.canResume) toggle.disabled = true;
       toggle.addEventListener("click", async () => {
         if (busy) return;
@@ -283,7 +305,7 @@ function renderSessions() {
           message("page-message", error.message, true);
         } finally {
           setBusy(false);
-          toggle.disabled = false;
+          refreshSalesStates();
         }
       });
       actions.append(toggle);
@@ -372,6 +394,7 @@ async function load() {
     loaded = true;
     message("page-message", "");
   } catch (error) {
+    salesViews = [];
     message("page-message", error.message, true);
     $("metrics").replaceChildren();
     $("sessions").textContent =
@@ -433,5 +456,12 @@ $("reset").addEventListener("click", () => {
   if (!busy) reset();
 });
 $("refresh").addEventListener("click", load);
+// Update existing labels and buttons without replacing cards or clearing drafts.
+setInterval(() => {
+  if (!document.hidden) refreshSalesStates();
+}, 1000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshSalesStates();
+});
 reset();
 load();

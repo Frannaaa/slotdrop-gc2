@@ -81,9 +81,43 @@
   "pending": [
     "Reviewed CP0 merge and actual collaborator access/assignments.",
     "Detailed main protection verification.",
-    "GitHub About field still describes the old appointment concept.",
-    "Original GC1 quotation check.",
     "Customer booking integration and public API/database deployment.",
     "Deployed challenge/baseline evidence, personal predictions/recording and Git contribution requirements."
-  ]
+  ],
+  "followUp": {
+    "date": "2026-10-28",
+    "fixes": [
+      "Expose serviceActive in session JSON.",
+      "Reject null characters in q and area before querying.",
+      "Update owner availability labels and resume controls without replacing cards or clearing drafts.",
+      "Check GC1 text references against the proposal and feedback."
+    ],
+    "localBranchTests": {
+      "22": {
+        "passed": 5,
+        "skipped": 0
+      },
+      "27": {
+        "passed": 10,
+        "skipped": 0
+      },
+      "28": {
+        "passed": 14,
+        "skipped": 1
+      },
+      "29": {
+        "passed": 22,
+        "skipped": 1
+      }
+    },
+    "sqlGroupsPerBranch": 8,
+    "syntax": "Passed on all four branches",
+    "runtime": "Node 24.22.1; PGlite",
+    "newCI": "Pending commit publication",
+    "regressionBeforeFix": {
+      "inactiveActivityDetail": "serviceActive missing",
+      "nullCharacterSearch": "500 rather than 400"
+    },
+    "clockRegression": "Controlled clock and lightweight DOM; checks deadline/window transitions, visibility recovery, retained cards/focus/draft, no data fetch."
+  }
 }

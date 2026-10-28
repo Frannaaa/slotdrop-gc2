@@ -2,8 +2,8 @@ export function cutoffGuidance(minutes, override) {
   return (
     `Activity default: ${minutes} minutes before start. ` +
     (override
-      ? "Your session override is preserved."
-      : "You can override this session.")
+      ? "Keeping your custom deadline."
+      : "You can change the deadline for this session.")
   );
 }
 export function cutoffRequestValue(input, original) {

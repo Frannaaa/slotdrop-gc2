@@ -1,6 +1,6 @@
 # Challenges and test results
 
-## Current results
+## Earlier results
 
 These results cover Fran's owner build. They do not complete the deployed customer-booking challenges.
 
@@ -67,4 +67,22 @@ Pending individual work. Each member writes three predictions before running a c
 - The owner layout follows the October 28 brand book: paper/ink/blue/lime, local fonts and 48-pixel action buttons. It stayed within the page at 320, 390, 768 and 1280-pixel viewport settings.
 - Simulating a database outage disabled saving; Refresh restored data and controls. A later buddy-rate edit preserved the original receipt and metrics.
 - The repository review found failing checks on the earlier data/offer branches: syntax scanning assumed public/js existed, and CI tried to run the later owner restart script. Syntax scanning now starts at public/, and Docker/restart steps run only when their files exist.
-- Original GC1 source checks, the public booking challenges, deployed baseline and group phone test remain open.
+- GC1 text/page references were checked against the original proposal and feedback on October 28. Provider interviews, public booking challenges, the deployed baseline and group phone test remain open.
+
+## October 28 follow-up fixes
+
+- Detail responses now include serviceActive, so a direct session link can explain an inactive activity. Discovery continues to exclude it.
+- Null characters in q and area now return 400 INVALID_INPUT before SQL. Both new HTTP cases failed before the correction.
+- Owner sales labels and Resume buttons update every second while the tab is visible and immediately when it becomes visible again. Existing cards, keyboard focus and unsaved deadlines are retained.
+- The remaining awkward headings and cutoff hint were shortened. The original GC1 text/page references were checked against the proposal and feedback.
+
+Local checks after these fixes:
+
+| Branch / PR | Tests passed | Skipped | Syntax | SQL groups |
+|---|---:|---:|---|---:|
+| Setup / #22 | 5 | 0 | Passed | 8 |
+| Session data / #27 | 10 | 0 | Passed | 8 |
+| Offer controls / #28 | 14 | 1 | Passed | 8 |
+| Owner workspace / #29 | 22 | 1 | Passed | 8 |
+
+The skipped case requires real PostgreSQL. These local runs used Node 24.22.1 and PGlite; the new commit's PostgreSQL/container results must come from its CI run. The clock regression exercises the page script with a controlled clock and lightweight DOM fixture; it is not a new full browser walkthrough. Customer booking integration and public deployment remain open.

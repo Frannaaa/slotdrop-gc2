@@ -9,7 +9,7 @@ test("activity guidance updates while an explicit session deadline is preserved"
   assert.match(cutoffGuidance(180, false), /180 minutes/);
   assert.equal(
     cutoffGuidance(30, true),
-    "Activity default: 30 minutes before start. Your session override is preserved.",
+    "Activity default: 30 minutes before start. Keeping your custom deadline.",
   );
 });
 test("a paused session cannot imply resumed sales after its cutoff, start or capacity limit", () => {

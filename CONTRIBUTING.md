@@ -21,6 +21,6 @@ The reviewer runs the branch, leaves a specific comment and approves after any i
 
 ## Required contribution record
 
-Each member needs three merged code PRs, two reviews with real comments, and work merged in two of these windows: October 14–28, October 29–November 4, November 5–9. Documentation-only PRs do not count as code PRs.
+Each member needs three merged code PRs, two teammate reviews with specific comments, and work merged in two of these windows: October 14–28, October 29–November 4, November 5–9. Documentation-only PRs do not count as code PRs.
 
 Keep main protected: PR required, one approval and no force pushes. Tag the reviewed final build `gc2-v1.0`.
