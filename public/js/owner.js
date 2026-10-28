@@ -4,6 +4,7 @@ import {
   changedOfferFields,
   salesState,
 } from "./owner-policy.js";
+import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
 const form = $("offer-form");
 const money = (centavos) =>
@@ -45,23 +46,6 @@ function setBusy(value) {
   $("save").disabled = value || !loaded ||
     (editing === null && !catalog.services.some(service => service.active));
   refreshSalesStates();
-}
-async function api(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...options.headers },
-  });
-  let data;
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error(
-      "The server returned an unreadable response. Please try again.",
-    );
-  }
-  if (!response.ok)
-    throw new Error(data.error?.message || "The request failed.");
-  return data;
 }
 function cents(value, optional = false) {
   const text = value.trim();

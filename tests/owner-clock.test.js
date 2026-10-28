@@ -35,6 +35,7 @@ test('the owner clock updates existing cards across deadlines without disturbing
     {...slot,id:3,startsAt:new Date(now+72*3600000+1000).toISOString(),bookingClosesAt:new Date(now+71*3600000).toISOString()}]};
   const source = (await readFile(new URL('../public/js/owner.js', import.meta.url), 'utf8'))
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/, '')
+    .replace(/^import \{ api \} from "\.\/api\.js";\n/m, '')
     .replace(/reset\(\);\nload\(\);\s*$/, '');
   const context = {document, ...policy, Intl,
     Date:class extends Date { static now() { return now; } },
@@ -68,4 +69,17 @@ test('the owner clock updates existing cards across deadlines without disturbing
   document.hidden = false;
   listeners.get('visibilitychange')();
   assert.equal(tag(cards[0]).textContent, 'Session started');
+  context.api = async () => { throw new Error('The request timed out.'); };
+  await runInNewContext('load()', context);
+  assert.equal(elements.get('refresh').disabled, false);
+  assert.equal(elements.get('offer-fields').disabled, false);
+  assert.equal(elements.get('save').disabled, true);
+  assert.equal(draft.value, '2026-11-03T19:42');
+  context.api = async path => path === '/api/owner/catalog' ? catalog
+    : path === '/api/bookings' ? []
+      : {bookingCount:0,platformRevenueCentavos:0,averageOrderValueCentavos:0,nearlyFullSessionCount:0};
+  await runInNewContext('load()', context);
+  assert.equal(elements.get('refresh').disabled, false);
+  assert.equal(elements.get('save').disabled, false);
+  assert.equal(draft.value, '2026-11-03T19:42');
 });
