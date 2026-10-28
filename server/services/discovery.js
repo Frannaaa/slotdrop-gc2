@@ -25,6 +25,7 @@ export async function listSlots(db, query, now) {
   if (query.category !== undefined && !['creative','active'].includes(query.category)) invalid('Invalid category.');
   if (query.when !== undefined && !['today','tomorrow','weekend'].includes(query.when)) invalid('Invalid date filter.');
   if ((query.q?.length ?? 0) > 100 || (query.area?.length ?? 0) > 100) invalid('Search text is too long.');
+  if ([query.q, query.area].some(value => value?.includes('\u0000'))) invalid('Search text cannot contain null characters.');
   const people = query.people === undefined ? 1 : integer(query.people, 'people', 1, MAX_SEATS);
   const values = [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
   const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',

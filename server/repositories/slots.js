@@ -17,7 +17,7 @@ export function slotResponse(row) {
     originalPriceCentavos: number('original_price_centavos'), offerPriceCentavos: number('offer_price_centavos'),
     buddyPriceCentavos: row.buddy_price_centavos === null ? null : number('buddy_price_centavos'),
     discountPercent: Math.round((number('original_price_centavos') - number('offer_price_centavos')) * 10000 / number('original_price_centavos')) / 100,
-    status: row.status, recurrenceNote: row.recurrence_note, runsAsScheduled: row.runs_as_scheduled,
+    status: row.status, serviceActive: row.active, recurrenceNote: row.recurrence_note, runsAsScheduled: row.runs_as_scheduled,
     defaultBookingCutoffMinutes: number('default_booking_cutoff_minutes')
   };
 }
