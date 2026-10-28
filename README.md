@@ -88,7 +88,6 @@ The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.ch
 - [System diagram and data flow](docs/system.md)
 - [Challenges and test results](docs/challenges.md)
 - [Deployed List baseline](docs/baseline.md)
-- [Assistance log](AI-USAGE.md)
 
 The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/SlotDrop-Fran.postman_collection.json) is in the owner branch. Set baseUrl and serviceId before running it against fictional data. Test records are in that branch's docs/evidence/.
 

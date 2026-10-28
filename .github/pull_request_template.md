@@ -5,9 +5,6 @@
 ## Checks
 Commands, results and any checks still needed:
 
-## Assistance
-AI assistance: <!-- Tool, task and what you kept or changed; write None if unused. -->
-
 ## Review
 - [ ] I can explain the change.
 - [ ] Contracts match the code.
