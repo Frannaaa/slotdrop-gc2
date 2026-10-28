@@ -20,7 +20,7 @@ Checked against the full GC2 brief supplied October 28, 2026. This report concer
 | #28 c5c941f | 17 passed, 1 PostgreSQL-only skip | 8 passed | Passed |
 | #29 99cc822 | 29 passed, 1 PostgreSQL-only skip | 8 passed | Passed |
 
-Syntax checks passed on all four refs. The PostgreSQL-only skip is a local environment limitation; the feature PRs link their successful PostgreSQL CI runs. The audit covered input boundaries, status codes, unknown IDs, Manila dates, search wildcards/nulls, allocation math, concurrent offers, cutoffs after lock waits, resuming/cancelling, saved receipts, five metrics, stale edits and request timeouts. No additional reproducible runtime defect was found in those refs during this pass.
+Syntax checks passed on all four refs. The PostgreSQL-only skip is a local environment limitation; the feature PRs link their successful PostgreSQL CI runs. The audit covered input boundaries, status codes, unknown IDs, Manila dates, search wildcards/nulls, allocation math, concurrent offers, cutoffs after lock waits, resuming/cancelling, saved receipts, five metrics, stale edits and request timeouts. The browser then reproduced an additional owner input defect: a five-digit year threw Invalid time value and left the old automatic cutoff visible. The correction in #29 validates dates, clears stale automatic cutoffs, bounds the native inputs and recovers after a valid date is entered. The updated owner suite passes 30 local tests with one PostgreSQL-only skip. The private build includes the same fix and a browser regression.
 
 ## Fran's remaining work
 
