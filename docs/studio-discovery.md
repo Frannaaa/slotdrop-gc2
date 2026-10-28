@@ -1,0 +1,41 @@
+# Real studios and activity discovery
+
+Checked 28 October 2026. Source prices are public research, not negotiated SlotDrop rates. No listed business has confirmed a partnership, a seat allocation, a discount or a SlotDrop booking deadline. Existing course transactions remain fictional, clearly marked demo inventory. Never attach an unverified real studio to a synthetic receipt.
+
+## Navigation and classification
+
+Use one primary activity type per offering: **Pottery, Painting or Pilates** for the current researched assortment. “All activities” removes the type filter. These choices are mutually exclusive by primary deliverable; they cover this launch assortment, not every future leisure activity. A class that makes and paints a ceramic mug stays Pottery, with Painting included as a tag. Ceramic painting is Pottery; canvas painting is Painting. Expand the controlled type list when a distinct activity is actually added.
+
+Broad domains remain Creative and Movement (`creative` / `active` in the booking API). Do not make Workshop, Beginner, Date night or Weekend sibling activity types. Workshop is a format; beginner is a skill attribute; date night is an editorial use case; weekend is a date filter.
+
+Tags may overlap. For GC2 the catalog editor maintains a small vocabulary (handbuilding, wheel-throwing, painting-included, group-class, beginner, painting); visitors filter existing tags, not create public tags. A later provider form can offer approved checkboxes after the source is checked. User reviews and user-created tags need identity, moderation and abuse controls and are outside this pass. Buddy price and remaining seats come from transaction data, never tags.
+
+ClassPass separates business categories, activity/studio search and filters such as location, skill and amenities. It also distinguishes available class results from the studio’s schedule. SlotDrop uses that distinction with direct PHP prices rather than credits: **Real studios** for research with official-site links; **Demo activities** for the course’s own working booking flow. Source: https://help.classpass.com/hc/en-us/articles/204312229-How-do-I-search-for-classes
+
+## Where it lives
+
+- `public/data/studio-research.json`: eight sourced offerings from five real businesses; prices, schedule notes, primary type, controlled tags, checked date and official URLs.
+- `server/routes/activities.js`: read-only `GET /api/activities`; validated q, type, area and tag filters; does not need or mutate the booking database.
+- `public/studios.html`, `public/js/studios.js`, `public/css/studios.css`: responsive directory, accessible filter buttons, search, source details, loading/empty/error/retry states and URL restoration.
+- `GET /api/slots`: existing bookable demo sessions with live database availability; its independent category, when, area and people filters are unchanged.
+
+## Real business research
+
+| Studio and branch | Offering | Published PHP/person | Published schedule evidence |
+|---|---|---:|---|
+| Laro Ceramics, Katipunan QC | Mug-making + painting | 3,000 | 3 hours; date/time selector, no fixed weekly schedule verified |
+| Laro Ceramics, Katipunan QC | Beginner wheel-throwing | 3,200 | 3 hours; date/time selector, no fixed weekly schedule verified |
+| Bumi & Ashe, Cubao Expo QC | Mug-making | 2,650 | 2 hours; FAQ says weekly slot releases, exact class times unverified; published sale price |
+| Bumi & Ashe, Cubao Expo QC | Free Form Pottery + Paint | 3,200 | 3 hours; choose date or request one; no fixed timetable verified |
+| AMT Ceramics, Tandang Sora QC | Hand-Building single session | 2,900 | 3 hours; FAQ lists Fri/Sat/Sun 10 AM–1 PM; reconfirm chosen date |
+| AMT Ceramics, Tandang Sora QC | Wheel-Throwing Exploratory single session | 2,900 | Same FAQ timetable; reconfirm availability |
+| Sip & Gogh, Century Mall Makati | Open Session painting | 1,400 | Published example: 6 November 2026, 6–9 PM; outside the current 72-hour booking window |
+| Core Pilates Studio, South Triangle QC | Group Class single-session credit | 1,150 | Credit valid 60 days; exact class time and duration unverified |
+
+Official price and schedule URLs are stored per offering in the JSON and shown on every card. Unknown schedule values stay unknown. Opening hours are not class times. A studio’s own sale price is not a SlotDrop discount. A single-session credit is not a reserved session.
+
+## Commercial recommendation to validate
+
+Start provider outreach with recurring pottery calendars (AMT’s published weekly pattern and Bumi’s weekly releases), plus repeatable movement sessions if timetable, provider allocation and cutoffs are confirmed. Painting adds a lower published price point, but one dated session is not evidence of weekly supply. Workshops may be occasional purchases; measure repeat booking across different activities rather than assuming the same customer buys pottery every week. These are planning recommendations, not validated demand or partner commitments.
+
+Before a real offering enters booking inventory, confirm the branch, dated start/end, released seats, final per-person price, cutoff, cancellation terms and settlement arrangement with that provider. Store the source and approval date. Until then the only action is Check studio dates, linking to the official business.

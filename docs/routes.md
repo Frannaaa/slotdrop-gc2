@@ -124,3 +124,7 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 | Owner workspace | /owner.html | Fran |
 
 Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
+
+## Proposed studio research discovery (Issue #31)
+
+GET /api/activities returns a read-only research catalog with offerings, checkedAt, currency and notice. q is a literal studio/activity/branch search up to 100 characters; type=pottery|painting|pilates; area=Quezon City|Makati; tag is a controlled value from the catalog. Invalid, unsupported or duplicate filters return 400 INVALID_INPUT. No matches returns 200 with offerings=[]. This does not change /api/slots or create booking allocations. See studio-discovery.md for official sources and classifications. Fran owns research/API; Kirsten owns discovery styling/UI.

@@ -10,3 +10,5 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 | 2026-10-28 | Fran / M1 | ChatGPT Codex | Check the supplied brief and current repository | Restored this required record and the PR assistance field; recorded the CP0 and feature-branch audit | Fresh checks on main and all three Fran branches; docs/final-audit-2026-10-28.md |
 
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
+
+| 2026-10-29 | Francine de Asis | ChatGPT Codex | Research real studios and ClassPass; separate activity types from tags | Added sourced research listings and a read-only discovery route; retained demo-only transaction inventory | Official-source checks, API filter/validation tests and browser discovery checks on the matching private build |

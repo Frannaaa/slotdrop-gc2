@@ -98,3 +98,7 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 - **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
 Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+
+## Real studio research
+
+Open `/studios.html` for official price/schedule references from five real businesses. These are independent research listings, not confirmed partners or released seats. The full transactional implementation stays in the feature PRs. See [discovery specification](docs/studio-discovery.md).
