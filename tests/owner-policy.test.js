@@ -54,3 +54,13 @@ test('future inventory is not described as bookable before its discovery window'
   assert.equal(salesState(slot,now,96).label,'Bookable');
   assert.equal(salesState({...slot,status:'paused'},now,72).canResume,true);
 });
+
+
+test('invalid owner dates cannot retain a stale automatic booking deadline', async () => {
+  const { sessionDate, suggestedCutoff } = await import('../public/js/owner-policy.js');
+  assert.throws(() => suggestedCutoff('10000-11-01T15:00', 180), /valid date/);
+  assert.throws(() => sessionDate('2026-02-30T15:00'), /valid date/);
+  assert.throws(() => sessionDate('0001-01-01T07:59'), /valid date/);
+  assert.throws(() => suggestedCutoff('0001-01-01T08:00', 30), /later session/);
+  assert.equal(suggestedCutoff('2026-11-01T15:00', 180).toISOString(), '2026-11-01T04:00:00.000Z');
+});

@@ -122,3 +122,6 @@
   .owner-page .session .actions button { flex: 1 1 120px; }
 }
 @media (prefers-reduced-motion: reduce) { .owner-page * { scroll-behavior: auto !important; } }
+
+/* Keep the workspace full width when shared customer panels gain a width limit. */
+.owner-page .panel { max-width: none; margin: 0; }

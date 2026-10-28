@@ -1,5 +1,7 @@
 import {
   cutoffGuidance,
+  sessionDate,
+  suggestedCutoff,
   cutoffRequestValue,
   changedOfferFields,
   salesState,
@@ -92,13 +94,16 @@ function defaultCutoff() {
     service.defaultBookingCutoffMinutes,
     manualCutoff || editing !== null,
   );
-  if (editing || manualCutoff || !$("starts").value) return;
-  $("cutoff").value = localTime(
-    new Date(
-      Date.parse($("starts").value + "+08:00") -
-        service.defaultBookingCutoffMinutes * 60000,
-    ),
-  );
+  if (editing || manualCutoff) return;
+  $("cutoff").value = "";
+  if (!$("starts").value) return;
+  try {
+    $("cutoff").value = localTime(suggestedCutoff(
+      $("starts").value, service.defaultBookingCutoffMinutes,
+    ));
+  } catch (error) {
+    $("cutoff-hint").textContent = error.message;
+  }
 }
 function reset() {
   editingCutoff = null;
@@ -409,7 +414,7 @@ form.addEventListener("submit", async (event) => {
     else
       Object.assign(body, {
         serviceId: Number($("service").value),
-        startsAt: new Date($("starts").value + "+08:00").toISOString(),
+        startsAt: sessionDate($("starts").value).toISOString(),
         originalPriceCentavos: cents(field("originalPriceCentavos").value),
         runsAsScheduled: field("runsAsScheduled").checked,
       });

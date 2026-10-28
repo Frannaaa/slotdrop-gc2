@@ -1,3 +1,17 @@
+export function sessionDate(value) {
+  const date = new Date(value + "+08:00");
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ||
+      !Number.isFinite(date.getTime()) || date.getUTCFullYear() < 1 || date.getUTCFullYear() > 9999 ||
+      new Date(date.getTime() + 8 * 3600000).toISOString().slice(0, 16) !== value) {
+    throw new Error("Enter a valid date from 0001 to 9999 in Philippine time.");
+  }
+  return date;
+}
+export function suggestedCutoff(value, minutes) {
+  const date = new Date(sessionDate(value).getTime() - minutes * 60000);
+  if (date.getUTCFullYear() < 1) throw new Error("Choose a later session start for this activity's booking lead time.");
+  return date;
+}
 export function cutoffGuidance(minutes, override) {
   return (
     `Activity default: ${minutes} minutes before start. ` +
@@ -12,7 +26,7 @@ export function cutoffRequestValue(input, original) {
     : null;
   return original && input === displayed
     ? original
-    : new Date(input + "+08:00").toISOString();
+    : sessionDate(input).toISOString();
 }
 export function changedOfferFields(values, original) {
   return Object.fromEntries(
