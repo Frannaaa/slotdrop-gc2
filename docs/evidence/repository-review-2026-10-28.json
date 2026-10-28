@@ -80,7 +80,6 @@
   ],
   "pending": [
     "Reviewed CP0 merge and actual collaborator access/assignments.",
-    "Detailed main protection verification.",
     "Customer booking integration and public API/database deployment.",
     "Deployed challenge/baseline evidence, personal predictions/recording and Git contribution requirements."
   ],
@@ -113,11 +112,20 @@
     "sqlGroupsPerBranch": 8,
     "syntax": "Passed on all four branches",
     "runtime": "Node 24.22.1; PGlite",
-    "newCI": "Pending commit publication",
+    "newCI": {
+      "commit": "95bd31e6dbff39d14e643eaea45f74d061a9400a",
+      "conclusion": "success",
+      "url": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40611964812"
+    },
     "regressionBeforeFix": {
       "inactiveActivityDetail": "serviceActive missing",
       "nullCharacterSearch": "500 rather than 400"
     },
     "clockRegression": "Controlled clock and lightweight DOM; checks deadline/window transitions, visibility recovery, retained cards/focus/draft, no data fetch."
+  },
+  "latestVerifiedCI": {
+    "commit": "8af3c2a201d3c48d36d0ec9b32f85b5c99cd093a",
+    "conclusion": "success",
+    "url": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40615055293"
   }
 }

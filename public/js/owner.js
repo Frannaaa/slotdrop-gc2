@@ -65,7 +65,7 @@ function preview() {
   try {
     if (!Number.isInteger(catalog.commissionBasisPoints)) {
       $("net-preview").textContent =
-        "Load the workspace to preview provider proceeds.";
+        "Load the workspace to estimate earnings per seat.";
       return;
     }
     const standard = cents(field("offerPriceCentavos").value),
@@ -73,14 +73,14 @@ function preview() {
     const net = (price) =>
       price - Math.round((price * catalog.commissionBasisPoints) / 10000);
     $("net-preview").textContent =
-      `Modeled ${catalog.commissionBasisPoints / 100}% fee. Standard proceeds: ${money(net(standard))} per seat.` +
+      `Estimated earnings after the ${catalog.commissionBasisPoints / 100}% fee: ${money(net(standard))} per seat.` +
       (buddy === null
         ? " Buddy pricing disabled."
-        : ` Buddy proceeds: ${money(net(buddy))} per seat on 2+ seats.`) +
-      " Before service costs; no real funds collected.";
+        : ` With buddy pricing: ${money(net(buddy))} per seat for a booking of 2+.`) +
+      " Before materials and other costs. Payments are simulated.";
   } catch {
     $("net-preview").textContent =
-      "Enter valid offer prices to preview modeled proceeds.";
+      "Enter valid offer prices to estimate earnings per seat.";
   }
 }
 function defaultCutoff() {
@@ -169,7 +169,7 @@ function renderMetrics(metrics) {
     [
       "Platform revenue",
       money(metrics.platformRevenueCentavos),
-      "Modeled saved commission",
+      "Commission from confirmed bookings",
     ],
     [
       "Average booking",

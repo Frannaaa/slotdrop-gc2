@@ -13,7 +13,6 @@ Give each screen, route and revenue feature an assigned Issue. Change an agreed 
 - Bring in the latest main with `git pull --no-edit origin main`.
 - Run the checks that cover your change and record the results in the PR.
 - Check the affected loading, empty and error states, plus the phone layout.
-- Fill in the assistance field and update AI-USAGE.md.
 - Make sure .env, credentials, node_modules and local demo data are not staged.
 - Be ready to explain the code you submit.
 
