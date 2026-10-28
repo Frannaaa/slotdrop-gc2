@@ -54,7 +54,7 @@ Current commission inventory, checked October 28 without changing the rate:
 |---|---|---|
 | server/config/business.js:1 | COMMISSION_BASIS_POINTS = 1000 | Yes |
 | server/repositories/owner.js:3 and :8 | Import and return the setting | No |
-| public/js/owner.js:88–90 | Preview provider proceeds using the API rate | No |
+| public/js/owner.js:73–79 (preview()) | Preview provider proceeds using the API rate | No |
 
 Saved receipt rates are historical. SQL checks each saved rate and its arithmetic; it does not set the active commission. Test fixtures and worked examples use fixed rates for specific cases. After the booking service is integrated, verify that it imports the same setting and update this inventory.
 
