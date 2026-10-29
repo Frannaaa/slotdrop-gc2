@@ -1,9 +1,15 @@
+// Group assignment: Fran. See docs/ownership-and-execution.md.
 import 'dotenv/config';
 import { createApp } from './app.js';
+import { migrateDatabase } from './repositories/migrations.js';
 import { postgresDatabase } from './repositories/database.js';
 const port = Number(process.env.PORT || 3000);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be 1-65535');
 const db = postgresDatabase();
+if (process.env.DATABASE_URL) {
+  try { await migrateDatabase(db); }
+  catch { console.error('Database upgrade failed. Check database availability and schema; no reseed was attempted.'); await db.close(); process.exit(1); }
+}
 const server = createApp({ db }).listen(port, () => console.log('SlotDrop: http://localhost:' + port));
 let stopping = false;
 for (const signal of ['SIGINT','SIGTERM']) process.on(signal, () => {
