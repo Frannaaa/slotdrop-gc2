@@ -16,7 +16,7 @@ Cards show studio, area/city, start, duration, seats left, exact deadline, selec
 
 ## Code handoff
 
-Fran: db/schema.sql, db/seed.sql, db/migrations/001_activity_attributes.sql, server/repositories/migrations.js, server/repositories/slots.js, server/services/discovery.js and server/index.js.
+Fran: public/js/customer-common.js (shared request, money/date/availability/card helpers), db/schema.sql, db/seed.sql, db/migrations/001_activity_attributes.sql, server/repositories/migrations.js, server/repositories/slots.js, server/services/discovery.js and server/index.js.
 Cholo: public/index.html and public/js/home.js, leading to Explore and featured bookable sessions.
 Kirsten: public/browse.html, public/js/browse.js, public/css/style.css; coordinate the shared card renderer in public/js/customer-common.js.
 Kat: public/js/detail.js for the added stored attributes, then Selection using Janelle's quote.
