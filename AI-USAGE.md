@@ -10,3 +10,5 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 | 2026-10-28 | Fran / M1 | ChatGPT Codex | Check the supplied brief and current repository | Restored this required record and the PR assistance field; recorded the CP0 and feature-branch audit | Fresh checks on main and all three Fran branches; docs/final-audit-2026-10-28.md |
 
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
+
+| 2026-10-29 | Fran / M1 | ChatGPT Codex | Review the current PRs and unblock Home | Extracted the existing shared customer helpers into an independent PR, with API-compatibility and static-serving regressions | Syntax and eight tests; staged APIs tested separately; teammate review still required |
