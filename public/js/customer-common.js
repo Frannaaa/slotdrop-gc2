@@ -28,6 +28,15 @@ export function positive(value, max = Number.MAX_SAFE_INTEGER) {
     throw new Error("Open a valid session and choose 1 to 100 seats.");
   return Number(value);
 }
+export function pageParameters(search, allowed) {
+  const params = new URLSearchParams(search), seen = new Set();
+  for (const [key, value] of params) {
+    if (!allowed.includes(key) || seen.has(key) || value === "")
+      throw new Error("Open a valid link with each field appearing once.");
+    seen.add(key);
+  }
+  return params;
+}
 export async function request(path, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
