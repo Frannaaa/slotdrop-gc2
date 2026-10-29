@@ -6,7 +6,7 @@ const types = ['', 'pottery', 'painting', 'pilates'];
 const tags = ['', 'handbuilding', 'wheel-throwing', 'painting-included', 'group-class'];
 const areaOptions = ['', 'Quezon City', 'Makati'];
 const labels = {pottery:'Pottery',painting:'Painting',pilates:'Pilates',beginner:'Beginner friendly',handbuilding:'Handbuilding','wheel-throwing':'Wheel-throwing','painting-included':'Painting included','group-class':'Group class'};
-let generation = 0, restoredError = '';
+let generation = 0, restoredError = '', appliedFilters = {};
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = value => new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0}).format(value);
 function safeUrl(value) { const url = new URL(value); if (url.protocol !== 'https:') throw new Error('Invalid studio source.'); return escape(url.href); }
@@ -32,6 +32,7 @@ function restore() {
   if ((key === 'type' && !types.includes(value)) || (key === 'tag' && !tags.includes(value)) || (key === 'area' && !areaOptions.includes(value))) continue;
   form.elements.namedItem(key).value = key === 'q' ? value.slice(0,100) : value;
  }
+ appliedFilters = filters();
  pressed();
 }
 function matches(item, f) {
@@ -44,7 +45,9 @@ function card(item) {
  return `<article class="studio-card" data-type="${escape(item.activityType)}"><div class="studio-card-band"><span>${escape(labels[item.activityType])}</span><span>Studio reference</span></div><div class="studio-card-body"><h3>${escape(item.business)}</h3><p class="studio-branch">${escape(item.branch)}</p><p class="studio-activity">${escape(item.activity)}</p><p class="studio-price">${money(item.pricePhp)} <small>/ person</small></p><p class="studio-price-note">${escape(item.priceNote)}</p><div class="studio-tags">${item.tags.map(tag=>`<span class="studio-tag">${escape(labels[tag] || tag)}</span>`).join('')}</div><p class="studio-schedule"><strong>When to go</strong><br>${escape(item.schedule)}</p><details><summary>Location &amp; source details</summary><p>${escape(item.address)}</p><p>${escape(duration)}</p><p>Price and schedule checked ${escape(item.checkedAt)}. No SlotDrop seat allocation or booking cutoff verified.</p><a href="${scheduleSource}" target="_blank" rel="noopener noreferrer">Schedule source ↗</a></details><div class="studio-card-links"><a class="button" href="${source}" target="_blank" rel="noopener noreferrer">Check studio dates ↗</a></div></div></article>`;
 }
 async function load(updateUrl = false) {
- const current = ++generation, f = filters();
+ const current = ++generation;
+ if (updateUrl) appliedFilters = filters();
+ const f = { ...appliedFilters };
  if (updateUrl) {restoredError = '';const params = new URLSearchParams(Object.entries(f).filter(([,value])=>value)); const next = location.pathname + (params.size ? '?' + params : ''); if (next !== location.pathname + location.search) history.pushState(null,'',next);}
  pressed(); results.replaceChildren(); status.textContent = 'Loading studio listings…'; status.dataset.error = 'false';
  if (restoredError) {status.textContent = restoredError;status.dataset.error = 'true';return;}
