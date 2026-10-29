@@ -6,7 +6,7 @@ const types = ['', 'pottery', 'painting', 'pilates'];
 const tags = ['', 'handbuilding', 'wheel-throwing', 'painting-included', 'group-class'];
 const areaOptions = ['', 'Quezon City', 'Makati'];
 const labels = {pottery:'Pottery',painting:'Painting',pilates:'Pilates',beginner:'Beginner friendly',handbuilding:'Handbuilding','wheel-throwing':'Wheel-throwing','painting-included':'Painting included','group-class':'Group class'};
-let generation = 0;
+let generation = 0, restoredError = '';
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = value => new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0}).format(value);
 function safeUrl(value) { const url = new URL(value); if (url.protocol !== 'https:') throw new Error('Invalid studio source.'); return escape(url.href); }
@@ -14,6 +14,18 @@ function filters() { return Object.fromEntries(['q','type','area','tag'].map(key
 function pressed() { form.querySelectorAll('[data-type]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.type === form.elements.namedItem('type').value))); }
 function restore() {
  const params = new URLSearchParams(location.search);
+ restoredError = '';
+ const seen = new Set();
+ for (const [key,value] of params) {
+  if (!['q','type','area','tag'].includes(key) || seen.has(key) ||
+      (key === 'type' && !types.includes(value)) ||
+      (key === 'tag' && !tags.includes(value)) ||
+      (key === 'area' && !areaOptions.includes(value)) ||
+      (key === 'q' && (value.length > 100 || value.includes('\u0000')))) {
+   restoredError = 'This studio filter link is invalid. Adjust the filters and choose Find studios, or clear filters.';
+  }
+  seen.add(key);
+ }
  form.reset();
  for (const key of ['q','type','area','tag']) {
   const value = params.get(key) || '';
@@ -33,8 +45,9 @@ function card(item) {
 }
 async function load(updateUrl = false) {
  const current = ++generation, f = filters();
- if (updateUrl) {const params = new URLSearchParams(Object.entries(f).filter(([,value])=>value)); const next = location.pathname + (params.size ? '?' + params : ''); if (next !== location.pathname + location.search) history.pushState(null,'',next);}
+ if (updateUrl) {restoredError = '';const params = new URLSearchParams(Object.entries(f).filter(([,value])=>value)); const next = location.pathname + (params.size ? '?' + params : ''); if (next !== location.pathname + location.search) history.pushState(null,'',next);}
  pressed(); results.replaceChildren(); status.textContent = 'Loading studio listings…'; status.dataset.error = 'false';
+ if (restoredError) {status.textContent = restoredError;status.dataset.error = 'true';return;}
  const controller = new AbortController(), timeout = setTimeout(()=>controller.abort(),10000);
  try {
   const response = await fetch(document.body.dataset.catalogUrl,{signal:controller.signal});
