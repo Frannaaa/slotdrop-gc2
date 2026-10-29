@@ -12,3 +12,5 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
 
 | 2026-10-29 | Francine de Asis | ChatGPT Codex | Research real studios and ClassPass; separate activity types from tags | Added sourced research listings and a read-only discovery route; retained demo-only transaction inventory | Official-source checks, API filter/validation tests and browser discovery checks on the matching private build |
+
+| 2026-10-29 | Francine de Asis | ChatGPT Codex | Refocus discovery after competitor critique | Moved research to a supporting role and made its separate reference-demo destination explicit | Directory source/links reviewed; matching private browser research regressions passed |

@@ -4,7 +4,7 @@ Checked 28 October 2026. Source prices are public research, not negotiated SlotD
 
 ## Navigation and classification
 
-Use one primary activity type per offering: **Pottery, Painting or Pilates** for the current researched assortment. “All activities” removes the type filter. These choices are mutually exclusive by primary deliverable; they cover this launch assortment, not every future leisure activity. A class that makes and paints a ceramic mug stays Pottery, with Painting included as a tag. Ceramic painting is Pottery; canvas painting is Painting. Expand the controlled type list when a distinct activity is actually added.
+For stored reference classification, use one primary activity type per offering: **Pottery, Painting or Pilates** for the current researched assortment. “All activities” removes the type filter. These stored types cover this researched assortment, not every future leisure activity. They do not require mutually exclusive search results or a mandatory top-level tab bar. Search can find secondary techniques and inclusions while preserving one offering ID. A class that makes and paints a ceramic mug stays Pottery, with Painting included as a tag. Ceramic painting is Pottery; canvas painting is Painting. Expand the controlled type list when a distinct activity is actually added.
 
 Broad domains remain Creative and Movement (`creative` / `active` in the booking API). Do not make Workshop, Beginner, Date night or Weekend sibling activity types. Workshop is a format; beginner is a skill attribute; date night is an editorial use case; weekend is a date filter.
 
@@ -39,3 +39,11 @@ Official price and schedule URLs are stored per offering in the JSON and shown o
 Start provider outreach with recurring pottery calendars (AMT’s published weekly pattern and Bumi’s weekly releases), plus repeatable movement sessions if timetable, provider allocation and cutoffs are confirmed. Painting adds a lower published price point, but one dated session is not evidence of weekly supply. Workshops may be occasional purchases; measure repeat booking across different activities rather than assuming the same customer buys pottery every week. These are planning recommendations, not validated demand or partner commitments.
 
 Before a real offering enters booking inventory, confirm the branch, dated start/end, released seats, final per-person price, cutoff, cancellation terms and settlement arrangement with that provider. Store the source and approval date. Until then the only action is Check studio dates, linking to the official business.
+
+## Verification for this pass
+
+Private build: 33 API/unit tests passed locally, with one PostgreSQL-only lock test reserved for CI; eight SQL scenario groups passed. The complete customer booking/receipt/owner flow passed with no page or console errors, plus 18 customer recovery/state scenarios. Four discovery/reset browser scenarios passed, including empty/error/retry, shared URLs, browser Back, disjoint primary types, official source links and layouts at 320, 390, 768 and 1280px. Fixed the stale reset request in Browse and the researched directory. Prototype classification also no longer includes ceramic painting under Painting. Local automated evidence uses disposable data and is not proof of a production transaction or real studio allocation.
+
+## Current priority
+
+In the complete implementation, Home and the main navigation lead to bookable released sessions in /browse.html. This independently reviewable research branch links to the separate reference booking demo while the group frontend is built. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See released-seat-discovery.md for the current product and UI contract.

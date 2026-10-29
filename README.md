@@ -102,3 +102,5 @@ Fran still needs approved code merges, two reviews of teammates' PRs, public dep
 ## Real studio research
 
 Open `/studios.html` for official price/schedule references from five real businesses. These are independent research listings, not confirmed partners or released seats. The full transactional implementation stays in the feature PRs. See [discovery specification](docs/studio-discovery.md).
+
+The studio directory is supporting research. The main product is in-app released-seat booking; the additional persisted filters/metadata are proposed in PR #34 after #27–29. Research links and reference-demo links do not replace the official group booking flow.
