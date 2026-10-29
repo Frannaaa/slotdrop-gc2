@@ -206,6 +206,6 @@
   "classpass": {
     "sourceUrl": "https://help.classpass.com/hc/en-us/articles/204312229-How-do-I-search-for-classes",
     "observed": "Separate broad business categories (All/Fitness/Wellness/Beauty), search for activity/experience/studio, and filters for activity, location/distance, credits, skill and amenities. Classes results contain open spots; studio search shows a studio schedule.",
-    "recommendation": "Keep broad Creative/Movement tabs; one primary activity type per offering (Pottery, Painting, Pilates initially), independent date/area/party-size filters, and a small controlled multi-tag vocabulary. Do not make Beginner/Date night/Weekend/Workshop sibling categories. No public free-form user tag creation for GC2; owner/provider selects existing verified tags, admins maintain vocabulary. A pottery+painting class stays primary Pottery with painting-included as a tag."
+    "recommendation": "Keep released-seat Explore primary with time, area and party size first. Use optional activity shortcuts and independent search/attributes; one stored primary activity type supports reporting, while secondary matches resolve to the same session ID and seat pool. The real-studio directory supports research, has no verified seat/date filters, and does not replace the in-app booking flow. No public free-form tag creation in GC2."
   }
 }

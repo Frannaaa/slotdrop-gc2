@@ -46,4 +46,4 @@ Private build: 33 API/unit tests passed locally, with one PostgreSQL-only lock t
 
 ## Current priority
 
-In the complete implementation, Home and the main navigation lead to bookable released sessions in /browse.html. This independently reviewable research branch links to the separate reference booking demo while the group frontend is built. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See released-seat-discovery.md for the current product and UI contract.
+In the complete implementation, Home and the main navigation lead to bookable released sessions in /browse.html. This independently reviewable research branch links to the separate reference booking demo while the group frontend is built. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See the product and UI contract proposed in https://github.com/Frannaaa/slotdrop-gc2/pull/34 .
