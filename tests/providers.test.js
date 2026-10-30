@@ -43,3 +43,10 @@ test('studio applications reject malformed fields, unsupported claims and invali
   assert.equal((await f.db.query('SELECT COUNT(*)::int AS n FROM provider_applications')).rows[0].n,0);
  }finally{await f.close();}
 });
+
+test('studio application prefill uses the business site rather than an activity purchase URL',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../public/js/provider-apply.js',import.meta.url),'utf8');
+ assert.match(source,/source\.origin\s*\+\s*'\/'/);
+ assert.doesNotMatch(source,/website:studio\.activities\[0\]\?\.sourceUrl/);
+});
