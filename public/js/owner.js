@@ -365,7 +365,7 @@ function renderBookings(rows) {
   $("bookings").append(wrap);
 }
 async function load() {
-  if (busy) return;
+  if (busy) return false;
   loaded = false;
   setBusy(true);
   message("page-message", "Loading your workspace…");
@@ -398,6 +398,7 @@ async function load() {
     preview();
     loaded = true;
     message("page-message", "");
+    return true;
   } catch (error) {
     salesViews = [];
     $("inventory-warning").textContent = "";
@@ -406,6 +407,7 @@ async function load() {
     $("sessions").textContent =
       "Sessions could not be loaded. Use Refresh data to retry.";
     $("bookings").textContent = "Bookings could not be loaded.";
+    return false;
   } finally {
     setBusy(false);
   }
@@ -443,8 +445,10 @@ form.addEventListener("submit", async (event) => {
     });
     setBusy(false);
     reset();
-    await load();
-    message("form-message", "Session saved.");
+    const refreshed = await load();
+    message("form-message", refreshed
+      ? "Session saved."
+      : "Session saved, but the workspace could not refresh. Use Refresh data to verify it; do not submit the offer again.", !refreshed);
   } catch (error) {
     message("form-message", error.message, true);
   } finally {
