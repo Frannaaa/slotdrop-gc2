@@ -64,3 +64,17 @@ test('invalid owner dates cannot retain a stale automatic booking deadline', asy
   assert.throws(() => suggestedCutoff('0001-01-01T08:00', 30), /later session/);
   assert.equal(suggestedCutoff('2026-11-01T15:00', 180).toISOString(), '2026-11-01T04:00:00.000Z');
 });
+
+test('Owner chooses active studios after deactivating legacy fixtures', async () => {
+  const { preferredServiceId } = await import('../public/js/owner-policy.js');
+  const services = [
+    {id:1,name:'Retired fixture',active:false},
+    {id:2,name:'Real source-backed studio',active:true},
+    {id:3,name:'Another active studio',active:true},
+  ];
+  assert.equal(preferredServiceId(services,'',null),'2');
+  assert.equal(preferredServiceId(services,'1',null),'2');
+  assert.equal(preferredServiceId(services,'3',null),'3');
+  assert.equal(preferredServiceId(services,'1',1),'1'); // historical editor is still readable
+  assert.equal(preferredServiceId(services.map(service=>({...service,active:false})),'',null),'');
+});
