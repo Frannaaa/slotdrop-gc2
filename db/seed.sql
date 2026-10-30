@@ -1,3 +1,4 @@
+-- Group assignment: Fran. See docs/ownership-and-execution.md.
 -- Synthetic, proposed demo inventory. No named real provider is a partner.
 -- Run only on a NEW database after schema.sql. Existing data is preserved on refusal.
 BEGIN;
@@ -17,6 +18,11 @@ INSERT INTO services(id,provider_id,name,category,duration_minutes,recurrence_no
  (2,1,'Ceramic Painting for Beginners','creative',90,'Fictional demo: recurring weekly sessions',120),
  (3,2,'Beginner Canvas Painting','creative',120,'Fictional demo: recurring weekly sessions',60),
  (4,3,'Beginner Dance Drop-in','active',60,'Fictional demo: recurring weekly sessions',30);
+-- Explicit sample attributes, not researched real-studio promises.
+UPDATE services SET activity_type='pottery', technique='handbuilding', inclusions=ARRAY['materials','painting','firing'], preparation_note='Demo terms: make and decorate a mug. Firing is included; collection timing would be confirmed by the provider.' WHERE id=1;
+UPDATE services SET activity_type='pottery', technique='ceramic-decoration', inclusions=ARRAY['materials','painting','firing'], preparation_note='Demo terms: decorate a ceramic piece. Firing is included; collection timing would be confirmed by the provider.' WHERE id=2;
+UPDATE services SET activity_type='painting', inclusions=ARRAY['materials'], preparation_note='Demo terms: canvas and painting materials included. Wear clothes that can get paint on them.' WHERE id=3;
+UPDATE services SET activity_type='dance', preparation_note='Demo terms: wear comfortable clothing and shoes; bring your own water.' WHERE id=4;
 -- Activity lead times are fictional examples (180/120/60/30 minutes), not real studio policies.
 -- Schedule fictional sessions at realistic Philippine daytime/evening hours.
 -- Next-day base keeps every fresh seed inside 72 hours, with future cutoffs.
