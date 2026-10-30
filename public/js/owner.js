@@ -383,7 +383,9 @@ async function load() {
     renderMetrics(metrics);
     renderSessions();
     renderBookings(bookings);
-    defaultCutoff();
+    // Keep an existing unsaved deadline when refreshing the Owner catalog.
+    // On first load the deadline is blank and must use the active activity default.
+    if (!$("cutoff").value) defaultCutoff();
     preview();
     loaded = true;
     message("page-message", "");
