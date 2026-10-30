@@ -78,3 +78,12 @@ test('Owner chooses active studios after deactivating legacy fixtures', async ()
   assert.equal(preferredServiceId(services,'1',1),'1'); // historical editor is still readable
   assert.equal(preferredServiceId(services.map(service=>({...service,active:false})),'',null),'');
 });
+
+test('Postman active-studio setup follows the current Owner catalog', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const collection = JSON.parse(await readFile(new URL('../docs/SlotDrop-Fran.postman_collection.json', import.meta.url),'utf8'));
+  const owner = collection.item.flatMap(group => group.item||[]).find(item => item.name==='Owner catalog includes managed inventory');
+  const script = owner.event.find(event => event.listen==='test').script.exec.join('\n');
+  assert.match(script,/services\.find\(service=>service\.active===true\)/);
+  assert.match(script,/collectionVariables\.set\('serviceId'/);
+});
