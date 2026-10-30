@@ -104,7 +104,7 @@ Money convention: store whole centavos. Fee per seat = round(unit price × commi
 | platformRevenueCentavos | Sum of stored confirmed booking fees. Example: ₱513. | Use as gross commission, then compare with acquisition/support costs; it is not profit or gross booking value. |
 | averageOrderValueCentavos | Mean full confirmed booking total. Example: ₱5,130. | Compare single and shared order value before expanding buddy offers; order value alone says nothing about margin. |
 | topSellingService | Most confirmed seats by service. Example: Laro Mug-making + painting, 2 seats. | Consider similar supply only after real bookings; seeded examples do not establish popularity. |
-| nearlyFullSessionCount | Eligible open sessions with ≤25% of released seats remaining, including sold-out. Example: 2/4 remain → 0. | Ask a provider whether more allocation is actually available. Do not interpret released allocation as whole-class occupancy. |
+| nearlyFullSessionCount | Eligible open sessions with 1–25% of released seats remaining; excludes sold-out. Example: 2/4 remain → 0. | Ask a provider whether more allocation is actually available. Do not interpret released allocation as whole-class occupancy. |
 
 Reconciliation check: add a second booking for one standard seat in the same four-seat session. Expected totals are 2 bookings, ₱783 platform fees, ₱3,915 average order value, 3 seats for the top service and 1 nearly-full session because 1/4 remains. Paused/expired sessions leave the nearly-full set; their saved confirmed receipts still contribute to booking totals. No gross-sales or seats-sold KPI card is currently implemented separately.
 
