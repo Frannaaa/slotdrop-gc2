@@ -5,6 +5,8 @@ import {
   cutoffRequestValue,
   changedOfferFields,
   salesState,
+  preferredServiceId,
+  demoInventoryStatus,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -111,8 +113,10 @@ function reset() {
   editing = null;
   manualCutoff = false;
   form.reset();
+  // form.reset() can reselect a retired fixture after the catalog migration.
+  $("service").value = preferredServiceId(catalog.services, $("service").value);
   $("editor-title").textContent = "Create a session";
-  $("save").textContent = "Publish session offer";
+  $("save").textContent = "Save demo session offer";
   $("status-field").hidden = true;
   for (const name of ["serviceId", "startsAt", "originalPriceCentavos"])
     field(name).disabled = false;
@@ -172,9 +176,9 @@ function renderMetrics(metrics) {
       "Transactions, not seats",
     ],
     [
-      "Platform revenue",
+      "Modeled platform revenue",
       money(metrics.platformRevenueCentavos),
-      "Commission from confirmed bookings",
+      "Simulated commission from saved bookings",
     ],
     [
       "Average booking",
@@ -189,9 +193,9 @@ function renderMetrics(metrics) {
         : "Confirmed seats",
     ],
     [
-      "Nearly full sessions",
+      "Almost-full sessions",
       String(metrics.nearlyFullSessionCount),
-      "25% or less allocation left, including sold out",
+      "1–25% of allocation left; excludes sold out",
     ],
   ]) {
     const card = element("article", undefined, "metric");
@@ -203,9 +207,16 @@ function renderMetrics(metrics) {
     $("metrics").append(card);
   }
 }
+function refreshDemoReadiness(now = Date.now()) {
+  const info = demoInventoryStatus(catalog.slots, catalog.services, now, catalog.discoveryHours);
+  const warning = $("inventory-warning");
+  if (warning.textContent !== info.message) warning.textContent = info.message;
+  warning.dataset.state = info.state;
+}
 function refreshSalesStates() {
   if (!loaded) return;
   const now = Date.now();
+  refreshDemoReadiness(now);
   for (const { slot, tag, help, toggle, editButton } of salesViews) {
     const state = salesState(slot, now, catalog.discoveryHours);
     tag.textContent = state.label;
@@ -354,7 +365,7 @@ function renderBookings(rows) {
   $("bookings").append(wrap);
 }
 async function load() {
-  if (busy) return;
+  if (busy) return false;
   loaded = false;
   setBusy(true);
   message("page-message", "Loading your workspace…");
@@ -376,21 +387,27 @@ async function load() {
       option.disabled = !service.active;
       $("service").append(option);
     }
-    if (selected) $("service").value = selected;
+    $("service").value = preferredServiceId(catalog.services, selected, editing);
     renderMetrics(metrics);
     renderSessions();
     renderBookings(bookings);
-    defaultCutoff();
+    refreshDemoReadiness();
+    // Keep an existing unsaved deadline when refreshing the Owner catalog.
+    // On first load the deadline is blank and must use the active activity default.
+    if (!$("cutoff").value) defaultCutoff();
     preview();
     loaded = true;
     message("page-message", "");
+    return true;
   } catch (error) {
     salesViews = [];
+    $("inventory-warning").textContent = "";
     message("page-message", error.message, true);
     $("metrics").replaceChildren();
     $("sessions").textContent =
       "Sessions could not be loaded. Use Refresh data to retry.";
     $("bookings").textContent = "Bookings could not be loaded.";
+    return false;
   } finally {
     setBusy(false);
   }
@@ -428,8 +445,10 @@ form.addEventListener("submit", async (event) => {
     });
     setBusy(false);
     reset();
-    await load();
-    message("form-message", "Session saved.");
+    const refreshed = await load();
+    message("form-message", refreshed
+      ? "Session saved."
+      : "Session saved, but the workspace could not refresh. Use Refresh data to verify it; do not submit the offer again.", !refreshed);
   } catch (error) {
     message("form-message", error.message, true);
   } finally {

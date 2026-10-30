@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fixture } from './helpers.js';
 import { insertDemoReceipt } from './receipts.js';
-import { closeDatabase } from '../server/lib/lifecycle.js';
+import { closeDatabase, validateProductionDatabase } from '../server/lib/lifecycle.js';
 import { dateRange } from '../server/services/discovery.js';
 
 test('tomorrow and blank search filters work through the HTTP/SQL boundary', async () => {
@@ -61,4 +61,12 @@ test('database shutdown rejection is handled without logging its sensitive messa
   assert.equal(closed,false);
   assert.deepEqual(messages,[['Database shutdown failed:','ECONNRESET']]);
   assert.equal(await closeDatabase({close:()=>undefined}),true);
+});
+
+test('production refuses to start without database configuration but local demos remain supported', () => {
+  assert.throws(() => validateProductionDatabase({ NODE_ENV:'production' }), /DATABASE_URL is required/);
+  assert.throws(() => validateProductionDatabase({ NODE_ENV:'production',DATABASE_URL:'  ' }), /DATABASE_URL is required/);
+  assert.doesNotThrow(() => validateProductionDatabase({ NODE_ENV:'development' }));
+  assert.doesNotThrow(() => validateProductionDatabase({ NODE_ENV:'test' }));
+  assert.doesNotThrow(() => validateProductionDatabase({ NODE_ENV:'production',DATABASE_URL:'postgresql://redacted.invalid/db' }));
 });

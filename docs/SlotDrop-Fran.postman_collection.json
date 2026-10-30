@@ -2,7 +2,7 @@
   "info": {
     "name": "SlotDrop: Fran's APIs",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Checks the implemented session and owner APIs using fictional data. Set baseUrl to the target app and serviceId to an active seeded activity. Quote, booking creation and receipt-by-ID are still to be integrated. Deployed challenge screenshots are recorded separately."
+    "description": "Checks Fran's session and Owner APIs using course-demo data. Run the Owner catalog request before creating offers: it automatically selects an active seeded activity (including after legacy fixtures are retired). No studio partnerships or real payments are implied. Janelle's quote, booking creation and receipt-by-ID routes must be tested separately after integration. Record deployed Challenge 1 screenshots separately."
   },
   "variable": [
     {
@@ -207,7 +207,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const services=pm.response.code===200?(pm.response.json().services||[]):[];",
+                  "const firstActive=services.find(service=>service.active===true);",
+                  "pm.test('An active demo activity is available',()=>pm.expect(firstActive).to.exist);",
+                  "if(firstActive)pm.collectionVariables.set('serviceId',String(firstActive.id));"
                 ]
               }
             }

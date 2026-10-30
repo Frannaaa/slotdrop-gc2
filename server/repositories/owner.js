@@ -29,7 +29,7 @@ export async function ownerMetrics(db, now) {
       (SELECT json_build_object('serviceId',id,'serviceName',name,'seatsSold',seats) FROM rankings) AS top,
       (SELECT COUNT(*) FROM slots sl JOIN services s ON s.id=sl.service_id
        WHERE s.active AND sl.status='open' AND sl.runs_as_scheduled AND sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1
-       AND sl.capacity-COALESCE((SELECT SUM(quantity) FROM confirmed WHERE slot_id=sl.id),0) <= sl.capacity*0.25) AS nearly_full`,
+       AND sl.capacity-COALESCE((SELECT SUM(quantity) FROM confirmed WHERE slot_id=sl.id),0) BETWEEN 1 AND sl.capacity*0.25) AS nearly_full`,
     [now,new Date(now.getTime()+DISCOVERY_HOURS*3600000)]);
   return {bookingCount:safeNumber(row.count),platformRevenueCentavos:safeNumber(row.revenue),averageOrderValueCentavos:safeNumber(row.average),
     topSellingService:row.top ? {...row.top,serviceId:safeNumber(row.top.serviceId),seatsSold:safeNumber(row.top.seatsSold)} : null,
