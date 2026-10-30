@@ -4,6 +4,7 @@ import healthRouter from './routes/health.js';
 import { errorHandler } from './middleware/errors.js';
 import { postgresDatabase } from './repositories/database.js';
 import { slotRouter } from './routes/slots.js';
+import { activityRouter } from './routes/activities.js';
 import { pricingRouter } from './routes/pricing.js';
 import { ownerRouter } from './routes/owner.js';
 
@@ -11,6 +12,7 @@ export function createApp({ db = postgresDatabase(), clock = () => new Date() } 
   const app = express();
   app.use(express.json({ limit: '16kb' }));
   app.use('/api/health', healthRouter);
+  app.use('/api/activities', activityRouter());
   app.use('/api/slots', slotRouter(db, clock));
   app.use('/api/pricing', pricingRouter(db, clock));
   app.use('/api', ownerRouter(db, clock));
