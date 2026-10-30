@@ -66,6 +66,9 @@ export async function editOffer(db, id, body, clock = () => new Date()) {
     const cutoff = body.bookingClosesAt === undefined ? new Date(slot.booking_closes_at) : timestamp(body.bookingClosesAt, 'bookingClosesAt');
     if (cutoff >= new Date(slot.starts_at)) invalid('Booking cutoff must precede the session start.');
     const now = clock();
+    if (new Date(slot.starts_at) <= now) {
+      throw new ApiError(409, 'SESSION_STARTED', 'This session has started. Its offer can no longer be edited.');
+    }
     if (slot.status !== 'open' && status === 'open' && (cutoff <= now || new Date(slot.starts_at) <= now || sold >= capacity || !slot.service_active || !slot.runs_as_scheduled)) {
       throw new ApiError(409, 'SESSION_NOT_BOOKABLE', 'Set a future booking deadline and ensure the activity has available seats before resuming sales.');
     }
