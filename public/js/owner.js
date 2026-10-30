@@ -5,6 +5,7 @@ import {
   cutoffRequestValue,
   changedOfferFields,
   salesState,
+  preferredServiceId,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -111,6 +112,8 @@ function reset() {
   editing = null;
   manualCutoff = false;
   form.reset();
+  // form.reset() can reselect a retired fixture after the catalog migration.
+  $("service").value = preferredServiceId(catalog.services, $("service").value);
   $("editor-title").textContent = "Create a session";
   $("save").textContent = "Save demo session offer";
   $("status-field").hidden = true;
@@ -172,9 +175,9 @@ function renderMetrics(metrics) {
       "Transactions, not seats",
     ],
     [
-      "Platform revenue",
+      "Modeled platform revenue",
       money(metrics.platformRevenueCentavos),
-      "Commission from confirmed bookings",
+      "Simulated commission from saved bookings",
     ],
     [
       "Average booking",
@@ -189,9 +192,9 @@ function renderMetrics(metrics) {
         : "Confirmed seats",
     ],
     [
-      "Nearly full sessions",
+      "Almost-full sessions",
       String(metrics.nearlyFullSessionCount),
-      "25% or less allocation left, including sold out",
+      "1–25% of allocation left; excludes sold out",
     ],
   ]) {
     const card = element("article", undefined, "metric");
@@ -376,11 +379,13 @@ async function load() {
       option.disabled = !service.active;
       $("service").append(option);
     }
-    if (selected) $("service").value = selected;
+    $("service").value = preferredServiceId(catalog.services, selected, editing);
     renderMetrics(metrics);
     renderSessions();
     renderBookings(bookings);
-    defaultCutoff();
+    // Keep an existing unsaved deadline when refreshing the Owner catalog.
+    // On first load the deadline is blank and must use the active activity default.
+    if (!$("cutoff").value) defaultCutoff();
     preview();
     loaded = true;
     message("page-message", "");
