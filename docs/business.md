@@ -1,6 +1,6 @@
 # SlotDrop | Business Case and Real-Studio Research
 
-Fran + Kat • Working draft • Updated 29 October 2026 • Internal review: 30 October
+Fran + Kat • Working draft • Updated 30 October 2026 • Internal review: 30 October
 
 Decision to review: launch a small QC catalog of provider-released seats in sessions already going ahead. Prioritize beginner creative workshops; test repeat supply before widening the catalog. Young professionals are the primary customer hypothesis; students are secondary. This is a business proposal supported by published examples, not completed customer or supplier validation.
 
@@ -36,7 +36,7 @@ Launch geography is a proposed operating boundary, not a distance search feature
 
 Classify the activity once, then describe its attributes. services.category is the broad creative/active grouping; services.activity_type is the primary activity: pottery, painting, pilates, dance or other. Technique and inclusions describe the same service without creating duplicate inventory. Each slot is one dated session with one released-seat counter.
 
-Current customer shortcuts: All, Pottery, Canvas painting and Dance. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
+Current customer shortcuts: All, Pottery and Canvas painting. Unsupported or unverified supply does not get an empty shortcut. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
 
 Example: a mug-making session remains pottery even when painting is included. Store handbuilding as its technique and painting/materials/firing as inclusions. A painting search may find it through its attributes; both paths open the same slot ID and consume the same seats. Do not copy the session into a second category.
 
@@ -56,7 +56,7 @@ Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-inc
 | Save / Confirmation | Fetch by returned booking ID so refresh displays the saved receipt, not a browser-calculated success screen. | GET /api/bookings/:id. Measure from saved confirmed receipts; no event conversion rate is currently collected. |
 | Manage / Owner | Separate forms for releasing/editing seats and tables for saved bookings and five metrics support allocation decisions. | GET /api/owner/catalog, GET /api/bookings, GET /api/metrics; POST/PATCH /api/slots. |
 
-Status on 29 October: public PR #27 supplies session data; #28 adds offer controls; #29 adds owner bookings/metrics; #34 adds activity metadata and discovery refinements. They are staged, unmerged work. Janelle owns quote/save/receipt implementation in the official group build. The private reference has the connected flow, but does not replace teammates’ required code contributions or reviews. Home PR #35 also needs the shared helper and session API before it can load featured sessions.
+Status on 30 October: public PR #27 (database/session API) and #28 (offer controls) are reviewed and merged. #29 has a privacy fix awaiting recheck; #36 (shared helper) and #34 (discovery) have their requested code/doc-link/log-table fixes pushed, awaiting approval. #32 supporting research and this business draft in #37 are separate unapproved work. Janelle owns quote/save/receipt implementation in the official group build. The private reference has the connected flow, but does not replace teammates’ required code contributions or reviews. Home PR #35 also needs the shared helper and session API before it can load featured sessions.
 
 ## 5. Rules, enforcement and customer result
 
@@ -80,17 +80,17 @@ DB constraints support the rules but do not replace transactional booking checks
 
 Feature A — availability: a released allocation, strict deadline and booking-time stock check make a sellable seat reliable. This supports commission income only when a booking is genuinely incremental. Feature B — tiered pricing: optional buddy pricing encourages a shared booking; the server selects the tier and stores its effect. General discounts alone are not being counted as a third custom feature.
 
-Classroom model: fictional session 1 has regular price ₱2,000, standard offer ₱1,600, optional buddy rate ₱1,520 per person and four released seats. Commission is 10% of the accepted amount, deducted from provider proceeds; it is not an extra customer fee. All figures below are before platform operating costs and provider attendance costs.
+Classroom model: Laro Ceramics advertises its mug-making + painting activity at ₱3,000. The course sample uses that reference price, a simulated standard offer of ₱2,700, an optional simulated buddy rate of ₱2,565 per person and four sample released seats. These offers are not approved by Laro. Commission is 10% of the accepted amount, deducted from provider proceeds; it is not an extra customer fee. All figures below are before platform operating costs and provider attendance costs.
 
 | Booking | Customer total | Platform fee | Provider proceeds |
 | --- | --- | --- | --- |
-| 1 standard seat | ₱1,600 | ₱160 | ₱1,440 |
-| 2 standard seats | ₱3,200 | ₱320 | ₱2,880 |
-| 2 buddy seats | ₱3,040 | ₱304 | ₱2,736 |
+| 1 standard seat | ₱2,700 | ₱270 | ₱2,430 |
+| 2 standard seats | ₱5,400 | ₱540 | ₱4,860 |
+| 2 buddy seats | ₱5,130 | ₱513 | ₱4,617 |
 
-If both people would have booked at the standard offer, buddy pricing saves customers ₱160 but reduces platform fees by ₱16 and provider proceeds by ₱144. So do not enable it merely to report a higher party size; it makes this unchanged attendance less valuable.
+If both people would have booked at the standard offer, buddy pricing saves customers ₱270 but reduces platform fees by ₱27 and provider proceeds by ₱243. So do not enable it merely to report a higher party size; it makes this unchanged attendance less valuable.
 
-If the alternative is one standard booking and one empty seat, two buddy seats add ₱1,440 in sales, ₱144 in platform fee and ₱1,296 in provider proceeds. So the extra attendee is beneficial to this provider only when incremental materials, labor and related costs are below ₱1,296, and the offer does not displace other direct sales. No provider cost or acceptance data has been collected.
+If the alternative is one standard booking and one empty seat, two buddy seats add ₱2,430 in sales, ₱243 in platform fee and ₱2,187 in provider proceeds. So the extra attendee is beneficial to this provider only when incremental materials, labor and related costs are below ₱2,187, and the offer does not displace other direct sales. No provider cost or acceptance data has been collected.
 
 After the two-seat buddy booking, two of four allocated seats remain. A request for three must fail without adding a booking. So allocation checks protect the promise and avoid collecting commission on an impossible booking. Correct inventory is operational support for revenue, not proof of demand.
 
@@ -101,18 +101,18 @@ Money convention: store whole centavos. Fee per seat = round(unit price × commi
 | Actual metric | Definition / worked value | Decision and limit |
 | --- | --- | --- |
 | bookingCount | Confirmed transactions, not seats. After one 2-seat buddy booking: 1. | Check saved orders against transactions. A two-person order is not two conversions. |
-| platformRevenueCentavos | Sum of stored confirmed booking fees. Example: ₱304. | Use as gross commission, then compare with acquisition/support costs; it is not profit or gross booking value. |
-| averageOrderValueCentavos | Mean full confirmed booking total. Example: ₱3,040. | Compare single and shared order value before expanding buddy offers; order value alone says nothing about margin. |
-| topSellingService | Most confirmed seats by service. Example: Mug Handbuilding, 2 seats. | Consider similar supply only after real bookings; seeded examples do not establish popularity. |
+| platformRevenueCentavos | Sum of stored confirmed booking fees. Example: ₱513. | Use as gross commission, then compare with acquisition/support costs; it is not profit or gross booking value. |
+| averageOrderValueCentavos | Mean full confirmed booking total. Example: ₱5,130. | Compare single and shared order value before expanding buddy offers; order value alone says nothing about margin. |
+| topSellingService | Most confirmed seats by service. Example: Laro Mug-making + painting, 2 seats. | Consider similar supply only after real bookings; seeded examples do not establish popularity. |
 | nearlyFullSessionCount | Eligible open sessions with ≤25% of released seats remaining, including sold-out. Example: 2/4 remain → 0. | Ask a provider whether more allocation is actually available. Do not interpret released allocation as whole-class occupancy. |
 
-Reconciliation check: add a second booking for one standard seat in the same four-seat session. Expected totals are 2 bookings, ₱464 platform fees, ₱2,320 average order value, 3 seats for the top service and 1 nearly-full session because 1/4 remains. Paused/expired sessions leave the nearly-full set; their saved confirmed receipts still contribute to booking totals. No gross-sales or seats-sold KPI card is currently implemented separately.
+Reconciliation check: add a second booking for one standard seat in the same four-seat session. Expected totals are 2 bookings, ₱783 platform fees, ₱3,915 average order value, 3 seats for the top service and 1 nearly-full session because 1/4 remains. Paused/expired sessions leave the nearly-full set; their saved confirmed receipts still contribute to booking totals. No gross-sales or seats-sold KPI card is currently implemented separately.
 
 ## 8. Real-studio evidence register
 
-Rechecked official sources on 29 October 2026 where stated below. Published products prove that a format and price were advertised; they do not prove future seats, supplier consent, spare capacity or permission to resell. Research entries must remain separate from fictional bookable inventory. Branch, date, price type, inclusions and policies must be checked together.
+Official sources were checked on 29–30 October 2026 as stated below. Published products prove that a format and price were advertised; they do not prove future seats, supplier consent, spare capacity or permission to resell. The private course catalog now uses real studio identities and published activity facts with source links. Dates, released seats, cutoffs, offers, payments and reservations remain explicitly simulated; this does not establish a partnership. Historical synthetic records remain unchanged. Branch, date, price type, inclusions and policies must be checked together.
 
-A1 — Laro Ceramics, 219 Katipunan Avenue, Blue Ridge A, QC. Mug making + painting is ₱3,000 for three hours; clay/tools, painting, glazing and firing are described. The product offers QC/BGC branch selection, so do not transfer a BGC date to Katipunan. Collection is approximately three months, not same-day take-home. Wheel throwing at ₱3,200 is retained from the 28 October collection check and needs the selected product/branch rechecked. Fit: local beginner format and companion occasion. Unknown: exact next eligible date, allocated seats, cutoff, costs and partnership.
+A1 — Laro Ceramics, 219 Katipunan Avenue, Blue Ridge A, QC. Mug making + painting is ₱3,000 for three hours; clay/tools, painting, glazing and firing are described. The product offers QC/BGC branch selection, so do not transfer a BGC date to Katipunan. Collection is approximately three months, not same-day take-home. Wheel throwing at ₱3,200 and the three-hour single-session duration were rechecked on the official product/collection pages on 30 October; dated branch availability remains unverified. Fit: local beginner format and companion occasion. Unknown: exact next eligible date, allocated seats, cutoff, costs and partnership.
 
 Sources: https://laro-ceramics.com/products/mug-making-class-manila | https://laro-ceramics.com/collections/pottery-classes-laro-ceramics
 
@@ -124,7 +124,7 @@ A3 — Metals & Gems, White Plains/Katipunan Extension, QC; address retained fro
 
 Sources: https://www.metalsandgems.com.ph/products/gem-to-jewelry-workshop | https://www.metalsandgems.com.ph/pages/contact-us
 
-B1 — Bumi & Ashe, Cubao Expo candidate; the site also offers Makati, so confirm the selected branch. Mug making shows ₱2,650 sale / ₱3,200 regular, a two-hour class, painting and firing. The FAQ gives 6–8 weeks for collection. The page’s one-mug description conflicts with FAQ wording about three pieces, so confirm the exact package. Mixed sold-out/cart indicators do not establish availability. Earlier catalog notes list free-form at ₱3,200 and wheel from ₱3,700; those selected products remain to be rechecked. Fit: creative supply expansion, with collection and schedule constraints.
+B1 — Bumi & Ashe, Cubao Expo candidate; the site also offers Makati, so confirm the selected branch. Mug making shows ₱2,650 sale / ₱3,200 regular, a two-hour class, painting and firing. The FAQ gives 6–8 weeks for collection. The page’s one-mug description conflicts with FAQ wording about three pieces, so confirm the exact package. Mixed sold-out/cart indicators do not establish availability. The free-form + paint product was rechecked on 30 October at ₱3,200 for three hours. Wheel products remain separate research and are not added to booking samples. Fit: creative supply expansion, with collection and schedule constraints.
 
 Sources: https://bumiandashe.com/products/mug-making-workshop-1 | https://bumiandashe.com/collections/workshops-1
 
@@ -135,6 +135,12 @@ Source: https://tahananpottery.ph/collections/pottery-classes-workshops
 B3 — Sip & Gogh Eastwood, QC. Keep branch/date/price as a verification task. The earlier official FAQ research directs customers to the branch calendar; no current Eastwood price is asserted here. Fit: a separate painting occasion. Do not reuse another branch’s price or call an old calendar current.
 
 Source: https://sipandgogh.com/faqs
+
+B4 — AMT Ceramics, Tandang Sora, QC. The official FAQ advertises handbuilding and wheel exploratory single sessions at ₱2,900 each, Fridays/Saturdays/Sundays 10 AM–1 PM. The sample catalog includes both three-hour activities. A recurring pattern does not confirm a specific date, spare capacity, inclusions or a cutoff. Source: https://amtceramics.com/pages/faqs .
+
+B5 — Sip & Gogh Century Mall, Makati, separate from the Eastwood prospect. Its published Open Session on 6 November 2026 is ₱1,400, 6–9 PM. This provides a painting price/duration example; it does not prove a QC offering or an eligible live session. The private sample has simulated dates and is not that official reservation. Source: https://www.sipandgogh.com/branches/century-mall/sessions/12100 .
+
+Core Pilates remains a research-only reference: the published ₱1,150 single-session credit is not a dated class reservation, and the exact class duration/timetable has not been verified. Source: https://corestudio.ph/class-packages .
 
 Policy counterexample — Studio Matisse, San Juan, outside the initial catchment. Its published policy requires reservations at least two days ahead. A 72-hour discovery window and 48-hour deadline leave a theoretical 24-hour sales window; a 72-hour-or-longer deadline leaves none. This illustrates operational fit, not a QC partner or a claim that the provider accepts resale.
 
@@ -178,3 +184,8 @@ Course handoff: Oct 30 shared styling/layout and business review; Nov 1 first wo
 Submit substantive docs/business.md plus the required concise business-summary PDF; this research Doc and the brand book serve different purposes. Documentation-only PRs do not count as a member’s three code PRs. Preserve specific real reviews and merges across the grading windows. Kat’s completed research and the group’s reasoning still need their authors’ confirmation; no interview, profitability or submission approval is implied.
 
 Official repository: https://github.com/Frannaaa/slotdrop-gc2 | Versioned business draft: https://github.com/Frannaaa/slotdrop-gc2/blob/main/docs/business.md
+
+
+## Studio application, separate from verified supply
+
+ClassPass separates submission of business information from onboarding a profile; Klook reviews merchant applications before access to listing tools. SlotDrop follows Apply → Review → Set up. The private build has an independent studio reference page, a validated application form and DB-backed pending-status readback. It records authorization as an attestation, not proof; it does not publish a page, grant account access or verify a partnership. Use sample contacts, keep them private, and retain the same request key after an uncertain save. Public profile ownership and real inventory need later verified onboarding. Sources checked 30 October: https://classpass.com/partners/how-it-works | https://merchant.klook.com/introduction .
