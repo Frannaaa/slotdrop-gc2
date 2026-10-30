@@ -86,3 +86,9 @@ Local checks after these fixes:
 | Owner workspace / #29 | 22 | 1 | Passed | 8 |
 
 The skipped case requires real PostgreSQL. These local runs used Node 24.22.1 and PGlite; the new commit's PostgreSQL/container results must come from its CI run. The clock regression exercises the page script with a controlled clock and lightweight DOM fixture; it is not a new full browser walkthrough. Customer booking integration and public deployment remain open.
+
+## Timeout and adversarial checks
+
+Normalized timestamps must stay within UTC years 0001-9999. A date crossing into year 10000 previously returned 500 in the PGlite demo; it now returns 400 before SQL. Boundary and ordinary timezone conversions are covered by tests/http.test.js.
+
+Local checks for this branch: syntax passed, 11 tests passed, 0 PostgreSQL-only tests skipped, and all eight SQL groups passed (Node 24.22.1/PGlite).

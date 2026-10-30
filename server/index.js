@@ -1,5 +1,16 @@
 import 'dotenv/config';
-import app from './app.js';
+import { createApp } from './app.js';
+import { postgresDatabase } from './repositories/database.js';
 const port = Number(process.env.PORT || 3000);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be 1-65535');
-app.listen(port, () => console.log('SlotDrop CP0: http://localhost:' + port));
+const db = postgresDatabase();
+const server = createApp({ db }).listen(port, () => console.log('SlotDrop: http://localhost:' + port));
+let stopping = false;
+for (const signal of ['SIGINT','SIGTERM']) process.on(signal, () => {
+  if (stopping) return;
+  stopping = true;
+  const timeout = setTimeout(() => { server.closeAllConnections(); }, 10000);
+  timeout.unref();
+  server.close(async () => { clearTimeout(timeout); await db.close(); });
+});
+
