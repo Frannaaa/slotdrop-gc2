@@ -125,3 +125,8 @@
 
 /* Keep the workspace full width when shared customer panels gain a width limit. */
 .owner-page .panel { max-width: none; margin: 0; }
+
+/* Inventory alerts use neutral accessible text instead of silently empty Browse. */
+.owner-page .inventory-readiness { padding: 15px 18px; background: white; border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 6px; margin: 4px 0 20px; font-size: 14px; }
+.owner-page .inventory-readiness[data-state='empty'], .owner-page .inventory-readiness[data-state='soon'] { border-left-color: var(--error); }
+.owner-page .inventory-readiness:empty { display: none; }
