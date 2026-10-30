@@ -96,7 +96,7 @@ An identical normalized retry returns its original receipt with 200, even after 
 
 ## Saved receipts and metrics
 
-Saved receipts contain id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt. The unauthenticated owner list is a separate explicit summary: it includes booking/session IDs, quantity, status, saved financial values, dates, serviceName and providerName, but omits customerName, customerEmail and requestId. It never selects future booking columns automatically. Confirmation must read saved amounts by ID, not rebuild a receipt from browser storage.
+Public POST /api/bookings responses and GET /api/bookings/:id return an explicit saved receipt: id, slotId, quantity, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, createdAt, serviceName and providerName. Customer names/emails and requestId remain stored internally for validation and retry matching, but are omitted from all public booking responses. A public owner-list ID must not reveal contacts through receipt readback. Confirmation displays the booking reference and saved activity/amounts, without a guest-name field. Clients retain the retry key they generated; they never recover it from a public receipt.
 
 Metrics use confirmed bookings only:
 
