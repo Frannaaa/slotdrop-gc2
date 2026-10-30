@@ -106,7 +106,7 @@ Metrics use confirmed bookings only:
 | platformRevenueCentavos | Sum of saved commission |
 | averageOrderValueCentavos | Rounded mean transaction total; zero when empty |
 | topSellingService | {serviceId,serviceName,seatsSold}, ranked by sum of quantity; lowest ID breaks ties; null when empty |
-| nearlyFullSessionCount | Eligible-time active/open/running sessions with remaining allocation ≤25% of capacity, including sold-out sessions |
+| nearlyFullSessionCount | Eligible-time active/open/running sessions with 1–25% of released capacity remaining; sold-out sessions are excluded |
 
 Payments are simulated. Platform revenue is modeled commission, not cash collected or total booking value.
 
