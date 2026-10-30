@@ -6,7 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-This branch: **Session data — PR #27**. Database connection, session list/detail, filters and local demo.
+This branch: **Session offers — PR #28**. Session data plus offer creation and price, capacity, cutoff and status edits.
 
 Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 

@@ -1,6 +1,6 @@
 # API and screen contract
 
-GET /api/health, GET /api/slots and GET /api/slots/:id are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
+Health and session list/detail/create/edit are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
 
 ## Routes
 
