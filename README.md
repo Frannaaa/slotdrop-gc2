@@ -8,7 +8,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 This branch: **Sourced studio catalog and pending applications**. It includes the earlier owner/discovery/research stack and adds independent studio profiles plus a saved application/status flow. See Issue #38.
 
-Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
+The quote API #40 is merged into main. Booking creation and receipt-by-ID are Janelle's next API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
 Reviewed #27/#28 are merged. Next: #36 shared helper, Home after Kirsten's review, #29 owner privacy recheck, then #34 discovery and #32 supporting research. This application/catalog extension follows #32 and does not block the core dependencies. Business #37 is reviewed separately. Retarget after approved dependency merges.
 
