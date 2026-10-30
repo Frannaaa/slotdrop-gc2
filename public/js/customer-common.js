@@ -101,9 +101,12 @@ export const comparisonLabel = slot => !slot.studioReference ? 'Regular price'
  : slot.originalPriceCentavos === slot.studioReference.publishedPriceCentavos ? 'Published reference price' : 'Demo base price';
 export function studioEvidence(slot) {
  const reference=slot.studioReference;if(!reference)return '';
- let source;
- try { source=new URL(reference.sourceUrl);if(source.protocol!=='https:')return ''; }catch{return '';}
- return `<p class="reference">Real studio reference · <a href="${escapeHtml(source.href)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${reference.priceSourceUrl?` · <a href="${escapeHtml(reference.priceSourceUrl)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>`:""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
+ const safeSource=value=>{
+  try {const source=new URL(value);return source.protocol==='https:'&& !source.username && !source.password ? source.href : null;}catch{return null;}
+ };
+ const source=safeSource(reference.sourceUrl);if(!source)return '';
+ const priceSource=safeSource(reference.priceSourceUrl);
+ return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource?` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>`:""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
 }
 export function card(slot, quantity = 1) {
  const selectedQuantity=Number.isSafeInteger(quantity)&&quantity>=1&&quantity<=100?quantity:1;
