@@ -112,6 +112,8 @@ function reset() {
   editing = null;
   manualCutoff = false;
   form.reset();
+  // form.reset() can reselect a retired fixture after the catalog migration.
+  $("service").value = preferredServiceId(catalog.services, $("service").value);
   $("editor-title").textContent = "Create a session";
   $("save").textContent = "Save demo session offer";
   $("status-field").hidden = true;
