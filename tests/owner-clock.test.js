@@ -70,7 +70,7 @@ test('the owner clock updates existing cards across deadlines without disturbing
   listeners.get('visibilitychange')();
   assert.equal(tag(cards[0]).textContent, 'Session started');
   context.api = async () => { throw new Error('The request timed out.'); };
-  await runInNewContext('load()', context);
+  assert.equal(await runInNewContext('load()', context), false);
   assert.equal(elements.get('refresh').disabled, false);
   assert.equal(elements.get('offer-fields').disabled, false);
   assert.equal(elements.get('save').disabled, true);
@@ -78,8 +78,50 @@ test('the owner clock updates existing cards across deadlines without disturbing
   context.api = async path => path === '/api/owner/catalog' ? catalog
     : path === '/api/bookings' ? []
       : {bookingCount:0,platformRevenueCentavos:0,averageOrderValueCentavos:0,nearlyFullSessionCount:0};
-  await runInNewContext('load()', context);
+  assert.equal(await runInNewContext('load()', context), true);
   assert.equal(elements.get('refresh').disabled, false);
   assert.equal(elements.get('save').disabled, false);
   assert.equal(draft.value, '2026-11-03T19:42');
+});
+
+test('a saved offer with failed refresh warns against a duplicate submission', async () => {
+  const elements = new Map(), handlers = new Map(), sent = [];
+  class El {
+    constructor() { this.value='';this.checked=false;this.dataset={};this.children=[];this.classList={toggle(){}};this.disabled=false; }
+    addEventListener(type, fn) { handlers.set(this === elements.get('offer-form') ? type : 'other:'+type, fn); }
+    replaceChildren(...values) { this.children = values; }
+    append(...items) { this.children.push(...items); }
+    reset() {}
+  }
+  const get = id => {if(!elements.has(id))elements.set(id,new El());return elements.get(id);};
+  const form=get('offer-form');
+  form.elements={namedItem: name => get(name)};
+  for (const [name,value] of Object.entries({
+    capacity:'4',offerPriceCentavos:'1600.00',buddyPriceCentavos:'1520.00',
+    originalPriceCentavos:'2000.00',serviceId:'1',bookingClosesAt:'2026-11-03T12:00',
+    startsAt:'2026-11-03T15:00',status:'open',
+  })) get(name).value=value;
+  get('service').value='1';
+  get('starts').value='2026-11-03T15:00';
+  get('cutoff').value='2026-11-03T12:00';
+  get('runsAsScheduled').checked=true;
+  const doc={getElementById:get,createElement:()=>new El(),addEventListener() {},hidden:false};
+  const source=(await readFile(new URL('../public/js/owner.js',import.meta.url),'utf8'))
+    .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/,'')
+    .replace(/^import \{ api \} from "\.\/api\.js";\n/m,'')
+    .replace(/reset\(\);\nload\(\);\s*$/,'');
+  const ctx={document:doc,...policy,Intl,URL,Date, setInterval() {},
+    api:async(path,options) => {
+      sent.push({path,method:options?.method||'GET'});
+      if(options?.method==='POST') return {id:42};
+      throw new Error('Database read temporarily unavailable');
+    }};
+  runInNewContext(source + '\ncatalog={services:[{id:1,active:true,defaultBookingCutoffMinutes:180}],slots:[],discoveryHours:72,commissionBasisPoints:1000};loaded=true;',ctx);
+  const onSubmit=handlers.get('submit');
+  assert.equal(typeof onSubmit,'function');
+  await onSubmit({preventDefault() {}});
+  assert.equal(sent.filter(row=>row.method==='POST').length,1);
+  assert.match(get('form-message').textContent,/Session saved, but the workspace could not refresh/);
+  assert.match(get('form-message').textContent,/do not submit the offer again/);
+  assert.equal(get('save').disabled,true);
 });
