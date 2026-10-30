@@ -7,3 +7,10 @@ export async function closeDatabase(db, report = console.error) {
   try { await db.close(); return true; }
   catch (error) { report('Database shutdown failed:', errorCode(error)); return false; }
 }
+
+/** A deployed GC2 build must not advertise a healthy app without its database. */
+export function validateProductionDatabase(env = process.env) {
+  if (env.NODE_ENV === 'production' && (typeof env.DATABASE_URL !== 'string' || !env.DATABASE_URL.trim())) {
+    throw new Error('DATABASE_URL is required in production. Configure a persistent course database before starting SlotDrop.');
+  }
+}
