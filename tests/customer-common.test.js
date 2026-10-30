@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import app from '../server/app.js';
-import { card, previewPrice } from '../public/js/customer-common.js';
+import { card, previewPrice, request, positive, available } from '../public/js/customer-common.js';
+import { DISCOVERY_HOURS } from '../public/js/business-config.js';
 
 // Session response before #34's additive metadata: Home must also work with #27.
 const slot = { id: 1, serviceName: 'Mug <script>bad()</script>',
@@ -20,6 +21,32 @@ test('Home can fetch its shared browser module independently of the owner stack'
     assert.match(response.headers.get('content-type'), /javascript/);
     assert.match(await response.text(), /export async function request/);
   } finally { await new Promise(resolve => server.close(resolve)); }
+});
+
+test('a null error response preserves HTTP failure instead of pretending the connection failed', async t => {
+  t.mock.method(globalThis, 'fetch', async () => ({ok:false,status:500,json:async()=>null}));
+  await assert.rejects(request('/api/slots'), error => {
+    assert.equal(error.message, 'Request failed.');
+    assert.equal(error.status, 500);
+    assert.equal(error.uncertain, undefined);
+    return true;
+  });
+});
+
+test('invalid session IDs and quantities have distinct guidance', () => {
+  assert.throws(() => positive('wrong'), /valid session link/);
+  assert.throws(() => positive('101', 100), /1 to 100/);
+  assert.equal(positive('1'), 1);
+});
+
+test('availability previews respect the configured discovery boundary', t => {
+  const now=Date.parse('2026-11-01T00:00:00Z');
+  t.mock.method(Date, 'now', () => now);
+  const session={serviceActive:true,status:'open',runsAsScheduled:true,remainingSeats:2,
+    bookingClosesAt:new Date(now+1000).toISOString(),startsAt:new Date(now+DISCOVERY_HOURS*3600000).toISOString()};
+  assert.equal(available(session), false);
+  assert.equal(available({...session,startsAt:new Date(now+DISCOVERY_HOURS*3600000-1).toISOString()},2), true);
+  assert.equal(available({...session,startsAt:new Date(now+1000).toISOString()},3), false);
 });
 
 test('cards accept the session API before additive attributes and escape studio text', () => {
