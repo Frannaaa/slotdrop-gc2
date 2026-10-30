@@ -36,9 +36,9 @@ Run against the **actual group deployment** once it exists:
 npm run check:gc2 -- https://YOUR-GROUP-DEPLOYMENT
 ```
 
-This checks that the 7 required page URLs, session list, a quantity-1 quote (if inventory exists), Owner bookings API, metrics API and nonempty discoverable sample inventory respond. It never sends POST/PATCH or fabricates data. It deliberately fails on the current incomplete group build; this is useful evidence of dependencies, **not** a failing CI gate. It does not prove that checkout/receipt saving works.
+This checks the seven required page URLs, session list/detail APIs, a quantity-1 quote (if inventory exists), the receipt-by-ID lookup route, Owner booking list, metrics API and nonempty discoverable sample inventory. It never sends POST/PATCH or fabricates data. It deliberately fails on the current incomplete group build; this is useful evidence of dependencies, **not** a failing CI gate. It does not prove that checkout/receipt saving works.
 
-For each checkpoint also run the dedicated `check:demo` availability monitor on the branch where it is installed. Initial sample sessions expire after two days. Create **new future demo offers through Owner** without reseeding historic rows and without representing real businesses as partners. This operational maintenance is not a teacher requirement, but an empty Browse violates CP1.
+Owner now displays an inventory-readiness warning above its metrics when no sessions are discoverable or when every available offer closes within 24 hours; it never changes database rows. This warning uses the last loaded Owner catalog, so refresh after other people book. For each checkpoint also run the dedicated `check:demo` availability monitor on the branch where it is installed. Initial sample sessions expire after two days. Create **new future demo offers through Owner** without reseeding historic rows and without representing real businesses as partners. This operational maintenance is not a teacher requirement, but an empty Browse violates CP1.
 
 ## Real transactional proof (manual, only after teammate implementations merge)
 
