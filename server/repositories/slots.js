@@ -1,8 +1,9 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
 import { safeNumber } from '../lib/validation.js';
+import { studioReferences } from './reference-catalog.js';
 
 export const SLOT_SELECT = `SELECT sl.*, s.provider_id, s.name AS service_name, s.category,
-  s.activity_type, s.technique, s.inclusions, s.preparation_note, s.cancellation_note,
+  s.reference_key, s.activity_type, s.technique, s.inclusions, s.preparation_note, s.cancellation_note,
   s.duration_minutes, s.beginner_friendly, s.recurrence_note, s.active,
   s.default_booking_cutoff_minutes, p.name AS provider_name, p.city, p.area,
   COALESCE((SELECT SUM(b.quantity) FROM bookings b WHERE b.slot_id=sl.id AND b.status='confirmed'),0) AS seats_booked
@@ -12,6 +13,7 @@ export function slotResponse(row) {
   const number = key => safeNumber(row[key]);
   return {
     id: number('id'), serviceId: number('service_id'), providerId: number('provider_id'),
+    studioReference: studioReferences.get(row.reference_key) || null,
     providerName: row.provider_name, serviceName: row.service_name, category: row.category,
     activityType: row.activity_type, technique: row.technique, inclusions: row.inclusions,
     preparationNote: row.preparation_note, cancellationNote: row.cancellation_note,
