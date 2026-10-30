@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Studio workspace · SlotDrop</title>
+    <meta name="theme-color" content="#F5F2EA" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/owner.css" />
+    <script src="/js/owner.js" type="module"></script>
+  </head>
+  <body class="owner-page">
+    <a class="skip-link" href="#main-content">Skip to workspace</a>
+    <div class="demo-bar"><span>GROUP 1 / COURSE DEMONSTRATION</span><span>STUDIO OPERATIONS</span></div>
+    <header>
+      <a class="brand" href="/" aria-label="SlotDrop home">
+        <svg class="brand-symbol" viewBox="0 0 28 36" aria-hidden="true"><path d="M2 10v24h24V10" /><rect x="9" y="0" width="10" height="10" rx="2" /></svg>
+        slotdrop
+      </a>
+      <button id="refresh" type="button">Refresh data</button>
+    </header>
+    <main id="main-content" tabindex="-1">
+      <section class="intro">
+        <p class="eyebrow">SLOTDROP / STUDIO WORKSPACE</p>
+        <h1>Bookings and open seats.</h1>
+        <p>Manage the seats released to SlotDrop and see what each booking contributes.</p>
+      </section>
+      <p class="demo-note">
+        <strong>Course demonstration</strong>
+        Providers may be fictional demo fixtures or independent researched studio references; none are verified SlotDrop partners. Session dates, released seats, discounts, bookings and payments are simulated, not real reservations. All times below are Philippine time.
+      </p>
+      <p id="page-message" role="status" aria-live="polite">
+        Loading your workspace…
+      </p>
+      <p id="inventory-warning" class="inventory-readiness" role="status" aria-live="polite"></p>
+      <section
+        class="metrics"
+        aria-label="Booking metrics"
+        id="metrics"
+      ></section>
+      <section class="receipts" aria-labelledby="receipts-title">
+        <p class="eyebrow">SAVED TRANSACTIONS</p>
+        <h2 id="receipts-title">Your bookings.</h2>
+        <p class="hint">Amounts and session dates are saved at booking time. Later offer edits leave these receipts unchanged.</p>
+        <div id="bookings" class="panel">Loading bookings…</div>
+      </section>
+      <div class="workspace">
+        <section class="panel editor" aria-labelledby="editor-title">
+          <div class="section-heading">
+            <h2 id="editor-title">Create a session</h2>
+            <button type="button" id="reset">New session</button>
+          </div>
+          <form id="offer-form">
+            <fieldset id="offer-fields">
+            <label
+              >Activity<select name="serviceId" id="service" required></select
+            ></label>
+            <label
+              >Session starts<input
+                name="startsAt"
+                id="starts"
+                type="datetime-local"
+                min="0001-01-01T08:00"
+                max="9999-12-31T23:59"
+                required
+            /></label>
+            <label
+              >Bookings close<input
+                name="bookingClosesAt"
+                id="cutoff"
+                type="datetime-local"
+                min="0001-01-01T08:00"
+                max="9999-12-31T23:59"
+                required
+            /></label>
+            <p class="hint" id="cutoff-hint">
+              Starts from the activity default; adjust it for this session.
+            </p>
+            <div class="form-grid">
+              <label
+                >Released seats<input
+                  name="capacity"
+                  type="number"
+                  min="1"
+                  max="100"
+                  required
+                  value="4" /></label
+              ><label
+                >Regular price / seat (₱)<input
+                  name="originalPriceCentavos"
+                  inputmode="decimal"
+                  required
+                  value="2000.00"
+              /></label>
+            </div>
+            <p class="hint">Released seats are your SlotDrop allocation, not the venue's total capacity.</p>
+            <div class="form-grid">
+              <label
+                >Offer price / seat (₱)<input
+                  name="offerPriceCentavos"
+                  inputmode="decimal"
+                  required
+                  value="1600.00" /></label
+              ><label
+                >Buddy price / seat (₱)<input
+                  name="buddyPriceCentavos"
+                  inputmode="decimal"
+                  placeholder="Optional"
+              /></label>
+            </div>
+            <p class="hint">
+              Buddy pricing applies to 2+ seats in one booking. Leave blank to
+              disable it.
+            </p>
+            <label id="status-field" hidden
+              >Status<select name="status">
+                <option value="open">Open</option>
+                <option value="paused">Paused</option>
+                <option value="cancelled">Cancelled</option>
+              </select></label
+            >
+            <label class="checkbox"
+              ><input name="runsAsScheduled" type="checkbox" required /> This
+              session will run even if no SlotDrop seats sell.</label
+            >
+            <output id="net-preview" aria-live="polite"></output>
+            <p id="form-message" role="status" aria-live="polite"></p>
+            <button class="primary" type="submit" id="save">
+              Save demo session offer
+            </button>
+            </fieldset>
+          </form>
+        </section>
+        <section class="panel inventory" aria-labelledby="sessions-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">YOUR SESSIONS</p><h2 id="sessions-title">Your session offers.</h2></div>
+            <span id="session-count"></span>
+          </div>
+          <div id="sessions">Loading sessions…</div>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <div class="footer-inner">
+        <a class="brand" href="/" aria-label="SlotDrop home"><svg class="brand-symbol" viewBox="0 0 28 36" aria-hidden="true"><path d="M2 10v24h24V10" /><rect x="9" y="0" width="10" height="10" rx="2" /></svg>slotdrop</a>
+        <p>Good plans for the gaps in your day.</p>
+        <small>Course-demo inventory and payments. Any researched studios are independent references, not confirmed partners.</small>
+      </div>
+    </footer>
+  </body>
+</html>

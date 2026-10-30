@@ -31,7 +31,7 @@ export async function listSlots(db, query, now) {
   const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',
     `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
   // position() is a literal substring match, so user %/_ do not become wildcards.
-  if (query.q) { values.push(query.q.trim()); where.push(`(position(lower($${values.length}) in lower(s.name)) > 0 OR position(lower($${values.length}) in lower(p.name)) > 0)`); }
+  if (query.q?.trim()) { values.push(query.q.trim()); where.push(`(position(lower($${values.length}) in lower(s.name)) > 0 OR position(lower($${values.length}) in lower(p.name)) > 0)`); }
   if (query.category) { values.push(query.category); where.push('s.category=$' + values.length); }
   if (query.area) { values.push(query.area); where.push('lower(p.area)=lower($' + values.length + ')'); }
   const range = dateRange(query.when, now);
