@@ -4,12 +4,14 @@ import healthRouter from './routes/health.js';
 import { errorHandler } from './middleware/errors.js';
 import { postgresDatabase } from './repositories/database.js';
 import { slotRouter } from './routes/slots.js';
+import { pricingRouter } from './routes/pricing.js';
 
 export function createApp({ db = postgresDatabase(), clock = () => new Date() } = {}) {
 const app = express();
 app.use(express.json({ limit: '16kb' }));
 app.use('/api/health', healthRouter);
 app.use('/api/slots', slotRouter(db, clock));
+app.use('/api/pricing', pricingRouter(db, clock));
 // Keep unavailable API routes in the same JSON error format.
 app.use('/api', (_req, res) => res.status(404).json({
   error: { code: 'ROUTE_NOT_IMPLEMENTED', message: 'This API route is not available yet.' }
