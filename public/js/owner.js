@@ -112,7 +112,7 @@ function reset() {
   manualCutoff = false;
   form.reset();
   $("editor-title").textContent = "Create a session";
-  $("save").textContent = "Publish session offer";
+  $("save").textContent = "Save demo session offer";
   $("status-field").hidden = true;
   for (const name of ["serviceId", "startsAt", "originalPriceCentavos"])
     field(name).disabled = false;
