@@ -51,8 +51,8 @@ test('GET /api/pricing/quote prices seeded sessions from the database', async ()
     assert.equal(quote.pricingType, 'standard');
     assert.equal(quote.totalPriceCentavos, 240000);
     // Database prices win: a later offer edit changes the next quote.
-    await f.database.query('UPDATE slots SET offer_price_centavos=150000 WHERE id=1');
-    assert.equal((await get('?slotId=1&quantity=1'))[1].totalPriceCentavos, 150000);
+    await f.database.query('UPDATE slots SET offer_price_centavos=155000 WHERE id=1');
+    assert.equal((await get('?slotId=1&quantity=1'))[1].totalPriceCentavos, 155000);
   } finally { await f.close(); }
 });
 
