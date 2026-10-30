@@ -14,6 +14,7 @@
     "check:sql": "node tools/check-sql.mjs",
     "demo": "node tools/demo.mjs",
     "db:init": "node tools/db-init.mjs",
+    "check:demo": "node tools/check-demo-readiness.mjs",
     "check:gc2": "node tools/check-gc2-readiness.mjs"
   },
   "dependencies": {

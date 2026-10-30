@@ -1,6 +1,6 @@
 # Real studios and activity discovery
 
-Checked 28 October 2026. Source prices are public research, not negotiated SlotDrop rates. No listed business has confirmed a partnership, a seat allocation, a discount or a SlotDrop booking deadline. Existing course transactions remain fictional, clearly marked demo inventory. Never attach an unverified real studio to a synthetic receipt.
+Checked 30 October 2026. Studio names, advertised activity facts and source prices are public research, not negotiated SlotDrop rates. The private build now uses eight of these real activity references for explicitly simulated sessions. No listed business has confirmed a partnership, seat allocation, discount or SlotDrop deadline. Historical synthetic provider records and their receipts are preserved unchanged; they are retired from new customer discovery.
 
 ## Navigation and classification
 
@@ -30,6 +30,7 @@ ClassPass separates business categories, activity/studio search and filters such
 | AMT Ceramics, Tandang Sora QC | Hand-Building single session | 2,900 | 3 hours; FAQ lists Fri/Sat/Sun 10 AM–1 PM; reconfirm chosen date |
 | AMT Ceramics, Tandang Sora QC | Wheel-Throwing Exploratory single session | 2,900 | Same FAQ timetable; reconfirm availability |
 | Sip & Gogh, Century Mall Makati | Open Session painting | 1,400 | Published example: 6 November 2026, 6–9 PM; outside the current 72-hour booking window |
+| Tahanan Pottery, Scout Tobias QC | Exploratory wheel | 2,500 | 3 hours; published Saturdays 2–5 PM; no dated allocation verified |
 | Core Pilates Studio, South Triangle QC | Group Class single-session credit | 1,150 | Credit valid 60 days; exact class time and duration unverified |
 
 Official price and schedule URLs are stored per offering in the JSON and shown on every card. Unknown schedule values stay unknown. Opening hours are not class times. A studio’s own sale price is not a SlotDrop discount. A single-session credit is not a reserved session.
@@ -38,7 +39,7 @@ Official price and schedule URLs are stored per offering in the JSON and shown o
 
 Start provider outreach with recurring pottery calendars (AMT’s published weekly pattern and Bumi’s weekly releases), plus repeatable movement sessions if timetable, provider allocation and cutoffs are confirmed. Painting adds a lower published price point, but one dated session is not evidence of weekly supply. Workshops may be occasional purchases; measure repeat booking across different activities rather than assuming the same customer buys pottery every week. These are planning recommendations, not validated demand or partner commitments.
 
-Before a real offering enters booking inventory, confirm the branch, dated start/end, released seats, final per-person price, cutoff, cancellation terms and settlement arrangement with that provider. Store the source and approval date. Until then the only action is Check studio dates, linking to the official business.
+Before a real offering can accept an actual reservation, confirm the branch, dated start/end, released seats, final per-person price, cutoff, cancellation terms and settlement arrangement with that provider. Store the source and approval date. Until then, official-site links are the route for actual studio dates. The separate course booking flow is labelled as a simulation; its saved record does not reserve a studio place.
 
 ## Verification for this pass
 
@@ -46,4 +47,8 @@ Private build: 33 API/unit tests passed locally, with one PostgreSQL-only lock t
 
 ## Current priority
 
-In the complete implementation, Home and the main navigation lead to bookable released sessions in /browse.html. This independently reviewable research branch links to the separate reference booking demo while the group frontend is built. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See the product and UI contract proposed in https://github.com/Frannaaa/slotdrop-gc2/pull/34 .
+Home and the main navigation lead to bookable released sessions in /browse.html. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See released-seat-discovery.md for the current product and UI contract.
+
+## Studio pages and applications
+
+Real reference profiles link from session cards. They are marked independent and unclaimed. `/provider-apply.html` collects a sample application with controlled activity choices, authorization attestation and a course notice. The API saves it pending and returns a status link; it does not verify the applicant or publish a page. See `provider-onboarding.md` for states, sources and tests.

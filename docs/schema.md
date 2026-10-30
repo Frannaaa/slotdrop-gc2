@@ -1,13 +1,14 @@
 # Database schema
 
-The SQL is in [db/schema.sql](../db/schema.sql). It defines four tables:
+The SQL is in [db/schema.sql](../db/schema.sql). It defines five tables:
 
 | Table | Stores |
 |---|---|
-| providers | Business name, city and area |
+| providers | Business name, city, area and stable source reference key |
 | services | Activity, provider, category, duration, recurrence note, active status and default booking lead time |
 | slots | Dated session, actual booking deadline, released capacity, regular/offer/buddy prices and status |
-| bookings | Quantity, demo customer details, retry key, status and saved time/price/fee fields |
+| bookings | Quantity, private demo customer details/retry key, status and saved time/price/fee fields |
+| provider_applications | Private demo contact/representation details, optional referenced provider, unique retry key and review status |
 
 Relationships: providers → services → slots → bookings. One session can have several bookings.
 
@@ -20,7 +21,7 @@ seatsBooked = sum of confirmed booking quantities
 remainingSeats = capacity - seatsBooked
 ```
 
-There is no separate remaining-seats counter. Booking and capacity edits must lock the same slots row before checking quantities. Owner edits already do this in the development PRs; the booking transaction still needs integration. SQL constraints alone do not enforce capacity across all booking rows.
+There is no separate remaining-seats counter. Booking and capacity edits must lock the same slots row before checking quantities. Owner edits and the booking service both use this lock. SQL constraints alone do not enforce capacity across all booking rows.
 
 Discovery requires an active activity, an open session that will run, a start after now but before now + 72 hours, a cutoff after now, and enough remaining seats. At the cutoff or exactly 72 hours away, the offer is excluded.
 
@@ -54,11 +55,11 @@ The API accepts price, capacity, cutoff and status edits. It rejects unknown fie
 
 ## Seed and setup
 
-[db/seed.sql](../db/seed.sql) creates three fictional providers, four activities and eight sessions on the next two Philippine calendar days. Session times are 10 AM, 1 PM, 4 PM and 6:30 PM, with activity-specific cutoffs.
+[db/seed.sql](../db/seed.sql) creates five real studio reference records, eight activities and sixteen sample sessions on the next two Philippine calendar days. Published prices and durations have official sources; session dates, released seats, default lead times and discounts are simulated.
 
 Schema creation refuses existing tables. Seeding refuses existing data. Neither script resets a shared database or migrates an older schema. Restarting the app preserves saved rows and does not refresh their timestamps.
 
-PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local demo and SQL checks. Public database hosting is not yet configured.
+PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local demo and SQL checks. The reference deployment uses persistent PostgreSQL on Render.
 
 
 ## Explicit activity attributes and safe upgrade
@@ -66,3 +67,7 @@ PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local dem
 services adds activity_type (pottery/painting/pilates/dance/other), optional technique (handbuilding/wheel-throwing/ceramic-decoration), inclusions TEXT[] (materials/painting/firing/equipment), preparation_note and cancellation_note. Defaults preserve unknown facts rather than deriving them from free-form user tags. Category remains creative/active for broad reporting.
 
 Fresh schema and seed contain these fields. Existing databases use db/migrations/001_activity_attributes.sql through server/repositories/migrations.js. Configured production startup and the persistent local demo apply this additive, repeatable upgrade before serving. Only the known fictional activity names with type=other receive demo metadata. Existing session dates, allocated seats, prices, saved receipts and customized notes are preserved. Never rerun seed.sql to apply this change.
+
+## Reference and application upgrades
+
+Migration 002 adds unique nullable `reference_key` values to providers and services. `ensureReferenceCatalog()` adds source-backed records and their first sample allocations once; it never renames old providers or changes historical receipts. Known legacy fixture services are deactivated for customer discovery. Migration 003 adds `provider_applications` without deleting data. The provider FK is optional because a new studio may not have a reference page. Applications are pending; they cannot update providers, create accounts or publish offers. Public readback exposes only application UUID, status and received time. Contacts, retry keys and signatures remain private.

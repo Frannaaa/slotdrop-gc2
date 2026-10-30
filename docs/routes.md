@@ -145,3 +145,7 @@ Whitespace-only q is intentionally ignored; the 100-character limit applies to t
 ## Studio research
 
 `GET /api/activities` returns sourced studio references, not live inventory. See `docs/studio-discovery.md`. The booking API remains `/api/slots`.
+
+## Studio reference and pending applications
+
+GET /api/providers/:id: 200 public real-reference profile, activity sources and eligible sample slots; 400 malformed ID, 404 unknown/legacy fixture. POST /api/provider-applications: 201 pending record, 200 identical retry, 400 validation, 404 unknown referenced studio, 409 conflicting key reuse. GET /api/provider-applications/:id: 200 id/status/createdAt only; 400 malformed UUID, 404 absent record. No public list/edit/approval endpoint exists. See `docs/provider-onboarding.md` for fields and privacy. Slot responses add nullable `studioReference`.
