@@ -6,6 +6,7 @@ import {
   changedOfferFields,
   salesState,
   preferredServiceId,
+  demoInventoryStatus,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -206,9 +207,16 @@ function renderMetrics(metrics) {
     $("metrics").append(card);
   }
 }
+function refreshDemoReadiness(now = Date.now()) {
+  const info = demoInventoryStatus(catalog.slots, catalog.services, now, catalog.discoveryHours);
+  const warning = $("inventory-warning");
+  if (warning.textContent !== info.message) warning.textContent = info.message;
+  warning.dataset.state = info.state;
+}
 function refreshSalesStates() {
   if (!loaded) return;
   const now = Date.now();
+  refreshDemoReadiness(now);
   for (const { slot, tag, help, toggle, editButton } of salesViews) {
     const state = salesState(slot, now, catalog.discoveryHours);
     tag.textContent = state.label;
@@ -383,6 +391,7 @@ async function load() {
     renderMetrics(metrics);
     renderSessions();
     renderBookings(bookings);
+    refreshDemoReadiness();
     // Keep an existing unsaved deadline when refreshing the Owner catalog.
     // On first load the deadline is blank and must use the active activity default.
     if (!$("cutoff").value) defaultCutoff();
@@ -391,6 +400,7 @@ async function load() {
     message("page-message", "");
   } catch (error) {
     salesViews = [];
+    $("inventory-warning").textContent = "";
     message("page-message", error.message, true);
     $("metrics").replaceChildren();
     $("sessions").textContent =
