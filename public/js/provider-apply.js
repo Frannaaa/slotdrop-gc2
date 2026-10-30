@@ -33,7 +33,13 @@ async function start(){
    providerId=positive(params.get('providerId'));
    notice(status,'Loading the studio reference…');
    const studio=await request('/api/providers/'+providerId);
-   for(const [name,value] of Object.entries({businessName:studio.name,city:studio.city,area:studio.area,website:studio.activities[0]?.sourceUrl||''}))form.elements.namedItem(name).value=value;
+   // An activity's source may be an individual product listing, not the business homepage.
+   let website='';
+   try {
+    const source=new URL(studio.activities[0]?.sourceUrl);
+    if(source.protocol==='https:')website=source.origin+'/';
+   } catch { /* Leave the website blank for the applicant to confirm. */ }
+   for(const [name,value] of Object.entries({businessName:studio.name,city:studio.city,area:studio.area,website}))form.elements.namedItem(name).value=value;
    form.querySelectorAll('[name=activityTypes]').forEach(box=>box.checked=studio.activities.some(a=>a.activityType===box.value));
    notice(status,'Studio details are prefilled from the public reference. Check them before applying. Representation has not been verified.');
   }
