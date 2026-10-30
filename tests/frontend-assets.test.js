@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 // Static asset paths can be broken even when JavaScript passes a syntax check.
 // In particular, Home must not merge until its imported customer-common module exists.
-const publicRoot = fileURLToPath(new URL('../public/', import.meta.url));
+const publicRoot = resolve(fileURLToPath(new URL('../public/', import.meta.url)));
 async function walk(folder) {
   const all = [];
   for (const item of await readdir(folder, {withFileTypes:true})) {
