@@ -64,3 +64,50 @@ test('invalid owner dates cannot retain a stale automatic booking deadline', asy
   assert.throws(() => suggestedCutoff('0001-01-01T08:00', 30), /later session/);
   assert.equal(suggestedCutoff('2026-11-01T15:00', 180).toISOString(), '2026-11-01T04:00:00.000Z');
 });
+
+test('Owner chooses active studios after deactivating legacy fixtures', async () => {
+  const { preferredServiceId } = await import('../public/js/owner-policy.js');
+  const services = [
+    {id:1,name:'Retired fixture',active:false},
+    {id:2,name:'Real source-backed studio',active:true},
+    {id:3,name:'Another active studio',active:true},
+  ];
+  assert.equal(preferredServiceId(services,'',null),'2');
+  assert.equal(preferredServiceId(services,'1',null),'2');
+  assert.equal(preferredServiceId(services,'3',null),'3');
+  assert.equal(preferredServiceId(services,'1',1),'1'); // historical editor is still readable
+  assert.equal(preferredServiceId(services.map(service=>({...service,active:false})),'',null),'');
+});
+
+test('Postman active-studio setup follows the current Owner catalog', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const collection = JSON.parse(await readFile(new URL('../docs/SlotDrop-Fran.postman_collection.json', import.meta.url),'utf8'));
+  const owner = collection.item.flatMap(group => group.item||[]).find(item => item.name==='Owner catalog includes managed inventory');
+  const script = owner.event.find(event => event.listen==='test').script.exec.join('\n');
+  assert.match(script,/services\.find\(service=>service\.active===true\)/);
+  assert.match(script,/collectionVariables\.set\('serviceId'/);
+});
+
+test('demo readiness ignores expired, paused, sold-out and inactive offers', async () => {
+  const { demoInventoryStatus } = await import('../public/js/owner-policy.js');
+  const now = Date.parse('2026-11-04T00:00:00Z');
+  const services = [{id:1,active:true},{id:2,active:false}];
+  const make = (hours, cutoffHours, overrides={}) => ({
+    serviceId:1,status:'open',runsAsScheduled:true,remainingSeats:3,
+    startsAt:new Date(now+hours*3600000).toISOString(),
+    bookingClosesAt:new Date(now+cutoffHours*3600000).toISOString(),...overrides
+  });
+  const unusable = [
+    make(-1,-2), make(30,28,{status:'paused'}), make(30,28,{remainingSeats:0}),
+    make(30,28,{serviceId:2}), make(73,72), make(20,-1),
+    make(20,19,{runsAsScheduled:false})
+  ];
+  const empty = demoInventoryStatus(unusable,services,now,72);
+  assert.equal(empty.state,'empty'); assert.equal(empty.count,0);
+  assert.match(empty.message,/do not reseed/i);
+  const soon = demoInventoryStatus([...unusable,make(14,12)],services,now,72);
+  assert.equal(soon.state,'soon');assert.equal(soon.count,1);
+  const ready = demoInventoryStatus([...unusable,make(14,12),make(50,48)],services,now,72);
+  assert.equal(ready.state,'ready');assert.equal(ready.count,2);
+  assert.equal(demoInventoryStatus([make(73,72)],services,now,96).count,1);
+});

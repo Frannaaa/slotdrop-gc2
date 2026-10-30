@@ -26,6 +26,8 @@ npm run demo
 
 Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
+**Teacher-brief check:** [GC2 submission gate](docs/gc2-submission-gate.md). Once the team has deployed its integrated pages, run `npm run check:gc2 -- https://YOUR-GROUP-DEPLOYMENT` for a read-only check of required screens, APIs and sample inventory. This is deliberately not part of ordinary CI while teammate screens and booking endpoints remain unfinished; it does not create bookings or replace the deployed manual/Postman evidence.
+
 Fresh seeds create eight sessions on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
 
 ## PostgreSQL and deployment
