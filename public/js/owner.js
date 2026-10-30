@@ -172,9 +172,9 @@ function renderMetrics(metrics) {
       "Transactions, not seats",
     ],
     [
-      "Platform revenue",
+      "Modeled platform revenue",
       money(metrics.platformRevenueCentavos),
-      "Commission from confirmed bookings",
+      "Simulated commission from saved bookings",
     ],
     [
       "Average booking",
@@ -189,9 +189,9 @@ function renderMetrics(metrics) {
         : "Confirmed seats",
     ],
     [
-      "Nearly full sessions",
+      "Almost-full sessions",
       String(metrics.nearlyFullSessionCount),
-      "25% or less allocation left, including sold out",
+      "1–25% of allocation left; excludes sold out",
     ],
   ]) {
     const card = element("article", undefined, "metric");
