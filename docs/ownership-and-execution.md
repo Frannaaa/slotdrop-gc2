@@ -38,3 +38,7 @@ The three-PR/two-review individual gate and grading windows still apply. Do not 
 ## Public demo data
 
 GC2 requires no owner login. GET /api/bookings is a non-contact owner summary: no customer name/email or requestId. The receipt readback contract is separate and owned by Janelle. Use fictional customer details for tests. The 72-hour discovery rule lives in public/js/business-config.js; server/config/business.js re-exports it in the discovery upgrade. The browser preview cannot reserve seats or overrule server checks.
+
+## Studio application extension (Fran)
+
+Fran owns reference-catalog.js, providers.js, migrations 002–003, real-studio-demo.json and the studio/application/status pages and matching JS/CSS. They add a pending demo application without publishing, verifying representation or changing a provider. Real business facts are sourced; dates, seats, cutoffs, discounts, payments and bookings are simulated. Cholo still owns Home, Kirsten shared CSS/Browse, Kat Detail/Selection, Janelle quote/save/receipt, Kaitlyn Checkout/Confirmation. This extension follows #32 and does not block core helper/pricing work. See provider-onboarding.md.

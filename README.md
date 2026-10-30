@@ -2,15 +2,15 @@
 
 Group 1 · ITMGT 45.03-YZW
 
-SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. GC2 uses fictional providers and simulated payments.
+SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. The sample catalog uses real studio names and sourced published facts; session dates, allocated seats, cutoffs, offers, bookings and payments are simulated. No partnership or real reservation is created.
 
 ## Build status
 
-This branch: **Owner workspace — PR #29**. Session/offer APIs, the branded owner dashboard, saved-booking list and five metrics.
+This branch: **Sourced studio catalog and pending applications**. It includes the earlier owner/discovery/research stack and adds independent studio profiles plus a saved application/status flow. See Issue #38.
 
 Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
-Merge order: [setup #22](https://github.com/Frannaaa/slotdrop-gc2/pull/22) → [data #27](https://github.com/Frannaaa/slotdrop-gc2/pull/27) → [offers #28](https://github.com/Frannaaa/slotdrop-gc2/pull/28) → [owner #29](https://github.com/Frannaaa/slotdrop-gc2/pull/29). Retarget the next PR to main after each approved merge.
+Reviewed #27/#28 are merged. Next: #36 shared helper, Home after Kirsten's review, #29 owner privacy recheck, then #34 discovery and #32 supporting research. This application/catalog extension follows #32 and does not block the core dependencies. Business #37 is reviewed separately. Retarget after approved dependency merges.
 
 ## Run locally
 
