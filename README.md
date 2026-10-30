@@ -2,15 +2,17 @@
 
 Group 1 · ITMGT 45.03-YZW
 
-SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. GC2 uses fictional providers and simulated payments.
+SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. Session availability, offers, payments and bookings are simulated for the course. Current main still uses legacy fictional studio fixtures. The sourced real-studio catalog is proposed in #39 and is not merged yet.
 
 ## Build status
 
-This branch: **Session offers — PR #28**. Session data plus offer creation and price, capacity, cutoff and status edits.
+Updated 31 October 2026. Main includes the database/session API (#27), offer controls (#28), shared customer helper (#36) and Janelle's pricing quote (#40).
 
-Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
+Kat can connect Selection to `GET /api/pricing/quote?slotId=ID&quantity=N` now. The quote reads stored prices and does not reserve seats. Booking creation and receipt-by-ID remain Janelle's next stages (#15/#16). Customer pages are still being integrated; the shared repository's deployed transaction flow is not ready.
 
-Merge order: [setup #22](https://github.com/Frannaaa/slotdrop-gc2/pull/22) → [data #27](https://github.com/Frannaaa/slotdrop-gc2/pull/27) → [offers #28](https://github.com/Frannaaa/slotdrop-gc2/pull/28) → [owner #29](https://github.com/Frannaaa/slotdrop-gc2/pull/29). Retarget the next PR to main after each approved merge.
+Owner #29 and discovery #34 have passing integration checks and need Janelle's fresh review of their current commits. Merge #29 before #34, retargeting #34 to main afterward. Supporting research #32 and catalog/application #39 follow #34. This business/documentation PR #37 has a separate review.
+
+Chonel's Home #35 is open with passing checks and corrected real-studio/demo copy. He should update his existing branch from main, record his actual tests and obtain Kirsten's review. Kirsten has reported CSS complete, but its PR/class-list handoff is still pending.
 
 ## Run locally
 
@@ -80,8 +82,10 @@ Availability and buddy pricing are the two revenue features. The booking API sti
 
 ## Design and documents
 
-The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. That prototype saves sample data in the browser; it is separate from this API-backed app. The owner branch serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
+The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. The design site includes the private reference app and archived frames. It is separate from the shared repository's submission and does not establish that the official group flow is deployed. The owner branch serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
 
+- [Who owns what and how to start](docs/ownership-and-execution.md)
+- [Step-by-step team guide](https://docs.google.com/document/d/1IYKZaL7qv-mRI3WhzI2rk-raRmC2bQqmZRSAMDUWjO4)
 - [Business case and sources](docs/business.md)
 - [Route contract](docs/routes.md)
 - [Database schema](docs/schema.md)
@@ -97,4 +101,4 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 - **November 4:** deployed Browse must load database sessions through the API.
 - **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
-Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+Fran reviewed and merged Janelle's quote #40. The individual gate still requires two meaningful reviews of distinct teammate PRs; two review submissions on #40 count as one reviewed PR. Approved feature merges, official deployment and full integration checks remain. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
