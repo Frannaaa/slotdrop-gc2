@@ -63,3 +63,11 @@ export function salesState(slot, now = Date.now(), discoveryHours) {
     canResume: slot.status === "paused",
   };
 }
+
+/** Prefer an active activity when creating; preserve historical selection while editing. */
+export function preferredServiceId(services, selected, editing = null) {
+  const prior = services.find(service => String(service.id) === String(selected));
+  if (prior && (prior.active || editing !== null)) return String(prior.id);
+  const firstActive = services.find(service => service.active);
+  return firstActive ? String(firstActive.id) : '';
+}
