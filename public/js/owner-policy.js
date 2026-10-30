@@ -71,3 +71,31 @@ export function preferredServiceId(services, selected, editing = null) {
   const firstActive = services.find(service => service.active);
   return firstActive ? String(firstActive.id) : '';
 }
+
+/**
+ * Operational warning for the course demo, not a substitute for GET /api/slots.
+ * Count only sessions that can appear in Browse *now*, with no database writes.
+ */
+export function demoInventoryStatus(slots, services, now = Date.now(), discoveryHours = 72) {
+  const hours = Number.isFinite(discoveryHours) && discoveryHours > 0 ? discoveryHours : 72;
+  const active = new Set(services.filter(service => service.active).map(service => service.id));
+  const available = slots.filter(slot => {
+    const starts = Date.parse(slot.startsAt);
+    const cutoff = Date.parse(slot.bookingClosesAt);
+    return active.has(slot.serviceId) && slot.status === 'open' &&
+      slot.runsAsScheduled === true && slot.remainingSeats >= 1 &&
+      Number.isFinite(starts) && Number.isFinite(cutoff) &&
+      starts > now && starts < now + hours * 3600000 && cutoff > now;
+  });
+  if (!available.length) {
+    return {state: 'empty', count: 0,
+      message: 'No demo sessions are currently discoverable in Browse. Create a future simulated session within the discovery window, with an open booking deadline and available seats; do not reseed saved bookings.'};
+  }
+  const latestCutoff = Math.max(...available.map(slot => Date.parse(slot.bookingClosesAt)));
+  if (latestCutoff <= now + 24 * 3600000) {
+    return {state: 'soon', count: available.length,
+      message: available.length + ' demo session(s) are discoverable, but all current booking deadlines expire within 24 hours. Prepare future simulated offers for the checkpoint.'};
+  }
+  return {state: 'ready', count: available.length,
+    message: available.length + ' demo session(s) are currently discoverable. These are classroom offers, not real studio availability.'};
+}
