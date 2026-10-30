@@ -6,7 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-This branch: **CP0 setup — PR #22**. Health endpoint, route/schema contracts and the first business draft.
+This branch: **Session offers — PR #28**. Session data plus offer creation and price, capacity, cutoff and status edits.
 
 Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
@@ -21,10 +21,10 @@ npm ci
 npm run check
 npm test
 npm run check:sql
-npm start
+npm run demo
 ```
 
-Open http://localhost:3000/api/health. Database-backed routes and the local demo start in PR #27.
+Open http://localhost:3000/api/slots. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
 Fresh seeds create eight sessions on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
 

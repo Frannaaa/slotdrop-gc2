@@ -1,6 +1,6 @@
 # API and screen contract
 
-Only GET /api/health is implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
+Health, session list/detail/create/edit and the price quote are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
 
 ## Routes
 
@@ -14,7 +14,7 @@ Only GET /api/health is implemented on this branch. Other routes below are plann
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints} | 500 unexpected failure | Fran |
 | GET /api/bookings | None | 200 saved receipt array | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
-| GET /api/pricing/quote | slotId, quantity | Planned 200 quote | Planned 400/404/409 | Janelle |
+| GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
 | POST /api/bookings | Booking fields below | Planned 201 created; 200 identical retry | Planned 400/404/409 | Janelle |
 | GET /api/bookings/:id | UUID | Planned 200 saved receipt | Planned 400 malformed; 404 unknown | Janelle |
 
@@ -43,7 +43,7 @@ The owner catalog includes paused and expired inventory. Its services include id
 
 ## Session creation and edits
 
-POST accepts serviceId, startsAt, capacity, originalPriceCentavos, offerPriceCentavos, optional buddyPriceCentavos, optional bookingClosesAt and runsAsScheduled=true. IDs, quantities and prices must be JSON integers; timestamps must be valid ISO dates with a timezone.
+POST accepts serviceId, startsAt, capacity, originalPriceCentavos, offerPriceCentavos, optional buddyPriceCentavos, optional bookingClosesAt and runsAsScheduled=true. IDs, quantities and prices must be JSON integers; timestamps must be valid ISO dates with a timezone and resolve to a UTC year from 0001 to 9999.
 
 If bookingClosesAt is omitted, derive it from the activity default. Require now < cutoff < start. Providers may create sessions farther than 72 hours ahead; they become discoverable only inside the window. Provider and location come from the activity, not duplicated browser fields.
 
@@ -62,6 +62,8 @@ All per-seat amounts are integers from 1 to 100,000,000 centavos. Require buddy 
 ## Planned quote and booking contract
 
 The remaining sections define Janelle's integration work; they are not working booking endpoints yet.
+
+GET /api/pricing/quote is implemented in server/services/pricing.js. It accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings will reuse the same priceQuote() and checkBookable() functions.
 
 A quote returns slotId, quantity, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, groupSavingsCentavos, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, discountPercent and quotedAt.
 

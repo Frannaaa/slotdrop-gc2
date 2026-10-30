@@ -56,7 +56,7 @@ Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-inc
 | Save / Confirmation | Fetch by returned booking ID so refresh displays the saved receipt, not a browser-calculated success screen. | GET /api/bookings/:id. Measure from saved confirmed receipts; no event conversion rate is currently collected. |
 | Manage / Owner | Separate forms for releasing/editing seats and tables for saved bookings and five metrics support allocation decisions. | GET /api/owner/catalog, GET /api/bookings, GET /api/metrics; POST/PATCH /api/slots. |
 
-Status on 30 October: public PR #27 (database/session API) and #28 (offer controls) are reviewed and merged. #29 has a privacy fix awaiting recheck; #36 (shared helper) and #34 (discovery) have their requested code/doc-link/log-table fixes pushed, awaiting approval. #32 supporting research and this business draft in #37 are separate unapproved work. Janelle owns quote/save/receipt implementation in the official group build. The private reference has the connected flow, but does not replace teammates’ required code contributions or reviews. Home PR #35 also needs the shared helper and session API before it can load featured sessions.
+Status on 31 October: #27/#28 (database/session/offer APIs), #36 (shared helper) and Janelle's quote #40 are merged. #29/#34 have integration commits awaiting Janelle's recheck; #32 research, this business draft #37 and catalog/application #39 remain unmerged. Home #35 needs Kirsten's review after updating its branch. The private reference does not replace members' own code, reviews or individual gates.
 
 ## 5. Rules, enforcement and customer result
 
