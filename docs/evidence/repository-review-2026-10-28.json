@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-28",
+  "reviewedBranches": [
+    {
+      "name": "g1/m1-cp0-contract",
+      "commit": "4a25992769b3572e2526f3ba5fc93953dd71efae"
+    },
+    {
+      "name": "g1/m1-offer-controls",
+      "commit": "75d6edaf1ef40180bdd4873d47210b9e41215290"
+    },
+    {
+      "name": "g1/m1-owner-workspace",
+      "commit": "35ebe839e2f26a14aa3f06bb936c4ba95ebe8e7f"
+    },
+    {
+      "name": "g1/m1-session-data",
+      "commit": "9190a0da5feca27873d563a65470aaa09bfb9838"
+    },
+    {
+      "name": "g3/m1-cp0-contract",
+      "commit": "2262f0364b0b56ba893ec01fce13346d593ccb1a"
+    },
+    {
+      "name": "main",
+      "commit": "a5d3e84439c170d384002602d9b287f2c16bac76"
+    }
+  ],
+  "historyScan": {
+    "commits": 64,
+    "textBlobs": 282,
+    "privateKeyOrTokenPatternFindings": 0,
+    "trackedEnvOrLocalDatabaseOrNodeModulesPaths": 0,
+    "scope": "Recognizable private-key/token patterns in reachable text blobs; binary font/image assets excluded."
+  },
+  "localBranchChecks": {
+    "22": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "sqlGroups": 8
+    },
+    "27": {
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "sqlGroups": 8
+    },
+    "28": {
+      "passed": 12,
+      "failed": 0,
+      "skipped": 1,
+      "sqlGroups": 8
+    },
+    "29": {
+      "passed": 19,
+      "failed": 0,
+      "skipped": 1,
+      "sqlGroups": 8
+    }
+  },
+  "postman": {
+    "runner": "Newman 6.2.1",
+    "requests": 21,
+    "assertions": 27,
+    "failures": 0,
+    "serviceIdOverride": 4,
+    "resolvedDefaultCutoffMinutes": 30,
+    "scope": "Disposable PGlite database with a fictional saved receipt; not public booking challenge evidence."
+  },
+  "productionDependencyAudit": {
+    "knownVulnerabilities": 0
+  },
+  "fixes": [
+    "Scan public/ rather than requiring public/js/ before frontend files exist.",
+    "Run Docker and owner restart checks only when their files are present.",
+    "Use the Postman serviceId variable and verify the activity cutoff.",
+    "Replace stale setup copy and repeated PR/Issue progress notes.",
+    "Remove the unused local Issue-board snapshot."
+  ],
+  "pending": [
+    "Reviewed CP0 merge and actual collaborator access/assignments.",
+    "Customer booking integration and public API/database deployment.",
+    "Deployed challenge/baseline evidence, personal predictions/recording and Git contribution requirements."
+  ],
+  "followUp": {
+    "date": "2026-10-28",
+    "fixes": [
+      "Expose serviceActive in session JSON.",
+      "Reject null characters in q and area before querying.",
+      "Update owner availability labels and resume controls without replacing cards or clearing drafts.",
+      "Check GC1 text references against the proposal and feedback."
+    ],
+    "localBranchTests": {
+      "22": {
+        "passed": 5,
+        "skipped": 0
+      },
+      "27": {
+        "passed": 10,
+        "skipped": 0
+      },
+      "28": {
+        "passed": 14,
+        "skipped": 1
+      },
+      "29": {
+        "passed": 22,
+        "skipped": 1
+      }
+    },
+    "sqlGroupsPerBranch": 8,
+    "syntax": "Passed on all four branches",
+    "runtime": "Node 24.22.1; PGlite",
+    "newCI": {
+      "commit": "95bd31e6dbff39d14e643eaea45f74d061a9400a",
+      "conclusion": "success",
+      "url": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40611964812"
+    },
+    "regressionBeforeFix": {
+      "inactiveActivityDetail": "serviceActive missing",
+      "nullCharacterSearch": "500 rather than 400"
+    },
+    "clockRegression": "Controlled clock and lightweight DOM; checks deadline/window transitions, visibility recovery, retained cards/focus/draft, no data fetch."
+  },
+  "latestVerifiedCI": {
+    "commit": "8af3c2a201d3c48d36d0ec9b32f85b5c99cd093a",
+    "conclusion": "success",
+    "url": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40615055293"
+  }
+}

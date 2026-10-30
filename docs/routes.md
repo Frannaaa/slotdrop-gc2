@@ -1,6 +1,6 @@
 # API and screen contract
 
-Only GET /api/health is implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
+Health, session list/detail/create/edit, owner catalog, saved-booking list and metrics are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
 
 ## Routes
 
@@ -12,7 +12,7 @@ Only GET /api/health is implemented on this branch. Other routes below are plann
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints} | 500 unexpected failure | Fran |
-| GET /api/bookings | None | 200 saved receipt array | 500 unexpected failure | Fran |
+| GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | Planned 200 quote | Planned 400/404/409 | Janelle |
 | POST /api/bookings | Booking fields below | Planned 201 created; 200 identical retry | Planned 400/404/409 | Janelle |
@@ -43,7 +43,7 @@ The owner catalog includes paused and expired inventory. Its services include id
 
 ## Session creation and edits
 
-POST accepts serviceId, startsAt, capacity, originalPriceCentavos, offerPriceCentavos, optional buddyPriceCentavos, optional bookingClosesAt and runsAsScheduled=true. IDs, quantities and prices must be JSON integers; timestamps must be valid ISO dates with a timezone.
+POST accepts serviceId, startsAt, capacity, originalPriceCentavos, offerPriceCentavos, optional buddyPriceCentavos, optional bookingClosesAt and runsAsScheduled=true. IDs, quantities and prices must be JSON integers; timestamps must be valid ISO dates with a timezone and resolve to a UTC year from 0001 to 9999.
 
 If bookingClosesAt is omitted, derive it from the activity default. Require now < cutoff < start. Providers may create sessions farther than 72 hours ahead; they become discoverable only inside the window. Provider and location come from the activity, not duplicated browser fields.
 
@@ -54,6 +54,7 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - A passed cutoff can close sales immediately.
 - Reopening paused or cancelled inventory requires a future cutoff/start, available allocation, an active activity and a session confirmed to run. Read the current time after acquiring the database lock.
 - Cancelling with confirmed bookings returns 409.
+- Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
 - Changing the start time is unsupported and returns 400.
 - Existing receipt amounts and times stay unchanged.
 
@@ -95,7 +96,7 @@ An identical normalized retry returns its original receipt with 200, even after 
 
 ## Saved receipts and metrics
 
-Saved receipts contain id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt. The implemented owner list also joins serviceName and providerName. Confirmation must read saved amounts by ID, not rebuild a receipt from browser storage.
+Public POST /api/bookings responses and GET /api/bookings/:id return an explicit saved receipt: id, slotId, quantity, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, createdAt, serviceName and providerName. Customer names/emails and requestId remain stored internally for validation and retry matching, but are omitted from all public booking responses. A public owner-list ID must not reveal contacts through receipt readback. Confirmation displays the booking reference and saved activity/amounts, without a guest-name field. Clients retain the retry key they generated; they never recover it from a public receipt.
 
 Metrics use confirmed bookings only:
 
@@ -125,6 +126,20 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 
 Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
 
-## Proposed studio research discovery (Issue #31)
+The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
 
-GET /api/activities returns a read-only research catalog with offerings, checkedAt, currency and notice. q is a literal studio/activity/branch search up to 100 characters; type=pottery|painting|pilates; area=Quezon City|Makati; tag is a controlled value from the catalog. Invalid, unsupported or duplicate filters return 400 INVALID_INPUT. No matches returns 200 with offerings=[]. This does not change /api/slots or create booking allocations. See studio-discovery.md for official sources and classifications. Fran owns research/API; Kirsten owns discovery styling/UI.
+## Released-seat discovery contract (Issue #33)
+
+The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
+
+GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. Sort uses the effective per-seat tier for the requested party; results still obey dates, provider cutoffs, confirmed-to-run state and remaining allocation. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
+
+Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes, not arbitrary public tags. The existing quote and receipt contracts do not change. Cards may preview the stored standard/buddy tier, but quote and save remain server-authoritative.
+
+Primary UI controls are When, Area and People, with optional activity shortcuts and search/category/attribute/sort under More filters. Show selected party total, per-person price, actual cutoff, duration and remaining seats. A ceramic painting session has primary type pottery but can match a painting search; use Canvas painting as the narrower painting-type label. Do not force a category choice before showing results.
+
+Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.
+
+## Studio research
+
+`GET /api/activities` returns sourced studio references, not live inventory. See `docs/studio-discovery.md`. The booking API remains `/api/slots`.

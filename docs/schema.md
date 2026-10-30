@@ -60,3 +60,9 @@ Schema creation refuses existing tables. Seeding refuses existing data. Neither 
 
 PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local demo and SQL checks. Public database hosting is not yet configured.
 
+
+## Explicit activity attributes and safe upgrade
+
+services adds activity_type (pottery/painting/pilates/dance/other), optional technique (handbuilding/wheel-throwing/ceramic-decoration), inclusions TEXT[] (materials/painting/firing/equipment), preparation_note and cancellation_note. Defaults preserve unknown facts rather than deriving them from free-form user tags. Category remains creative/active for broad reporting.
+
+Fresh schema and seed contain these fields. Existing databases use db/migrations/001_activity_attributes.sql through server/repositories/migrations.js. Configured production startup and the persistent local demo apply this additive, repeatable upgrade before serving. Only the known fictional activity names with type=other receive demo metadata. Existing session dates, allocated seats, prices, saved receipts and customized notes are preserved. Never rerun seed.sql to apply this change.

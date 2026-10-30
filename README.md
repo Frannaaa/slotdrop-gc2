@@ -6,7 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-This branch: **CP0 setup — PR #22**. Health endpoint, route/schema contracts and the first business draft.
+This branch: **Owner workspace — PR #29**. Session/offer APIs, the branded owner dashboard, saved-booking list and five metrics.
 
 Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
@@ -21,10 +21,10 @@ npm ci
 npm run check
 npm test
 npm run check:sql
-npm start
+npm run demo
 ```
 
-Open http://localhost:3000/api/health. Database-backed routes and the local demo start in PR #27.
+Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
 Fresh seeds create eight sessions on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
 
@@ -99,8 +99,8 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 
 Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
 
-## Real studio research
+## Released-seat discovery revision
 
-Open `/studios.html` for official price/schedule references from five real businesses. These are independent research listings, not confirmed partners or released seats. The full transactional implementation stays in the feature PRs. See [discovery specification](docs/studio-discovery.md).
+The main customer path is Explore sessions, with time/area/party size first, optional activity filters and a saved in-app booking. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.
 
-The studio directory is supporting research. The main product is in-app released-seat booking; the additional persisted filters/metadata are proposed in PR #34 after #27–29. Research links and reference-demo links do not replace the official group booking flow.
+Studio research is available at `/studios.html` through `GET /api/activities`. It is separate from the database-backed booking inventory. See `docs/studio-discovery.md`.
