@@ -5,6 +5,7 @@ import {
   cutoffRequestValue,
   changedOfferFields,
   salesState,
+  preferredServiceId,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -376,7 +377,7 @@ async function load() {
       option.disabled = !service.active;
       $("service").append(option);
     }
-    if (selected) $("service").value = selected;
+    $("service").value = preferredServiceId(catalog.services, selected, editing);
     renderMetrics(metrics);
     renderSessions();
     renderBookings(bookings);
