@@ -124,7 +124,7 @@ function reset() {
   setBusy(false);
 }
 function edit(slot) {
-  if (busy) return;
+  if (busy || Date.parse(slot.startsAt) <= Date.now()) return;
   reset();
   editingSnapshot = { ...slot };
   editingCutoff = slot.bookingClosesAt;
@@ -191,7 +191,7 @@ function renderMetrics(metrics) {
     [
       "Nearly full sessions",
       String(metrics.nearlyFullSessionCount),
-      "25% or less allocation left",
+      "25% or less allocation left, including sold out",
     ],
   ]) {
     const card = element("article", undefined, "metric");
@@ -206,12 +206,14 @@ function renderMetrics(metrics) {
 function refreshSalesStates() {
   if (!loaded) return;
   const now = Date.now();
-  for (const { slot, tag, help, toggle } of salesViews) {
+  for (const { slot, tag, help, toggle, editButton } of salesViews) {
     const state = salesState(slot, now, catalog.discoveryHours);
     tag.textContent = state.label;
     help.textContent = state.help || "";
     help.hidden = !state.help;
-    if (toggle) toggle.disabled = busy || (slot.status === "paused" && !state.canResume);
+    const started = Date.parse(slot.startsAt) <= now;
+    if (editButton) editButton.disabled = busy || started;
+    if (toggle) toggle.disabled = busy || started || (slot.status === "paused" && !state.canResume);
   }
 }
 function renderSessions() {
@@ -266,6 +268,8 @@ function renderSessions() {
     salesViews.push(view);
     const actions = element("div", undefined, "actions"),
       editButton = element("button", "Edit offer");
+    view.editButton = editButton;
+    editButton.disabled = Date.parse(slot.startsAt) <= Date.now();
     editButton.type = "button";
     editButton.addEventListener("click", () => edit(slot));
     actions.append(editButton);
@@ -276,7 +280,7 @@ function renderSessions() {
       );
       toggle.type = "button";
       view.toggle = toggle;
-      if (slot.status === "paused" && !state.canResume) toggle.disabled = true;
+      if (Date.parse(slot.startsAt) <= Date.now() || (slot.status === "paused" && !state.canResume)) toggle.disabled = true;
       toggle.addEventListener("click", async () => {
         if (busy) return;
         setBusy(true);
@@ -318,7 +322,6 @@ function renderBookings(rows) {
   wrap.setAttribute("aria-label", "Saved bookings; scroll horizontally for all amounts");
   for (const title of [
     "Booking / activity",
-    "Customer",
     "Session",
     "Seats",
     "Rate",
@@ -335,7 +338,6 @@ function renderBookings(rows) {
     const tr = element("tr");
     for (const value of [
       row.id + " · " + row.serviceName,
-      row.customerName,
       time(row.sessionStartsAt),
       String(row.quantity),
       row.pricingType + " · " + money(row.unitPriceCentavos),

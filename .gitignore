@@ -6,4 +6,3 @@ node_modules/
 .local-data/
 .release-state.json
 
-node_modules

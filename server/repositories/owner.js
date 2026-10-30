@@ -10,7 +10,11 @@ export async function ownerCatalog(db) {
     slots: slots.map(slotResponse) };
 }
 export async function listBookings(db) {
-  const {rows} = await db.query(`SELECT b.*,s.name AS service_name,p.name AS provider_name FROM bookings b JOIN slots sl ON sl.id=b.slot_id
+  // The GC2 owner screen has no login. Return an explicit non-contact summary.
+  const {rows} = await db.query(`SELECT b.id,b.slot_id,b.quantity,b.status,b.session_starts_at,
+    b.original_unit_price_centavos,b.offer_unit_price_centavos,b.pricing_type,b.unit_price_centavos,
+    b.commission_basis_points,b.total_price_centavos,b.platform_fee_centavos,b.provider_payout_centavos,
+    b.created_at,s.name AS service_name,p.name AS provider_name FROM bookings b JOIN slots sl ON sl.id=b.slot_id
     JOIN services s ON s.id=sl.service_id JOIN providers p ON p.id=s.provider_id ORDER BY b.created_at DESC,b.id`);
   const numeric = new Set(['slot_id','quantity','original_unit_price_centavos','offer_unit_price_centavos','unit_price_centavos','commission_basis_points','total_price_centavos','platform_fee_centavos','provider_payout_centavos']);
   return rows.map(row => Object.fromEntries(Object.entries(row).map(([key,value]) => [key.replace(/_([a-z])/g,(_match,letter)=>letter.toUpperCase()),

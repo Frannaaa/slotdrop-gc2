@@ -35,7 +35,16 @@ export async function listSlots(db, query, now) {
   const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',
     `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
   // position() is a literal substring match, so user %/_ do not become wildcards.
-  if (query.q) { values.push(query.q.trim()); where.push(`(position(lower($${values.length}) in lower(s.name)) > 0 OR position(lower($${values.length}) in lower(p.name)) > 0 OR position(lower($${values.length}) in lower(s.activity_type || ' ' || COALESCE(s.technique,'') || ' ' || array_to_string(s.inclusions,' '))) > 0)`); }
+  if (query.q?.trim()) {
+    values.push(query.q.trim());
+    const term = '$' + values.length;
+    where.push(`(position(lower(${term}) in lower(s.name)) > 0
+      OR position(lower(${term}) in lower(p.name)) > 0
+      OR position(lower(${term}) in lower(NULLIF(s.activity_type,'other'))) > 0
+      OR position(lower(${term}) in lower(COALESCE(s.technique,''))) > 0
+      OR EXISTS (SELECT 1 FROM unnest(s.inclusions) AS included(value)
+        WHERE position(lower(${term}) in lower(included.value)) > 0))`);
+  }
   if (query.category) { values.push(query.category); where.push('s.category=$' + values.length); }
   if (query.area) { values.push(query.area); where.push('lower(p.area)=lower($' + values.length + ')'); }
   if (query.type) { values.push(query.type); where.push('s.activity_type=$' + values.length); }

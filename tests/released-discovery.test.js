@@ -3,6 +3,25 @@ import { test } from 'node:test';
 import { fixture } from './helpers.js';
 import { migrateDatabase } from '../server/repositories/migrations.js';
 import { insertDemoReceipt } from './receipts.js';
+import { DISCOVERY_HOURS as serverHours } from '../server/config/business.js';
+import { DISCOVERY_HOURS as browserHours } from '../public/js/business-config.js';
+
+test('browser and server import the same discovery rule', () => {
+ assert.equal(serverHours,browserHours);
+});
+
+test('metadata search cannot manufacture matches across fields or placeholder types', async () => {
+ const f=await fixture();
+ try {
+  const get=async q=>{const r=await fetch(f.base+'/api/slots?q='+encodeURIComponent(q));assert.equal(r.status,200);return r.json();};
+  assert.deepEqual(await get('g m'),[]);
+  assert.deepEqual((await get('   ')).map(x=>x.id),(await(await fetch(f.base+'/api/slots')).json()).map(x=>x.id));
+  await f.db.query("UPDATE services SET activity_type='other' WHERE id=1");
+  assert.deepEqual(await get('other'),[]);
+  assert.ok((await get('handbuilding')).length>0);
+  assert.ok((await get('painting')).length>0);
+ } finally { await f.close(); }
+});
 
 test('primary types, overlapping facts and literal search share one session inventory',async()=>{
  const f=await fixture();try{

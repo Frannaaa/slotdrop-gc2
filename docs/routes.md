@@ -12,7 +12,7 @@ Health, session list/detail/create/edit, owner catalog, saved-booking list and m
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints} | 500 unexpected failure | Fran |
-| GET /api/bookings | None | 200 saved receipt array | 500 unexpected failure | Fran |
+| GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | Planned 200 quote | Planned 400/404/409 | Janelle |
 | POST /api/bookings | Booking fields below | Planned 201 created; 200 identical retry | Planned 400/404/409 | Janelle |
@@ -54,6 +54,7 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - A passed cutoff can close sales immediately.
 - Reopening paused or cancelled inventory requires a future cutoff/start, available allocation, an active activity and a session confirmed to run. Read the current time after acquiring the database lock.
 - Cancelling with confirmed bookings returns 409.
+- Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
 - Changing the start time is unsupported and returns 400.
 - Existing receipt amounts and times stay unchanged.
 
@@ -95,7 +96,7 @@ An identical normalized retry returns its original receipt with 200, even after 
 
 ## Saved receipts and metrics
 
-Saved receipts contain id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt. The implemented owner list also joins serviceName and providerName. Confirmation must read saved amounts by ID, not rebuild a receipt from browser storage.
+Saved receipts contain id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt. The unauthenticated owner list is a separate explicit summary: it includes booking/session IDs, quantity, status, saved financial values, dates, serviceName and providerName, but omits customerName, customerEmail and requestId. It never selects future booking columns automatically. Confirmation must read saved amounts by ID, not rebuild a receipt from browser storage.
 
 Metrics use confirmed bookings only:
 
@@ -136,3 +137,5 @@ GET /api/slots keeps q/category/area/when/people and adds optional type (pottery
 Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes, not arbitrary public tags. The existing quote and receipt contracts do not change. Cards may preview the stored standard/buddy tier, but quote and save remain server-authoritative.
 
 Primary UI controls are When, Area and People, with optional activity shortcuts and search/category/attribute/sort under More filters. Show selected party total, per-person price, actual cutoff, duration and remaining seats. A ceramic painting session has primary type pottery but can match a painting search; use Canvas painting as the narrower painting-type label. Do not force a category choice before showing results.
+
+Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.

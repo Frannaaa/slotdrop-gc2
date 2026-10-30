@@ -1,4 +1,5 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
+import { DISCOVERY_HOURS } from './business-config.js';
 export const money = (value) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(
     value / 100,
@@ -25,7 +26,9 @@ export function positive(value, max = Number.MAX_SAFE_INTEGER) {
     Number(value) < 1 ||
     Number(value) > max
   )
-    throw new Error("Open a valid session and choose 1 to 100 seats.");
+    throw new Error(max === Number.MAX_SAFE_INTEGER
+      ? "Open a valid session link."
+      : `Choose a whole number from 1 to ${max}.`);
   return Number(value);
 }
 export function pageParameters(search, allowed) {
@@ -50,7 +53,7 @@ export async function request(path, options = {}) {
     if (!response.ok) {
       const error = new Error(data?.error?.message || "Request failed.");
       error.code = data?.error?.code;
-      error.quote = data.quote;
+      error.quote = data?.quote;
       error.status = response.status;
       throw error;
     }
@@ -84,7 +87,7 @@ export function available(slot, quantity = 1) {
     slot.remainingSeats >= quantity &&
     Date.parse(slot.bookingClosesAt) > now &&
     start > now &&
-    start < now + 72 * 3600000
+    start < now + DISCOVERY_HOURS * 3600000
   );
 }
 export function previewPrice(slot, quantity=1) {
