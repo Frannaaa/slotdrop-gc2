@@ -1,3 +1,4 @@
+import { timestamp } from '../server/lib/validation.js';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import express from 'express';
@@ -81,3 +82,13 @@ test('unsupported JSON charset and content encoding return 415 JSON', async () =
   });
 });
 
+
+
+test('timestamps stay within supported UTC years after timezone normalization', () => {
+  for (const value of ['9999-12-31T23:59:59.999-23:59','0000-01-01T00:00:00Z','0001-01-01T00:00:00+01:00']) {
+    assert.throws(() => timestamp(value, 'startsAt'), error => error.status === 400 && error.code === 'INVALID_INPUT');
+  }
+  assert.equal(timestamp('0001-01-01T00:00:00Z','startsAt').toISOString(),'0001-01-01T00:00:00.000Z');
+  assert.equal(timestamp('9999-12-31T23:59:59.999Z','startsAt').toISOString(),'9999-12-31T23:59:59.999Z');
+  assert.equal(timestamp('2028-01-01T00:00:00+08:00','startsAt').toISOString(),'2027-12-31T16:00:00.000Z');
+});
