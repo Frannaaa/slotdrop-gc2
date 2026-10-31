@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Choose your seats | SlotDrop</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script type="module" src="/js/selection.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+<a class="logo" href="/">slotdrop<span></span></a>
+<nav aria-label="Main navigation"><a href="/browse.html">Explore sessions</a><a href="/owner.html">Demo owner</a></nav>
+</header>
+<main id="main">
+<p class="eyebrow">Your plan starts here</p>
+<h1>Who's coming?</h1>
+<form id="selection" class="panel">
+<label>Number of people<input id="quantity" name="quantity" type="number" min="1" max="100" step="1" value="1" required /></label>
+<p id="chosenSession" role="status">Loading session details...</p>
+<p id="summary" class="total"></p>
+<p id="status" role="status"></p>
+<button class="text-button" id="retry" type="button">Refresh quote</button>
+<button id="continue" class="button" type="submit" disabled>Continue to booking</button>
+</form>
+</main>
+<a href="/browse.html">Back to activities</a>
+<footer>
+Real studio references. Sample schedules and offers. Simulated bookings and payments. <a href="/studios.html">Studio research &amp; sources</a>.
+<a href="/provider-apply.html">For studios: apply for a page </a></footer>
+</body>
+</html>
