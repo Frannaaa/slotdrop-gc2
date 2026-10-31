@@ -1,18 +1,54 @@
 <!doctype html>
+<!-- Group assignment: Cholo. See docs/ownership-and-execution.md. -->
 <html lang="en">
-<head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>SlotDrop | Course demo</title>
- <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
- <main>
-  <p class="eyebrow">SLOTDROP / COURSE DEMO</p>
-  <h1>Free this afternoon or weekend?</h1>
-  <p>Find a nearby activity with an available spot and a provider-approved deal.</p>
-  <p>Customer booking is not available yet. The customer pages are still being built. All demonstration providers and sessions are fictional.</p>
-  <p><a href="/api/health">Server status</a></p>
- </main>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nearby activities. Released seats. | SlotDrop</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script type="module" src="/js/home.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="logo" href="/">slotdrop<span>●</span></a>
+      <nav aria-label="Main navigation">
+        <a href="/browse.html">Explore sessions</a>
+        <a href="/owner.html">Demo owner</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <p class="eyebrow">Nearby activities / Next 72 hours</p>
+        <h1>A free evening.<br />An open seat.</h1>
+        <p>
+          Book nearby activities happening in the next 72 hours, with released seats and upfront prices.
+        </p>
+        <a class="button" href="/browse.html">Explore available sessions ↗</a>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <h2>Released seats near you</h2>
+          <a href="/browse.html">See all activities</a>
+        </div>
+        <p id="status" role="status"></p>
+        <button id="retry" class="text-button" type="button">
+          Refresh activities
+        </button>
+        <div id="featured" class="activity-grid"></div>
+      </section>
+
+      <section class="how-strip" aria-label="How released seats work">
+        <h2>A small opening. A good plan.</h2>
+        <p>Providers release a limited number of seats in sessions already going ahead. Pick a time and group size, check the price, then save your booking.</p>
+        <p class="reference">Course demo: uses real studio public details, but session dates, seats, and offers are simulated. Published studio research is linked in the footer.</p>
+      </section>
+    </main>
+
+    <footer>
+      Fictional booking inventory. Simulated payments. <a href="/studios.html">Studio research &amp; sources</a>.
+    </footer>
+  </body>
 </html>
