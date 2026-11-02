@@ -130,4 +130,14 @@ Other than the owner workspace, customer screens remain team implementation work
 
 The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
 
-Whitespace-only q is intentionally ignored. The 100-character limit applies to the raw query value before trimming.
+## Released-seat discovery contract (Issue #33)
+
+The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
+
+GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. Sort uses the effective per-seat tier for the requested party; results still obey dates, provider cutoffs, confirmed-to-run state and remaining allocation. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
+
+Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes, not arbitrary public tags. The existing quote and receipt contracts do not change. Cards may preview the stored standard/buddy tier, but quote and save remain server-authoritative.
+
+Primary UI controls are When, Area and People, with optional activity shortcuts and search/category/attribute/sort under More filters. Show selected party total, per-person price, actual cutoff, duration and remaining seats. A ceramic painting session has primary type pottery but can match a painting search; use Canvas painting as the narrower painting-type label. Do not force a category choice before showing results.
+
+Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.
