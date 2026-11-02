@@ -53,7 +53,7 @@ export async function request(path, options = {}) {
     if (!response.ok) {
       const error = new Error(data?.error?.message || "Request failed.");
       error.code = data?.error?.code;
-      error.quote = data?.quote;
+      error.quote = data?.quote ?? data?.error?.quote;
       error.status = response.status;
       throw error;
     }
