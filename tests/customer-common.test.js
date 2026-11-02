@@ -39,6 +39,18 @@ test('invalid session IDs and quantities have distinct guidance', () => {
   assert.equal(positive('1'), 1);
 });
 
+test('a changed-price response preserves the fresh quote for Checkout in both API envelopes', async t => {
+  const quote={slotId:1,quantity:2,unitPriceCentavos:150000,totalPriceCentavos:300000,pricingType:'buddy'};
+  let data;
+  t.mock.method(globalThis,'fetch',async()=>({ok:false,status:409,json:async()=>data}));
+  for (const body of [{error:{code:'PRICE_CHANGED',message:'Review the new total.',quote}},{error:{code:'PRICE_CHANGED',message:'Review the new total.'},quote}]) {
+    data=body;
+    await assert.rejects(request('/api/bookings',{method:'POST'}),error=>{
+      assert.equal(error.code,'PRICE_CHANGED');assert.equal(error.status,409);assert.deepEqual(error.quote,quote);return true;
+    });
+  }
+});
+
 test('availability previews respect the configured discovery boundary', t => {
   const now=Date.parse('2026-11-01T00:00:00Z');
   t.mock.method(Date, 'now', () => now);

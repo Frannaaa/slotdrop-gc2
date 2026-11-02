@@ -14,7 +14,8 @@ export function errorHandler(error, _req, res, next) {
     return res.status(415).json({ error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: 'Use UTF-8 JSON with a supported content encoding.' } });
   }
   if ([400, 404, 409, 503].includes(error.status) && typeof error.code === 'string') {
-    return res.status(error.status).json({ error: { code: error.code, message: error.message } });
+    // details carries safe extras such as the fresh quote on PRICE_CHANGED.
+    return res.status(error.status).json({ error: { code: error.code, message: error.message, ...error.details } });
   }
   // Unexpected internal messages and stack traces never go to the browser.
   return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected server error occurred.' } });
