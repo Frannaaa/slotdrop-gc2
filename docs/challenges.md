@@ -91,6 +91,8 @@ The skipped case requires real PostgreSQL. These local runs used Node 24.22.1 an
 
 Normalized timestamps must stay within UTC years 0001-9999. A date crossing into year 10000 previously returned 500 in the PGlite demo; it now returns 400 before SQL. Boundary and ordinary timezone conversions are covered by tests/http.test.js.
 
-Local checks for this branch: syntax passed, 17 tests passed, 1 PostgreSQL-only tests skipped, and all eight SQL groups passed (Node 24.22.1/PGlite).
+Local checks for this branch: syntax passed, 29 tests passed, 1 PostgreSQL-only tests skipped, and all eight SQL groups passed (Node 24.22.1/PGlite).
 
 Tests also send invalid/oversized edits, including compressed payloads, and verify unchanged inventory and receipts. Six simultaneous duplicate creates produce one new session; conflicting capacity, cancellation and price edits preserve confirmed seats and receipt amounts. Real PostgreSQL execution is left to this commit's CI run.
+
+Workspace requests now abort after 15 seconds, including response-body reads. Refresh and editing recover after failure without clearing drafts. A timed-out save is never automatically retried: it may have completed, so the owner is asked to refresh and check first. Controlled-time tests cover stalled reads/bodies/writes, timer cleanup and recovery. This is not a new full browser walkthrough.
