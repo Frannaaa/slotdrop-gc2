@@ -1,6 +1,6 @@
 # API and screen contract
 
-Health, session list/detail/create/edit, the price quote, owner catalog, saved-booking list and metrics are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
+Health, session list/detail/create/edit, pricing quote, owner catalog, saved-booking list, metrics, booking save and receipt readback are implemented. JSON uses camelCase; SQL uses snake_case.
 
 ## Routes
 
@@ -15,8 +15,8 @@ Health, session list/detail/create/edit, the price quote, owner catalog, saved-b
 | GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
-| POST /api/bookings | Booking fields below | Planned 201 created; 200 identical retry | Planned 400/404/409 | Janelle |
-| GET /api/bookings/:id | UUID | Planned 200 saved receipt | Planned 400 malformed; 404 unknown | Janelle |
+| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT | Janelle |
+| GET /api/bookings/:id | UUID | 200 saved receipt | 400 malformed; 404 BOOKING_NOT_FOUND | Janelle |
 
 Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.
 
@@ -60,11 +60,11 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 
 All per-seat amounts are integers from 1 to 100,000,000 centavos. Require buddy < offer < regular when the buddy rate is enabled. The actual regular price must be checked with the provider; code cannot establish that it is genuine.
 
-## Planned quote and booking contract
+## Quote and booking contract
 
-The remaining sections define Janelle's integration work; they are not working booking endpoints yet.
+Janelle's quote, booking save and receipt readback are implemented in server/services/pricing.js and server/services/bookings.js.
 
-GET /api/pricing/quote is implemented in server/services/pricing.js. It accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings will reuse the same priceQuote() and checkBookable() functions.
+GET /api/pricing/quote is implemented in server/services/pricing.js. It accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings reuses the same priceQuote() and checkBookable() functions.
 
 A quote returns slotId, quantity, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, groupSavingsCentavos, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, discountPercent and quotedAt.
 
@@ -92,7 +92,7 @@ On one checked-out database client:
 5. Compare expectedTotalCentavos before inserting.
 6. Insert receipt snapshots, commit and release the client.
 
-Insufficient seats return 409 SLOT_UNAVAILABLE. A changed acknowledged amount returns 409 PRICE_CHANGED with a fresh quote before any insert. The frontend displays the new amount and asks again.
+Insufficient seats return 409 SLOT_UNAVAILABLE. A changed acknowledged amount returns 409 PRICE_CHANGED with a fresh quote (error.quote) before any insert. The frontend displays the new amount and asks again.
 
 An identical normalized retry returns its original receipt with 200, even after the session closes. Reusing the key with different details returns 409 REQUEST_KEY_CONFLICT. After a concurrent unique-key violation, roll back and compare the saved request rather than creating another booking. Keep the retry key for a network retry; use a new key for a deliberately changed request.
 
