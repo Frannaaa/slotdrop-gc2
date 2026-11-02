@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-28",
+  "scope": "Fran-owned session/offer APIs and owner workspace",
+  "commit": "2f4e384eb52c284d5481e31843b2a8ff03f27be3",
+  "regressions": [
+    {
+      "scenario": "Reopen cancelled session after booking cutoff",
+      "before": 200,
+      "expected": 409,
+      "after": 409
+    },
+    {
+      "scenario": "Create session when its booking cutoff passes during simulated lock wait",
+      "before": 201,
+      "expected": 400,
+      "after": 400
+    }
+  ],
+  "local": {
+    "syntax": "passed",
+    "tests": {
+      "passed": 14,
+      "failed": 0,
+      "skipped": 1,
+      "skipReason": "Requires TEST_DATABASE_URL for real PostgreSQL concurrency"
+    },
+    "sqlScenarioGroups": 8,
+    "productionDependencyAudit": {
+      "knownVulnerabilities": 0
+    }
+  },
+  "ci": {
+    "url": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40543382241",
+    "conclusion": "success",
+    "checks": [
+      "syntax",
+      "eight SQL scenario groups",
+      "PostgreSQL HTTP and locking suite",
+      "production Docker build and initialization",
+      "persistence after production-container restart"
+    ]
+  },
+  "browser": {
+    "database": "Disposable PGlite fixture; saved user demo data unchanged",
+    "checks": [
+      "Pause session",
+      "Edit offer",
+      "Server rejects regular-price offer",
+      "Controls unlock after validation error",
+      "Successful corrected edit"
+    ]
+  },
+  "pending": [
+    "teammate review and approved merges",
+    "collaborator access and remaining assignments",
+    "public deployment and complete customer booking flow",
+    "deployed challenge evidence and baseline",
+    "Fran's personal predictions and unaided recording",
+    "Git contribution requirements across two windows"
+  ]
+}

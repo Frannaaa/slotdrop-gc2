@@ -56,7 +56,7 @@ Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-inc
 | Save / Confirmation | Fetch by returned booking ID so refresh displays the saved receipt, not a browser-calculated success screen. | GET /api/bookings/:id. Measure from saved confirmed receipts; no event conversion rate is currently collected. |
 | Manage / Owner | Separate forms for releasing/editing seats and tables for saved bookings and five metrics support allocation decisions. | GET /api/owner/catalog, GET /api/bookings, GET /api/metrics; POST/PATCH /api/slots. |
 
-Status on 31 October: #27/#28 (database/session/offer APIs), #36 (shared helper) and Janelle's quote #40 are merged. #29/#34 have integration commits awaiting Janelle's recheck; #32 research, this business draft #37 and catalog/application #39 remain unmerged. Home #35 needs Kirsten's review after updating its branch. The private reference does not replace members' own code, reviews or individual gates.
+Status on 3 November: #27/#28/#36/#40/#29/#34/#42 are merged, including session/offer/discovery/Owner and transactional quote/save/receipt APIs. Customer PRs #35/#41/#43 are refreshed and checked but await assigned reviews and author follow-ups. CSS/Browse and official deployment remain pending. Supporting research #32, this business PR #37 and catalog/application #39 are unmerged. The private reference does not replace the group's code/review or individual gates.
 
 ## 5. Rules, enforcement and customer result
 

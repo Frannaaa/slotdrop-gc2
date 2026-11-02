@@ -1,3 +1,4 @@
+-- Group assignment: Fran. See docs/ownership-and-execution.md.
 -- Group 1 SlotDrop CP0 contract: fictional recurring leisure sessions.
 -- This is a fresh-schema proposal, not a migration for an existing database.
 -- Money is integer PHP centavos; timestamps use TIMESTAMPTZ.
@@ -14,6 +15,11 @@ CREATE TABLE services (
  provider_id BIGINT NOT NULL REFERENCES providers(id),
  name TEXT NOT NULL,
  category TEXT NOT NULL CHECK (category IN ('creative','active')),
+ activity_type TEXT NOT NULL DEFAULT 'other' CHECK (activity_type IN ('pottery','painting','pilates','dance','other')),
+ technique TEXT CHECK (technique IN ('handbuilding','wheel-throwing','ceramic-decoration')),
+ inclusions TEXT[] NOT NULL DEFAULT '{}' CHECK (inclusions <@ ARRAY['materials','painting','firing','equipment']::TEXT[]),
+ preparation_note TEXT NOT NULL DEFAULT '',
+ cancellation_note TEXT NOT NULL DEFAULT 'Course demo: cancellations and rescheduling are unavailable.',
  duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
  recurrence_note TEXT NOT NULL,
  -- Activity default only; each slot stores its own resolved absolute cutoff.

@@ -1,0 +1,262 @@
+{
+  "scope": "Disposable local fictional database; not deployed challenge evidence",
+  "recordedAt": "2026-10-27T14:56:46.955Z",
+  "runner": "Newman 6.2.1",
+  "requests": 21,
+  "requestFailures": 0,
+  "assertions": 26,
+  "assertionFailures": 0,
+  "checks": [
+    {
+      "name": "Starter health",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Discover released seats",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        },
+        {
+          "name": "List is an array",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Known session detail",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Unknown session",
+      "method": "GET",
+      "status": 404,
+      "assertions": [
+        {
+          "name": "Status is 404",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Malformed ID",
+      "method": "GET",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "No matching search",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        },
+        {
+          "name": "Empty array",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Invalid people quantity",
+      "method": "GET",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Repeated filter rejected",
+      "method": "GET",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Owner catalog includes managed inventory",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Saved booking list",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Owner metrics reconcile to saved confirmed receipts",
+      "method": "GET",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        },
+        {
+          "name": "Booking count",
+          "passed": true
+        },
+        {
+          "name": "Modeled commission sum",
+          "passed": true
+        },
+        {
+          "name": "Average whole-booking value",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Create a session using the activity cutoff",
+      "method": "POST",
+      "status": 201,
+      "assertions": [
+        {
+          "name": "Status is 201",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Pause the created session",
+      "method": "PATCH",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Reject a buddy rate above the offer",
+      "method": "PATCH",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Lower offer and disable buddy atomically",
+      "method": "PATCH",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Close the booking deadline",
+      "method": "PATCH",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Refuse misleading resumption after cutoff",
+      "method": "PATCH",
+      "status": 409,
+      "assertions": [
+        {
+          "name": "Status is 409",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Set a future cutoff and resume",
+      "method": "PATCH",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Status is 200",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Missing required session fields",
+      "method": "POST",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Malformed JSON",
+      "method": "POST",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Empty edit",
+      "method": "PATCH",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Status is 400",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

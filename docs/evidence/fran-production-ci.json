@@ -1,0 +1,15 @@
+{
+  "commit": "6401b8d5d83fbcf4b949c736372c428016b066b2",
+  "url": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40527821450",
+  "nodeMajor": 22,
+  "postgresMajor": 16,
+  "tests": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "productionImageBuild": "passed",
+  "productionContainerRestartPersistence": "passed",
+  "scope": "Disposable CI PostgreSQL and fictional receipt fixture; no public deployment or customer booking flow claimed"
+}

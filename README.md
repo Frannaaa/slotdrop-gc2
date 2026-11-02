@@ -6,13 +6,15 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-Updated 31 October 2026. Main includes the database/session API (#27), offer controls (#28), shared customer helper (#36) and Janelle's pricing quote (#40).
+Updated 3 November 2026. Main includes database/session #27, offers #28, shared helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42.
 
-Kat can connect Selection to `GET /api/pricing/quote?slotId=ID&quantity=N` now. The quote reads stored prices and does not reserve seats. Booking creation and receipt-by-ID remain Janelle's next stages (#15/#16). Customer pages are still being integrated; the shared repository's deployed transaction flow is not ready.
+The merged APIs include `GET /api/slots`, `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings`, `GET /api/bookings/:id` and the owner catalog/list/metrics. Quotes use stored prices and do not reserve seats. Booking save rechecks eligibility and confirmed seats under the slot lock, then saves immutable receipt amounts. Public booking responses omit customer contacts and retry keys.
 
-Owner #29 and discovery #34 have passing integration checks and need Janelle's fresh review of their current commits. Merge #29 before #34, retargeting #34 to main afterward. Supporting research #32 and catalog/application #39 follow #34. This business/documentation PR #37 has a separate review.
+Submitted customer-page PRs #35 (Home), #41 (Detail/Selection) and #43 (Checkout/Confirmation) are refreshed with these APIs and pass CI. They still need assigned peer reviews and author follow-ups. Kirsten reports that the CSS class list is at the bottom of her file, but no CSS/Browse PR is visible yet. Published and reviewed Browse/shared styling is the immediate handoff for the November 4 deployment.
 
-Chonel's Home #35 is open with passing checks and corrected real-studio/demo copy. He should update his existing branch from main, record his actual tests and obtain Kirsten's review. Kirsten has reported CSS complete, but its PR/class-list handoff is still pending.
+Captain integration checks on disposable data passed the submitted Home → Detail/Selection → Checkout/receipt → Owner path, changed-price acknowledgement, lost-response retry after reload, storage failure before POST and invalid links. These checks do not establish an official deployed Browse screen or replace individual tests/reviews.
+
+Supporting research #32, this business/documentation PR #37 and real-studio catalog/applications #39 remain unmerged. The private reference is separate from the shared repository's submission.
 
 ## Run locally
 
@@ -101,4 +103,4 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 - **November 4:** deployed Browse must load database sessions through the API.
 - **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
-Fran reviewed and merged Janelle's quote #40. The individual gate still requires two meaningful reviews of distinct teammate PRs; two review submissions on #40 count as one reviewed PR. Approved feature merges, official deployment and full integration checks remain. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+Fran reviewed and merged Janelle's quote #40 and booking/receipt #42 with specific test results. Remaining work includes assigned frontend reviews, official deployment, group challenge/baseline evidence and the outside-group phone test. Each member completes their own required predictions and unedited recording. The private reference does not replace the contribution gates.
