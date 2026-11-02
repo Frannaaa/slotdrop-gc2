@@ -1,5 +1,5 @@
 export class ApiError extends Error {
-  constructor(status, code, message) { super(message); this.status = status; this.code = code; }
+  constructor(status, code, message, details) { super(message); this.status = status; this.code = code; if (details) this.details = details; }
 }
 export function invalid(message) { throw new ApiError(400, 'INVALID_INPUT', message); }
 export function integer(value, name, min = 1, max = Number.MAX_SAFE_INTEGER) {
