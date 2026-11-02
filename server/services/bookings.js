@@ -10,7 +10,10 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PAYMENT_METHODS = ['mock_card', 'pay_on_site'];
 
 // Receipts are read back from the saved row, never rebuilt from the live slot or the browser.
-const RECEIPT_SELECT = `SELECT b.*, s.name AS service_name, p.name AS provider_name
+const RECEIPT_SELECT = `SELECT b.id,b.request_id,b.slot_id,b.quantity,b.customer_name,b.customer_email,
+  b.payment_method,b.status,b.session_starts_at,b.original_unit_price_centavos,b.offer_unit_price_centavos,
+  b.unit_price_centavos,b.pricing_type,b.commission_basis_points,b.total_price_centavos,
+  b.platform_fee_centavos,b.provider_payout_centavos,b.created_at,s.name AS service_name,p.name AS provider_name
   FROM bookings b JOIN slots sl ON sl.id=b.slot_id JOIN services s ON s.id=sl.service_id JOIN providers p ON p.id=s.provider_id`;
 
 function jsonInteger(value, name, min, max) {
@@ -53,8 +56,8 @@ export function bookingRequest(body) {
 export function receiptResponse(row) {
   const number = key => safeNumber(row[key]);
   return {
-    id: row.id, requestId: row.request_id, slotId: number('slot_id'), quantity: number('quantity'),
-    customerName: row.customer_name, customerEmail: row.customer_email, paymentMethod: row.payment_method, status: row.status,
+    id: row.id, slotId: number('slot_id'), quantity: number('quantity'),
+    paymentMethod: row.payment_method, status: row.status,
     serviceName: row.service_name, providerName: row.provider_name,
     sessionStartsAt: new Date(row.session_starts_at).toISOString(),
     originalUnitPriceCentavos: number('original_unit_price_centavos'), offerUnitPriceCentavos: number('offer_unit_price_centavos'),
@@ -65,15 +68,16 @@ export function receiptResponse(row) {
   };
 }
 
-function sameRequest(receipt, request) {
-  return receipt.slotId === request.slotId && receipt.quantity === request.quantity
-    && receipt.customerName === request.customerName && receipt.customerEmail === request.customerEmail
-    && receipt.paymentMethod === request.paymentMethod && receipt.totalPriceCentavos === request.expectedTotalCentavos;
+function sameRequest(row, request) {
+  // Private fields are compared inside the server, never returned as a receipt.
+  return safeNumber(row.slot_id) === request.slotId && safeNumber(row.quantity) === request.quantity
+    && row.customer_name === request.customerName && row.customer_email === request.customerEmail
+    && row.payment_method === request.paymentMethod && safeNumber(row.total_price_centavos) === request.expectedTotalCentavos;
 }
 
 async function findByRequestId(client, requestId) {
   const { rows } = await client.query(RECEIPT_SELECT + ' WHERE b.request_id=$1', [requestId]);
-  return rows[0] ? receiptResponse(rows[0]) : null;
+  return rows[0] || null;
 }
 
 // An identical retry returns the original receipt (200), even after the session closes.
@@ -81,7 +85,7 @@ function replay(receipt, request) {
   if (!sameRequest(receipt, request)) {
     throw new ApiError(409, 'REQUEST_KEY_CONFLICT', 'This request key was already used for a different booking. Start a new booking.');
   }
-  return { status: 200, receipt };
+  return { status: 200, receipt: receiptResponse(receipt) };
 }
 
 export async function createBooking(db, body, clock) {

@@ -1,6 +1,6 @@
 # API and screen contract
 
-Health, session list/detail/create/edit, the price quote, booking save and receipt readback are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
+Health, session list/detail/create/edit, pricing quote, owner catalog, saved-booking list, metrics, booking save and receipt readback are implemented. JSON uses camelCase; SQL uses snake_case.
 
 ## Routes
 
@@ -12,7 +12,7 @@ Health, session list/detail/create/edit, the price quote, booking save and recei
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints} | 500 unexpected failure | Fran |
-| GET /api/bookings | None | 200 saved receipt array | 500 unexpected failure | Fran |
+| GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
 | POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT | Janelle |
@@ -54,6 +54,7 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - A passed cutoff can close sales immediately.
 - Reopening paused or cancelled inventory requires a future cutoff/start, available allocation, an active activity and a session confirmed to run. Read the current time after acquiring the database lock.
 - Cancelling with confirmed bookings returns 409.
+- Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
 - Changing the start time is unsupported and returns 400.
 - Existing receipt amounts and times stay unchanged.
 
@@ -63,7 +64,7 @@ All per-seat amounts are integers from 1 to 100,000,000 centavos. Require buddy 
 
 Janelle's quote, booking save and receipt readback are implemented in server/services/pricing.js and server/services/bookings.js.
 
-GET /api/pricing/quote is implemented in server/services/pricing.js. It accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings will reuse the same priceQuote() and checkBookable() functions.
+GET /api/pricing/quote is implemented in server/services/pricing.js. It accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings reuses the same priceQuote() and checkBookable() functions.
 
 A quote returns slotId, quantity, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, groupSavingsCentavos, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, discountPercent and quotedAt.
 
@@ -97,7 +98,7 @@ An identical normalized retry returns its original receipt with 200, even after 
 
 ## Saved receipts and metrics
 
-Saved receipts contain id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt. The implemented owner list also joins serviceName and providerName. GET /api/bookings/:id and the POST response also include serviceName and providerName for the confirmation screen. Confirmation must read saved amounts by ID, not rebuild a receipt from browser storage.
+Public POST /api/bookings responses and GET /api/bookings/:id return an explicit saved receipt: id, slotId, quantity, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, createdAt, serviceName and providerName. Customer names/emails and requestId remain stored internally for validation and retry matching, but are omitted from all public booking responses. A public owner-list ID must not reveal contacts through receipt readback. Confirmation displays the booking reference and saved activity/amounts, without a guest-name field. Clients retain the retry key they generated; they never recover it from a public receipt.
 
 Metrics use confirmed bookings only:
 
@@ -107,7 +108,7 @@ Metrics use confirmed bookings only:
 | platformRevenueCentavos | Sum of saved commission |
 | averageOrderValueCentavos | Rounded mean transaction total; zero when empty |
 | topSellingService | {serviceId,serviceName,seatsSold}, ranked by sum of quantity; lowest ID breaks ties; null when empty |
-| nearlyFullSessionCount | Eligible-time active/open/running sessions with remaining allocation ≤25% of capacity, including sold-out sessions |
+| nearlyFullSessionCount | Eligible-time active/open/running sessions with 1–25% of released capacity remaining; sold-out sessions are excluded |
 
 Payments are simulated. Platform revenue is modeled commission, not cash collected or total booking value.
 
@@ -126,3 +127,17 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 | Owner workspace | /owner.html | Fran |
 
 Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
+
+The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
+
+## Released-seat discovery contract (Issue #33)
+
+The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
+
+GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. Sort uses the effective per-seat tier for the requested party; results still obey dates, provider cutoffs, confirmed-to-run state and remaining allocation. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
+
+Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes, not arbitrary public tags. The existing quote and receipt contracts do not change. Cards may preview the stored standard/buddy tier, but quote and save remain server-authoritative.
+
+Primary UI controls are When, Area and People, with optional activity shortcuts and search/category/attribute/sort under More filters. Show selected party total, per-person price, actual cutoff, duration and remaining seats. A ceramic painting session has primary type pottery but can match a painting search; use Canvas painting as the narrower painting-type label. Do not force a category choice before showing results.
+
+Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.

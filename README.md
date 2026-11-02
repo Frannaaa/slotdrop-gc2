@@ -6,7 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-This branch: **Session offers — PR #28**. Session data plus offer creation and price, capacity, cutoff and status edits.
+This branch: **Owner workspace — PR #29**. Session/offer APIs, the branded owner dashboard, saved-booking list and five metrics.
 
 Customer quote, booking creation and receipt-by-ID are Janelle's API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
@@ -24,7 +24,9 @@ npm run check:sql
 npm run demo
 ```
 
-Open http://localhost:3000/api/slots. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
+Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
+
+**Teacher-brief check:** [GC2 submission gate](docs/gc2-submission-gate.md). Once the team has deployed its integrated pages, run `npm run check:gc2 -- https://YOUR-GROUP-DEPLOYMENT` for a read-only check of required screens, APIs and sample inventory. This is deliberately not part of ordinary CI while teammate screens and booking endpoints remain unfinished; it does not create bookings or replace the deployed manual/Postman evidence.
 
 Fresh seeds create eight sessions on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
 
@@ -98,3 +100,7 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 - **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
 Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+
+## Released-seat discovery revision
+
+The main customer path is Explore sessions, with time/area/party size first, optional activity filters and a saved in-app booking. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.

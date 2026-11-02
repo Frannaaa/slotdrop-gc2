@@ -18,7 +18,8 @@ test('a new booking returns 201 with server-priced receipt snapshots', async () 
     assert.equal(response.status, 201);
     const receipt = await response.json();
     assert.match(receipt.id, /^[0-9a-f-]{36}$/);
-    assert.equal(receipt.customerName, 'Demo Customer');
+    assert.equal('customerName' in receipt, false);
+    assert.equal((await f.database.query('SELECT customer_name FROM bookings WHERE id=$1',[receipt.id])).rows[0].customer_name, 'Demo Customer');
     assert.equal(receipt.pricingType, 'buddy');
     assert.equal(receipt.unitPriceCentavos, 152000);
     assert.equal(receipt.totalPriceCentavos, 304000);
