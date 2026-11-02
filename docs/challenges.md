@@ -1,3 +1,15 @@
+# Current integration status — November 3, 2026
+
+Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42 are reviewed and merged into main. The dated results below are historical; references there to an unimplemented booking endpoint describe the earlier owner-only build.
+
+A fresh check of main 06a3e42 passed syntax, 73 tests and eight SQL groups; one PostgreSQL-only test was skipped locally. The merged booking CI also passed PostgreSQL and production restart checks. Receipt responses exclude contacts and retry keys; the browser helper accepts both changed-price quote envelopes.
+
+Open customer PRs #35/#41/#43 have passing CI and captain integration checks, but still require assigned peer reviews, author records and shared CSS integration. CSS/Browse are not published yet. Official group deployment, deployed challenge screenshots, baseline, outside-group phone test, member explanations and individual recordings remain pending. The private reference does not satisfy group collaboration evidence.
+
+The exact private reference commit 0ac4712 passed syntax, 60 tests (one PostgreSQL-only local skip), eight SQL groups and all seven browser scripts, including full booking/reload/Owner at 320–1280px, recovery, stale responses, studio applications and discovery. These used disposable local data, not the official group deployment. On November 3 the private live Browse had no discoverable sessions because its sample dates expired; new simulated November 4 offers were added through Owner without reseeding or changing historical receipts.
+
+## Historical test records
+
 # Challenges and test results
 
 ## Earlier results
