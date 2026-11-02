@@ -1,6 +1,6 @@
 # API and screen contract
 
-Health, session list/detail/create/edit and the price quote are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
+Health, session list/detail/create/edit, the price quote, owner catalog, saved-booking list and metrics are implemented on this branch. Other routes below are planned contracts. JSON uses camelCase; SQL uses snake_case.
 
 ## Routes
 
@@ -12,7 +12,7 @@ Health, session list/detail/create/edit and the price quote are implemented on t
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints} | 500 unexpected failure | Fran |
-| GET /api/bookings | None | 200 saved receipt array | 500 unexpected failure | Fran |
+| GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
 | POST /api/bookings | Booking fields below | Planned 201 created; 200 identical retry | Planned 400/404/409 | Janelle |
@@ -54,6 +54,7 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - A passed cutoff can close sales immediately.
 - Reopening paused or cancelled inventory requires a future cutoff/start, available allocation, an active activity and a session confirmed to run. Read the current time after acquiring the database lock.
 - Cancelling with confirmed bookings returns 409.
+- Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
 - Changing the start time is unsupported and returns 400.
 - Existing receipt amounts and times stay unchanged.
 
@@ -97,7 +98,7 @@ An identical normalized retry returns its original receipt with 200, even after 
 
 ## Saved receipts and metrics
 
-Saved receipts contain id, requestId, slotId, quantity, customerName, customerEmail, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos and createdAt. The implemented owner list also joins serviceName and providerName. Confirmation must read saved amounts by ID, not rebuild a receipt from browser storage.
+Public POST /api/bookings responses and GET /api/bookings/:id return an explicit saved receipt: id, slotId, quantity, paymentMethod, status, sessionStartsAt, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, commissionBasisPoints, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, createdAt, serviceName and providerName. Customer names/emails and requestId remain stored internally for validation and retry matching, but are omitted from all public booking responses. A public owner-list ID must not reveal contacts through receipt readback. Confirmation displays the booking reference and saved activity/amounts, without a guest-name field. Clients retain the retry key they generated; they never recover it from a public receipt.
 
 Metrics use confirmed bookings only:
 
@@ -107,7 +108,7 @@ Metrics use confirmed bookings only:
 | platformRevenueCentavos | Sum of saved commission |
 | averageOrderValueCentavos | Rounded mean transaction total; zero when empty |
 | topSellingService | {serviceId,serviceName,seatsSold}, ranked by sum of quantity; lowest ID breaks ties; null when empty |
-| nearlyFullSessionCount | Eligible-time active/open/running sessions with remaining allocation ≤25% of capacity, including sold-out sessions |
+| nearlyFullSessionCount | Eligible-time active/open/running sessions with 1–25% of released capacity remaining; sold-out sessions are excluded |
 
 Payments are simulated. Platform revenue is modeled commission, not cash collected or total booking value.
 
@@ -126,3 +127,7 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 | Owner workspace | /owner.html | Fran |
 
 Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
+
+The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
+
+Whitespace-only q is intentionally ignored. The 100-character limit applies to the raw query value before trimming.
