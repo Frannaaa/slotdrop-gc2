@@ -80,3 +80,19 @@ test('legacy backfill targets fictional providers without rewriting same-named r
   assert.equal(legacy.technique,'handbuilding');
  }finally{await f.close();}
 });
+
+test('catalog startup retires only old fictional fixtures, not newly created services',async()=>{
+ const f=await fixture();
+ try{
+  const {rows:[custom]}=await f.db.query(`INSERT INTO services
+    (provider_id,name,category,duration_minutes,recurrence_note,default_booking_cutoff_minutes)
+    VALUES(1,'New owner-created course','creative',90,'User-created demo offering',60)
+    RETURNING id`);
+  await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  const {rows:[newService]}=await f.db.query('SELECT active FROM services WHERE id=$1',[custom.id]);
+  const {rows:oldServices}=await f.db.query('SELECT active FROM services WHERE id BETWEEN 1 AND 4 ORDER BY id');
+  assert.equal(newService.active,true,'Startup must not deactivate unrelated user-created services');
+  assert.ok(oldServices.every(row=>row.active===false),'Original retired fixture activities remain inactive');
+ }finally{await f.close();}
+});
