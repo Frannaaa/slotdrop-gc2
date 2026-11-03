@@ -26,6 +26,12 @@ export async function ensureReferenceCatalog(db) {
    }
   }
   // Only the known former test fixtures are retired. Their records and bookings remain.
-  await client.query("UPDATE services s SET active=false FROM providers p WHERE s.provider_id=p.id AND s.reference_key IS NULL AND p.name IN ('Demo Clay Corner','Demo Color Room','Demo Move Studio')");
+  await client.query(`UPDATE services s SET active=false FROM providers p
+    WHERE s.provider_id=p.id AND s.reference_key IS NULL AND p.reference_key IS NULL
+    AND (
+      (p.name='Demo Clay Corner' AND s.name IN ('Beginner Mug Handbuilding','Ceramic Painting for Beginners'))
+      OR (p.name='Demo Color Room' AND s.name='Beginner Canvas Painting')
+      OR (p.name='Demo Move Studio' AND s.name='Beginner Dance Drop-in')
+    )`);
  });
 }
