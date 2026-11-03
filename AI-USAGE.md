@@ -28,4 +28,6 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 
 | 2026-11-04 | Fran / M1 | ChatGPT | Strengthen production-container booking verification | Replaced a directly inserted CI receipt fixture with a real quote, transactional POST booking, persisted receipt readback, idempotent replay after container restart, and seats/Owner metric checks; updated GC2 guide | GitHub Actions production-container run passed on #45; only disposable CI PostgreSQL was used, not the deployed group app |
 
+| 2026-11-04 | Fran / M1 | ChatGPT | Fix Fran-owned production health and catalog startup safeguards; clarify official-group deployment | Production readiness now requires required SlotDrop tables, not just a live DB port; legacy demo retirement only disables original fixture activities, preserving new Owner-created services. Added regression tests, corrected stale README, and documented the separate official-group Render deployment sequence | GitHub Actions tests on #45; no deployed data modified; reviewed PR merges and teammate-owned Browse/Checkout remain pending |
+
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
