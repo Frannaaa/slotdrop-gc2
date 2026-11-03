@@ -11,16 +11,18 @@ import {
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
 const form = $("offer-form");
-const money = (centavos) =>
-  new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(
-    centavos / 100,
-  );
-const time = (value) =>
-  new Intl.DateTimeFormat("en-PH", {
-    timeZone: "Asia/Manila",
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+// Cache the formatters; Owner renders many rows with the same locale.
+const pesoFormat = new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+});
+const manilaTimeFormat = new Intl.DateTimeFormat("en-PH", {
+  timeZone: "Asia/Manila",
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+const money = (centavos) => pesoFormat.format(centavos / 100);
+const time = (value) => manilaTimeFormat.format(new Date(value));
 const localTime = (value) =>
   new Date(new Date(value).getTime() + 8 * 3600000).toISOString().slice(0, 16);
 let catalog = {
@@ -250,16 +252,13 @@ function renderSessions() {
     return;
   }
   for (const slot of catalog.slots) {
-    const state = salesState(
-      {
-        ...slot,
-        serviceActive: catalog.services.find(
-          (service) => service.id === slot.serviceId,
-        )?.active,
-      },
-      Date.now(),
-      catalog.discoveryHours,
-    );
+    const viewSlot = {
+      ...slot,
+      serviceActive: catalog.services.find(
+        (service) => service.id === slot.serviceId,
+      )?.active,
+    };
+    const state = salesState(viewSlot, Date.now(), catalog.discoveryHours);
     const card = element("article", undefined, "session"),
       heading = element("h3", slot.serviceName),
       tag = element("span", state.label, "tag");
@@ -294,17 +293,7 @@ function renderSessions() {
     const help = element("p", state.help || "", "hint");
     help.hidden = !state.help;
     card.append(help);
-    const view = {
-      slot: {
-        ...slot,
-        serviceActive: catalog.services.find(
-          (service) => service.id === slot.serviceId,
-        )?.active,
-      },
-      tag,
-      help,
-      toggle: null,
-    };
+    const view = { slot: viewSlot, tag, help, toggle: null };
     salesViews.push(view);
     const actions = element("div", undefined, "actions"),
       editButton = element("button", "Edit offer");
