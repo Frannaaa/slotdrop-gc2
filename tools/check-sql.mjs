@@ -5,7 +5,7 @@ import { PGlite } from '@electric-sql/pglite';
 
 const db = new PGlite();
 const schema = await readFile(new URL('../db/schema.sql', import.meta.url), 'utf8');
-const seed = await readFile(new URL('../db/seed.sql', import.meta.url), 'utf8');
+const seed = await readFile(new URL('../tests/fixtures/legacy-seed.sql', import.meta.url), 'utf8');
 const cases = [];
 async function check(name, run) {
   await run();
@@ -37,9 +37,9 @@ async function saveReceipt(quantity, requestId) {
 try {
   await db.exec(schema);
   await db.exec(seed);
-  await check('four entities and eight eligible fictional sessions', async () => {
+  await check('five tables and eight eligible synthetic regression sessions', async () => {
     const tables = await db.query("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'");
-    assert.equal(tables.rows[0].n, 4);
+    assert.equal(tables.rows[0].n, 5);
     const slots = await db.query("SELECT count(*)::int AS n FROM slots WHERE starts_at > NOW() AND starts_at < NOW()+INTERVAL '72 hours' AND booking_closes_at > NOW() AND booking_closes_at < starts_at");
     assert.equal(slots.rows[0].n, 8);
     const daytime = await db.query("SELECT count(*)::int AS n FROM slots WHERE EXTRACT(HOUR FROM starts_at AT TIME ZONE 'Asia/Manila') BETWEEN 9 AND 20");
