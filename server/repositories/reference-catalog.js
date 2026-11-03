@@ -9,14 +9,15 @@ export async function ensureReferenceCatalog(db) {
   for(const [index,item] of referenceCatalog.offerings.entries()) {
    await client.query('INSERT INTO providers(name,city,area,reference_key) VALUES($1,$2,$3,$4) ON CONFLICT(reference_key) DO NOTHING',[item.business,item.city,item.area,item.providerKey]);
    const provider=(await client.query('SELECT id FROM providers WHERE reference_key=$1',[item.providerKey])).rows[0];
-   await client.query(`INSERT INTO services(provider_id,name,category,activity_type,technique,inclusions,preparation_note,cancellation_note,duration_minutes,recurrence_note,default_booking_cutoff_minutes,reference_key)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(reference_key) DO NOTHING`,
+   const {rows: addedServices}=await client.query(`INSERT INTO services(provider_id,name,category,activity_type,technique,inclusions,preparation_note,cancellation_note,duration_minutes,recurrence_note,default_booking_cutoff_minutes,reference_key)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(reference_key) DO NOTHING RETURNING id`,
     [provider.id,item.activity,item.category,item.activityType,item.technique,item.inclusions,item.preparationNote,
      'Course simulation: changes here do not cancel or reserve a real studio visit. Check the studio website for its actual policy.',item.durationMinutes,
      'Sample dates only. Published schedule reference: '+item.publishedSchedule,item.activityType==='pottery'?180:60,item.key]);
-   const service=(await client.query('SELECT id FROM services WHERE reference_key=$1 FOR UPDATE',[item.key])).rows[0];
-   const hasOffers=(await client.query('SELECT 1 FROM slots WHERE service_id=$1 LIMIT 1',[service.id])).rows.length;
-   if(!hasOffers) {
+   // Only a newly inserted activity receives initial demo slots. An existing activity
+   // with no slots may have had its inventory deliberately cleared; never republish it.
+   if(addedServices.length) {
+    const service=addedServices[0];
     const price=Math.round(item.publishedPriceCentavos*0.9),buddy=index%3===2?null:Math.round(price*0.95);
     await client.query(`WITH base AS (SELECT (date_trunc('day',NOW() AT TIME ZONE 'Asia/Manila')+INTERVAL '1 day') AT TIME ZONE 'Asia/Manila' AS day)
      INSERT INTO slots(service_id,starts_at,booking_closes_at,capacity,original_price_centavos,offer_price_centavos,buddy_price_centavos)
