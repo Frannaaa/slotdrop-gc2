@@ -43,3 +43,28 @@ test('GC2 preflight identifies missing booking services without writing data',as
  assert.equal(rows.some(r=>r.name==='Saved booking receipt-by-ID route' && !r.pass),true);
  assert.ok(methods.every(method=>method==='GET'));
 });
+
+test('receipt preflight rejects unrelated 404 responses from a missing booking endpoint', async t => {
+ let code = 'NOT_FOUND';
+ const methods = [];
+ t.mock.method(globalThis, 'fetch', async (url, options) => {
+  methods.push(options?.method || 'GET');
+  const path = new URL(url).pathname;
+  if (requiredPages.some(([,p]) => p === path))
+   return new Response('<main>Demo</main>', {headers: {'content-type':'text/html'}});
+  if (path === '/api/slots') return Response.json([]);
+  if (path === '/api/bookings/00000000-0000-4000-8000-000000000000')
+   return Response.json({error:{code}}, {status:404});
+  if (path === '/api/bookings') return Response.json([]);
+  if (path === '/api/metrics')
+   return Response.json({bookingCount:0,platformRevenueCentavos:0,
+    averageOrderValueCentavos:0,nearlyFullSessionCount:0,topSellingService:null});
+  return Response.json({error:{code:'ROUTE_NOT_IMPLEMENTED'}}, {status:404});
+ });
+ const receipt = async () => (await inspectGC2('http://localhost:3000'))
+  .find(row => row.name === 'Saved booking receipt-by-ID route');
+ assert.equal((await receipt()).pass, false);
+ code = 'BOOKING_NOT_FOUND';
+ assert.equal((await receipt()).pass, true);
+ assert.ok(methods.every(method => method === 'GET'));
+});
