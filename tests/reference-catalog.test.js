@@ -38,3 +38,21 @@ test('fresh seed stores the sourced catalog and 16 sample sessions in the databa
 
  }finally{await f.close();}
 });
+
+test('startup does not silently recreate deliberately cleared reference inventory',async()=>{
+ const f=await fixture();
+ try{
+  await ensureReferenceCatalog(f.db);
+  const key=referenceCatalog.offerings[0].key;
+  const {rows:[service]}=await f.db.query('SELECT id FROM services WHERE reference_key=$1',[key]);
+  assert.ok(service);
+  const count=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1',[service.id])).rows[0].n);
+  assert.equal(await count(),2);
+  await f.db.query('DELETE FROM slots WHERE service_id=$1',[service.id]);
+  assert.equal(await count(),0);
+  await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  assert.equal(await count(),0,'Restart must not recreate removed session allocations');
+  assert.equal((await f.db.query('SELECT COUNT(*)::int AS n FROM services WHERE reference_key=$1',[key])).rows[0].n,1);
+ }finally{await f.close();}
+});
