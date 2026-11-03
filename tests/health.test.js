@@ -13,16 +13,27 @@ async function withServer(db, checkDatabaseHealth, inspect) {
   }
 }
 
-test('production health checks that PostgreSQL is reachable', async () => {
+test('production health checks that the required SlotDrop tables exist', async () => {
   const statements = [];
   await withServer({query: async statement => {
     statements.push(statement);
-    return {rows:[{'?column?':1}]};
+    return {rows:[{slots:'slots',services:'services',bookings:'bookings'}]};
   }}, true, async response => {
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), {status:'ok',app:'SlotDrop'});
   });
-  assert.deepEqual(statements, ['SELECT 1']);
+  assert.equal(statements.length, 1);
+  assert.match(statements[0], /to_regclass\('slots'\)/);
+});
+
+test('production health rejects a reachable but uninitialized database', async () => {
+  await withServer({query:async () => ({rows:[{slots:null,services:null,bookings:null}]})},
+    true, async response => {
+      assert.equal(response.status,503);
+      assert.deepEqual(await response.json(),{status:'unavailable',app:'SlotDrop'});
+    });
+  await withServer({query:async () => ({rows:[{slots:'slots',services:'services',bookings:null}]})},
+    true, async response => assert.equal(response.status,503));
 });
 
 test('production health returns 503 on database outage without leaking details', async () => {
