@@ -189,3 +189,6 @@ Official repository: https://github.com/Frannaaa/slotdrop-gc2 | Versioned busine
 ## Studio application, separate from verified supply
 
 ClassPass separates submission of business information from onboarding a profile; Klook reviews merchant applications before access to listing tools. SlotDrop follows Apply → Review → Set up. The private build has an independent studio reference page, a validated application form and DB-backed pending-status readback. It records authorization as an attestation, not proof; it does not publish a page, grant account access or verify a partnership. Use sample contacts, keep them private, and retain the same request key after an uncertain save. Public profile ownership and real inventory need later verified onboarding. Sources checked 30 October: https://classpass.com/partners/how-it-works | https://merchant.klook.com/introduction .
+
+
+November 3 integration update: Janelle approved #32 and #39 on their exact heads and both are merged into main. The sourced catalog and pending studio applications are now available in the group code. Business PR #37 still requires Kat’s review. Customer pages, shared CSS/Browse, official deployment and group evidence remain pending.

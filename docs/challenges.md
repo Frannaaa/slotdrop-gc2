@@ -1,3 +1,5 @@
+November 3 follow-up: #32 and #39 are now approved and merged; research/catalog/application work is available in main. Business PR #37 is refreshed against that main; customer pages still need assigned reviews and CSS/Browse is unpublished. The earlier dated statuses below describe the state when recorded.
+
 # Current integration status — November 3, 2026
 
 Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42 are reviewed and merged into main. The dated results below are historical; references there to an unimplemented booking endpoint describe the earlier owner-only build.

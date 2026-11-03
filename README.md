@@ -2,19 +2,15 @@
 
 Group 1 · ITMGT 45.03-YZW
 
-SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. Session availability, offers, payments and bookings are simulated for the course. Current main still uses legacy fictional studio fixtures. The sourced real-studio catalog is proposed in #39 and is not merged yet.
+SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. The sample catalog uses real studio names and sourced published facts; session dates, allocated seats, cutoffs, offers, bookings and payments are simulated. No partnership or real reservation is created.
 
 ## Build status
 
-Updated 3 November 2026. Main includes database/session #27, offers #28, shared helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42.
+This branch: **Sourced studio catalog and pending applications**. It includes the earlier owner/discovery/research stack and adds independent studio profiles plus a saved application/status flow. See Issue #38.
 
-The merged APIs include `GET /api/slots`, `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings`, `GET /api/bookings/:id` and the owner catalog/list/metrics. Quotes use stored prices and do not reserve seats. Booking save rechecks eligibility and confirmed seats under the slot lock, then saves immutable receipt amounts. Public booking responses omit customer contacts and retry keys.
+The quote API #40 is merged into main. Booking creation and receipt-by-ID are Janelle's next API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
 
-Submitted customer-page PRs #35 (Home), #41 (Detail/Selection) and #43 (Checkout/Confirmation) are refreshed with these APIs and pass CI. They still need assigned peer reviews and author follow-ups. Kirsten reports that the CSS class list is at the bottom of her file, but no CSS/Browse PR is visible yet. Published and reviewed Browse/shared styling is the immediate handoff for the November 4 deployment.
-
-Captain integration checks on disposable data passed the submitted Home → Detail/Selection → Checkout/receipt → Owner path, changed-price acknowledgement, lost-response retry after reload, storage failure before POST and invalid links. These checks do not establish an official deployed Browse screen or replace individual tests/reviews.
-
-Supporting research #32, this business/documentation PR #37 and real-studio catalog/applications #39 remain unmerged. The private reference is separate from the shared repository's submission.
+Reviewed #27/#28 are merged. Next: #36 shared helper, Home after Kirsten's review, #29 owner privacy recheck, then #34 discovery and #32 supporting research. This application/catalog extension follows #32 and does not block the core dependencies. Business #37 is reviewed separately. Retarget after approved dependency merges.
 
 ## Run locally
 
@@ -28,9 +24,9 @@ npm run check:sql
 npm run demo
 ```
 
-Open http://localhost:3000/api/slots. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
+Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
-Fresh seeds create eight sessions on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
+Fresh seeds create 16 simulated sessions across eight researched offerings on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
 
 ## PostgreSQL and deployment
 
@@ -84,10 +80,8 @@ Availability and buddy pricing are the two revenue features. The booking API sti
 
 ## Design and documents
 
-The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. The design site includes the private reference app and archived frames. It is separate from the shared repository's submission and does not establish that the official group flow is deployed. The owner branch serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
+The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. That prototype saves sample data in the browser; it is separate from this API-backed app. The owner branch serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
 
-- [Who owns what and how to start](docs/ownership-and-execution.md)
-- [Step-by-step team guide](https://docs.google.com/document/d/1IYKZaL7qv-mRI3WhzI2rk-raRmC2bQqmZRSAMDUWjO4)
 - [Business case and sources](docs/business.md)
 - [Route contract](docs/routes.md)
 - [Database schema](docs/schema.md)
@@ -103,4 +97,30 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 - **November 4:** deployed Browse must load database sessions through the API.
 - **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
-Fran reviewed and merged Janelle's quote #40 and booking/receipt #42 with specific test results. Remaining work includes assigned frontend reviews, official deployment, group challenge/baseline evidence and the outside-group phone test. Each member completes their own required predictions and unedited recording. The private reference does not replace the contribution gates.
+Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+
+## Released-seat discovery revision
+
+The main customer path is Explore sessions, with time/area/party size first, optional activity filters and a saved in-app booking. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.
+
+Studio research is available at `/studios.html` through `GET /api/activities`. It is separate from the database-backed booking inventory. See `docs/studio-discovery.md`.
+
+## Sourced catalog and studio application
+
+Fran's additional reference-catalog work supplies eight activities at five real businesses, with sixteen explicitly simulated dated allocations. Published business facts/prices have source URLs; discounts, seats and deadlines are sample data. Startup adds records once without renaming historical providers or changing receipts. Never reseed a populated database. `/provider-apply.html` saves a pending demo application, and `/provider-application.html?id=UUID` reads back only status. It does not publish or verify ownership. These supporting pages follow the shared styling; see `docs/provider-onboarding.md`.
+
+## Pre-checkpoint demo inventory check (read-only)
+
+**Important for November 4, 7 and 9:** The sample allocations start only on the two days after the database is first seeded. They **do not roll forward** when the server restarts. An unchanged demo database first seeded on October 30 will therefore have no bookable sample sessions by November 4. This is expected expiry, not a database failure.
+
+Before each deployed demo/checkpoint, with the app running, run:
+
+```sh
+npm run check:demo -- https://YOUR-APP-HOST
+```
+
+Or run `npm run check:demo` against local `http://localhost:3000`. The check fetches `GET /api/slots`, reports remaining bookable demo allocations, and returns a failure exit code if none remain. It **never** creates offers, shifts existing dates, reactivates sold-out seats, modifies receipts or touches the database.
+
+If inventory is absent or about to expire, open the **Owner course-demo screen** and create *new, future, explicitly simulated* allocations for active sample activities, with future cutoffs and the intended prices. Test Browse again. Do not rerun `db:init` on a populated database, overwrite historic bookings, silently reseed or claim real studio consent. Because the public demo has no owner login, use fictional test data only and do not expose real provider management as a production feature.
+
+This check tests availability only. It does **not** prove that Detail, Selection, Checkout, Confirmation, PostgreSQL persistence or customer booking are integrated. Run those separately once teammates' PRs merge.
