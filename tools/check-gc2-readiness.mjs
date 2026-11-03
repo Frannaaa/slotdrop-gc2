@@ -32,8 +32,9 @@ async function inspectReceiptReadback(base) {
       return {name,pass:false,detail:'Expected JSON receipt error, received '+type};
     const data = await response.json();
     const code = data?.error?.code;
-    const pass = response.status === 404 && typeof code === 'string' &&
-      code !== 'ROUTE_NOT_IMPLEMENTED';
+    // Only the booking router's documented response proves receipt lookup is wired.
+    // An unrelated HTML/API fallback 404 must not be accepted as a working receipt API.
+    const pass = response.status === 404 && code === 'BOOKING_NOT_FOUND';
     return {name,pass,detail:pass?'Receipt lookup route responds correctly to an unknown ID':
       'Receipt lookup not verified: HTTP '+response.status+', code '+(code||'missing')};
   } catch(error) {
