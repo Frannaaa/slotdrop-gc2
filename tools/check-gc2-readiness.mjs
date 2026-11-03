@@ -73,6 +73,7 @@ export async function inspectGC2(origin) {
       results.push({name:'Quantity-aware quote API',pass:false,detail:'Blocked until inventory can be rechecked'});
     }
   } else {
+    results.push({name:'Sample inventory for public demo',pass:false,detail:'Blocked until slots endpoint works'});
     results.push({name:'Session detail API',pass:false,detail:'Blocked until slots endpoint works'});
     results.push({name:'Quantity-aware quote API',pass:false,detail:'Blocked until slots endpoint works'});
   }
