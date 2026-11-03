@@ -110,9 +110,7 @@ export async function findProvider(db, providerId, clock) {
       ...studioReferences.get(row.reference_key),
     }))
     .filter((r) => r.key);
-  const slots = (await listSlots(db, {}, clock())).filter(
-    (slot) => slot.providerId === id,
-  );
+  const slots = await listSlots(db, {}, clock(), id);
   return {
     id: Number(provider.id),
     name: provider.name,
