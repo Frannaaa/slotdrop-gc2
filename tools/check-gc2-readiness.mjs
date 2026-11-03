@@ -52,7 +52,9 @@ export async function inspectGC2(origin) {
   if(slots.pass) {
     try{
       const response=await fetch(new URL('/api/slots',base),{signal:AbortSignal.timeout(milliseconds)});
+      if (!response.ok) throw new Error('Second inventory read returned HTTP '+response.status);
       const data=await response.json();
+      if (!Array.isArray(data)) throw new Error('Inventory response must be an array');
       const available=data.filter(row=>row && row.remainingSeats>=1);
       results.push({name:'Sample inventory for public demo',pass:available.length>0,detail:available.length+' discoverable sample sessions; if zero create new FUTURE offers through Owner without reseeding'});
       const first=available[0];
@@ -65,7 +67,11 @@ export async function inspectGC2(origin) {
         results.push({name:'Session detail API',pass:false,detail:'No eligible session to inspect'});
         results.push({name:'Quantity-aware quote API',pass:false,detail:'No eligible session to quote'});
       }
-    }catch(error){results.push({name:'Sample inventory for public demo',pass:false,detail:error.message});}
+    }catch(error){
+      results.push({name:'Sample inventory for public demo',pass:false,detail:error.message});
+      results.push({name:'Session detail API',pass:false,detail:'Blocked until inventory can be rechecked'});
+      results.push({name:'Quantity-aware quote API',pass:false,detail:'Blocked until inventory can be rechecked'});
+    }
   } else {
     results.push({name:'Session detail API',pass:false,detail:'Blocked until slots endpoint works'});
     results.push({name:'Quantity-aware quote API',pass:false,detail:'Blocked until slots endpoint works'});
