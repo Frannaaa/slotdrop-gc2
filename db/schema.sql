@@ -6,6 +6,7 @@ BEGIN;
 CREATE TABLE providers (
  id BIGSERIAL PRIMARY KEY,
  name TEXT NOT NULL,
+ reference_key TEXT,
  city TEXT NOT NULL,
  area TEXT NOT NULL,
  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -13,6 +14,7 @@ CREATE TABLE providers (
 CREATE TABLE services (
  id BIGSERIAL PRIMARY KEY,
  provider_id BIGINT NOT NULL REFERENCES providers(id),
+ reference_key TEXT,
  name TEXT NOT NULL,
  category TEXT NOT NULL CHECK (category IN ('creative','active')),
  activity_type TEXT NOT NULL DEFAULT 'other' CHECK (activity_type IN ('pottery','painting','pilates','dance','other')),
@@ -76,6 +78,32 @@ CREATE TABLE bookings (
  CHECK (platform_fee_centavos = ROUND(unit_price_centavos::NUMERIC * commission_basis_points / 10000)::BIGINT * quantity),
  CHECK (platform_fee_centavos + provider_payout_centavos = total_price_centavos)
 );
+CREATE UNIQUE INDEX providers_reference_key_idx ON providers(reference_key);
+CREATE UNIQUE INDEX services_reference_key_idx ON services(reference_key);
+CREATE TABLE provider_applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id UUID NOT NULL UNIQUE,
+  payload_signature TEXT NOT NULL,
+  provider_id BIGINT REFERENCES providers(id),
+  business_name TEXT NOT NULL,
+  website TEXT NOT NULL,
+  city TEXT NOT NULL,
+  area TEXT NOT NULL,
+  activity_types TEXT[] NOT NULL,
+  contact_name TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  representative_role TEXT NOT NULL CHECK(representative_role IN ('owner','manager','authorized_representative')),
+  authorized BOOLEAN NOT NULL CHECK(authorized),
+  demo_acknowledged BOOLEAN NOT NULL CHECK(demo_acknowledged),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','declined')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK(length(business_name) BETWEEN 1 AND 120),
+  CHECK(length(website) BETWEEN 1 AND 2048),
+  CHECK(length(city) BETWEEN 1 AND 100 AND length(area) BETWEEN 1 AND 100),
+  CHECK(length(contact_name) BETWEEN 1 AND 100 AND length(contact_email) BETWEEN 3 AND 254),
+  CHECK(cardinality(activity_types) BETWEEN 1 AND 5),
+  CHECK(activity_types <@ ARRAY['pottery','painting','pilates','dance','other']::TEXT[])
+ );
 CREATE INDEX idx_slots_status_start ON slots(status, starts_at);
 CREATE INDEX idx_confirmed_bookings_slot ON bookings(slot_id) WHERE status = 'confirmed';
 COMMIT;

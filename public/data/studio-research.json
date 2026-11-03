@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-10-28",
+  "checkedAt": "2026-10-30",
   "currency": "PHP",
-  "notice": "Official public reference listings only. No partnership, SlotDrop seat allocation, discount or booking availability has been confirmed. Published prices may change; exact class dates must be checked with the studio. Never convert operating hours into class times.",
+  "notice": "Real business references, checked 30 October 2026. Published facts are sourced; exact live inventory and partnership are unconfirmed. In-app dates, seat allocations, cutoffs, discounts and bookings are clearly labelled course simulations.",
   "offerings": [
     {
       "id": "laro-mug",
@@ -201,6 +201,30 @@
       "slotdropSeatsVerified": false,
       "slotdropDiscountVerified": false,
       "priceNote": "Single-session class credit, valid 60 days; a class time must be reserved separately."
+    },
+    {
+      "id": "tahanan-wheel",
+      "business": "Tahanan Pottery Shop & Studio",
+      "branch": "Scout Tobias, Quezon City",
+      "address": "27 Scout Tobias Street, Quezon City",
+      "activity": "Exploratory Wheel Workshop",
+      "category": "creative",
+      "activityType": "pottery",
+      "pricePhp": 2500,
+      "durationMinutes": 180,
+      "schedule": "Official overview: Saturdays, 2–5 PM. A recurring pattern is not a confirmed available date.",
+      "recurrence": "saturday",
+      "sourceUrl": "https://tahananpottery.ph/collections/pottery-classes-workshops",
+      "scheduleSourceUrl": "https://tahananpottery.ph/collections/pottery-classes-workshops",
+      "tags": [
+        "wheel-throwing"
+      ],
+      "checkedAt": "2026-10-30",
+      "verificationStatus": "public_reference_only",
+      "partnershipConfirmed": false,
+      "slotdropSeatsVerified": false,
+      "slotdropDiscountVerified": false,
+      "priceNote": "Published workshop price; a dated seat has not been verified."
     }
   ],
   "classpass": {
