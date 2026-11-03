@@ -141,3 +141,7 @@ Slot list and Detail add activityType, technique, inclusions (array), preparatio
 Primary UI controls are When, Area and People, with optional activity shortcuts and search/category/attribute/sort under More filters. Show selected party total, per-person price, actual cutoff, duration and remaining seats. A ceramic painting session has primary type pottery but can match a painting search; use Canvas painting as the narrower painting-type label. Do not force a category choice before showing results.
 
 Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.
+
+## Studio research
+
+`GET /api/activities` returns sourced studio references, not live inventory. See `docs/studio-discovery.md`. The booking API remains `/api/slots`.
