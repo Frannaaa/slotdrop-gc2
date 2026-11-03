@@ -119,24 +119,23 @@ export const comparisonLabel = (slot) =>
     : slot.originalPriceCentavos === slot.studioReference.publishedPriceCentavos
       ? "Published reference price"
       : "Demo base price";
+// Use the same source-link rules on cards and studio profiles.
+export function safeHttpsUrl(value) {
+  try {
+    const source = new URL(value);
+    return source.protocol === "https:" && !source.username && !source.password
+      ? source.href
+      : null;
+  } catch {
+    return null;
+  }
+}
 export function studioEvidence(slot) {
   const reference = slot.studioReference;
   if (!reference) return "";
-  const safeSource = (value) => {
-    try {
-      const source = new URL(value);
-      return source.protocol === "https:" &&
-        !source.username &&
-        !source.password
-        ? source.href
-        : null;
-    } catch {
-      return null;
-    }
-  };
-  const source = safeSource(reference.sourceUrl);
+  const source = safeHttpsUrl(reference.sourceUrl);
   if (!source) return "";
-  const priceSource = safeSource(reference.priceSourceUrl);
+  const priceSource = safeHttpsUrl(reference.priceSourceUrl);
   return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
 }
 export function card(slot, quantity = 1) {
