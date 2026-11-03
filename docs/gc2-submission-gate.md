@@ -52,10 +52,22 @@ Owner now displays an inventory-readiness warning above its metrics when no sess
 
 The private reference/demo and `/studios.html` are supporting artifacts. The graded Browse must read `/api/slots` from the group's deployed database; Checkout must save via Janelle's transactional API; Confirmation must read that saved receipt. Real studio names/prices are sourced public references only. Dates, slots, discounts, payments and bookings are classroom simulations.
 
-## As of Oct 30 — integration blockers
+## As of November 4 — integration and deployment blockers
 
-- #22, #27, #28, #30 merged.
-- #36 shared browser helper needs Janelle's **new approval** after requested fixes. A mistaken previous approval explicitly does not count.
-- #29 Owner has one recorded teammate approval, but commits after that review require recheck. #34 is stacked on it; #32 and #39 are supporting stacked PRs. Respect branch dependencies and CI.
-- #35 Home is Chonel's code with Kirsten review pending. CSS/Browse belongs to Kirsten; Detail/Selection to Kat; Checkout/Confirmation to Kaitlyn; quote/save/receipt and server-side pricing to Janelle.
-- Public customer flow and deployed group URL remain unverified. Do not mark them done because the private reference or isolated branch tests pass.
+- Backend, booking/receipt API, sourced catalog, shared browser helpers and Owner are merged into `main`. Fran's #45 cleanup and business case #37 remain in review.
+- Teammate pages are still unmerged: Home #35 (Chonel), Detail/Selection #41 (Kat), Checkout/Confirmation #43 (Kaitlyn). Respect the assigned human reviewers and do not merge unapproved branches.
+- Kirsten's shared CSS/Browse `public/browse.html` + `public/js/browse.js` have **no published PR or branch** in the official repository as checked November 4. Browse is the course's CP1 deliverable and **must use /api/slots from the group database**.
+- The only connected Render web service is `slotdrop-gc2-complete` from **`Frannaaa/reference-only-slotdrop`**, not this graded repository. Do not repoint or mutate that reference service.
+- The connected `slotdrop-gc2-db` PostgreSQL instance cannot be externally inspected with the current Render connection (its IP allowlist blocks external queries). Its relationship to the reference build is not safely verified. **Do not reuse or initialize it as the group database without confirming its ownership and content.**
+- A customer double-submit window was reported in Kaitlyn's Checkout #43; only the page owner should modify her files. Review must confirm Submit stays disabled after successful save until Confirmation opens.
+
+### Fran's official-group deployment sequence (after reviewed Browse/CSS is ready)
+
+1. Confirm the assigned Browse/CSS PR is approved and merged into `main`. Merge other approved customer PRs in the agreed order; never treat the private reference as a replacement.
+2. Use a **dedicated, empty** PostgreSQL database, separately verified from the reference-only build. Keep its `DATABASE_URL` as a Render environment secret; do not put it in Git, comments or screenshots.
+3. Initialize the new database exactly once with `npm run db:init` from an authorized environment that can connect to it. This command is **not** a per-deploy command; it intentionally fails on existing data. Subsequent app starts apply only additive migrations/reference registration.
+4. Create a **separate** Render web service using `https://github.com/Frannaaa/slotdrop-gc2`, branch `main`, Singapore region, Node 22, build `npm ci --omit=dev`, start `npm start`, `NODE_ENV=production`, and its own `DATABASE_URL`. Use `/api/health` as the health path. Do not use the reference-only service or database accidentally.
+5. Verify `/api/health` returns 200 (including required tables), `/api/slots` is backed by live demo PostgreSQL, and Browse visibly renders at least eight realistic **future simulated** sessions. Existing demo allocations expire and are never automatically rolled forward.
+6. Run `npm run check:gc2 -- https://ACTUAL-GROUP-URL` and `npm run check:demo -- https://ACTUAL-GROUP-URL`. After teammate pages merge, do a real disposable booking in the public group app, confirm its saved receipt/seat decrement/metrics, restart without reset, and perform the independent phone test. CI's transactional restart test does not substitute for the deployed browser test.
+
+Do not claim that the November 4 deployed Browse checkpoint is satisfied until steps 1–5 are actually verified on the official-group URL.
