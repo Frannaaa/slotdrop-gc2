@@ -26,4 +26,6 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 
 | 2026-11-04 | Fran / M1 | ChatGPT | Audit cross-branch customer release readiness and API preflight consistency | Changed read-only GC2 readiness to use a single validated Browse inventory response, avoiding contradictory status when inventory or DB availability changes between two requests; updated API regression tests; confirmed required customer pages are still unmerged and group deployment is absent | GitHub Actions on PR #45; end-to-end combined browser testing and teammate-reviewed merges remain outstanding |
 
+| 2026-11-04 | Fran / M1 | ChatGPT | Strengthen production-container booking verification | Replaced a directly inserted CI receipt fixture with a real quote, transactional POST booking, persisted receipt readback, idempotent replay after container restart, and seats/Owner metric checks; updated GC2 guide | GitHub Actions production-container run passed on #45; only disposable CI PostgreSQL was used, not the deployed group app |
+
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
