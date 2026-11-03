@@ -24,7 +24,7 @@ function sync() {
   if (!link || !slot) return;
   const open = available(slot, quantity);
   link.hidden = !open;
-  notice(status, open ? "" : "This session is unavailable. Browse another activity.");
+  notice(status, open ? "" : "This session is unavailable. Choose another featured session from Home.");
 }
 
 async function load() {
