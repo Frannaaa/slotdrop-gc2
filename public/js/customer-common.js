@@ -149,7 +149,57 @@ export function card(slot, quantity = 1) {
     slot.beginnerFriendly ? "Beginner-friendly" : "",
     ...(slot.inclusions || []).map(inclusionLabel),
   ].filter(Boolean);
-  return `<article class="activity-card"><div class="card-art ${slot.category === "active" ? "active" : ""}" aria-hidden="true">${escapeHtml(activityLabel(slot.activityType))}</div><div class="card-body"><p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p><h2>${escapeHtml(slot.serviceName)}</h2><p class="provider-name">${slot.studioReference ? `<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>` : escapeHtml(slot.providerName)}</p><p class="session-time"><strong>${date(slot.startsAt)}</strong><br>${slot.durationMinutes} minutes · ${slot.remainingSeats} seats left</p><p class="session-cutoff">Book before ${date(slot.bookingClosesAt)}</p><div class="session-traits">${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}</div><div class="party-price"><strong>${money(price.total)}</strong><span>total for ${selectedQuantity} ${selectedQuantity === 1 ? "person" : "people"}</span></div><p>${money(price.unit)} / person${price.buddy ? " · Buddy price applied" : ""}<br><small>${comparisonLabel(slot)} ${money(slot.originalPriceCentavos)} / person</small>${slot.buddyPriceCentavos !== null && !price.buddy ? `<br><span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>` : ""}</p>${studioEvidence(slot)}<p class="reference">Price preview. Rechecked before saving.</p><a class="button secondary" href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}">View session ↗</a></div></article>`;
+  return /* HTML */ `<article class="activity-card">
+    <div
+      class="card-art ${slot.category === "active" ? "active" : ""}"
+      aria-hidden="true"
+    >
+      ${escapeHtml(activityLabel(slot.activityType))}
+    </div>
+    <div class="card-body">
+      <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
+      <h2>${escapeHtml(slot.serviceName)}</h2>
+      <p class="provider-name">
+        ${slot.studioReference
+          ? `<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>`
+          : escapeHtml(slot.providerName)}
+      </p>
+      <p class="session-time">
+        <strong>${date(slot.startsAt)}</strong>
+        <br />${slot.durationMinutes} minutes · ${slot.remainingSeats} seats
+        left
+      </p>
+      <p class="session-cutoff">Book before ${date(slot.bookingClosesAt)}</p>
+      <div class="session-traits">
+        ${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}
+      </div>
+      <div class="party-price">
+        <strong>${money(price.total)}</strong>
+        <span
+          >total for ${selectedQuantity}
+          ${selectedQuantity === 1 ? "person" : "people"}</span
+        >
+      </div>
+      <p>
+        ${money(price.unit)} /
+        person${price.buddy ? " · Buddy price applied" : ""}<br />
+        <small
+          >${comparisonLabel(slot)} ${money(slot.originalPriceCentavos)} /
+          person</small
+        >${slot.buddyPriceCentavos !== null && !price.buddy
+          ? `<br>
+    <span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`
+          : ""}
+      </p>
+      ${studioEvidence(slot)}
+      <p class="reference">Price preview. Rechecked before saving.</p>
+      <a
+        class="button secondary"
+        href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
+        >View session ↗</a
+      >
+    </div>
+  </article>`;
 }
 export function notice(element, message, error = false) {
   element.textContent = message;
