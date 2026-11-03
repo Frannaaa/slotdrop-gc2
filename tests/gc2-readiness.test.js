@@ -19,7 +19,7 @@ test('GC2 read-only preflight checks all required screens and core endpoints',as
  const rows=await inspectGC2('http://127.0.0.1:3000');
  assert.equal(rows.every(r=>r.pass),true);
  assert.equal(rows.length,14);
- assert.equal(calls.includes('/api/slots'),true);
+ assert.equal(calls.filter(p=>p==='/api/slots').length,1);
  assert.equal(calls.some(p=>p==='/api/bookings'),true);
  assert.equal(calls.some(p=>p==='/api/pricing/quote'),true);
  assert.equal(calls.some(p=>p==='/api/slots/1'),true);
@@ -69,33 +69,31 @@ test('receipt preflight rejects unrelated 404 responses from a missing booking e
  assert.ok(methods.every(method => method === 'GET'));
 });
 
-test('preflight retains every check when the second inventory read fails', async t => {
+test('preflight uses one consistent inventory response even if a second read would fail', async t => {
  let inventoryReads=0;
  t.mock.method(globalThis, 'fetch', async url => {
   const path=new URL(url).pathname;
-  if (requiredPages.some(([,p]) => p === path))
-   return new Response('<main>Demo</main>', {headers:{'content-type':'text/html'}});
-  if (path === '/api/slots') {
+  if(requiredPages.some(([,p])=>p===path))
+   return new Response('<main>Demo</main>',{headers:{'content-type':'text/html'}});
+  if(path==='/api/slots') {
    inventoryReads++;
-   return inventoryReads === 1
-    ? Response.json([{id:1,remainingSeats:4}])
-    : Response.json({error:{code:'DATABASE_UNAVAILABLE'}}, {status:503});
+   return inventoryReads === 1 ? Response.json([{id:1,remainingSeats:4}])
+    : Response.json({error:{code:'DATABASE_UNAVAILABLE'}},{status:503});
   }
-  if (path === '/api/bookings/00000000-0000-4000-8000-000000000000')
-   return Response.json({error:{code:'BOOKING_NOT_FOUND'}}, {status:404});
-  if (path === '/api/bookings') return Response.json([]);
-  if (path === '/api/metrics')
+  if(path==='/api/slots/1') return Response.json({id:1,remainingSeats:4,startsAt:'2026-11-01T02:00:00Z'});
+  if(path==='/api/pricing/quote') return Response.json({slotId:1,quantity:1,totalPriceCentavos:10000});
+  if(path==='/api/bookings/00000000-0000-4000-8000-000000000000')
+   return Response.json({error:{code:'BOOKING_NOT_FOUND'}},{status:404});
+  if(path==='/api/bookings') return Response.json([]);
+  if(path==='/api/metrics')
    return Response.json({bookingCount:0,platformRevenueCentavos:0,
     averageOrderValueCentavos:0,nearlyFullSessionCount:0,topSellingService:null});
-  return Response.json({error:{code:'ROUTE_NOT_IMPLEMENTED'}}, {status:404});
+  return Response.json({error:{code:'ROUTE_NOT_IMPLEMENTED'}},{status:404});
  });
  const rows=await inspectGC2('http://localhost:3000');
- assert.equal(inventoryReads,2);
+ assert.equal(inventoryReads,1,'One inventory snapshot is sufficient for the full readiness check');
  assert.equal(rows.length,14);
- for (const name of ['Sample inventory for public demo','Session detail API','Quantity-aware quote API'])
-  assert.equal(rows.find(row=>row.name===name)?.pass,false,name);
- assert.match(rows.find(row=>row.name==='Sample inventory for public demo').detail,/503/);
- assert.equal(rows.find(row=>row.name==='Saved booking receipt-by-ID route').pass,true);
+ assert.equal(rows.every(row=>row.pass),true);
 });
 
 test('preflight includes inventory status when the Browse API is unavailable',async t=>{
