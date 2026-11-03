@@ -38,7 +38,9 @@ export async function listSlots(db, query, now, providerId = null) {
   // This is an internal argument; it is not a public discovery query parameter.
   if (providerId !== null) {
     values.push(integer(providerId, 'providerId'));
-    where.push('s.provider_id=
+    where.push('s.provider_id=$' + values.length);
+  }
+
   // position() is a literal substring match, so user %/_ do not become wildcards.
   if (query.q?.trim()) {
     values.push(query.q.trim());
