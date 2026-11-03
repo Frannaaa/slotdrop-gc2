@@ -1,6 +1,6 @@
-import {request,pageParameters,positive,escapeHtml,money,card,notice} from './customer-common.js';
+import {request,pageParameters,positive,escapeHtml,money,card,notice,safeHttpsUrl} from './customer-common.js';
 const status=document.querySelector('#status'),profile=document.querySelector('#profile'),sessions=document.querySelector('#sessions'),retry=document.querySelector('#retry');
-function sourceLink(url){try{const source=new URL(url);return source.protocol==='https:'?`<a href="${escapeHtml(source.href)}" target="_blank" rel="noopener noreferrer">Published studio details ↗</a>`:'';}catch{return '';}}
+function sourceLink(value){const url=safeHttpsUrl(value);return url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Published studio details ↗</a>`:'';}
 async function load(){
  retry.disabled=true;profile.replaceChildren();sessions.replaceChildren();notice(status,'Loading studio reference…');
  try{
