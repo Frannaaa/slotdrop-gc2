@@ -337,7 +337,9 @@ function renderSessions() {
             }),
           });
           setBusy(false);
-          await load();
+          const refreshed = await load();
+          if (!refreshed)
+            message("page-message", "Sales status saved, but the workspace could not refresh. Use Refresh data to verify it; do not toggle sales again.", true);
         } catch (error) {
           message("page-message", error.message, true);
         } finally {
