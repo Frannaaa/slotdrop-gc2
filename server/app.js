@@ -10,10 +10,10 @@ import { pricingRouter } from './routes/pricing.js';
 import { bookingRouter } from './routes/bookings.js';
 import { ownerRouter } from './routes/owner.js';
 
-export function createApp({ db = postgresDatabase(), clock = () => new Date() } = {}) {
+export function createApp({ db = postgresDatabase(), clock = () => new Date(), checkDatabaseHealth = process.env.NODE_ENV === 'production' } = {}) {
   const app = express();
   app.use(express.json({ limit: '16kb' }));
-  app.use('/api/health', healthRouter);
+  app.use('/api/health', healthRouter(db, checkDatabaseHealth));
   app.use('/api/activities', activityRouter());
   app.use('/api/slots', slotRouter(db, clock));
   app.use('/api/pricing', pricingRouter(db, clock));
