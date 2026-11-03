@@ -34,39 +34,10 @@ export async function listSlots(db, query, now, providerId = null) {
   const values = [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
   const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',
     `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
-  // The studio-profile endpoint scopes the SQL result instead of fetching every provider's offers.
-  // This is an internal argument; it is not a public discovery query parameter.
+  // Studio-profile lookups use a bound provider filter; public discovery filters are unchanged.
   if (providerId !== null) {
     values.push(integer(providerId, 'providerId'));
     where.push('s.provider_id=$' + values.length);
-  }
-
-  // position() is a literal substring match, so user %/_ do not become wildcards.
-  if (query.q?.trim()) {
-    values.push(query.q.trim());
-    const term = '$' + values.length;
-    where.push(`(position(lower(${term}) in lower(s.name)) > 0
-      OR position(lower(${term}) in lower(p.name)) > 0
-      OR position(lower(${term}) in lower(NULLIF(s.activity_type,'other'))) > 0
-      OR position(lower(${term}) in lower(COALESCE(s.technique,''))) > 0
-      OR EXISTS (SELECT 1 FROM unnest(s.inclusions) AS included(value)
-        WHERE position(lower(${term}) in lower(included.value)) > 0))`);
-  }
-  if (query.category) { values.push(query.category); where.push('s.category=$' + values.length); }
-  if (query.area) { values.push(query.area); where.push('lower(p.area)=lower($' + values.length + ')'); }
-  if (query.type) { values.push(query.type); where.push('s.activity_type=$' + values.length); }
-  if (query.tag === 'beginner') where.push('s.beginner_friendly');
-  if (['handbuilding','wheel-throwing'].includes(query.tag)) { values.push(query.tag); where.push('s.technique=$' + values.length); }
-  if (query.tag === 'painting-included') where.push("'painting'=ANY(s.inclusions)");
-  if (query.tag === 'materials-included') where.push("'materials'=ANY(s.inclusions)");
-  const range = dateRange(query.when, now);
-  if (range) { values.push(...range); where.push(`sl.starts_at >= $${values.length - 1} AND sl.starts_at < $${values.length}`); }
-  const effectivePrice = 'CASE WHEN $3 >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END';
-  const order = query.sort === 'price-low' ? effectivePrice + ' ASC, sl.starts_at, sl.id' : query.sort === 'price-high' ? effectivePrice + ' DESC, sl.starts_at, sl.id' : 'sl.starts_at, sl.id';
-  const result = await db.query(SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order, values);
-  return result.rows.map(slotResponse);
-}
- + values.length);
   }
   // position() is a literal substring match, so user %/_ do not become wildcards.
   if (query.q?.trim()) {
