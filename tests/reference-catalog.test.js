@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {fixture} from './helpers.js';
 import {ensureReferenceCatalog,referenceCatalog} from '../server/repositories/reference-catalog.js';
+import {migrateDatabase} from '../server/repositories/migrations.js';
 import {insertDemoReceipt} from './receipts.js';
 
 test('real studio demo installation is additive and preserves legacy receipts and dates',async()=>{
@@ -54,5 +55,28 @@ test('startup does not silently recreate deliberately cleared reference inventor
   await ensureReferenceCatalog(f.db);
   assert.equal(await count(),0,'Restart must not recreate removed session allocations');
   assert.equal((await f.db.query('SELECT COUNT(*)::int AS n FROM services WHERE reference_key=$1',[key])).rows[0].n,1);
+ }finally{await f.close();}
+});
+
+test('legacy backfill targets fictional providers without rewriting same-named real activities',async()=>{
+ const f=await fixture();
+ try{
+  const {rows:[provider]}=await f.db.query(
+   "INSERT INTO providers(name,city,area) VALUES('Independent Studio','Quezon City','UP Village') RETURNING id");
+  const {rows:[service]}=await f.db.query(
+   `INSERT INTO services(provider_id,name,category,duration_minutes,recurrence_note,
+      default_booking_cutoff_minutes,activity_type,preparation_note)
+    VALUES($1,'Beginner Mug Handbuilding','creative',120,'Custom activity',90,'other','Keep this studio-authored note')
+    RETURNING id`,[provider.id]);
+  // Simulate a legacy demo record that genuinely still needs its original backfill.
+  await f.db.query("UPDATE services SET activity_type='other',technique=NULL,preparation_note='Legacy placeholder' WHERE id=1");
+  await migrateDatabase(f.db);
+  await migrateDatabase(f.db);
+  const {rows:[custom]}=await f.db.query('SELECT activity_type,preparation_note FROM services WHERE id=$1',[service.id]);
+  assert.equal(custom.activity_type,'other');
+  assert.equal(custom.preparation_note,'Keep this studio-authored note');
+  const {rows:[legacy]}=await f.db.query('SELECT activity_type,technique FROM services WHERE id=1');
+  assert.equal(legacy.activity_type,'pottery');
+  assert.equal(legacy.technique,'handbuilding');
  }finally{await f.close();}
 });
