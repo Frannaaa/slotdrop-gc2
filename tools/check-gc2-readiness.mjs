@@ -20,6 +20,23 @@ async function inspect(base, name, path, kind, valid) {
     return valid(data) ? {name,pass:true,detail:'OK'} : {name,pass:false,detail:'Response shape does not match contract'};
   }catch(err){return {name,pass:false,detail:err.name==='TimeoutError'?'Request timed out':err.message};}
 }
+// Use one atomic response snapshot for the Browse health check and its dependents.
+// A second GET can see different inventory or an outage and produce conflicting results.
+async function inspectSlots(base) {
+  const name = 'Database-backed Browse API';
+  try {
+    const response = await fetch(new URL('/api/slots', base),
+      {signal:AbortSignal.timeout(milliseconds),redirect:'error'});
+    if (!response.ok) return {check:{name,pass:false,detail:'HTTP '+response.status},data:null};
+    const type = response.headers.get('content-type') || '';
+    if (!/application\/json/i.test(type)) return {check:{name,pass:false,detail:'Expected JSON, received '+type},data:null};
+    const data = await response.json();
+    if (!Array.isArray(data)) return {check:{name,pass:false,detail:'Response shape does not match contract'},data:null};
+    return {check:{name,pass:true,detail:'OK'},data};
+  } catch (error) {
+    return {check:{name,pass:false,detail:error.name==='TimeoutError'?'Request timed out':error.message},data:null};
+  }
+}
 // A nonexistent UUID should receive the booking route's own 404, not the
 // generic unimplemented API fallback. Never creates a test booking.
 async function inspectReceiptReadback(base) {
@@ -47,30 +64,21 @@ export async function inspectGC2(origin) {
   if(!['http:','https:'].includes(base.protocol)||base.username||base.password)throw Error('Provide an HTTP(S) URL without credentials.');
   const results=[];
   for(const [name,path] of requiredPages)results.push(await inspect(base,name,path,'html'));
-  const slots=await inspect(base,'Database-backed Browse API','/api/slots','json',v=>Array.isArray(v));
+  const {check:slots,data:inventory}=await inspectSlots(base);
   results.push(slots);
-  if(slots.pass) {
-    try{
-      const response=await fetch(new URL('/api/slots',base),{signal:AbortSignal.timeout(milliseconds)});
-      if (!response.ok) throw new Error('Second inventory read returned HTTP '+response.status);
-      const data=await response.json();
-      if (!Array.isArray(data)) throw new Error('Inventory response must be an array');
-      const available=data.filter(row=>row && row.remainingSeats>=1);
-      results.push({name:'Sample inventory for public demo',pass:available.length>0,detail:available.length+' discoverable sample sessions; if zero create new FUTURE offers through Owner without reseeding'});
-      const first=available[0];
-      if(first && Number.isSafeInteger(first.id)) {
-        results.push(await inspect(base,'Session detail API','/api/slots/'+first.id,'json',
-          v=>v && v.id===first.id && v.remainingSeats>=1 && typeof v.startsAt==='string'));
-        results.push(await inspect(base,'Quantity-aware quote API','/api/pricing/quote?slotId='+first.id+'&quantity=1','json',
-          v=>v && v.slotId===first.id && v.quantity===1 && Number.isSafeInteger(v.totalPriceCentavos)));
-      } else {
-        results.push({name:'Session detail API',pass:false,detail:'No eligible session to inspect'});
-        results.push({name:'Quantity-aware quote API',pass:false,detail:'No eligible session to quote'});
-      }
-    }catch(error){
-      results.push({name:'Sample inventory for public demo',pass:false,detail:error.message});
-      results.push({name:'Session detail API',pass:false,detail:'Blocked until inventory can be rechecked'});
-      results.push({name:'Quantity-aware quote API',pass:false,detail:'Blocked until inventory can be rechecked'});
+  if (slots.pass) {
+    const available=inventory.filter(row=>row && row.remainingSeats>=1);
+    results.push({name:'Sample inventory for public demo',pass:available.length>0,
+      detail:available.length+' discoverable sample sessions; if zero create new FUTURE offers through Owner without reseeding'});
+    const first=available[0];
+    if(first && Number.isSafeInteger(first.id)) {
+      results.push(await inspect(base,'Session detail API','/api/slots/'+first.id,'json',
+        v=>v && v.id===first.id && v.remainingSeats>=1 && typeof v.startsAt==='string'));
+      results.push(await inspect(base,'Quantity-aware quote API','/api/pricing/quote?slotId='+first.id+'&quantity=1','json',
+        v=>v && v.slotId===first.id && v.quantity===1 && Number.isSafeInteger(v.totalPriceCentavos)));
+    } else {
+      results.push({name:'Session detail API',pass:false,detail:'No eligible session to inspect'});
+      results.push({name:'Quantity-aware quote API',pass:false,detail:'No eligible session to quote'});
     }
   } else {
     results.push({name:'Sample inventory for public demo',pass:false,detail:'Blocked until slots endpoint works'});
