@@ -55,8 +55,8 @@ The private reference/demo and `/studios.html` are supporting artifacts. The gra
 ## As of November 4 — integration and deployment blockers
 
 - Backend, booking/receipt API, sourced catalog, shared browser helpers and Owner are merged into `main`. Fran's #45 cleanup and business case #37 remain in review.
-- Teammate pages are still unmerged: Home #35 (Chonel), Detail/Selection #41 (Kat), Checkout/Confirmation #43 (Kaitlyn). Respect the assigned human reviewers and do not merge unapproved branches.
-- Kirsten's shared CSS/Browse `public/browse.html` + `public/js/browse.js` have **no published PR or branch** in the official repository as checked November 4. Browse is the course's CP1 deliverable and **must use /api/slots from the group database**.
+- Home #35 (Chonel) is merged. Detail/Selection #41 (Kat) and Checkout/Confirmation #43 (Kaitlyn) remain unmerged. Respect the assigned human reviewers and do not merge unapproved branches.
+- Kirsten has published shared CSS on `css_styling`; Browse (`public/browse.html` + `public/js/browse.js`) and the CSS/Browse PR are still outstanding as checked November 4. Browse is the course's CP1 deliverable and **must use /api/slots from the group database**.
 - The only connected Render web service is `slotdrop-gc2-complete` from **`Frannaaa/reference-only-slotdrop`**, not this graded repository. Do not repoint or mutate that reference service.
 - The connected `slotdrop-gc2-db` PostgreSQL instance cannot be externally inspected with the current Render connection (its IP allowlist blocks external queries). Its relationship to the reference build is not safely verified. **Do not reuse or initialize it as the group database without confirming its ownership and content.**
 - A customer double-submit window was reported in Kaitlyn's Checkout #43; only the page owner should modify her files. Review must confirm Submit stays disabled after successful save until Confirmation opens.

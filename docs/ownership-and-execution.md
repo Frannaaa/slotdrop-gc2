@@ -1,6 +1,6 @@
 # Who owns what and how to hand it over
 
-Updated 3 November 2026. This is the shared group repository. The private reference is a guide; it does not replace anyone's implementation, testing or review.
+Updated 4 November 2026. This is the shared group repository. The private reference is a guide; it does not replace anyone's implementation, testing or review.
 
 | Member | Code and issues | Handoff |
 |---|---|---|
@@ -23,7 +23,7 @@ Updated 3 November 2026. This is the shared group repository. The private refere
 
 ## Work order and dates
 
-Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34, booking/receipt #42, research #32 and studio catalog/applications #39 are reviewed and merged. Customer PRs #35/#41/#43 are refreshed against the catalog and await paired reviews. Kirsten's shared CSS/Browse are not published yet. Business #37 needs Kat's review; cleanup #45 needs Janelle's review. Official deployment and deployed evidence remain pending. CI does not replace those approvals.
+Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34, booking/receipt #42, research #32 and studio catalog/applications #39 are reviewed and merged. Home #35 is merged; customer PRs #41/#43 await paired reviews. Kirsten has published the css_styling branch; Browse and the CSS/Browse PR remain outstanding. Business #37 needs Kat's review; cleanup #45 needs Janelle's review. Official deployment and deployed evidence remain pending. CI does not replace those approvals.
 
 | Date | Deliverable |
 |---|---|
@@ -54,4 +54,8 @@ This is a **catalog change, not a claim of new partners**. The existing fictiona
 - **Janelle — quote/booking/receipt (#14–16/#20–21):** the quote and booked seats come from the same slot record under lock, not from /api/activities or published website prices. Return consistent expected-total conflicts and stable-key retries. Public Owner booking lists must omit customer contact data.
 - **Fran — integration (#29/#34/#32/#39):** own reference data, provider-application safety, migrations, integration checks and deployment. The studio application remains pending; its authorization checkbox is not proof of ownership and it never publishes a business page. Review approvals and the latest CI before merging dependent PRs.
 
-Current review order: Kirsten reviews Home #35; Kaitlyn reviews Detail/Selection #41; Kat reviews Checkout/Confirmation #43 and business #37; Janelle reviews cleanup #45. The page branches already contain current main, so do not repeat completed integration or rebuild their pages. Fran handles reviewed merges and deployment. CSS/Browse publication remains the November 4 checkpoint blocker. Internal targets: October 30 styling/layouts; November 1 first code PRs; November 4 deployed API-backed Browse; November 7 complete connected flow; November 9, 11:59 PM PHT final submission.
+Current review order: Home #35 is already merged; Kaitlyn reviews Detail/Selection #41; Kat reviews Checkout/Confirmation #43 and business #37; Janelle reviews cleanup #45. Recheck page branches against current main before integration; preserve their assigned implementations. Fran handles reviewed merges and deployment. CSS/Browse publication remains the November 4 checkpoint blocker. Internal targets: October 30 styling/layouts; November 1 first code PRs; November 4 deployed API-backed Browse; November 7 complete connected flow; November 9, 11:59 PM PHT final submission.
+
+## November 4 shared styling handoff
+
+The shared card helper emits both `activity-card` (existing page styles) and `card` (Kirsten's css_styling branch). Preserve both selectors during integration. Kirsten still owns font loading, form styling and the `[hidden]` safeguard in shared CSS. Kaitlyn owns locking Checkout after a successful receipt so delayed navigation cannot submit a new request ID. Home is merged, but its session links require the reviewed Detail/Selection PR #41; do not report a complete customer flow until the remaining pages and Browse are integrated.

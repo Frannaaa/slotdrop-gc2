@@ -6,7 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-Current official group status (November 4): the database, Owner, discovery, shared helpers, pricing, persisted booking/receipt APIs, and studio reference catalog are merged into `main`. Home (#35), Detail/Selection (#41), and Checkout/Confirmation (#43) are still open for teammate reviews, while Kirsten's Browse/CSS PR has not been published. Fran's shared cleanup/release checks (#45) and business case (#37) also await review. Passing individual CI does not prove the assembled six-screen journey; the group web service has not been deployed. The separate `reference-only-slotdrop` deployment is not the graded application.
+Current official group status (November 4): the database, Owner, discovery, shared helpers, pricing, persisted booking/receipt APIs, and studio reference catalog are merged into `main`. Home (#35) is merged. Detail/Selection (#41) and Checkout/Confirmation (#43) remain open for teammate reviews, so Home session links still require #41. Kirsten has published the css_styling branch, but Browse and a CSS/Browse PR remain outstanding. Fran's shared cleanup/release checks (#45) and business case (#37) also await review. Passing individual CI does not prove the assembled six-screen journey; the group web service has not been deployed. The separate `reference-only-slotdrop` deployment is not the graded application.
 
 ## Run locally
 

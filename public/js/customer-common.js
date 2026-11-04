@@ -148,7 +148,7 @@ export function card(slot, quantity = 1) {
     slot.beginnerFriendly ? "Beginner-friendly" : "",
     ...(slot.inclusions || []).map(inclusionLabel),
   ].filter(Boolean);
-  return /* HTML */ `<article class="activity-card">
+  return /* HTML */ `<article class="activity-card card">
     <div
       class="card-art ${slot.category === "active" ? "active" : ""}"
       aria-hidden="true"
