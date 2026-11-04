@@ -59,3 +59,5 @@ Current review order: Home #35 is already merged; Kaitlyn reviews Detail/Selecti
 ## November 4 shared styling handoff
 
 The shared card helper emits both `activity-card` (existing page styles) and `card` (Kirsten's css_styling branch). Preserve both selectors during integration. Kirsten still owns font loading, form styling and the `[hidden]` safeguard in shared CSS. Kaitlyn owns locking Checkout after a successful receipt so delayed navigation cannot submit a new request ID. Home is merged, but its session links require the reviewed Detail/Selection PR #41; do not report a complete customer flow until the remaining pages and Browse are integrated.
+
+Fran-owned research, studio and application return links temporarily target `/#featured` while Browse is absent. Restore these destinations to `/browse.html`, alongside the customer-page return links, during the reviewed Browse integration.
