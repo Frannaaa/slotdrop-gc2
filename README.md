@@ -39,7 +39,7 @@ Database tools and Docker are available from PR #27.
 5. Check /api/health for liveness and /api/slots for a database response. Health does not test the database.
 6. Run Postman against the **final public API**, create a new fictional booking through `POST /api/bookings`, read it by `GET /api/bookings/:id`, restart the service without resetting PostgreSQL, and read that same receipt again. Verify Owner/metrics and remaining seats. No such public flow has yet been verified in this README.
 
-.env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
+.env.example lists PORT, DATABASE_URL, NODE_ENV and optional TEST_DATABASE_URL with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 
 TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. Without it, local tests use PGlite and skip the PostgreSQL lock test.
 
