@@ -4,13 +4,13 @@ Group 1 · ITMGT 45.03-YZW
 
 SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. The sample catalog uses real studio names and sourced published facts; session dates, allocated seats, cutoffs, offers, bookings and payments are simulated. No partnership or real reservation is created.
 
-## Build status
+## Build status (checked November 8, 2026)
 
-This branch: **Sourced studio catalog and pending applications**. It includes the earlier owner/discovery/research stack and adds independent studio profiles plus a saved application/status flow. See Issue #38.
+**Implemented on current main:** database-backed discovery, session offer creation/editing, quote calculation, booking create and receipt readback APIs, saved-booking list, Owner metrics, Home, Detail, Selection, and researched supporting studio profiles/applications. The booking API was merged in PR #42; quote API in #40; Home #35; Detail/Selection #41.
 
-The quote API #40 is merged into main. Booking creation and receipt-by-ID are Janelle's next API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
+**Not yet complete on main:** Browse and its search/filter UI; Checkout and Confirmation (submitted in PR #43, awaiting a valid peer approval); final shared CSS (Kirsten's `css_styling` branch has not been merged). Local combined-page checks do not establish a public complete customer flow.
 
-Reviewed #27/#28 are merged. Next: #36 shared helper, Home after Kirsten's review, #29 owner privacy recheck, then #34 discovery and #32 supporting research. This application/catalog extension follows #32 and does not block the core dependencies. Business #37 is reviewed separately. Retarget after approved dependency merges.
+**Open related work:** [#37 business/PDF/Challenge 1 collection](https://github.com/Frannaaa/slotdrop-gc2/pull/37), [#43 Checkout/Confirmation](https://github.com/Frannaaa/slotdrop-gc2/pull/43), [#45 startup/release checks](https://github.com/Frannaaa/slotdrop-gc2/pull/45), and [the eleven-item submission gate](docs/final-submission-checklist.md). Until the final hosted group build is independently checked, **do not claim a deployed complete flow**.
 
 ## Run locally
 
@@ -37,9 +37,9 @@ Database tools and Docker are available from PR #27.
 3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
 4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
 5. Check /api/health for liveness and /api/slots for a database response. Health does not test the database.
-6. Run Postman against the public URL. After booking integration, save a booking, restart the server and read the same receipt back.
+6. Run Postman against the **final public API**, create a new fictional booking through `POST /api/bookings`, read it by `GET /api/bookings/:id`, restart the service without resetting PostgreSQL, and read that same receipt again. Verify Owner/metrics and remaining seats. No such public flow has yet been verified in this README.
 
-.env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
+.env.example lists PORT, DATABASE_URL, NODE_ENV and optional TEST_DATABASE_URL with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 
 TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. Without it, local tests use PGlite and skip the PostgreSQL lock test.
 
@@ -76,7 +76,7 @@ package-lock.json pins dependencies. Add the actual public runtime/database vers
 
 The build focuses on recurring leisure sessions and released seat allocations. Discovery covers the next 72 hours; each session has its own booking deadline. Studios control standard and optional buddy offers. The course commission is 10%.
 
-Availability and buddy pricing are the two revenue features. The booking API still needs to enforce them when saving a purchase. Paid add-ons, accounts, real payments, React and optimization are deferred.
+Availability and buddy pricing are the two revenue features. The merged server booking path now rechecks remaining seats under a session-row lock, selects stored standard/buddy prices, recomputes the total and commission, and saves a durable receipt. The unmerged customer Checkout/Confirmation pages still need to expose that path in the final public build. Paid add-ons, accounts, real payments, React and optimization are deferred.
 
 ## Design and documents
 
@@ -89,15 +89,15 @@ The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.ch
 - [Challenges and test results](docs/challenges.md)
 - [Deployed List baseline](docs/baseline.md)
 
-The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/SlotDrop-Fran.postman_collection.json) is in the owner branch. Set baseUrl and serviceId before running it against fictional data. Test records are in that branch's docs/evidence/.
+The existing [Owner/session Postman collection](docs/SlotDrop-Fran.postman_collection.json) is in main. The separate [six-case booking Challenge 1 collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-business-case/docs/SlotDrop-GC2-Challenge1.postman_collection.json) is currently in PR #37 and must be merged and rerun on the **actual public API** with dated screenshots. A passing local test is not a substitute.
 
 ## Dates and remaining work
 
-- **October 28:** finish access/assignments, verify main's protection settings, review and merge routes/schema/business draft. [Issue #1](https://github.com/Frannaaa/slotdrop-gc2/issues/1) tracks the remaining CP0 steps.
-- **November 4:** deployed Browse must load database sessions through the API.
-- **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
+- **October 28 CP0:** repo, contracts and first business draft (historical evidence; do not backdate).
+- **November 4 CP1:** public deployed Browse backed by the group's database API was required (independent deployed evidence not yet confirmed).
+- **November 9, 11:59 PM Philippine time:** submit the final reviewed `main` tagged `gc2-v1.0`, actual public full-flow link, ≤2-page business PDF, exported booking Postman collection, system/data flow, business/challenges/baseline and each member's unaided recording. Submission channel remains unannounced in the supplied brief.
 
-Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+Use [the 11-item final submission and evidence checklist](docs/final-submission-checklist.md). This tracks the valid Git approvals and authorship gates, deployed transaction/restart test, six public Postman cases, Challenges 2–4, Lighthouse/Network baseline, outside-group phone test and all six recordings. Do not mark a proof complete until it was actually obtained.
 
 ## Released-seat discovery revision
 
