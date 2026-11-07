@@ -36,6 +36,8 @@ jobs:
         run: npm test
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+      - name: Measure Selection sequential/parallel GET timing (disposable fixture)
+        run: node tools/benchmark-selection-requests.mjs
       - name: Build and initialize production image
         if: ${{ hashFiles('Dockerfile') != '' }}
         run: |
