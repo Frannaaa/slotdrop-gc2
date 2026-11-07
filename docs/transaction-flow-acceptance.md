@@ -38,6 +38,21 @@ npm run check:transaction -- https://ACTUAL-GROUP-HOST --confirm-fictional-write
 
 Do **not** use the private reference-only Render URL as the final group URL, do not use real emails, and do not rerun against a full session without creating fresh future offers through Owner. A successful API smoke **does not** prove the six-screen browser path or independent stranger test.
 
+### Verified disposable CI smoke — November 8, 2026 (PHT)
+
+On [CI run 42396545013](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42396545013), head `e666f800b8b478621149ab4f65bbb284d5471af8`, the new **local disposable** Node HTTP test passed. The logs show:
+
+| Observation | Actual outcome |
+|---|---|
+| POST /api/bookings | **201**, fictional one-seat receipt created |
+| GET /api/bookings/:id | **200**, same saved receipt |
+| Repeat same request ID and payload | **200**, same receipt, no duplicate |
+| Owner GET /api/bookings | Exact new receipt ID appears once |
+| Available seats | **4 → 3** |
+| Owner booking count | **0 → 1** |
+
+The test fixture used a PGlite database and local `127.0.0.1` HTTP app. This verifies the *backend-to-Owner chain* in isolation; it **does not** verify an official Group 1 deployment, any of the missing browser screens, independent phone use, or the required PostgreSQL restart of that public deployment. The CI also separately reported successful Node/PostgreSQL tests and production-container restart checks.
+
 ### Full-credit browser acceptance — actual evidence to collect
 
 - [ ] Member-owned, validly reviewed Browse + CSS PRs and Checkout/Confirmation PR #43 merged into main, all page links actually wired.
