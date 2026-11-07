@@ -64,11 +64,7 @@ export async function listSlots(db, query, now) {
   if (paginated) {
     // Apply LIMIT/OFFSET after discovery filters and deterministic ORDER BY.
     values.push(limit, (page - 1) * limit);
-    sql += ' LIMIT 
-}
- + (values.length - 1) + ' OFFSET 
-}
- + values.length;
+    sql += ' LIMIT ' + String.fromCharCode(36) + (values.length - 1) + ' OFFSET ' + String.fromCharCode(36) + values.length;
   }
   const result = await db.query(sql, values);
   return result.rows.map(slotResponse);
