@@ -7,7 +7,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
 | GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Does not check the database | Fran |
-| GET /api/slots | q, category, area, when, people | 200 array, including [] | 400 bad filter | Fran |
+| GET /api/slots | q, category, area, when, people, type, tag, sort | 200 array, including [] | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
@@ -22,7 +22,7 @@ Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is
 
 ## Discovery and session responses
 
-q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
+q is a case-insensitive literal substring of the provider, service, activity type, technique or inclusion. category is creative or active; area matches an area name case-insensitively; people is an integer from 1 to 100. type accepts pottery, painting, pilates, dance or other. tag accepts beginner, handbuilding, wheel-throwing, painting-included or materials-included. sort accepts soonest, price-low or price-high; the price sort uses the party-size-aware standard/buddy rate. Repeated query keys, unsupported filters, overlong q/area and null characters in q or area return 400.
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
