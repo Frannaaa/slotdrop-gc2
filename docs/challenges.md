@@ -125,6 +125,8 @@ These requests ran against the assembled local Express app using the disposable 
 
 ### 1. Six API cases
 
+Import [the Challenge 1 Postman collection](SlotDrop-GC2-Challenge1.postman_collection.json). Set the official group URL and slot variables, run all six requests and capture the request, status and response in Postman. The collection requests and assertions were verified with the local HTTP harness.
+
 The POST cases used the same valid fictional booking body except for the listed change and a fresh request ID. The fixture's session 1 had four seats. No code change was needed after this run.
 
 | Request | Expected | Actual response |

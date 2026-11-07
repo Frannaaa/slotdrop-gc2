@@ -1,0 +1,220 @@
+{
+  "info": {
+    "name": "SlotDrop GC2 | Challenge 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set baseUrl to the official group deployment and slotId to a bookable session. Set overCapacityQuantity to one more than its remaining seats, at most 100. Verify unknownSlotId does not exist. Run all six requests and capture each request body, status and response. The default variables target the local QA fixture."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "slotId",
+      "value": "1"
+    },
+    {
+      "key": "overCapacityQuantity",
+      "value": "5"
+    },
+    {
+      "key": "unknownSlotId",
+      "value": "999"
+    },
+    {
+      "key": "expectedTotalCentavos",
+      "value": "304000"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 · Zero quantity",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": 0,\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"INVALID_INPUT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_INPUT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 · Browser sends a fake total",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": 2,\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\",\n  \"total\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"INVALID_INPUT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_INPUT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 · More seats than available",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": {{overCapacityQuantity}},\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"SLOT_UNAVAILABLE\", () => pm.expect(pm.response.json().error.code).to.eql(\"SLOT_UNAVAILABLE\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 · Unknown session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{unknownSlotId}},\n  \"quantity\": 2,\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"SLOT_NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"SLOT_NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 · Missing customer name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": 2,\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"INVALID_INPUT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_INPUT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 · Search has no matches",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/slots?q=zzzz-no-match"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Empty results\", () => pm.expect(pm.response.json()).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
