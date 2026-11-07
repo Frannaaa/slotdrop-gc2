@@ -25,12 +25,16 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Audit reachable Git history for prohibited tracked filenames
+        run: node tools/audit-git-paths.mjs
       - run: npm run check:sql
       - name: API tests
         run: npm test
