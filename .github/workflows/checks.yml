@@ -36,6 +36,8 @@ jobs:
         run: npm test
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+      - name: Fran transaction smoke (disposable DB; save receipt and check Owner)
+        run: node tools/check-transaction-smoke.mjs
       - name: Build and initialize production image
         if: ${{ hashFiles('Dockerfile') != '' }}
         run: |
