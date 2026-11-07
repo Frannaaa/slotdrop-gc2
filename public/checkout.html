@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- Group assignment: Kaitlyn. See docs/ownership-and-execution.md. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Complete your booking | SlotDrop</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script type="module" src="/js/checkout.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="logo" href="/">slotdrop<span>●</span></a>
+      <nav aria-label="Main navigation"><a href="/#featured">Featured sessions</a><a href="/owner.html">Demo owner</a></nav>
+    </header>
+    <main id="main">
+      <p class="eyebrow">One step from a good plan</p>
+      <h1>Make it a date.</h1>
+      <form id="checkout" class="panel">
+        <p>
+          Use fictional details for this demo. No payment will be collected.
+        </p>
+        <p id="chosenSession" role="status">Loading session details…</p>
+<p id="summary" class="total"></p>
+        <label
+          >Your name<input
+            name="customerName"
+            required
+            maxlength="100"
+            autocomplete="off"
+            placeholder="Demo Guest" /></label
+        ><label
+          >Email<input
+            name="customerEmail"
+            type="email"
+            required
+            maxlength="254"
+            autocomplete="off"
+            placeholder="guest@example.com" /></label
+        ><label
+          >Simulated payment<select name="paymentMethod" required>
+            <option value="pay_on_site">Pay on site (simulated)</option>
+            <option value="mock_card">Mock card (simulated)</option>
+          </select></label
+        ><label class="checkbox"
+          ><input id="acceptPrice" type="checkbox" required /><span
+            id="priceLabel"
+            >I agree to the booking total.</span
+          ></label
+        >
+        <p id="status" role="status"></p>
+        <button id="retry" class="text-button" type="button">
+          Refresh quote</button
+        ><button id="submit" class="button" type="submit" disabled>
+          Confirm simulated booking
+        </button>
+      </form>
+      <a href="/#featured">Back to featured sessions</a>
+    </main>
+    <footer><p>Course demonstration. Session dates, released seats, offers, bookings and payments are simulated. Any researched studios are independent references, not confirmed partners.</p></footer>
+  </body>
+</html>
