@@ -118,3 +118,80 @@ Tested a disposable local build assembled from Fran's #45, Kat's #41 and Kaitlyn
 The running app returned a quote for two seats, saved a booking with HTTP 201 and returned the same receipt with HTTP 200 on an identical retry. Availability fell by two seats, Owner listed the booking once, and the saved receipt was readable after restarting the local server.
 
 This run covers HTTP and persistence. Browser interaction, deployed challenge screenshots, the phone test and the Browse baseline are still pending. Checkout still needs to prevent a second submission during navigation to Confirmation.
+
+## November 8 local challenge evidence
+
+These requests ran against the assembled local Express app using the disposable PGlite test fixture. The official deployment, Postman screenshots, browser Network recording and hand-drawn diagram remain pending.
+
+### 1. Six API cases
+
+The POST cases used the same valid fictional booking body except for the listed change and a fresh request ID. The fixture's session 1 had four seats. No code change was needed after this run.
+
+| Request | Expected | Actual response |
+|---|---:|---|
+| POST /api/bookings with quantity 0 | 400 | 400 INVALID_INPUT, quantity outside allowed range |
+| POST /api/bookings with an additional total of 1 | 400 or saved server total | 400 INVALID_INPUT, unsupported field total |
+| POST /api/bookings for five seats | 409 | 409 SLOT_UNAVAILABLE, four seats left |
+| POST /api/bookings with slotId 999 | 404 | 404 SLOT_NOT_FOUND |
+| POST /api/bookings without customerName | 400 | 400 INVALID_INPUT, provide customerName |
+| GET /api/slots?q=zzzz-no-match | 200 and empty list | 200, [] |
+
+### 2. Booking request and code path
+
+A local HTTP POST to /api/bookings returned 201. The persisted receipt read back with 200 at GET /api/bookings/917d1fa9-9a71-4a2f-873e-78c6ea4b8c9e. This is a local request plus a source trace of the browser path for the eventual deployed walkthrough.
+
+```json
+{
+  "slotId": 1,
+  "quantity": 2,
+  "customerName": "GC2 QA",
+  "customerEmail": "qa@example.com",
+  "paymentMethod": "mock_card",
+  "expectedTotalCentavos": 304000,
+  "requestId": "2e7012ac-0510-49e6-ba6b-9174d7d8c5f3"
+}
+```
+
+```json
+{
+  "id": "917d1fa9-9a71-4a2f-873e-78c6ea4b8c9e",
+  "slotId": 1,
+  "quantity": 2,
+  "paymentMethod": "mock_card",
+  "status": "confirmed",
+  "serviceName": "Beginner Mug Handbuilding",
+  "providerName": "Demo Clay Corner",
+  "sessionStartsAt": "2026-11-09T02:00:00.000Z",
+  "originalUnitPriceCentavos": 200000,
+  "offerUnitPriceCentavos": 160000,
+  "unitPriceCentavos": 152000,
+  "pricingType": "buddy",
+  "commissionBasisPoints": 1000,
+  "totalPriceCentavos": 304000,
+  "platformFeeCentavos": 30400,
+  "providerPayoutCentavos": 273600,
+  "createdAt": "2026-11-07T16:17:52.806Z"
+}
+```
+
+1. public/js/checkout.js:74 handles submit and builds the payload. At line 101 it calls request() in public/js/customer-common.js:46.
+2. server/app.js:26 mounts bookingRouter. server/routes/bookings.js:7 calls createBooking with the JSON body.
+3. server/services/bookings.js:39 validates with bookingRequest. createBooking at line 91 checks the request key, locks the slot with SELECT FOR UPDATE at line 99, and calls priceQuote at line 109 to recompute the price and enforce availability. The INSERT at line 114 saves the receipt snapshot within the transaction.
+4. receiptResponse in server/services/bookings.js:56 shapes the saved receipt and the route returns JSON. Checkout navigates with its ID at line 106.
+5. public/js/confirmation.js:6 runs load(), GETs the receipt at line 14 via server/routes/bookings.js:11 and findReceipt in server/services/bookings.js:134, then renders the saved quantities and prices at line 17.
+
+### 3. Group review prompts
+
+The existing debugging table gives the group concrete cases to discuss: rounded deadlines, stale edits overwriting newer values and infrastructure failures returning generic errors. For each chosen case, the group should confirm which AI output it actually used, explain the failure or review that exposed it, and describe the decision to replace it. The local tests establish the observed behavior and correction.
+
+### 4. Verified single edit for the commission rate
+
+For a new active commission rate, edit server/config/business.js:1 only. No rate was changed during this check. server/services/pricing.js:22 defaults to that value. server/services/bookings.js:109 and :120 use it to calculate and persist new bookings. server/repositories/owner.js:8 exposes the setting and public/js/owner.js:87 uses the API value for its preview. Existing receipts keep the rate saved at booking time.
+
+### Stretch evidence
+
+- Double click / last seats. An identical retry returned 200 with the same receipt ID. With exactly two seats remaining, two simultaneous two-seat bookings with distinct keys returned 201 and 409. This demonstrates the API race case. The separate Checkout navigation window still needs its UI fix.
+- Sequential or parallel. The Owner screen uses Promise.all at public/js/owner.js:400. A local HTTP harness measured two independent requests used there, GET /api/metrics and GET /api/bookings. After warmup, 15 alternating trials per mode gave a 8.37 ms sequential median and a 7.21 ms parallel median. This measures the two requests through response JSON on local loopback, not deployed browser render time.
+- Pagination, 429 with frontend wait/retry, and two-route computed value remain open.
+
+Challenge 5 is each member's own prediction, experiment and unedited recording.
