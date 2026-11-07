@@ -7,9 +7,9 @@ import {
   salesState,
   preferredServiceId,
   demoInventoryStatus,
+  openReleaseUtilization,
 } from "./owner-policy.js";
 import { api } from "./api.js";
-import { openReleaseUtilization } from "./owner-insights.js";
 const $ = (id) => document.getElementById(id);
 const form = $("offer-form");
 // Cache the formatters; Owner renders many rows with the same locale.
