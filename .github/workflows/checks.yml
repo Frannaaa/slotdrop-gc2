@@ -35,6 +35,8 @@ jobs:
       - run: npm run check
       - name: Audit reachable Git history for prohibited tracked filenames
         run: node tools/audit-git-paths.mjs
+      - name: Scan historical source blobs for high-confidence secret signatures
+        run: node tools/audit-git-signatures.mjs
       - run: npm run check:sql
       - name: API tests
         run: npm test
