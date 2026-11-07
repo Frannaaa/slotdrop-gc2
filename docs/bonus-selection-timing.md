@@ -17,6 +17,18 @@ node tools/benchmark-selection-requests.mjs
 
 GitHub CI additionally runs it after API tests with PGlite fixture data; its log is an honest **local** benchmark, not a browser capture or final deployed result.
 
+## Actual local CI measurement — November 8, 2026 PHT
+
+On [GitHub Actions run 42394996195](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42394996195), commit `730ee03e73cf8dcb13178a2c36a9009a48a68e93`, the read-only benchmark executed **seven alternating rounds** on a disposable local HTTP/PGlite fixture after warmup.
+
+| Observed median | Time |
+|---|---:|
+| Sequential detail then quote | **5.47 ms** |
+| Parallel detail + quote | **4.59 ms** |
+| Sequential minus parallel | **0.88 ms** |
+
+These are **real local CI measurements**, not a public Render deployment, a browser Network waterfall or a controlled scientific speed claim. The two endpoints were `GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quantity=2`. Different hardware, cold starts, internet latency and caching can change the result or reverse the ordering. The public deployed run and the team's own interpretation remain pending.
+
 ## Run once a public service has live fictional sessions
 
 ```sh
