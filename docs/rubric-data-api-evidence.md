@@ -13,15 +13,15 @@
 | Confirmation reads by ID | `GET /api/bookings/:id` loads saved DB receipt by UUID (200), malformed ID (400), missing ID (404). `public/js/confirmation.js` in teammate PR #43 calls this API by URL ID. | **Backend passed**; **teammate Confirmation frontend not yet merged on main** |
 | Survives restart | `tools/check-release.mjs` creates API offer, quotes/saves a real SQL booking in a production Docker container backed by PostgreSQL 16; restarts that container and checks same receipt, replay, seat count, Owner metrics. | **Passed in disposable production-container CI**; official hosted service restart remains unverified |
 
-### Current-head proof
+### Verified CI run (implementation commit)
 
-[**GC2 checks CI run 42397450273**](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42397450273), commit `7d3342ee5c35092447e20bacf1c90924d0557f83` on PR #45, finished successfully:
+[**GC2 checks CI run 42397754778**](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42397754778), implementation commit `38b2d0de64618d8ef04b19466be6657a55c491d8` on PR #45, finished successfully:
 
 - **98 tests passed, 0 failed** with PostgreSQL test database.
 - `npm run check`, `npm run check:sql`, and dedicated **Fran/M1 cross-route data/API matrix** passed.
 - `tools/check-transaction-smoke.mjs` **local disposable PGlite** API booking gave 201 POST, 200 receipt GET, 200 exact-key retry; one seat 4 → 3; Owner booking count 0 → 1 with the exact saved ID once.
 - **Real PostgreSQL 16 + production Docker container**: new quote/booking saved before container restart, identical receipt found after restart, retry remained idempotent, Owner and seat counts persisted. This is not a restart of a hosted Render instance.
-- Git history filename audit found **188 distinct reachable historical object paths** without common tracked `.env`, `node_modules`, local database, private-key or credential filenames. This does **not** inspect all historical source text for hidden credentials.
+- Git history filename audit found **190 distinct reachable historical object paths** without common tracked `.env`, `node_modules`, local database, private-key or credential filenames. A second scan inspected **746 distinct reachable historical text blobs** (zero oversized skipped) and found no common high-confidence private-key headers or GitHub, AWS, OpenAI and Slack token signatures. Both checks are safe (they never output secret values) and **neither guarantees arbitrary credentials are absent**.
 
 ### Representative actual HTTP status cases
 
