@@ -20,7 +20,7 @@ export function dateRange(when, now) {
 
 export async function listSlots(db, query, now) {
   for (const key of Object.keys(query)) {
-    if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort'].includes(key)) invalid('Unsupported filter: ' + key);
+    if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort', 'page', 'limit'].includes(key)) invalid('Unsupported filter: ' + key);
     if (typeof query[key] !== 'string') invalid('Filters must appear once.');
   }
   if (query.category !== undefined && !['creative','active'].includes(query.category)) invalid('Invalid category.');
@@ -31,6 +31,10 @@ export async function listSlots(db, query, now) {
   if ((query.q?.length ?? 0) > 100 || (query.area?.length ?? 0) > 100) invalid('Search text is too long.');
   if ([query.q, query.area].some(value => value?.includes('\u0000'))) invalid('Search text cannot contain null characters.');
   const people = query.people === undefined ? 1 : integer(query.people, 'people', 1, MAX_SEATS);
+  // Pagination is opt-in so existing Home/Owner callers still receive the full array.
+  const paginated = query.page !== undefined || query.limit !== undefined;
+  const page = query.page === undefined ? 1 : integer(query.page, 'page', 1, 10000);
+  const limit = query.limit === undefined ? 12 : integer(query.limit, 'limit', 1, 50);
   const values = [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
   const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',
     `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
@@ -56,6 +60,12 @@ export async function listSlots(db, query, now) {
   if (range) { values.push(...range); where.push(`sl.starts_at >= $${values.length - 1} AND sl.starts_at < $${values.length}`); }
   const effectivePrice = 'CASE WHEN $3 >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END';
   const order = query.sort === 'price-low' ? effectivePrice + ' ASC, sl.starts_at, sl.id' : query.sort === 'price-high' ? effectivePrice + ' DESC, sl.starts_at, sl.id' : 'sl.starts_at, sl.id';
-  const result = await db.query(SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order, values);
+  let sql = SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order;
+  if (paginated) {
+    // Apply LIMIT/OFFSET after discovery filters and deterministic ORDER BY.
+    values.push(limit, (page - 1) * limit);
+    sql += ' LIMIT $' + (values.length - 1) + ' OFFSET $' + values.length;
+  }
+  const result = await db.query(sql, values);
   return result.rows.map(slotResponse);
 }
