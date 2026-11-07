@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Choose your seats | SlotDrop</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script type="module" src="/js/selection.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+<a class="logo" href="/">slotdrop<span></span></a>
+<nav aria-label="Main navigation"><a href="/#featured">Featured sessions</a><a href="/owner.html">Demo owner</a></nav>
+</header>
+<main id="main">
+<p class="eyebrow">Your plan starts here</p>
+<h1>Who's coming?</h1>
+<form id="selection" class="panel">
+<label>Number of people<input id="quantity" name="quantity" type="number" min="1" max="100" step="1" value="1" required /></label>
+<p id="chosenSession" role="status">Loading session details...</p>
+<p id="summary" class="total"></p>
+<p id="status" role="status"></p>
+<button class="text-button" id="retry" type="button">Refresh quote</button>
+<button id="continue" class="button" type="submit" disabled>Continue to booking</button>
+</form>
+</main>
+<a href="/#featured">Back to featured sessions</a>
+<footer><p>Course demonstration. Session dates, released seats, offers, bookings and payments are simulated. Any researched studios are independent references, not confirmed partners.</p></footer>
+</body>
+</html>
