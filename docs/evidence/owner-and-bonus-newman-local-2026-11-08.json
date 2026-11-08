@@ -1,0 +1,492 @@
+{
+  "owner": {
+    "environment": "Local disposable PGlite fixture with reference catalog",
+    "runner": "Newman 6.2.3",
+    "cases": [
+      {
+        "name": "Starter health",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/health",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Discover released seats",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots?people=2&category=creative",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          },
+          {
+            "name": "List is an array",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Known session detail",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots/1",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Unknown session",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots/900000000",
+        "requestBody": null,
+        "status": 404,
+        "assertions": [
+          {
+            "name": "Status is 404",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Malformed ID",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots/not-an-id",
+        "requestBody": null,
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "No matching search",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots?q=NO_MATCH_gc2_check_73f2",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          },
+          {
+            "name": "Empty array",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Invalid people quantity",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots?people=0",
+        "requestBody": null,
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Repeated filter rejected",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/slots?people=2&people=3",
+        "requestBody": null,
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Owner catalog includes managed inventory",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/owner/catalog",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          },
+          {
+            "name": "An active demo activity is available",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Saved booking list",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/bookings",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Owner metrics reconcile to saved confirmed receipts",
+        "method": "GET",
+        "url": "http://127.0.0.1:33543/api/metrics",
+        "requestBody": null,
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          },
+          {
+            "name": "Booking count",
+            "passed": true
+          },
+          {
+            "name": "Modeled commission sum",
+            "passed": true
+          },
+          {
+            "name": "Average whole-booking value",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Create a session using the activity cutoff",
+        "method": "POST",
+        "url": "http://127.0.0.1:33543/api/slots",
+        "requestBody": "{\n  \"serviceId\": 5,\n  \"startsAt\": \"2026-11-09T01:33:02.149Z\",\n  \"capacity\": 4,\n  \"originalPriceCentavos\": 200000,\n  \"offerPriceCentavos\": 160000,\n  \"buddyPriceCentavos\": 152000,\n  \"runsAsScheduled\": true\n}",
+        "status": 201,
+        "assertions": [
+          {
+            "name": "Status is 201",
+            "passed": true
+          },
+          {
+            "name": "Activity cutoff applied",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Pause the created session",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/25",
+        "requestBody": "{\n  \"status\": \"paused\"\n}",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Reject a buddy rate above the offer",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/25",
+        "requestBody": "{\n  \"buddyPriceCentavos\": 170000\n}",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Lower the offer and turn off buddy pricing",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/25",
+        "requestBody": "{\n  \"offerPriceCentavos\": 150000,\n  \"buddyPriceCentavos\": null\n}",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Close the booking deadline",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/25",
+        "requestBody": "{\n  \"bookingClosesAt\": \"2020-01-01T00:00:00Z\"\n}",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Reject reopening after the cutoff",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/25",
+        "requestBody": "{\n  \"status\": \"open\"\n}",
+        "status": 409,
+        "assertions": [
+          {
+            "name": "Status is 409",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Set a future cutoff and resume",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/25",
+        "requestBody": "{\"bookingClosesAt\":\"2026-11-08T23:33:02.149Z\",\"status\":\"open\"}",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "Status is 200",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Missing required session fields",
+        "method": "POST",
+        "url": "http://127.0.0.1:33543/api/slots",
+        "requestBody": "{\n  \"serviceId\": 1\n}",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Malformed JSON",
+        "method": "POST",
+        "url": "http://127.0.0.1:33543/api/slots",
+        "requestBody": "{",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Empty edit",
+        "method": "PATCH",
+        "url": "http://127.0.0.1:33543/api/slots/1",
+        "requestBody": "{}",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "Status is 400",
+            "passed": true
+          }
+        ]
+      }
+    ],
+    "requests": {
+      "total": 21,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 28,
+      "pending": 0,
+      "failed": 0
+    },
+    "commit": "b1cf5c05890eb1cc51a308977d5dea29a6cfa32e"
+  },
+  "page": {
+    "runner": "Newman 6.2.3",
+    "environment": "Local disposable PGlite fixture",
+    "branch": "#49 a457e39",
+    "requests": {
+      "total": 4,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 6,
+      "pending": 0,
+      "failed": 0
+    },
+    "cases": [
+      {
+        "name": "First page",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "HTTP 200",
+            "passed": true
+          },
+          {
+            "name": "Two sessions",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Second page",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "HTTP 200",
+            "passed": true
+          },
+          {
+            "name": "Two different sessions",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Reject invalid page",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "HTTP 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Reject excess limit",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "HTTP 400",
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "rate": {
+    "runner": "Newman 6.2.3",
+    "environment": "Local disposable PGlite fixture",
+    "branch": "#56 f5c7bba, clock advanced by ten seconds before retry",
+    "requests": {
+      "total": 7,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 12,
+      "pending": 0,
+      "failed": 0
+    },
+    "cases": [
+      {
+        "name": "Invalid request one",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "HTTP 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Invalid request two",
+        "status": 400,
+        "assertions": [
+          {
+            "name": "HTTP 400",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Blocked booking",
+        "status": 429,
+        "assertions": [
+          {
+            "name": "HTTP 429",
+            "passed": true
+          },
+          {
+            "name": "Retry-After is 10 seconds",
+            "passed": true
+          },
+          {
+            "name": "RATE_LIMITED",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "No booking saved while blocked",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "HTTP 200",
+            "passed": true
+          },
+          {
+            "name": "No saved booking",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Retry same request after limit resets",
+        "status": 201,
+        "assertions": [
+          {
+            "name": "HTTP 201",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Replay same key",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "HTTP 200",
+            "passed": true
+          },
+          {
+            "name": "Original receipt",
+            "passed": true
+          }
+        ]
+      },
+      {
+        "name": "Owner sees one booking",
+        "status": 200,
+        "assertions": [
+          {
+            "name": "HTTP 200",
+            "passed": true
+          },
+          {
+            "name": "One saved booking",
+            "passed": true
+          }
+        ]
+      }
+    ]
+  }
+}
