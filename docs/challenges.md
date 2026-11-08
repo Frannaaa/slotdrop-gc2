@@ -49,7 +49,25 @@ Case 2: the server rejects any field it does not expect, so a browser cannot eve
 
 ## 2. Trace a real request
 
-[system.md](system.md) explains the booking architecture. Capture one complete deployed booking in DevTools Network: method, URL, body, status and response. Name each handler, validator and database statement, and attach the required hand-drawn diagram.
+**Status:** cannot be recorded on the live site yet. Browse (#60, #62, #63, #64) and Checkout/Confirmation (#43) are not merged, so the deployed site has no Checkout page to place an order from. Merged together locally on top of `main`, all six customer pages are present and the test suite passes apart from the three Windows line-ending tests fixed by #58.
+
+When they are deployed, record one fictional booking with DevTools → Network open: the `POST /api/bookings` request (method, URL, request body, status 201, response) and the `GET /api/bookings/:id` that Confirmation sends. Save the screenshots in `docs/evidence/challenge2/` and add the booking ID here. Seeded sessions start on 9 November and do not renew, so merge #59 or add a future session on the Owner screen first.
+
+**Every hop, by file and function** (line numbers on `main` 96d4a31 and Kaitlyn's #43 branch):
+
+| Hop | File and function | What happens |
+|---|---|---|
+| Button handler | `public/js/checkout.js:74`, the form's `submit` listener | Stops if busy, unacknowledged or invalid; builds `{requestId, slotId, quantity, customerName, customerEmail, paymentMethod, expectedTotalCentavos}` with a new `crypto.randomUUID()`; disables the button |
+| Request | `public/js/checkout.js:101` → `request()` in `public/js/customer-common.js:46` | `fetch` with JSON headers and a 15 s timeout; non-2xx becomes an error carrying the API's `code` |
+| Route | `server/app.js:28` `bookingRateLimiter`, then `server/app.js:29` `bookingRouter`; `server/routes/bookings.js:7` | The limiter allows 30 POSTs per minute; the route calls `createBooking(db, req.body, clock)` |
+| Validation | `bookingRequest()` in `server/services/bookings.js:39`, using `object()` and `integer()` from `server/lib/validation.js` | Rejects unknown fields (such as `total`), checks each field's type and range → 400 `INVALID_INPUT` |
+| Database statements | `createBooking()` in `server/services/bookings.js:91`, one transaction | Looks up the `requestId` (a retry returns the saved receipt) → `SELECT id FROM slots WHERE id=$1 FOR UPDATE` (line 99) locks the session → re-reads it (line 104) → `checkBookable()` in `server/services/pricing.js:8` rejects closed or full sessions (409) → `priceQuote()` (`pricing.js:22`, called at line 109) recomputes the price, tier and commission → compares with `expectedTotalCentavos` (409 `PRICE_CHANGED` if different) → `INSERT INTO bookings …` (line 114) → re-reads the receipt (line 121) → `COMMIT` |
+| Response | `server/routes/bookings.js:9`, shaped by `receiptResponse()` (`bookings.js:56`) | 201 with the saved receipt (200 for an identical retry) |
+| What renders | `public/js/checkout.js:106` goes to `/confirmation.html?id=…`; `load()` in `public/js/confirmation.js:6` calls `GET /api/bookings/:id` (line 14) → `server/routes/bookings.js:11` → `findReceipt()` (`bookings.js:134`) | Confirmation shows the reference, seats, price per person, saved total and payment choice read back from PostgreSQL |
+
+Seats are never stored as a counter: remaining seats are capacity minus the confirmed bookings, so saving the row is what makes the seat unavailable.
+
+**Still needed from the group:** the Network screenshots from the live site and the hand-drawn diagram (a photo is fine).
 
 ## 3. Debugging record
 
@@ -60,7 +78,20 @@ Case 2: the server rejects any field it does not expect, so a browser cannot eve
 | An old price form undid a later pause, capacity and deadline change | Reproduced the full-field PATCH overwrite | Send only edited fields; tests/owner-edit.test.js |
 | Invalid URL encodings, unsupported JSON encodings and database outages all returned 500 | Three failing regression cases | Return safe 400, 415 and 503 errors; HTTP and database-failure tests |
 
-The team still needs its own explanation of three corrections for Challenge 3. These notes record what was observed and changed; they are not a teammate review.
+### Challenge 3 — three moments, to be written by the group
+
+Facts from the repository you can choose from (pick three, or use your own):
+
+- **Line-ending fix was incomplete.** #58's first version normalized only `tests/owner-clock.test.js`. After merging `main`, `tests/owner-toggle.test.js` (from #45) still failed on Windows with the same pattern. Fixed by normalizing it too and adding it to the Windows CI job.
+- **Challenge 1 setup sent its quote to localhost.** The first deployed run ([42459905436](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436)) failed 1 of 15 assertions because request 00 read `baseUrl` from collection variables. The local run had passed because both URLs were localhost. Fixed by splitting 00 into visible 00a/00b requests.
+- **Health said "ok" without a database.** An earlier health route returned 200 even when PostgreSQL or its tables were missing, so Render would mark a broken service live. Changed to return 503 in production until the tables exist (`server/routes/health.js`, `tests/deployment-bootstrap.test.js`).
+- The four rows in the table above (rounded deadlines, stale PATCH overwrite, reopened cancelled session, 500s for bad encodings).
+
+For each one you choose, write in your own words:
+
+1. **What the AI gave us:**
+2. **How we noticed** (test, error, review comment):
+3. **What we did instead, and why:**
 
 ## 4. Change an owner rule
 
@@ -73,6 +104,8 @@ Current commission inventory, rechecked November 8 on `main` (`96d4a31`) without
 | public/js/owner.js:87 | Preview provider proceeds using the rate from the API | No |
 
 The **rate** lives in one place. The **fee formula** (price × rate ÷ 10,000, rounded per seat) appears three times: server/services/pricing.js:25 computes it for quotes and bookings, public/js/owner.js:87 repeats it only to preview a studio's earnings before an offer is saved, and db/schema.sql:78 checks it as a constraint on every saved receipt. Changing the rate edits none of them. Changing the *rounding rule* would mean editing all three; the owner preview could later read the fee from the quote API to remove the browser copy.
+
+**Why, in the group's words** (to fill in): why is the rate in one place but the fee formula in three? Should the owner preview read the fee from the server instead, and what would that cost?
 
 Saved receipt rates are historical. SQL checks each saved rate and its arithmetic; it does not set the active commission. Test fixtures and worked examples use fixed rates for specific cases. The current booking service reads the shared commission setting. `tests/challenge4-rate.test.js` checks the active value in the quote, stored receipt and Owner catalog.
 
