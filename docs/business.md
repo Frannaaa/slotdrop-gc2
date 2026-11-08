@@ -88,6 +88,13 @@ DB constraints support the rules but do not replace transactional booking checks
 
 Feature A — availability: a released allocation, strict deadline and booking-time stock check make a sellable seat reliable. This supports commission income only when a booking is genuinely incremental. Feature B — tiered pricing: optional buddy pricing encourages a shared booking; the server selects the tier and stores its effect. General discounts alone are not being counted as a third custom feature.
 
+The two features have distinct saved data and server enforcement:
+
+| Revenue feature | Persisted fields | Server enforcement and revenue link |
+|---|---|---|
+| **A. Released-seat availability** | `slots.capacity`, `starts_at`, `booking_closes_at`, `status`, `runs_as_scheduled`; saved `bookings.quantity` | Discovery shows eligible allocations; the booking transaction locks the slot and excludes unavailable, full or expired inventory. A completed booking creates the modeled commission, rather than counting a listing as revenue. |
+| **B. Buddy pricing** | `slots.offer_price_centavos`, optional `buddy_price_centavos`; `bookings.pricing_type`, `unit_price_centavos`, `total_price_centavos`, `platform_fee_centavos` | Shared quote and save services select the buddy tier only for a qualifying two-or-more-seat order, recompute totals on the server, and store the accepted amounts. The commercial effect depends on whether the second customer is incremental. |
+
 Classroom model: Laro Ceramics advertises its mug-making + painting activity at ₱3,000. The course sample uses that reference price, a simulated standard offer of ₱2,700, an optional simulated buddy rate of ₱2,565 per person and four sample released seats. These offers are not approved by Laro. Commission is 10% of the accepted amount, deducted from provider proceeds; it is not an extra customer fee. All figures below are before platform operating costs and provider attendance costs.
 
 | Booking | Customer total | Platform fee | Provider proceeds |
