@@ -79,7 +79,7 @@ providerPayout = total - platformFee
 discountPercent = Math.round((regular - unitPrice) * 10000 / regular) / 100
 ```
 
-The active model rate is 1000 basis points in server/config/business.js on the development branches. It is deducted from the accepted price, with no customer surcharge. Money is saved in centavos. The server chooses the tier; the client cannot choose a rate or pricingType.
+The active modeled commission rate is 1000 basis points in `server/config/business.js`. It is deducted from the accepted price, with no customer surcharge. Money is saved in centavos. The server chooses the tier; the client cannot choose a rate or pricingType.
 
 POST /api/bookings accepts requestId, slotId, quantity, customerName, customerEmail, paymentMethod and expectedTotalCentavos. Validate a UUID retry key, quantity 1–100, trimmed name 1–100 characters, trimmed basic email up to 254 characters, mock_card/pay_on_site and a nonnegative safe-integer acknowledged total. Reject unsupported price fields such as total with 400. Do not collect card numbers.
 
@@ -126,11 +126,11 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 | Confirmation | /confirmation.html?id=UUID | Kaitlyn |
 | Owner workspace | /owner.html | Fran |
 
-Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
+Customer pages should handle loading, empty and error states at phone widths. GC2 uses fictional payments and does not require a login.
 
 The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
 
-## Released-seat discovery contract (Issue #33)
+## Released-seat discovery contract
 
 The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
 
