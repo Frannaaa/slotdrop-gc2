@@ -39,4 +39,6 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 
 | 2026-11-08 | Fran / M1 | ChatGPT GPT-6 | Prepare safe optional HTTP 429 rate-limit support for GC2 bonus | Implemented POST-only single-process server limiter, Retry-After JSON/header, safe same-payload optional browser helper and isolated tests/docs; left Kaitlyn's assigned Checkout #43 unchanged | New PR tests/CI to verify actual 429/reset/retry; final front-end wiring, valid human review, public screenshot and graded bonus remain pending |
 
+| 2026-11-08 | Fran / M1 | ChatGPT GPT-6 | Prepare Vercel Hobby deployment of the existing Group 1 Express/Neon app, rather than pay for Render | Improved existing PR #67 to use the documented root Express entrypoint, Singapore region, CDN static assets, original API routes, cold-start persistence tests and a complete private-secret deployment runbook | GitHub Actions tests on the updated PR; no Vercel account connected, no claimed public deployment, no teammate page changes, no live database writes |
+
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
