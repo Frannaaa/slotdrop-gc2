@@ -11,19 +11,26 @@ import {
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
 const form = $("offer-form");
-const money = (centavos) =>
-  new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(
-    centavos / 100,
-  );
-const time = (value) =>
-  new Intl.DateTimeFormat("en-PH", {
-    timeZone: "Asia/Manila",
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+// Cache the formatters; Owner renders many rows with the same locale.
+const pesoFormat = new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+});
+const manilaTimeFormat = new Intl.DateTimeFormat("en-PH", {
+  timeZone: "Asia/Manila",
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+const money = (centavos) => pesoFormat.format(centavos / 100);
+const time = (value) => manilaTimeFormat.format(new Date(value));
 const localTime = (value) =>
   new Date(new Date(value).getTime() + 8 * 3600000).toISOString().slice(0, 16);
-let catalog = { services: [], slots: [], commissionBasisPoints: null, discoveryHours: null },
+let catalog = {
+    services: [],
+    slots: [],
+    commissionBasisPoints: null,
+    discoveryHours: null,
+  },
   editing = null,
   manualCutoff = false,
   busy = false;
@@ -47,8 +54,10 @@ function setBusy(value) {
   $("reset").disabled = value;
   $("refresh").disabled = value;
   $("sessions").inert = value;
-  $("save").disabled = value || !loaded ||
-    (editing === null && !catalog.services.some(service => service.active));
+  $("save").disabled =
+    value ||
+    !loaded ||
+    (editing === null && !catalog.services.some((service) => service.active));
   refreshSalesStates();
 }
 function cents(value, optional = false) {
@@ -100,9 +109,9 @@ function defaultCutoff() {
   $("cutoff").value = "";
   if (!$("starts").value) return;
   try {
-    $("cutoff").value = localTime(suggestedCutoff(
-      $("starts").value, service.defaultBookingCutoffMinutes,
-    ));
+    $("cutoff").value = localTime(
+      suggestedCutoff($("starts").value, service.defaultBookingCutoffMinutes),
+    );
   } catch (error) {
     $("cutoff-hint").textContent = error.message;
   }
@@ -208,7 +217,12 @@ function renderMetrics(metrics) {
   }
 }
 function refreshDemoReadiness(now = Date.now()) {
-  const info = demoInventoryStatus(catalog.slots, catalog.services, now, catalog.discoveryHours);
+  const info = demoInventoryStatus(
+    catalog.slots,
+    catalog.services,
+    now,
+    catalog.discoveryHours,
+  );
   const warning = $("inventory-warning");
   if (warning.textContent !== info.message) warning.textContent = info.message;
   warning.dataset.state = info.state;
@@ -224,7 +238,9 @@ function refreshSalesStates() {
     help.hidden = !state.help;
     const started = Date.parse(slot.startsAt) <= now;
     if (editButton) editButton.disabled = busy || started;
-    if (toggle) toggle.disabled = busy || started || (slot.status === "paused" && !state.canResume);
+    if (toggle)
+      toggle.disabled =
+        busy || started || (slot.status === "paused" && !state.canResume);
   }
 }
 function renderSessions() {
@@ -236,12 +252,13 @@ function renderSessions() {
     return;
   }
   for (const slot of catalog.slots) {
-    const state = salesState({
+    const viewSlot = {
       ...slot,
       serviceActive: catalog.services.find(
         (service) => service.id === slot.serviceId,
       )?.active,
-    }, Date.now(), catalog.discoveryHours);
+    };
+    const state = salesState(viewSlot, Date.now(), catalog.discoveryHours);
     const card = element("article", undefined, "session"),
       heading = element("h3", slot.serviceName),
       tag = element("span", state.label, "tag");
@@ -258,7 +275,11 @@ function renderSessions() {
         "p",
         `${slot.remainingSeats} of ${slot.capacity} released seats left`,
       ),
-      element("p", "Regular " + money(slot.originalPriceCentavos) + " / seat", "regular-price"),
+      element(
+        "p",
+        "Regular " + money(slot.originalPriceCentavos) + " / seat",
+        "regular-price",
+      ),
       element("p", money(slot.offerPriceCentavos) + " / seat", "price"),
     );
     if (slot.buddyPriceCentavos !== null)
@@ -272,10 +293,7 @@ function renderSessions() {
     const help = element("p", state.help || "", "hint");
     help.hidden = !state.help;
     card.append(help);
-    const view = { slot: {
-      ...slot,
-      serviceActive: catalog.services.find(service => service.id === slot.serviceId)?.active,
-    }, tag, help, toggle: null };
+    const view = { slot: viewSlot, tag, help, toggle: null };
     salesViews.push(view);
     const actions = element("div", undefined, "actions"),
       editButton = element("button", "Edit offer");
@@ -291,7 +309,11 @@ function renderSessions() {
       );
       toggle.type = "button";
       view.toggle = toggle;
-      if (Date.parse(slot.startsAt) <= Date.now() || (slot.status === "paused" && !state.canResume)) toggle.disabled = true;
+      if (
+        Date.parse(slot.startsAt) <= Date.now() ||
+        (slot.status === "paused" && !state.canResume)
+      )
+        toggle.disabled = true;
       toggle.addEventListener("click", async () => {
         if (busy) return;
         setBusy(true);
@@ -304,7 +326,9 @@ function renderSessions() {
             }),
           });
           setBusy(false);
-          await load();
+          const refreshed = await load();
+          if (!refreshed)
+            message("page-message", "Sales status saved, but the workspace could not refresh. Use Refresh data to verify it; do not toggle sales again.", true);
         } catch (error) {
           message("page-message", error.message, true);
         } finally {
@@ -330,7 +354,10 @@ function renderBookings(rows) {
     header = element("tr");
   wrap.tabIndex = 0;
   wrap.setAttribute("role", "region");
-  wrap.setAttribute("aria-label", "Saved bookings; scroll horizontally for all amounts");
+  wrap.setAttribute(
+    "aria-label",
+    "Saved bookings; scroll horizontally for all amounts",
+  );
   for (const title of [
     "Booking / activity",
     "Session",
@@ -387,7 +414,11 @@ async function load() {
       option.disabled = !service.active;
       $("service").append(option);
     }
-    $("service").value = preferredServiceId(catalog.services, selected, editing);
+    $("service").value = preferredServiceId(
+      catalog.services,
+      selected,
+      editing,
+    );
     renderMetrics(metrics);
     renderSessions();
     renderBookings(bookings);
@@ -429,8 +460,7 @@ form.addEventListener("submit", async (event) => {
         message("form-message", "No changes to save.");
         return;
       }
-    }
-    else
+    } else
       Object.assign(body, {
         serviceId: Number($("service").value),
         startsAt: sessionDate($("starts").value).toISOString(),
@@ -446,9 +476,13 @@ form.addEventListener("submit", async (event) => {
     setBusy(false);
     reset();
     const refreshed = await load();
-    message("form-message", refreshed
-      ? "Session saved."
-      : "Session saved, but the workspace could not refresh. Use Refresh data to verify it; do not submit the offer again.", !refreshed);
+    message(
+      "form-message",
+      refreshed
+        ? "Session saved."
+        : "Session saved, but the workspace could not refresh. Use Refresh data to verify it; do not submit the offer again.",
+      !refreshed,
+    );
   } catch (error) {
     message("form-message", error.message, true);
   } finally {
