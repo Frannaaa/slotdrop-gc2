@@ -1,6 +1,8 @@
-November 3 follow-up: #32 and #39 are now approved and merged; research/catalog/application work is available in main. Business PR #37 is refreshed against that main; customer pages still need assigned reviews and CSS/Browse is unpublished. The earlier dated statuses below describe the state when recorded.
+# SlotDrop | Challenges and test evidence
 
-# Current integration status — November 3, 2026
+**Historical November 3 update:** #32 and #39 were approved and merged, research/catalog/application work became available in main, and business PR #37 was refreshed. Customer pages still needed reviews, and CSS/Browse was unpublished. Historical test entries below describe their actual earlier state; newer CI and current implementation evidence is added in dated sections.
+
+## Integration snapshot — November 3, 2026
 
 Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42 are reviewed and merged into main. The dated results below are historical; references there to an unimplemented booking endpoint describe the earlier owner-only build.
 
@@ -12,7 +14,7 @@ The exact private reference commit 0ac4712 passed syntax, 60 tests (one PostgreS
 
 ## Historical test records
 
-# Challenges and test results
+## Historical challenges and test results
 
 ## Earlier results
 
@@ -197,3 +199,33 @@ For a new active commission rate, edit server/config/business.js:1 only. No rate
 - Pagination, 429 with frontend wait/retry, and two-route computed value remain open.
 
 Challenge 5 is each member's own prediction, experiment and unedited recording.
+
+
+## November 8 — independently reproducible Fran-owned checks
+
+[**GitHub Actions run 42428732562**](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42428732562) for PR #37: **86 tests passed, zero failed** on the checked-out branch in CI, including three new specifically named rubric checks. This establishes test behavior in a disposable test environment; **it does not claim Postman screenshots, browser Network captures, a hand-drawn diagram, or completion of the deployed group challenges**.
+
+| Criterion and repeatable code | Observed / proved in isolated CI | Still requires true group evidence |
+| --- | --- | --- |
+| Challenge 1 — `tests/challenge1-postman.test.js` and exported `docs/SlotDrop-GC2-Challenge1.postman_collection.json` | Actually sent the **six exact exported Postman collection requests** through the Express HTTP test fixture; verified 400, 400, 409, 404, 400, 200/[] plus error bodies; rejected calls left zero saved bookings and four available seats | Import/run the collection **in Postman against the actual public Group 1 deployment**, attach request/status/body screenshots and actual deployed commit/date. These CI requests did not run inside Postman |
+| Challenge 2 — source trace and `tools/check-transaction-smoke.mjs` in PR #45 | Local API POST saved a booking and GET read it by ID; source code identifies browser `customer-common.request()` → Express booking route → `createBooking()` → PostgreSQL row lock, SQL insert and receipt → Confirmation's GET | Capture one real **deployed browser** Network request/response and the group's **hand-drawn** front-end→server→DB trace; then compare it to source. Do not label a code-derived diagram as a member's hand drawing |
+| Challenge 3 — observed defect candidates from `tests/owner-policy.test.js`, `tests/owner-edit.test.js`, `tests/database-failures.test.js` | Actual regressions cover truncated untouched booking deadlines, stale PATCH overwriting later Owner edits, and DB outage classification as safe 503 rather than exposing 500 internals | Each responsible group member confirms whether AI-assisted output was involved and **personally** writes: original expectation, observed failure, diagnosis, fix and real before/after evidence. Code tests do not establish AI provenance or substitute for the student's reasoning |
+| Challenge 4 — `tests/challenge4-rate.test.js` and `server/config/business.js` | Checked **one active source** for `COMMISSION_BASIS_POINTS`; server quote/save and Owner catalog use it; confirmed receipt snapshots are unchanged by later offer price edits. **No commission rate was changed** | Group verifies and explains all read/write sites, hypothetical fee impact and why past receipts do not reprice; include a real cited PR/CI, not a claim that a rule-change migration was performed |
+
+### Actual code path for Challenge 2 (source-derived, not a Network screenshot)
+
+1. Kaitlyn's **unmerged** Checkout `public/js/checkout.js` builds a request with `slotId`, `quantity`, fictional guest details, `expectedTotalCentavos` and stable `requestId`, then calls `request()` in `public/js/customer-common.js`.
+2. The group's merged Express `server/app.js` mounts `bookingRouter()`. `server/routes/bookings.js` calls `createBooking()` from `server/services/bookings.js`.
+3. `bookingRequest()` rejects unknown or malformed fields. `createBooking()` checks the retry key, locks the session row with `SELECT ... FOR UPDATE`, rechecks eligibility and confirmed seats, and calls shared `priceQuote()` to recompute the amount/fee.
+4. The SQL `INSERT INTO bookings ... RETURNING id` persists snapshot price/tier/commission/quantity. The server returns JSON with HTTP **201** for a new booking or **200** for the same accepted retry. There is no five-minute seat hold.
+5. Confirmation `public/js/confirmation.js` (also **unmerged** PR #43) reads `GET /api/bookings/:id`, which uses `findReceipt()` to retrieve the saved PostgreSQL row. Owner fetches `GET /api/bookings` and `GET /api/metrics`.
+
+### Optional bonus status — no unearned points claimed
+
+- **Double-click/last-seat:** existing booking locking/idempotent retry tests pass in CI; browser Checkout #43 still has a post-success second-submission window that the page author must fix and demonstrate. Local backend proof ≠ full +1.
+- **Pagination:** Fran-owned opt-in bounded `page`/`limit` API + PostgreSQL tests in [PR #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49), passing CI. Kirsten's actual Browse must consume it on the official deployment.
+- **HTTP 429 with safe wait/retry:** not implemented; [Issue #54](https://github.com/Frannaaa/slotdrop-gc2/issues/54) records Janelle/Kaitlyn's contract and evidence handoff.
+- **Join and compute:** Fran-owned [PR #51](https://github.com/Frannaaa/slotdrop-gc2/pull/51) implements Owner released-seat utilization joining catalog and saved bookings, with passing unit tests. Must be validly reviewed/merged and demonstrated publicly.
+- **Sequential vs parallel:** [PR #53](https://github.com/Frannaaa/slotdrop-gc2/pull/53) uses real Selection detail/quote GETs. [Local CI run 42394996195](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42394996195) measured median **5.47ms sequential vs 4.59ms parallel** across seven alternating rounds after warm-up, an observed **0.88ms difference**. Public Browser Network trace and group interpretation are missing; no guaranteed speedup is claimed.
+
+**Evidence provenance:** All generated sessions, seat limits, rates, payments and bookings are fictional. No real business partnership, demand or studio consent is implied. The four challenges require group-authored interpretation; maintain original failure/correction chronology without fabricating screenshots or an earlier checkpoint.
