@@ -10,6 +10,12 @@ The frontend uses native HTML, CSS and JavaScript to request session listings an
 
 Customer-facing screens, integration status and final test evidence are tracked in the [submission checklist](docs/final-submission-checklist.md). The [system diagram](docs/system.md) explains the request and data flow.
 
+## Deployed app
+
+**Live URL:** https://slotdrop-gc2-group-zx8j.onrender.com (Render free web service `slotdrop-gc2-group-zx8j`, branch `main`, with a hosted PostgreSQL database). The free instance sleeps when idle, so the first request can take about a minute.
+
+On November 8, deployed commit `96d4a31` answered `/api/health`, `/api/slots`, `/api/metrics` and `/api/bookings` with 200, and passed all six Challenge 1 cases ([run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586)). Browse, Checkout and Confirmation are not yet merged, so the full customer flow cannot be completed on the live site yet.
+
 ## Run locally
 
 Use Node 22 or later.
@@ -34,7 +40,7 @@ The official deployment is the Render web service in [render.yaml](render.yaml),
 2. On each start, `tools/db-bootstrap.mjs` loads db/schema.sql and db/seed.sql only when none of the SlotDrop tables exist. If all of them exist, it changes nothing. If only some exist, it stops and the server does not start. Saved bookings are never deleted or reseeded.
 3. `npm start` then applies the additive migrations in db/migrations/ and adds any missing reference-catalog records. Production startup refuses to run without `DATABASE_URL`. Render provides `PORT`; `NODE_ENV=production` is set in render.yaml. Keep database TLS verification enabled.
 4. Render polls `/api/health`. In production it returns 200 only when PostgreSQL answers and the slots, services and bookings tables exist; otherwise it returns 503 without database details. Then check `/api/slots` for live sessions.
-5. Run the read-only checks: `npm run check:gc2 -- https://YOUR-APP-HOST` and `npm run check:demo -- https://YOUR-APP-HOST`. Run [the Challenge 1 collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) in Postman (or `npx newman@6.2.1 run docs/SlotDrop-GC2-Challenge1.postman_collection.json --env-var baseUrl=https://YOUR-APP-HOST`). It picks a live session first and creates no booking.
+5. Run the read-only checks: `npm run check:gc2 -- https://slotdrop-gc2-group-zx8j.onrender.com` and `npm run check:demo -- https://slotdrop-gc2-group-zx8j.onrender.com`. Run [the Challenge 1 collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) in Postman (or `npx newman@6.2.1 run docs/SlotDrop-GC2-Challenge1.postman_collection.json --env-var baseUrl=https://slotdrop-gc2-group-zx8j.onrender.com`). It picks a live session first and creates no booking.
 6. For the persistence proof, place one fictional booking through the public site, read it by `GET /api/bookings/:id`, restart the Render service without touching the database, and read the same receipt again. Check Owner metrics and remaining seats. Record the public URL, deployed commit and observed result in `docs/challenges.md`.
 
 `npm run db:init` is a manual alternative for initializing a new, empty database from a trusted machine. It refuses existing tables and is not part of the Render start command. The Dockerfile serves the same app but does not run the bootstrap step.
@@ -112,7 +118,7 @@ Sample allocations are dated for the two days following the initial database see
 Before each deployed demo/checkpoint, with the app running, run:
 
 ```sh
-npm run check:demo -- https://YOUR-APP-HOST
+npm run check:demo -- https://slotdrop-gc2-group-zx8j.onrender.com
 ```
 
 Or run `npm run check:demo` against local `http://localhost:3000`. The check fetches `GET /api/slots`, reports remaining bookable demo allocations, and returns a failure exit code if none remain. It **never** creates offers, shifts existing dates, reactivates sold-out seats, modifies receipts or touches the database.
