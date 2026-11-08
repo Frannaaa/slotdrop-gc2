@@ -1,10 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "",
-  "outputDirectory": "public",
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }],
+  "framework": "express",
+  "regions": [
+    "sin1"
+  ],
   "functions": {
-    "api/index.js": {
+    "index.js": {
       "includeFiles": "{db/**,public/data/**}",
       "maxDuration": 30
     }
