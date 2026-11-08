@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/browse.css" />
     <script type="module" src="/js/browse.js"></script>
   </head>
-  <body>
+  <body class="browse-page">
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
       <a class="logo" href="/">slotdrop<span>●</span></a>
@@ -30,7 +30,7 @@
       <section aria-label="Search and filter sessions">
         <div class="browse-controls">
           <label for="search">Search by activity or studio</label>
-          <input id="search" name="search" type="text" placeholder="Try pottery, dance, or a studio name" />
+          <input id="search" name="search" type="search" placeholder="Try pottery, dance, or a studio name" />
           <fieldset>
             <legend>Activity category</legend>
             <div class="activity-types">
@@ -41,7 +41,7 @@
           </fieldset>
         </div>
         <p id="status" role="status" aria-live="polite">Loading sessions…</p>
-        <button id="retry" class="text-button" type="button">Refresh sessions</button>
+        <button id="retry" class="button secondary" type="button">Refresh sessions</button>
         <div id="results" class="activity-grid" aria-label="Available sessions"></div>
       </section>
     </main>
