@@ -47,7 +47,7 @@ The customer and Owner pages share the same Express application and database. UI
 sequenceDiagram
   autonumber
   participant C as Customer browser
-  participant A as Express booking route
+  participant A as Express API
   participant S as Booking service
   participant D as PostgreSQL
   C->>A: POST /api/bookings with slotId, quantity, requestId and accepted total
@@ -55,7 +55,8 @@ sequenceDiagram
   S->>D: BEGIN, find existing requestId
   alt Identical request already saved
     D-->>S: Existing booking receipt
-    S-->>C: 200 with same receipt
+    S-->>A: Replayed receipt
+    A-->>C: 200 with same receipt
   else New booking
     S->>D: SELECT slot FOR UPDATE
     D-->>S: Locked session row
@@ -63,17 +64,20 @@ sequenceDiagram
     D-->>S: Availability and stored prices
     S->>S: Check deadline, seats, tier, total and commission
     alt Ineligible, insufficient seats or changed price
-      S->>D: ROLLBACK
-      S-->>C: 404 or 409 JSON error, no saved booking
+      S->>D: Transaction wrapper rolls back
+      S-->>A: Error without a new receipt
+      A-->>C: 404 or 409 JSON error
     else Accepted booking
       S->>D: INSERT immutable booking snapshot
       S->>D: COMMIT
-      S-->>C: 201 with saved receipt
+      S-->>A: Newly saved receipt
+      A-->>C: 201 with saved receipt
     end
   end
   C->>A: GET /api/bookings/:id on Confirmation
   A->>D: Read saved receipt by booking UUID
-  D-->>C: Saved snapshot returned as JSON
+  D-->>A: Saved booking snapshot
+  A-->>C: 200 receipt JSON
 ```
 
 The row lock serializes competing bookings and Owner capacity edits for the **same** slot. Confirmed booking quantities, not a mutable remaining-seat counter, determine available allocation. A submitted quote is only a price acknowledgement: the server recomputes it after acquiring the lock. If the total changed, the API returns a fresh quote with `409 PRICE_CHANGED`; it does not save the order.
