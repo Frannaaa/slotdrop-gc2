@@ -27,6 +27,8 @@ The customer and Owner pages share the same Express application and database. UI
 
 ## Transaction: choose, quote, save, read back
 
+**Short data flow:** A customer chooses a session and quantity, requests a fresh server quote, then submits the accepted amount with a stable request ID. The server locks the session, rechecks seats and price, saves one PostgreSQL booking, and returns its receipt ID. Confirmation reads that stored receipt by ID, while Owner independently reads saved bookings and aggregated metrics.
+
 | Hop | Code location | Behavior |
 |---|---|---|
 | 1. Browse | Home and Browse interface → `GET /api/slots` | Requests eligible sessions filtered by date, area, activity or party size |
