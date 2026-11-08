@@ -1,10 +1,8 @@
 # SlotDrop | Business Case and Real-Studio Research
 
-Fran + Kat • Working draft • Updated 30 October 2026 • Internal review: 30 October
+**Business proposal:** Launch a focused Quezon City catalog of released seats in sessions already scheduled to proceed. Start with beginner-friendly creative workshops and test the consistency of supplier availability before expanding. Young professionals are the primary customer hypothesis, with students as a secondary audience.
 
-Decision to review: launch a small QC catalog of provider-released seats in sessions already going ahead. Prioritize beginner creative workshops; test repeat supply before widening the catalog. Young professionals are the primary customer hypothesis; students are secondary. This is a business proposal supported by published examples, not completed customer or supplier validation.
-
-The shared Google Doc is our research workspace. docs/business.md is the versioned GC2 submission draft. Public development PRs and the complete private reference have different implementation status; neither a researched studio nor a sample booking demonstrates a commercial partnership.
+The business model uses publicly sourced studio and activity information alongside simulated seat allocations and prices. No supplier partnership, live inventory allocation or validated customer demand is claimed.
 
 ## 1. Positioning, customer and supply
 
@@ -44,25 +42,17 @@ Implemented discovery contract: search text, broad category, area, date choice, 
 
 Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-included and materials-included. These are controlled descriptive filters, not claims such as popular or solo-friendly without evidence. A provider-facing free-tag editor and multi-select tag semantics are future work.
 
-## 4. Customer funnel and implementation status
+## 4. Customer funnel and measures
 
 | Step / screen | Control and why it fits | Route / intended measure |
 | --- | --- | --- |
-| Discover / Home | A short introduction and up to three eligible featured sessions explain the offer. Cholo still needs to connect Home to Kirsten’s assigned Browse page once that reviewed page exists. | GET /api/slots. Future measure: eligible Home visits that open Browse or Detail. |
+| Discover / Home | A short introduction and up to three eligible featured sessions explain the offer and lead visitors into the session catalog. | GET /api/slots. Future measure: eligible Home visits that open Browse or Detail. |
 | Browse | Cards plus search, date, area, people and activity filters support comparison. Show total party price and per-person rate together. | GET /api/slots with validated filters. Future measure: Browse visits that open a session. |
 | Select / Detail | Show the specific branch, start, deadline, duration, inclusions, preparation and available allocation. A link continues with the same slotId. | GET /api/slots/:id. Future measure: eligible Detail visits reaching Selection. |
 | Select / Selection | Quantity selector and fresh server quote show the rate and full booking amount; no seat is reserved here. | GET /api/pricing/quote. Future measure: valid selections reaching Checkout. |
 | Confirm / Checkout | Labeled fictional contact fields, simulated payment choices and an explicit total acceptance prevent ambiguous submission. | POST /api/bookings. Future measure: valid Checkout attempts saved successfully; count each requestId once. |
 | Save / Confirmation | Fetch by returned booking ID so refresh displays the saved receipt, not a browser-calculated success screen. | GET /api/bookings/:id. Measure from saved confirmed receipts; no event conversion rate is currently collected. |
 | Manage / Owner | Separate forms for releasing/editing seats and tables for saved bookings and five metrics support allocation decisions. | GET /api/owner/catalog, GET /api/bookings, GET /api/metrics; POST/PATCH /api/slots. |
-
-Status on 3 November: #27/#28/#36/#40/#29/#34/#42 are merged, including session/offer/discovery/Owner and transactional quote/save/receipt APIs. Customer PRs #35/#41/#43 are refreshed and checked but await assigned reviews and author follow-ups. CSS/Browse and official deployment remain pending. Supporting research #32, this business PR #37 and catalog/application #39 are unmerged. The private reference does not replace the group's code/review or individual gates.
-
-### November 8 implementation evidence update (historical November 3 status retained above)
-
-The customer/frontend status has changed since the historical November 3 paragraph: Cholo's Home #35 and Kat's Detail/Selection #41 are merged. Janelle's quote #40 and transactional booking/receipt #42, Fran's DB/discovery/Owner #27/#28/#29/#34/#39, and shared helpers #36 are merged. Kaitlyn's Checkout/Confirmation #43, Kirsten's Browse/shared styling and the **official** Group 1 public deployment remain outstanding. This business PR #37 has not yet been approved or merged, and the separate reference-only app does not earn group deployed credit.
-
-The directly runnable revenue regression `tests/business-worked-numbers.test.js` is now part of this PR. It creates a **fictional** four-seat session with ₱3,000 regular / ₱2,700 offer / ₱2,565 buddy unit prices, checks Janelle's live quote and saved receipt snapshots, confirms 4→2→1 released seats, rejects an oversell, and verifies the five Owner metrics after 2+1 seats. The test's actual results must be checked against the PR's latest passing CI; its numbers are not user demand, studio approval, or public deployed evidence. The decision in the worked example is conditional: buddy helps an **incremental** second attendee only if marginal provider costs are under ₱2,187 and the sale does not displace a standard customer; if both would buy standard, buddy reduces provider proceeds by ₱243 and modeled platform fees by ₱27.
 
 ## 5. Rules, enforcement and customer result
 
@@ -72,13 +62,13 @@ The directly runnable revenue regression `tests/business-worked-numbers.test.js`
 | Respect each session’s deadline. | Service default cutoff minutes produces a slot deadline; createOffer()/editOffer() validate it. Slot override is allowed. | Different studios can need different lead times. The default is not a universal minimum. |
 | Only discover sessions starting inside the next 72 hours. | listSlots(); future start and future cutoff required. Offer creation may schedule farther ahead. | A valid future session appears only when it enters the window; exactly 72 hours ahead is outside it. |
 | Standard and buddy prices must be valid provider-set offers. | createOffer()/editOffer(), SQL price constraints; standard < regular, optional buddy < standard. | Invalid or negative offers are refused; buddy is optional. |
-| Buddy means two or more seats in one booking for one session. | Merged Janelle quote (#40) and booking/receipt (#42) services enforce this server-side; bookings persist pricing_type and unit price. The private reference is not used as group evidence. | Two separate one-person bookings do not combine automatically. Browser totals cannot select their own rate. |
+| Buddy means two or more seats in one booking for one session. | The server's shared quote and booking services enforce this; bookings persist pricing_type and the accepted unit price. | Two separate one-person bookings do not combine automatically. Browser totals cannot select their own rate. |
 | Never sell more seats than remain. | Booking transaction must lock the slot and recheck confirmed quantities; editOffer() cannot shrink below already sold seats. | Insufficient seats return 409 without saving. Allocation describes SlotDrop seats, not total room capacity. |
 | Recompute price and fee on the server. | One pricing service, integer centavos; persist quantity, selected unit price, total, commission rate, fee and provider payout. | If the accepted total changes, return 409 PRICE_CHANGED and require fresh acceptance. |
 | Retry one booking, rather than creating another. | Unique request_id plus identical-payload retry contract; conflicting reuse returns 409. | A lost response can be retried using the same key. Save is the reservation point; there is no hold. |
 | Keep old receipts stable when offers change. | Offer edits never update saved booking amounts; receipt is read by ID. | Confirmation reflects the purchased price, not today’s offer. |
 | Pause sales without pretending existing bookings disappeared. | Owner edit controls; confirmed bookings prevent cancelling their session; reopening rechecks eligibility. | Pausing stops new discovery. Customer refunds/rebooking are not implemented. |
-| Return useful HTTP errors. | 400 invalid input, 404 absent session/receipt, 409 stock/price/request conflict, 503 unavailable DB; 201 newly saved booking. | An error must not display a successful receipt. Booking and receipt routes were implemented by Janelle and merged in #42. The official deployed checkout/confirmation and end-to-end evidence remain pending. |
+| Return useful HTTP errors. | 400 invalid input, 404 absent session/receipt, 409 stock/price/request conflict, 503 unavailable DB; 201 newly saved booking. | An error must not display a successful receipt. Booking and receipt routes return explicit JSON errors without creating a receipt for a rejected order. |
 
 DB constraints support the rules but do not replace transactional booking checks. Main must receive the reviewed implementations before the team calls the official flow complete. Scope does not include production account security, real card handling or synchronization with a studio’s direct calendar.
 
@@ -175,26 +165,6 @@ Sources: https://classpass.com/search-index/manila | https://classpass.com/partn
 | Thin or unsuitable supply | Small geography; verify recurring, already-confirmed sessions and prep deadlines. | Published workshop catalogs are not a supplier pipeline. If too few eligible sessions exist, revisit geography/window rather than fabricate dates. |
 | Materials/prep or collection mismatch | Display technique, inclusions, preparation and collection notes. | Real-provider data must be verified before a pilot; no real cancellations/refunds or payment handling is implemented. |
 
-## 11. Fran + Kat: execution, decisions and handoff
+## 11. Studio applications, separate from verified supply
 
-By the 30 October internal review, Fran confirms or revises the proposed target/geography, keeps the pricing/cutoff rules aligned with code, verifies the worked calculations and carries the approved case into docs/business.md. Fran coordinates the API dependencies and real teammate review; a polished Doc alone does not complete GC2.
-
-Kat verifies the supplier register against the exact selected branch and product. For each prospect record: source URL; checked date; branch/address; activity; standard versus sale price; duration; dated session versus recurring schedule; preparation cutoff; included materials; collection time; cancellation/reschedule terms; contradictions; and what remains unknown. State what was checked, rather than writing only “verified.” No outreach is claimed or sent by this draft.
-
-Both decide whether the evidence supports the launch premise. Proposed interview questions: Which classes already run regularly? How many allocated seats were unused across recent sessions? Can seats be ring-fenced from direct sales? What is the last feasible booking time? What is the incremental cost per attendee? What net payout would justify a trial? Would two buddy seats be incremental or replace two standard sales? Record answers and dates if interviews actually occur; leave unanswered fields explicit.
-
-Before a real pilot, require a willing provider, one dated confirmed-to-run session, an agreed dedicated allocation, verified price/inclusions/deadline and a positive provider contribution after marginal costs. These are proposed go/no-go checks, not completed results. If the evidence fails, change the offer or supplier scope; do not convert unknowns into favorable claims.
-
-Course handoff: Oct 30 shared styling/layout and business review; Nov 1 first working code PR target; Nov 4 deployed database-backed Browse checkpoint; Nov 7 internal connected-flow target; Nov 9 final submission at 11:59 PM Philippine time. Oct 30, Nov 1 and Nov 7 are internal targets. Nov 4 and Nov 9 are course checkpoints.
-
-Submit substantive docs/business.md plus the required concise business-summary PDF; this research Doc and the brand book serve different purposes. Documentation-only PRs do not count as a member’s three code PRs. Preserve specific real reviews and merges across the grading windows. Kat’s completed research and the group’s reasoning still need their authors’ confirmation; no interview, profitability or submission approval is implied.
-
-Official repository: https://github.com/Frannaaa/slotdrop-gc2 | Versioned business draft: https://github.com/Frannaaa/slotdrop-gc2/blob/main/docs/business.md
-
-
-## Studio application, separate from verified supply
-
-ClassPass separates submission of business information from onboarding a profile; Klook reviews merchant applications before access to listing tools. SlotDrop follows Apply → Review → Set up. The private build has an independent studio reference page, a validated application form and DB-backed pending-status readback. It records authorization as an attestation, not proof; it does not publish a page, grant account access or verify a partnership. Use sample contacts, keep them private, and retain the same request key after an uncertain save. Public profile ownership and real inventory need later verified onboarding. Sources checked 30 October: https://classpass.com/partners/how-it-works | https://merchant.klook.com/introduction .
-
-
-November 3 integration update: Janelle approved #32 and #39 on their exact heads and both are merged into main. The sourced catalog and pending studio applications are now available in the group code. Business PR #37 still requires Kat’s review. Customer pages, shared CSS/Browse, official deployment and group evidence remain pending.
+ClassPass separates submission of business information from onboarding a profile; Klook reviews merchant applications before access to listing tools. SlotDrop follows Apply → Review → Set up. The reference catalog has a separate studio profile, a validated application form and database-backed pending-status readback. It records authorization as an attestation, not proof; it does not publish a page, grant account access or verify a partnership. Use sample contacts, keep them private, and retain the same request key after an uncertain save. Public profile ownership and real inventory need later verified onboarding. Sources checked 30 October: https://classpass.com/partners/how-it-works | https://merchant.klook.com/introduction .
