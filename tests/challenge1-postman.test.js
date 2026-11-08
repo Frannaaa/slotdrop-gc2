@@ -1,5 +1,5 @@
 // Exercise the EXACT six exported Challenge 1 Postman requests through real HTTP,
-// after the read-only 00 request that chooses live variables on the target API.
+// after the read-only 00a/00b requests that choose live variables on the target API.
 // Fran/M1 test. CI is local/isolated, NOT a public Postman screenshot or deployed proof.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,9 +10,11 @@ import { fixture } from './helpers.js';
 test('exported six-case Postman collection has accurate requests, assertions and expected API results', async () => {
   const collection = JSON.parse(await readFile(new URL('../docs/SlotDrop-GC2-Challenge1.postman_collection.json',import.meta.url),'utf8'));
   assert.match(collection.info.schema,/collection\/v2\.1\.0/);
-  assert.equal(collection.item.length,7);
-  const [picker,...cases]=collection.item;
-  assert.equal(picker.request.method,'GET','the variable picker must be read-only');
+  assert.equal(collection.item.length,8);
+  const [picker,quoter,...cases]=collection.item;
+  for(const setup of [picker,quoter]) assert.equal(setup.request.method,'GET',setup.name+' must be read-only');
+  // Setup requests must not hide extra calls; each one is visible in the Postman/Newman evidence.
+  assert.ok(!JSON.stringify(collection).includes('sendRequest'),'no hidden pm.sendRequest calls');
   const expected = [
     {status:400,code:'INVALID_INPUT'},
     {status:400,code:'INVALID_INPUT'},
@@ -24,7 +26,7 @@ test('exported six-case Postman collection has accurate requests, assertions and
   const f=await fixture();
   try {
     const known = Object.fromEntries(collection.variable.map(x=>[x.key,x.value]));
-    // Mirror the 00 test script: first session with 2+ seats, one seat too many, an unused ID, the server quote.
+    // Mirror the 00a/00b test scripts: first session with 2+ seats, one seat too many, an unused ID, the server quote.
     const slots=await fetch(f.base+'/api/slots?people=2').then(x=>x.json());
     const live=slots.find(row=>row.remainingSeats>=2&&row.remainingSeats<100);
     assert.ok(live,'fixture has a bookable session');

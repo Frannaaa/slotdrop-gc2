@@ -2,7 +2,7 @@
   "info": {
     "name": "SlotDrop GC2 | Challenge 1",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Set baseUrl to the official group deployment, then run the whole collection in order. Request 00 is read-only: it picks a bookable session, an over-capacity quantity, an unknown ID and the server quote. Requests 01-06 are all refused or read-only, so the run creates no booking and changes no stock."
+    "description": "Set baseUrl to the official group deployment, then run the whole collection in order. Requests 00a and 00b are read-only: they pick a bookable session, an over-capacity quantity, an unknown ID and the server quote. Requests 01-06 are all refused or read-only, so the run creates no booking and changes no stock."
   },
   "variable": [
     {
@@ -28,7 +28,7 @@
   ],
   "item": [
     {
-      "name": "00 · Pick a bookable session (read-only)",
+      "name": "00a · Pick a bookable session (read-only)",
       "event": [
         {
           "listen": "test",
@@ -44,10 +44,6 @@
               "  pm.collectionVariables.set(\"slotId\", String(slot.id));",
               "  pm.collectionVariables.set(\"overCapacityQuantity\", String(slot.remainingSeats + 1));",
               "  pm.collectionVariables.set(\"unknownSlotId\", String(Math.max(...slots.map(row => row.id)) + 100000));",
-              "  pm.sendRequest(pm.collectionVariables.get(\"baseUrl\") + \"/api/pricing/quote?slotId=\" + slot.id + \"&quantity=2\", (error, response) => {",
-              "    pm.test(\"Server quote for two seats\", () => { pm.expect(error).to.equal(null); pm.expect(response.code).to.equal(200); });",
-              "    if (!error && response.code === 200) pm.collectionVariables.set(\"expectedTotalCentavos\", String(response.json().totalPriceCentavos));",
-              "  });",
               "}"
             ]
           }
@@ -68,6 +64,48 @@
           "query": [
             {
               "key": "people",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "00b · Server quote for two seats (read-only)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const quote = pm.response.json();",
+              "pm.test(\"Quote has a server total\", () => pm.expect(quote.totalPriceCentavos).to.be.a(\"number\"));",
+              "pm.collectionVariables.set(\"expectedTotalCentavos\", String(quote.totalPriceCentavos));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/pricing/quote?slotId={{slotId}}&quantity=2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "pricing",
+            "quote"
+          ],
+          "query": [
+            {
+              "key": "slotId",
+              "value": "{{slotId}}"
+            },
+            {
+              "key": "quantity",
               "value": "2"
             }
           ]
