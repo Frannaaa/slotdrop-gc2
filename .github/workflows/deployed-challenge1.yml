@@ -1,0 +1,87 @@
+# Group assignment: Fran. Runs the Challenge 1 Postman collection against the
+# official deployed API from GitHub's network. Read-only: no request creates a booking.
+name: Deployed Challenge 1
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseUrl:
+        description: Public SlotDrop URL
+        default: https://slotdrop-gc2-group-zx8j.onrender.com
+  push:
+    branches: [g1/m1-business-case]
+    paths:
+      - .github/workflows/deployed-challenge1.yml
+      - docs/SlotDrop-GC2-Challenge1.postman_collection.json
+
+permissions:
+  contents: read
+
+jobs:
+  challenge1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: ${{ inputs.baseUrl || 'https://slotdrop-gc2-group-zx8j.onrender.com' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Wake the free Render instance
+        run: |
+          for attempt in $(seq 1 12); do
+            status=$(curl -s -m 30 -o /dev/null -w '%{http_code}' "$BASE_URL/api/health" || true)
+            echo "attempt $attempt: /api/health $status"
+            [ "$status" = "200" ] && exit 0
+            sleep 10
+          done
+          exit 1
+      - name: Record the four read endpoints
+        run: |
+          mkdir -p evidence
+          {
+            echo "## Deployed endpoints"
+            echo
+            echo "Base URL: $BASE_URL · checked $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            for path in /api/health /api/slots /api/metrics /api/bookings; do
+              file="evidence/$(echo "$path" | tr '/' '_').json"
+              status=$(curl -s -m 60 -o "$file" -w '%{http_code} %{time_total}s' "$BASE_URL$path")
+              echo "### GET $path → $status"
+              echo '```json'
+              head -c 1500 "$file"
+              echo
+              echo '```'
+            done
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Run the Challenge 1 collection
+        run: |
+          npx -y newman@6.2.1 run docs/SlotDrop-GC2-Challenge1.postman_collection.json \
+            --env-var "baseUrl=$BASE_URL" --timeout-request 60000 \
+            --reporters cli,json --reporter-json-export evidence/challenge1-deployed-newman.json
+      - name: Summarize each request and response
+        if: always()
+        run: |
+          node -e '
+            const run = require("./evidence/challenge1-deployed-newman.json").run;
+            const out = ["## Challenge 1 against the deployed API", ""];
+            for (const e of run.executions) {
+              const req = e.request, res = e.response || {};
+              const url = req.url.protocol + "://" + req.url.host.join(".") + "/" + req.url.path.join("/") + (req.url.query?.length ? "?" + req.url.query.map(q => q.key + "=" + q.value).join("&") : "");
+              const body = res.stream ? Buffer.from(res.stream.data).toString("utf8") : "";
+              out.push("### " + e.item.name, "", "`" + req.method + " " + url + "` → **" + res.code + " " + (res.status || "") + "** (" + res.responseTime + " ms)", "");
+              if (req.body?.raw) out.push("Request body:", "```json", req.body.raw, "```");
+              out.push("Response:", "```json", body.slice(0, 1200), "```");
+              for (const a of e.assertions || []) out.push("- " + (a.error ? "❌ " : "✅ ") + a.assertion);
+              out.push("");
+            }
+            out.push("Assertions: " + (run.stats.assertions.total - run.stats.assertions.failed) + "/" + run.stats.assertions.total + " passed");
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+            console.log(out.join("\n"));
+          '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: challenge1-deployed-evidence
+          path: evidence/
