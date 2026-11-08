@@ -36,7 +36,7 @@ Launch geography is a proposed operating boundary, not a distance search feature
 
 Classify the activity once, then describe its attributes. services.category is the broad creative/active grouping; services.activity_type is the primary activity: pottery, painting, pilates, dance or other. Technique and inclusions describe the same service without creating duplicate inventory. Each slot is one dated session with one released-seat counter.
 
-Current customer shortcuts: All, Pottery and Canvas painting. Unsupported or unverified supply does not get an empty shortcut. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
+Proposed Browse shortcuts (not yet merged into the official Group 1 `main` as of November 8): All, Pottery and Canvas painting. Unsupported or unverified supply does not get an empty shortcut. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
 
 Example: a mug-making session remains pottery even when painting is included. Store handbuilding as its technique and painting/materials/firing as inclusions. A painting search may find it through its attributes; both paths open the same slot ID and consume the same seats. Do not copy the session into a second category.
 
@@ -48,7 +48,7 @@ Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-inc
 
 | Step / screen | Control and why it fits | Route / intended measure |
 | --- | --- | --- |
-| Discover / Home | A short introduction, Browse link and up to three eligible featured sessions help a visitor understand the offer before narrowing it. | GET /api/slots. Future measure: eligible Home visits that open Browse or Detail. |
+| Discover / Home | A short introduction and up to three eligible featured sessions explain the offer. Cholo still needs to connect Home to Kirsten’s assigned Browse page once that reviewed page exists. | GET /api/slots. Future measure: eligible Home visits that open Browse or Detail. |
 | Browse | Cards plus search, date, area, people and activity filters support comparison. Show total party price and per-person rate together. | GET /api/slots with validated filters. Future measure: Browse visits that open a session. |
 | Select / Detail | Show the specific branch, start, deadline, duration, inclusions, preparation and available allocation. A link continues with the same slotId. | GET /api/slots/:id. Future measure: eligible Detail visits reaching Selection. |
 | Select / Selection | Quantity selector and fresh server quote show the rate and full booking amount; no seat is reserved here. | GET /api/pricing/quote. Future measure: valid selections reaching Checkout. |
@@ -58,6 +58,12 @@ Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-inc
 
 Status on 3 November: #27/#28/#36/#40/#29/#34/#42 are merged, including session/offer/discovery/Owner and transactional quote/save/receipt APIs. Customer PRs #35/#41/#43 are refreshed and checked but await assigned reviews and author follow-ups. CSS/Browse and official deployment remain pending. Supporting research #32, this business PR #37 and catalog/application #39 are unmerged. The private reference does not replace the group's code/review or individual gates.
 
+### November 8 implementation evidence update (historical November 3 status retained above)
+
+The customer/frontend status has changed since the historical November 3 paragraph: Cholo's Home #35 and Kat's Detail/Selection #41 are merged. Janelle's quote #40 and transactional booking/receipt #42, Fran's DB/discovery/Owner #27/#28/#29/#34/#39, and shared helpers #36 are merged. Kaitlyn's Checkout/Confirmation #43, Kirsten's Browse/shared styling and the **official** Group 1 public deployment remain outstanding. This business PR #37 has not yet been approved or merged, and the separate reference-only app does not earn group deployed credit.
+
+The directly runnable revenue regression `tests/business-worked-numbers.test.js` is now part of this PR. It creates a **fictional** four-seat session with ₱3,000 regular / ₱2,700 offer / ₱2,565 buddy unit prices, checks Janelle's live quote and saved receipt snapshots, confirms 4→2→1 released seats, rejects an oversell, and verifies the five Owner metrics after 2+1 seats. The test's actual results must be checked against the PR's latest passing CI; its numbers are not user demand, studio approval, or public deployed evidence. The decision in the worked example is conditional: buddy helps an **incremental** second attendee only if marginal provider costs are under ₱2,187 and the sale does not displace a standard customer; if both would buy standard, buddy reduces provider proceeds by ₱243 and modeled platform fees by ₱27.
+
 ## 5. Rules, enforcement and customer result
 
 | Plain-language rule | Enforcement / persistence | Customer result |
@@ -66,13 +72,13 @@ Status on 3 November: #27/#28/#36/#40/#29/#34/#42 are merged, including session/
 | Respect each session’s deadline. | Service default cutoff minutes produces a slot deadline; createOffer()/editOffer() validate it. Slot override is allowed. | Different studios can need different lead times. The default is not a universal minimum. |
 | Only discover sessions starting inside the next 72 hours. | listSlots(); future start and future cutoff required. Offer creation may schedule farther ahead. | A valid future session appears only when it enters the window; exactly 72 hours ahead is outside it. |
 | Standard and buddy prices must be valid provider-set offers. | createOffer()/editOffer(), SQL price constraints; standard < regular, optional buddy < standard. | Invalid or negative offers are refused; buddy is optional. |
-| Buddy means two or more seats in one booking for one session. | Janelle’s quote/save service contract; saved pricing_type and unit price. Private reference enforces this. | Two separate one-person bookings do not combine automatically. Browser totals cannot select their own rate. |
+| Buddy means two or more seats in one booking for one session. | Merged Janelle quote (#40) and booking/receipt (#42) services enforce this server-side; bookings persist pricing_type and unit price. The private reference is not used as group evidence. | Two separate one-person bookings do not combine automatically. Browser totals cannot select their own rate. |
 | Never sell more seats than remain. | Booking transaction must lock the slot and recheck confirmed quantities; editOffer() cannot shrink below already sold seats. | Insufficient seats return 409 without saving. Allocation describes SlotDrop seats, not total room capacity. |
 | Recompute price and fee on the server. | One pricing service, integer centavos; persist quantity, selected unit price, total, commission rate, fee and provider payout. | If the accepted total changes, return 409 PRICE_CHANGED and require fresh acceptance. |
 | Retry one booking, rather than creating another. | Unique request_id plus identical-payload retry contract; conflicting reuse returns 409. | A lost response can be retried using the same key. Save is the reservation point; there is no hold. |
 | Keep old receipts stable when offers change. | Offer edits never update saved booking amounts; receipt is read by ID. | Confirmation reflects the purchased price, not today’s offer. |
 | Pause sales without pretending existing bookings disappeared. | Owner edit controls; confirmed bookings prevent cancelling their session; reopening rechecks eligibility. | Pausing stops new discovery. Customer refunds/rebooking are not implemented. |
-| Return useful HTTP errors. | 400 invalid input, 404 absent session/receipt, 409 stock/price/request conflict, 503 unavailable DB; 201 newly saved booking. | An error must not display a successful receipt. Official booking routes still require Janelle’s implementation and review. |
+| Return useful HTTP errors. | 400 invalid input, 404 absent session/receipt, 409 stock/price/request conflict, 503 unavailable DB; 201 newly saved booking. | An error must not display a successful receipt. Booking and receipt routes were implemented by Janelle and merged in #42. The official deployed checkout/confirmation and end-to-end evidence remain pending. |
 
 DB constraints support the rules but do not replace transactional booking checks. Main must receive the reviewed implementations before the team calls the official flow complete. Scope does not include production account security, real card handling or synchronization with a studio’s direct calendar.
 
