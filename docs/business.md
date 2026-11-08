@@ -4,6 +4,18 @@
 
 The business model uses publicly sourced studio and activity information alongside simulated seat allocations and prices. No supplier partnership, live inventory allocation or validated customer demand is claimed.
 
+## Executive decision summary
+
+| Business question | SlotDrop GC2 response | Decision implication |
+|---|---|---|
+| Who is this for? | Young professionals making near-term activity plans around Katipunan and neighboring Quezon City areas; students are a secondary hypothesis | Validate spontaneous demand and willingness to pay before expanding beyond the initial area |
+| Where does supply come from? | A studio explicitly releases a **limited allocation** in a class that is already confirmed to run | The allocation must be ring-fenced and kept accurate, rather than assuming every advertised class has vacancies |
+| What creates revenue? | A modeled **10% platform commission** on a confirmed saved booking, deducted from the provider's proceeds | Revenue is realized per successful transaction, not per listing or page view; this is a proposed fee, not a negotiated contract |
+| What are the two distinguishing features? | **Released-seat availability with a booking cutoff** and **optional two-or-more-person buddy pricing** | The first makes released inventory bookable without overselling; the second may convert incremental attendees, but can also discount customers who would have paid more |
+| What makes a trial worth pursuing? | Genuine studio agreement, separately managed inventory, accurate booking/receipt operations, and positive contribution **after** marginal attendance costs | Pilot only where provider proceeds and operational reliability justify the discount; mock bookings and source research do not demonstrate demand |
+
+**Decision:** Keep a narrow, reliable released-seat pilot rather than launching a broad generic activity marketplace. Offer the buddy tier selectively, not automatically: the worked scenarios in Section 6 show that higher order quantity alone does not mean higher margins.
+
 ## 1. Positioning, customer and supply
 
 Working value proposition: Find an activity near you happening within 72 hours, compare the provider-set price and deadline, and book a released seat. Keep GC1’s “Empty slot, better price.” as the idea, without promising that popular studios always have openings or that every direct price is higher.
@@ -84,9 +96,14 @@ Classroom model: Laro Ceramics advertises its mug-making + painting activity at 
 | 2 standard seats | ₱5,400 | ₱540 | ₱4,860 |
 | 2 buddy seats | ₱5,130 | ₱513 | ₱4,617 |
 
-If both people would have booked at the standard offer, buddy pricing saves customers ₱270 but reduces platform fees by ₱27 and provider proceeds by ₱243. So do not enable it merely to report a higher party size; it makes this unchanged attendance less valuable.
+The same buddy price has very different economics depending on the customer's alternative:
 
-If the alternative is one standard booking and one empty seat, two buddy seats add ₱2,430 in sales, ₱243 in platform fee and ₱2,187 in provider proceeds. So the extra attendee is beneficial to this provider only when incremental materials, labor and related costs are below ₱2,187, and the offer does not displace other direct sales. No provider cost or acceptance data has been collected.
+| Counterfactual without buddy pricing | Change when two customers book buddy instead | Decision |
+|---|---|---|
+| **Two people would both buy standard seats** (₱5,400 combined) | Customer pays **₱270 less**; platform fee falls **₱27**; provider proceeds fall **₱243** | Do not discount two purchases that were already likely to happen |
+| **Only one person would buy standard and the second seat would be empty** (₱2,700 combined) | Customer booking total rises **₱2,430**; platform fee rises **₱243**; provider proceeds rise **₱2,187** | Buddy can add contribution if the incremental guest costs **less than ₱2,187** to serve and does not displace another buyer |
+
+These comparisons are alternatives, not forecasts. No provider marginal-cost, conversion, or acceptance data was collected. If a second attendee displaces a full-price direct booking, the incremental-revenue argument no longer holds.
 
 After the two-seat buddy booking, two of four allocated seats remain. A request for three must fail without adding a booking. So allocation checks protect the promise and avoid collecting commission on an impossible booking. Correct inventory is operational support for revenue, not proof of demand.
 
