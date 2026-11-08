@@ -1,22 +1,8 @@
 # SlotDrop | Challenges and test evidence
 
-**Historical November 3 update:** #32 and #39 were approved and merged, research/catalog/application work became available in main, and business PR #37 was refreshed. Customer pages still needed reviews, and CSS/Browse was unpublished. Historical test entries below describe their actual earlier state; newer CI and current implementation evidence is added in dated sections.
+This record separates repeatable test results from the evidence required on the final deployed group application. Actual request/response captures and group-authored explanations are retained with dates, while earlier integration notes are kept in [historical handoffs](ownership-and-execution.md).
 
-## Integration snapshot — November 3, 2026
-
-Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42 are reviewed and merged into main. The dated results below are historical; references there to an unimplemented booking endpoint describe the earlier owner-only build.
-
-A fresh check of main 06a3e42 passed syntax, 73 tests and eight SQL groups; one PostgreSQL-only test was skipped locally. The merged booking CI also passed PostgreSQL and production restart checks. Receipt responses exclude contacts and retry keys; the browser helper accepts both changed-price quote envelopes.
-
-Open customer PRs #35/#41/#43 have passing CI and captain integration checks, but still require assigned peer reviews, author records and shared CSS integration. CSS/Browse are not published yet. Official group deployment, deployed challenge screenshots, baseline, outside-group phone test, member explanations and individual recordings remain pending. The private reference does not satisfy group collaboration evidence.
-
-The exact private reference commit 0ac4712 passed syntax, 60 tests (one PostgreSQL-only local skip), eight SQL groups and all seven browser scripts, including full booking/reload/Owner at 320–1280px, recovery, stale responses, studio applications and discovery. These used disposable local data, not the official group deployment. On November 3 the private live Browse had no discoverable sessions because its sample dates expired; new simulated November 4 offers were added through Owner without reseeding or changing historical receipts.
-
-## Historical test records
-
-## Historical challenges and test results
-
-## Earlier results
+## Earlier Owner/API checks (October 27–28)
 
 These results cover Fran's owner build. They do not complete the deployed customer-booking challenges.
 
@@ -36,7 +22,7 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 
 ## 1. Break the deployed booking API
 
-Pending booking integration and public deployment. For each required case, save the request, expected status, actual response screenshot and any fix:
+Run these six cases against the final public API and preserve the request, expected status, actual response and any fix:
 
 - Quantity 0 or -3: 400.
 - Browser-supplied wrong total: 400 or a saved server-computed total.
@@ -49,7 +35,7 @@ Local session validation tests are useful checks, but these screenshots must com
 
 ## 2. Trace a real request
 
-[system.md](system.md) maps the implemented offer-management code. After customer booking integration, capture one complete deployed booking in Network: method, URL, body, status and response. Name each handler, validator and database statement, and attach the required hand-drawn diagram.
+[system.md](system.md) explains the booking architecture. Capture one complete deployed booking in DevTools Network: method, URL, body, status and response. Name each handler, validator and database statement, and attach the required hand-drawn diagram.
 
 ## 3. Debugging record
 
@@ -72,7 +58,7 @@ Current commission inventory, checked October 28 without changing the rate:
 | server/repositories/owner.js:3 and :8 | Import and return the setting | No |
 | public/js/owner.js:73–79 (preview()) | Preview provider proceeds using the API rate | No |
 
-Saved receipt rates are historical. SQL checks each saved rate and its arithmetic; it does not set the active commission. Test fixtures and worked examples use fixed rates for specific cases. After the booking service is integrated, verify that it imports the same setting and update this inventory.
+Saved receipt rates are historical. SQL checks each saved rate and its arithmetic; it does not set the active commission. Test fixtures and worked examples use fixed rates for specific cases. The current booking service reads the shared commission setting. `tests/challenge4-rate.test.js` checks the active value in the quote, stored receipt and Owner catalog.
 
 ## 5. Predict, then run
 
