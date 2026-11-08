@@ -5,7 +5,19 @@ import { test } from 'node:test';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
-import { createHandler } from '../api/index.js';
+import { createHandler } from '../server/vercel-handler.js';
+import vercelApp from '../index.js';
+import { readFile } from 'node:fs/promises';
+
+test('Vercel configuration uses the documented Express entrypoint and Singapore region', async () => {
+  const config = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+  assert.equal(config.framework, 'express');
+  assert.deepEqual(config.regions, ['sin1']);
+  assert.equal(config.rewrites, undefined, 'No custom rewrite may discard /api/... route paths');
+  assert.equal(typeof vercelApp, 'function', 'A Node-compatible Express handler is exported at root');
+  assert.equal(typeof vercelApp.use, 'function', 'Vercel gets a real Express app');
+  assert.equal(config.functions['index.js'].maxDuration, 30);
+});
 
 function pglite() {
   const database = new PGlite();
