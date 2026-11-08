@@ -8,12 +8,14 @@ import { activityRouter } from './routes/activities.js';
 import { providerRouter } from './routes/providers.js';
 import { pricingRouter } from './routes/pricing.js';
 import { bookingRouter } from './routes/bookings.js';
+import { bookingRateLimiter } from './middleware/booking-rate-limit.js';
 import { ownerRouter } from './routes/owner.js';
 
 export function createApp({
   db = postgresDatabase(),
   clock = () => new Date(),
   checkDatabaseHealth = process.env.NODE_ENV === 'production',
+  bookingRateLimit,
 } = {}) {
   const app = express();
   app.use(express.json({ limit: '16kb' }));
@@ -23,6 +25,7 @@ export function createApp({
   app.use('/api/pricing', pricingRouter(db, clock));
   app.use('/api', ownerRouter(db, clock));
   app.use('/api', providerRouter(db, clock));
+  app.use('/api/bookings', bookingRateLimiter(bookingRateLimit));
   app.use('/api/bookings', bookingRouter(db, clock));
 
   // Keep all unknown API paths in the same JSON error format.
