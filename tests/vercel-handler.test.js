@@ -1,4 +1,4 @@
-// Group assignment: Fran. Runs api/index.js the way Vercel would: a fresh database,
+// Group assignment: Fran. Runs the Vercel root Express entrypoint and handler as Vercel would: a fresh database,
 // first-request startup, a saved booking, and a later cold start on the same data.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -6,7 +6,7 @@ import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 import { createHandler } from '../server/vercel-handler.js';
-import vercelApp from '../index.js';
+import vercelApp, { createVercelApp } from '../index.js';
 import { readFile } from 'node:fs/promises';
 
 test('Vercel configuration uses the documented Express entrypoint and Singapore region', async () => {
@@ -34,6 +34,41 @@ async function withHandler(handler, run) {
   try { await run('http://127.0.0.1:' + server.address().port); }
   finally { await new Promise(resolve => server.close(resolve)); }
 }
+
+test('the actual Vercel Express entry routes API, pages, assets and API errors', async () => {
+  const db = pglite();
+  try {
+    await withHandler(createVercelApp(db), async base => {
+      const health = await fetch(base + '/api/health');
+      assert.equal(health.status, 200);
+      assert.deepEqual(await health.json(), {status:'ok', app:'SlotDrop'});
+
+      const slots = await fetch(base + '/api/slots');
+      assert.equal(slots.status, 200);
+      const catalog = await slots.json();
+      assert.ok(catalog.length >= 8, 'the actual entrypoint exposes seeded inventory');
+
+      const home = await fetch(base + '/');
+      assert.equal(home.status, 200);
+      assert.match(await home.text(), /SlotDrop/i);
+
+      const styles = await fetch(base + '/css/style.css');
+      assert.equal(styles.status, 200);
+      assert.match(styles.headers.get('content-type') ?? '', /text\/css/);
+
+      const invalid = await fetch(base + '/api/bookings', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({}),
+      });
+      assert.equal(invalid.status, 400);
+      assert.equal((await invalid.json()).error.code, 'INVALID_INPUT');
+
+      const unknown = await fetch(base + '/api/does-not-exist');
+      assert.equal(unknown.status, 404);
+      assert.equal((await unknown.json()).error.code, 'ROUTE_NOT_IMPLEMENTED');
+    });
+  } finally { await db.close(); }
+});
 
 test('the Vercel handler prepares an empty database on first request and keeps bookings across cold starts', async () => {
   const db = pglite();
