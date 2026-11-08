@@ -10,4 +10,4 @@ async function check(directory) {
     }
   }
 }
-for (const directory of ['server','public','tests','tools']) await check(directory);
+for (const directory of ['api','server','public','tests','tools']) await check(directory);
