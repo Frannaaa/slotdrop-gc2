@@ -1,6 +1,6 @@
-# GC2 submission gate — teacher brief, not production scope
+# GC2 assignment requirements
 
-This checklist follows the Canvas **GC 2: MVP Build** assignment as of October 30, 2026. It is a coordination aid; the teacher's original brief is authoritative. Current Fran branches are not the same as merged group main.
+This document summarizes the GC2 MVP Build assignment requirements. The instructor's brief remains authoritative. Current integration status, PR approvals and evidence gaps are maintained separately in [the final submission checklist](final-submission-checklist.md).
 
 ## Mandatory milestones
 
@@ -16,7 +16,7 @@ Internal Nov 1 first PR and Nov 7 fully connected flow are team targets, not ins
 
 - Home → Browse with API-driven list + filter/sort → Detail → Selection with accurate quantity and total → Checkout form with validation and simulated payment → Confirmation **fetched by saved booking ID**. A separate reference-only prototype does **not** count.
 - Server-side API recomputes booking totals; verifies available seats inside the same database transaction that saves a booking; refuses overselling; returns documented 200/201/400/404/409 codes. Booking still exists after server restart.
-- PostgreSQL/real persistent database with ≥3 tables and ≥8 realistic seeded services or sessions; do not count JSON or browser storage. Fran's branch has a real schema and initial seed, but the published deployment must be checked.
+- PostgreSQL/real persistent database with ≥3 tables and ≥8 realistic seeded services or sessions; do not count JSON or browser storage. The published deployment must be checked with the actual persistent database.
 - Owner screen lists saved demo bookings and five computed metrics: booking count, modeled revenue, average booking, top-selling service, and nearly-full sessions.
 - Both revenue features, availability and buddy/tier pricing, must be **enforced by the server and persisted**. Database columns and UI previews alone do not satisfy the rubric.
 - Every fetch-backed screen should handle loading, no results/unknown record, failure and recovery; work on phone width without dead buttons or Console errors.
@@ -40,7 +40,7 @@ This checks the seven required page URLs, session list/detail APIs, a quantity-1
 
 Owner now displays an inventory-readiness warning above its metrics when no sessions are discoverable or when every available offer closes within 24 hours; it never changes database rows. This warning uses the last loaded Owner catalog, so refresh after other people book. For each checkpoint also run the dedicated `check:demo` availability monitor on the branch where it is installed. Initial sample sessions expire after two days. Create **new future demo offers through Owner** without reseeding historic rows and without representing real businesses as partners. This operational maintenance is not a teacher requirement, but an empty Browse violates CP1.
 
-## Real transactional proof (manual, only after teammate implementations merge)
+## Final deployed transaction verification
 
 1. Use a new disposable sample customer and a currently available session; inspect Network while booking, ensuring all prices match the server quote.
 2. Verify one saved booking ID, GET /api/bookings/:id returns its original amount and quantity, GET /api/bookings and GET /api/metrics reflect that booking, and remaining seats drop by exactly the booked quantity.
@@ -52,10 +52,4 @@ Owner now displays an inventory-readiness warning above its metrics when no sess
 
 The private reference/demo and `/studios.html` are supporting artifacts. The graded Browse must read `/api/slots` from the group's deployed database; Checkout must save via Janelle's transactional API; Confirmation must read that saved receipt. Real studio names/prices are sourced public references only. Dates, slots, discounts, payments and bookings are classroom simulations.
 
-## As of Oct 30 — integration blockers
-
-- #22, #27, #28, #30 merged.
-- #36 shared browser helper needs Janelle's **new approval** after requested fixes. A mistaken previous approval explicitly does not count.
-- #29 Owner has one recorded teammate approval, but commits after that review require recheck. #34 is stacked on it; #32 and #39 are supporting stacked PRs. Respect branch dependencies and CI.
-- #35 Home is Chonel's code with Kirsten review pending. CSS/Browse belongs to Kirsten; Detail/Selection to Kat; Checkout/Confirmation to Kaitlyn; quote/save/receipt and server-side pricing to Janelle.
-- Public customer flow and deployed group URL remain unverified. Do not mark them done because the private reference or isolated branch tests pass.
+Current merge blockers, valid reviewer requirements and incomplete customer-screen evidence are tracked in the [final submission checklist](final-submission-checklist.md).
