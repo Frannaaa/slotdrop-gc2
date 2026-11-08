@@ -21,9 +21,10 @@ test('real studio discovery has one primary type, sourced prices and no bookable
  }finally{await new Promise(resolve=>server.close(resolve));}
 });
 
-test('studio research navigates to our group Browse, never to the private reference prototype',async()=>{
+test('studio research navigates to existing group featured sessions, never to the private reference prototype',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/studios.html',import.meta.url),'utf8');
- assert.match(html,/href="\/browse\.html"/);
+ assert.match(html,/href="\/#featured"/);
+ assert.doesNotMatch(html,/href="\/browse\.html"/);
  assert.doesNotMatch(html,/slotdrop-gc2-complete\.onrender\.com/);
 });
