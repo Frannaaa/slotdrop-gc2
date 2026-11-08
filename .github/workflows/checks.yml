@@ -74,5 +74,5 @@ jobs:
         shell: pwsh
         run: |
           node -e "const fs=require('node:fs'); const p='public/js/owner.js'; const src=fs.readFileSync(p,'utf8').replace(/\r?\n/g,'\r\n'); fs.writeFileSync(p,src);"
-          node --test tests/owner-clock.test.js
+          node --test tests/owner-clock.test.js tests/owner-toggle.test.js
 

@@ -25,7 +25,8 @@ test('successful Owner sales toggle reports saved status when refresh fails',asy
  const catalog={services:[{id:1,active:true,providerName:'Demo studio',name:'Demo workshop'}],
   slots:[slot],commissionBasisPoints:1000,discoveryHours:72};
  const file=await readFile(new URL('../public/js/owner.js',import.meta.url),'utf8');
- const js=file.replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/,'')
+ const js=file.replace(/\r\n?/g,'\n') // Windows CRLF must not change the source patterns under test.
+  .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/,'')
   .replace(/^import \{ api \} from "\.\/api\.js";\n/m,'')
   .replace(/reset\(\);\nload\(\);\s*$/,'');
  const context={document,...policy,Intl,Date,setInterval(){},
