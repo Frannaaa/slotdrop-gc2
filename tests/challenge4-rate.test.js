@@ -54,7 +54,7 @@ test('active commission has one editable source and is reflected in quote, Owner
     const original=JSON.stringify(receipt);
     const patch=await fetch(f.base+'/api/slots/1',{
       method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({offerPriceCentavos:150000}),
+      body:JSON.stringify({offerPriceCentavos:170000}),
     });
     assert.equal(patch.status,200);
     const after=await fetch(f.base+'/api/bookings/'+receipt.id);
