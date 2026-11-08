@@ -113,6 +113,45 @@ Saved receipt rates are historical. SQL checks each saved rate and its arithmeti
 
 Pending individual work. Each member writes three predictions before running a chosen function, records the actual outputs and explains mismatches. The unedited voice recording must be at most three minutes and made without assistance.
 
+## Stretch challenges — deployed evidence
+
+All measured against https://slotdrop-gc2-group-zx8j.onrender.com (commit `96d4a31`) from GitHub Actions on 2026-11-08 at 08:36–08:38 UTC, [run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799). None of these requests creates a booking; `GET /api/metrics` still showed `bookingCount: 0` afterwards.
+
+### Sequential or parallel — complete
+
+Selection loads the session and the quote with `Promise.all` (`public/js/selection.js:19`). The two requests do not depend on each other: both need only `slotId` and `quantity` from the URL.
+
+| Mode | Median | Fastest | Slowest |
+|---|---:|---:|---:|
+| Sequential (before) | 398.0 ms | 385.6 ms | 730.8 ms |
+| Parallel (after, current code) | 200.2 ms | 194.3 ms | 535.5 ms |
+
+`GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quantity=2`, 15 alternating trials after 3 warm-ups. Parallel halved the wait, because each request costs roughly one round trip to Singapore and the two now overlap. These times are measured from a GitHub server, not a phone browser. [Screenshot](evidence/stretch-deployed/sequential-vs-parallel.jpg).
+
+### Too many requests — server side complete, front end still open
+
+| Step | Result |
+|---|---|
+| Refused `POST /api/bookings` (quantity 0) | 25 × **400** |
+| Next POST | **429** `RATE_LIMITED`, `Retry-After: 30`, `retryAfterSeconds: 30` |
+| Same request after waiting 31 s | **400** again: the limit had reset |
+
+The 429 came on attempt 26, not 31, because the Challenge 1 job in the same run had already sent 5 POSTs that minute: the limit is 30 booking POSTs per minute per client address (`server/middleware/booking-rate-limit.js`). [Screenshot](evidence/stretch-deployed/too-many-requests-429.jpg).
+
+Still open: the brief also asks the front end to wait and retry. `retryLimitedBooking()` exists in `public/js/customer-common.js:87`, but Kaitlyn's Checkout (#43) does not call it yet. Known limitation: on Render every request reaches Node from Render's proxy, so the "per client" key is most likely shared by all visitors.
+
+### Double click — server side shown in tests, browser still open
+
+The server is safe: an identical retry (same `requestId`) returns the first receipt with 200, and the row lock in `createBooking()` lets only one of two simultaneous last-seat bookings succeed (201 and 409, `tests/postgres-locking.test.js`, `tests/bookings.test.js`). Not run on the live site because it would create bookings. Checkout (#43) disables the button while saving; showing a real double click needs the merged Checkout page.
+
+### Pagination — not earned yet
+
+The API side is ready in #49 (`?page=&limit=`, not yet merged). Browse (#62) loads the whole list, and #63 adds a React `pagination.js` at the repository root that no page loads and that does not call `?page=`. Browse needs to request `/api/slots?page=…&limit=…` and show page controls.
+
+### Join and compute — not earned yet
+
+#51 joins `GET /api/owner/catalog` with `GET /api/bookings` to show open-seat utilization on the Owner screen. It needs a review and merge before it is on the live site.
+
 ## Further checks
 
 - The owner layout follows the October 28 brand book: paper/ink/blue/lime, local fonts and 48-pixel action buttons. It stayed within the page at 320, 390, 768 and 1280-pixel viewport settings.
