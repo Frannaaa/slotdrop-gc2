@@ -11,10 +11,15 @@ import { bookingRouter } from './routes/bookings.js';
 import { bookingRateLimiter } from './middleware/booking-rate-limit.js';
 import { ownerRouter } from './routes/owner.js';
 
-export function createApp({ db = postgresDatabase(), clock = () => new Date(), bookingRateLimit } = {}) {
+export function createApp({
+  db = postgresDatabase(),
+  clock = () => new Date(),
+  checkDatabaseHealth = process.env.NODE_ENV === 'production',
+  bookingRateLimit,
+} = {}) {
   const app = express();
   app.use(express.json({ limit: '16kb' }));
-  app.use('/api/health', healthRouter);
+  app.use('/api/health', healthRouter(db, checkDatabaseHealth));
   app.use('/api/activities', activityRouter());
   app.use('/api/slots', slotRouter(db, clock));
   app.use('/api/pricing', pricingRouter(db, clock));
@@ -22,13 +27,17 @@ export function createApp({ db = postgresDatabase(), clock = () => new Date(), b
   app.use('/api', providerRouter(db, clock));
   app.use('/api/bookings', bookingRateLimiter(bookingRateLimit));
   app.use('/api/bookings', bookingRouter(db, clock));
-  // Keep unavailable API routes in the same JSON error format.
-  app.use('/api', (_req, res) => res.status(404).json({
-    error: { code: 'ROUTE_NOT_IMPLEMENTED', message: 'This API route is not available yet.' }
-}));
-app.use(express.static(fileURLToPath(new URL('../public/', import.meta.url))));
-app.use(errorHandler);
-return app;
-}
-export default createApp();
 
+  // Keep all unknown API paths in the same JSON error format.
+  app.use('/api', (_req, res) => res.status(404).json({
+    error: {
+      code: 'ROUTE_NOT_IMPLEMENTED',
+      message: 'This API route is not available yet.',
+    },
+  }));
+  app.use(express.static(fileURLToPath(new URL('../public/', import.meta.url))));
+  app.use(errorHandler);
+  return app;
+}
+
+export default createApp();

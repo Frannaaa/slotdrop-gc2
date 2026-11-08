@@ -23,6 +23,7 @@ An authorization checkbox records an attestation; it is not proof. A new applica
 | Source-backed catalog | public/data/real-studio-demo.json; server/repositories/reference-catalog.js; tools/generate-reference-seed.mjs |
 | Additive persistence | db/migrations/002_studio_references.sql; 003_provider_applications.sql; db/schema.sql |
 | JSON routes | server/routes/providers.js; server/app.js |
+| Studio profile/application rules and transactions | server/services/providers.js |
 | Profile, form and status | public/studio.html; provider-apply.html; provider-application.html; matching public/js files; public/css/providers.css |
 | Checks | tests/providers.test.js; tests/reference-catalog.test.js; tools/provider-ux.mjs |
 

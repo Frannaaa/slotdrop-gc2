@@ -6,11 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Build status
 
-This branch: **Sourced studio catalog and pending applications**. It includes the earlier owner/discovery/research stack and adds independent studio profiles plus a saved application/status flow. See Issue #38.
-
-The quote API #40 is merged into main. Booking creation and receipt-by-ID are Janelle's next API tasks. The six customer screens are still being built. The complete Browse → Select → Confirm → Save flow is not ready, and the API-backed app has no public deployment yet.
-
-Reviewed #27/#28 are merged. Next: #36 shared helper, Home after Kirsten's review, #29 owner privacy recheck, then #34 discovery and #32 supporting research. This application/catalog extension follows #32 and does not block the core dependencies. Business #37 is reviewed separately. Retarget after approved dependency merges.
+Current official group status (November 4): the database, Owner, discovery, shared helpers, pricing, persisted booking/receipt APIs, and studio reference catalog are merged into `main`. Home (#35) is merged. Detail/Selection (#41) and Checkout/Confirmation (#43) remain open for teammate reviews, so Home session links still require #41. Kirsten has published the css_styling branch, but Browse and a CSS/Browse PR remain outstanding. Fran's shared cleanup/release checks (#45) and business case (#37) also await review. Passing individual CI does not prove the assembled six-screen journey; the group web service has not been deployed. The separate `reference-only-slotdrop` deployment is not the graded application.
 
 ## Run locally
 
@@ -33,10 +29,10 @@ Fresh seeds create 16 simulated sessions across eight researched offerings on th
 Database tools and Docker are available from PR #27.
 
 1. Set DATABASE_URL privately in .env or the host's environment settings.
-2. Run `npm run db:init` once against a new, empty course database. It refuses existing tables or data.
+2. Run `npm run db:init` **once** against a new, empty course database. It must not be rerun on a populated database and must not target the reference-only project's database.
 3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
 4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
-5. Check /api/health for liveness and /api/slots for a database response. Health does not test the database.
+5. Check `/api/health` and `/api/slots`. In production, health probes PostgreSQL *and* the required booking tables; local demo health is deliberately lightweight.
 6. Run Postman against the public URL. After booking integration, save a booking, restart the server and read the same receipt back.
 
 .env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
@@ -76,7 +72,7 @@ package-lock.json pins dependencies. Add the actual public runtime/database vers
 
 The build focuses on recurring leisure sessions and released seat allocations. Discovery covers the next 72 hours; each session has its own booking deadline. Studios control standard and optional buddy offers. The course commission is 10%.
 
-Availability and buddy pricing are the two revenue features. The booking API still needs to enforce them when saving a purchase. Paid add-ons, accounts, real payments, React and optimization are deferred.
+Availability and buddy pricing are the two revenue features. The merged booking API enforces both availability and buddy pricing under a database transaction, with persisted receipt snapshots and stable request-ID retries. Paid add-ons, accounts, real payments, React and optimization are deferred.
 
 ## Design and documents
 
@@ -89,7 +85,7 @@ The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.ch
 - [Challenges and test results](docs/challenges.md)
 - [Deployed List baseline](docs/baseline.md)
 
-The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/SlotDrop-Fran.postman_collection.json) is in the owner branch. Set baseUrl and serviceId before running it against fictional data. Test records are in that branch's docs/evidence/.
+The [Postman collection](docs/SlotDrop-Fran.postman_collection.json) is included in the official repository. Set `baseUrl` and the active `serviceId` before running it against fictional data. Test records are in that branch's docs/evidence/.
 
 ## Dates and remaining work
 
@@ -97,7 +93,7 @@ The [Postman collection](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-own
 - **November 4:** deployed Browse must load database sessions through the API.
 - **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
 
-Fran still needs approved code merges, two reviews of teammates' PRs, public deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+Fran still needs approved code merges, her remaining required teammate reviews, the public group deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
 
 ## Released-seat discovery revision
 

@@ -1,5 +1,5 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
-import { DISCOVERY_HOURS } from './business-config.js';
+import { DISCOVERY_HOURS } from "./business-config.js";
 export const money = (value) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(
     value / 100,
@@ -26,13 +26,16 @@ export function positive(value, max = Number.MAX_SAFE_INTEGER) {
     Number(value) < 1 ||
     Number(value) > max
   )
-    throw new Error(max === Number.MAX_SAFE_INTEGER
-      ? "Open a valid session link."
-      : `Choose a whole number from 1 to ${max}.`);
+    throw new Error(
+      max === Number.MAX_SAFE_INTEGER
+        ? "Open a valid session link."
+        : `Choose a whole number from 1 to ${max}.`,
+    );
   return Number(value);
 }
 export function pageParameters(search, allowed) {
-  const params = new URLSearchParams(search), seen = new Set();
+  const params = new URLSearchParams(search),
+    seen = new Set();
   for (const [key, value] of params) {
     if (!allowed.includes(key) || seen.has(key) || value === "")
       throw new Error("Open a valid link with each field appearing once.");
@@ -116,29 +119,112 @@ export function available(slot, quantity = 1) {
     start < now + DISCOVERY_HOURS * 3600000
   );
 }
-export function previewPrice(slot, quantity=1) {
- const buddy=quantity>=2&&slot.buddyPriceCentavos!==null;
- const unit=buddy?slot.buddyPriceCentavos:slot.offerPriceCentavos;
- return {buddy,unit,total:unit*quantity};
+export function previewPrice(slot, quantity = 1) {
+  const buddy = quantity >= 2 && slot.buddyPriceCentavos !== null;
+  const unit = buddy ? slot.buddyPriceCentavos : slot.offerPriceCentavos;
+  return { buddy, unit, total: unit * quantity };
 }
-export const activityLabel = type => ({pottery:'Pottery',painting:'Canvas painting',pilates:'Pilates',dance:'Dance',other:'Activity'}[type]||'Activity');
-export const inclusionLabel = key => ({materials:'Materials included',painting:'Painting included',firing:'Firing included',equipment:'Equipment included'}[key]||key);
-export const comparisonLabel = slot => !slot.studioReference ? 'Regular price'
- : slot.originalPriceCentavos === slot.studioReference.publishedPriceCentavos ? 'Published reference price' : 'Demo base price';
+export const activityLabel = (type) =>
+  ({
+    pottery: "Pottery",
+    painting: "Canvas painting",
+    pilates: "Pilates",
+    dance: "Dance",
+    other: "Activity",
+  })[type] || "Activity";
+export const inclusionLabel = (key) =>
+  ({
+    materials: "Materials included",
+    painting: "Painting included",
+    firing: "Firing included",
+    equipment: "Equipment included",
+  })[key] || key;
+export const comparisonLabel = (slot) =>
+  !slot.studioReference
+    ? "Regular price"
+    : slot.originalPriceCentavos === slot.studioReference.publishedPriceCentavos
+      ? "Published reference price"
+      : "Demo base price";
+// Use the same source-link rules on cards and studio profiles.
+export function safeHttpsUrl(value) {
+  try {
+    const source = new URL(value);
+    return source.protocol === "https:" && !source.username && !source.password
+      ? source.href
+      : null;
+  } catch {
+    return null;
+  }
+}
 export function studioEvidence(slot) {
- const reference=slot.studioReference;if(!reference)return '';
- const safeSource=value=>{
-  try {const source=new URL(value);return source.protocol==='https:'&& !source.username && !source.password ? source.href : null;}catch{return null;}
- };
- const source=safeSource(reference.sourceUrl);if(!source)return '';
- const priceSource=safeSource(reference.priceSourceUrl);
- return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource?` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>`:""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
+  const reference = slot.studioReference;
+  if (!reference) return "";
+  const source = safeHttpsUrl(reference.sourceUrl);
+  if (!source) return "";
+  const priceSource = safeHttpsUrl(reference.priceSourceUrl);
+  return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
 }
 export function card(slot, quantity = 1) {
- const selectedQuantity=Number.isSafeInteger(quantity)&&quantity>=1&&quantity<=100?quantity:1;
- const price=previewPrice(slot,selectedQuantity);
- const traits=[slot.beginnerFriendly?'Beginner-friendly':'',...(slot.inclusions||[]).map(inclusionLabel)].filter(Boolean);
- return `<article class="activity-card"><div class="card-art ${slot.category==='active'?'active':''}" aria-hidden="true">${escapeHtml(activityLabel(slot.activityType))}</div><div class="card-body"><p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p><h2>${escapeHtml(slot.serviceName)}</h2><p class="provider-name">${slot.studioReference?`<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>`:escapeHtml(slot.providerName)}</p><p class="session-time"><strong>${date(slot.startsAt)}</strong><br>${slot.durationMinutes} minutes · ${slot.remainingSeats} seats left</p><p class="session-cutoff">Book before ${date(slot.bookingClosesAt)}</p><div class="session-traits">${traits.map(trait=>`<span>${escapeHtml(trait)}</span>`).join('')}</div><div class="party-price"><strong>${money(price.total)}</strong><span>total for ${selectedQuantity} ${selectedQuantity===1?'person':'people'}</span></div><p>${money(price.unit)} / person${price.buddy?' · Buddy price applied':''}<br><small>${comparisonLabel(slot)} ${money(slot.originalPriceCentavos)} / person</small>${slot.buddyPriceCentavos!==null&&!price.buddy?`<br><span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`:''}</p>${studioEvidence(slot)}<p class="reference">Price preview. Rechecked before saving.</p><a class="button secondary" href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}">View session ↗</a></div></article>`;
+  const selectedQuantity =
+    Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 100
+      ? quantity
+      : 1;
+  const price = previewPrice(slot, selectedQuantity);
+  const traits = [
+    slot.beginnerFriendly ? "Beginner-friendly" : "",
+    ...(slot.inclusions || []).map(inclusionLabel),
+  ].filter(Boolean);
+  return /* HTML */ `<article class="activity-card card">
+    <div
+      class="card-art ${slot.category === "active" ? "active" : ""}"
+      aria-hidden="true"
+    >
+      ${escapeHtml(activityLabel(slot.activityType))}
+    </div>
+    <div class="card-body">
+      <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
+      <h2>${escapeHtml(slot.serviceName)}</h2>
+      <p class="provider-name">
+        ${slot.studioReference
+          ? `<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>`
+          : escapeHtml(slot.providerName)}
+      </p>
+      <p class="session-time">
+        <strong>${date(slot.startsAt)}</strong>
+        <br />${slot.durationMinutes} minutes · ${slot.remainingSeats} seats
+        left
+      </p>
+      <p class="session-cutoff">Book before ${date(slot.bookingClosesAt)}</p>
+      <div class="session-traits">
+        ${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}
+      </div>
+      <div class="party-price">
+        <strong>${money(price.total)}</strong>
+        <span
+          >total for ${selectedQuantity}
+          ${selectedQuantity === 1 ? "person" : "people"}</span
+        >
+      </div>
+      <p>
+        ${money(price.unit)} /
+        person${price.buddy ? " · Buddy price applied" : ""}<br />
+        <small
+          >${comparisonLabel(slot)} ${money(slot.originalPriceCentavos)} /
+          person</small
+        >${slot.buddyPriceCentavos !== null && !price.buddy
+          ? `<br>
+    <span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`
+          : ""}
+      </p>
+      ${studioEvidence(slot)}
+      <p class="reference">Price preview. Rechecked before saving.</p>
+      <a
+        class="button secondary"
+        href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
+        >View session ↗</a
+      >
+    </div>
+  </article>`;
 }
 export function notice(element, message, error = false) {
   element.textContent = message;
