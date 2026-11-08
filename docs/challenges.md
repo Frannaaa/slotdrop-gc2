@@ -24,18 +24,26 @@ The [Postman collection](SlotDrop-Fran.postman_collection.json) covers the imple
 
 ## 1. Break the deployed booking API
 
-The exported six-case collection sends an extra unsupported JSON field `"total": 1` for the rubric's invalid browser total case, which yields `400 INVALID_INPUT`. A *different* case with an outdated `expectedTotalCentavos` returns `409 PRICE_CHANGED` and a fresh quote. Document these distinctly; do not present a `409` as the expected result for the collection's fake-field case.
+**Deployed result: all six cases answered as expected.** The [Challenge 1 collection](SlotDrop-GC2-Challenge1.postman_collection.json) ran with Newman 6.2.1 from GitHub Actions against the official deployment, `https://slotdrop-gc2-group-zx8j.onrender.com` (Render service `slotdrop-gc2-group-zx8j`, deployed commit `96d4a31`), on 2026-11-08 at 07:45 UTC. [Run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) shows every request body, status and response in its job summary; 16/16 assertions passed.
 
-Run these six cases against the final public API and preserve the request, expected status, actual response and any fix:
+Requests 00a and 00b are read-only setup. 00a picked session 1 (Laro Ceramics, Mug-making + painting, 4 of 4 seats left) and 00b fetched the server's two-seat buddy quote, ₱5,130.00 (`513000` centavos). None of the requests creates a booking: `GET /api/metrics` showed `bookingCount: 0` and `GET /api/bookings` returned `[]` in the same run.
 
-- Quantity 0 or -3: 400.
-- Browser-supplied wrong total: 400 or a saved server-computed total.
-- Too many seats: 409.
-- Unknown item/session: 404.
-- Missing required details: 400.
-- Search with no matches: 200 and an empty array.
+| # | Request sent to the deployed API | Expected | Actual status and response | Time |
+|---|---|---|---|---:|
+| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms |
+| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms |
+| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms |
+| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms |
+| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms |
+| 6 | `GET /api/slots?q=zzzz-no-match` | 200 and an empty list | **200** `[]` | 246 ms |
 
-Local session validation tests are useful checks, but these screenshots must come from the deployed booking API.
+Every POST also carried a fresh `requestId`, fictional guest details (`GC2 QA`, `qa@example.com`), `paymentMethod: "mock_card"` and the server's `expectedTotalCentavos`; only the listed field changed.
+
+Case 2: the server rejects any field it does not expect, so a browser cannot even send its own total. A *different* case, a stale `expectedTotalCentavos`, returns `409 PRICE_CHANGED` with a fresh quote; that is the "ask again when the price changes" rule, not this test.
+
+**First-attempt failure, found and fixed.** The [first deployed run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436) passed all six cases but failed 1 of 15 assertions: the setup request fetched its quote from `localhost`, the collection's default URL, instead of the deployment, because it read `baseUrl` from the collection variables rather than the value supplied for the run. The six cases still answered correctly because their failure conditions do not depend on the total, but they sent a stale `expectedTotalCentavos` of `304000`. The earlier local run had missed this because both URLs were `localhost:3000`. The fix split the setup into two visible requests (00a session, 00b quote) and added a test that the collection contains no hidden `pm.sendRequest` calls; it was rechecked locally on a different port before the passing deployed rerun.
+
+**How this was run.** The laptop used for this work could not open the Render URL (its connection stalled during the TLS handshake, and Render's logs showed no incoming requests), while GitHub's network reached it normally. [.github/workflows/deployed-challenge1.yml](../.github/workflows/deployed-challenge1.yml) therefore wakes the service, records the four read endpoints and runs the collection. The run's `challenge1-deployed-evidence` artifact holds the full Newman JSON. To rerun it in the Postman app, import the collection, set `baseUrl` to the URL above and run the folder in order.
 
 ## 2. Trace a real request
 
@@ -54,13 +62,15 @@ The team still needs its own explanation of three corrections for Challenge 3. T
 
 ## 4. Change an owner rule
 
-Current commission inventory, checked October 28 without changing the rate:
+Current commission inventory, rechecked November 8 on `main` (`96d4a31`) without changing the rate:
 
 | File/line | Role | Edit to change the active rate? |
 |---|---|---|
 | server/config/business.js:1 | COMMISSION_BASIS_POINTS = 1000 | Yes |
 | server/repositories/owner.js:3 and :8 | Import and return the setting | No |
-| public/js/owner.js:73–79 (preview()) | Preview provider proceeds using the API rate | No |
+| public/js/owner.js:87 | Preview provider proceeds using the rate from the API | No |
+
+The **rate** lives in one place. The **fee formula** (price × rate ÷ 10,000, rounded per seat) appears three times: server/services/pricing.js:25 computes it for quotes and bookings, public/js/owner.js:87 repeats it only to preview a studio's earnings before an offer is saved, and db/schema.sql:78 checks it as a constraint on every saved receipt. Changing the rate edits none of them. Changing the *rounding rule* would mean editing all three; the owner preview could later read the fee from the quote API to remove the browser copy.
 
 Saved receipt rates are historical. SQL checks each saved rate and its arithmetic; it does not set the active commission. Test fixtures and worked examples use fixed rates for specific cases. The current booking service reads the shared commission setting. `tests/challenge4-rate.test.js` checks the active value in the quote, stored receipt and Owner catalog.
 
@@ -169,7 +179,7 @@ A local HTTP POST to /api/bookings returned 201. The persisted receipt read back
 ```
 
 1. public/js/checkout.js:74 handles submit and builds the payload. At line 101 it calls request() in public/js/customer-common.js:46.
-2. server/app.js:26 mounts bookingRouter. server/routes/bookings.js:7 calls createBooking with the JSON body.
+2. server/app.js:28 applies bookingRateLimiter and server/app.js:29 mounts bookingRouter. server/routes/bookings.js:7 calls createBooking with the JSON body.
 3. server/services/bookings.js:39 validates with bookingRequest. createBooking at line 91 checks the request key, locks the slot with SELECT FOR UPDATE at line 99, and calls priceQuote at line 109 to recompute the price and enforce availability. The INSERT at line 114 saves the receipt snapshot within the transaction.
 4. receiptResponse in server/services/bookings.js:56 shapes the saved receipt and the route returns JSON. Checkout navigates with its ID at line 106.
 5. public/js/confirmation.js:6 runs load(), GETs the receipt at line 14 via server/routes/bookings.js:11 and findReceipt in server/services/bookings.js:134, then renders the saved quantities and prices at line 17.
