@@ -1,8 +1,8 @@
-# SlotDrop | Challenges and test evidence [case 1](evidence/challenge1-deployed/01-zero-quantity.jpg) | [case 2](evidence/challenge1-deployed/02-fake-total.jpg) | [case 3](evidence/challenge1-deployed/03-more-seats-than-available.jpg) | [case 4](evidence/challenge1-deployed/04-unknown-session.jpg) | [case 5](evidence/challenge1-deployed/05-missing-customer-name.jpg) | [case 6](evidence/challenge1-deployed/06-search-no-matches.jpg) |
+# SlotDrop | Challenges and test evidence
 
 This record separates repeatable test results from the evidence required on the final deployed group application. Actual request/response captures and group-authored explanations are retained with dates, while earlier integration notes are kept in [historical handoffs](ownership-and-execution.md).
 
-**Latest automated verification (November 8):** [PR #37 GitHub Actions run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) passed **104 of 104 tests**, including the exported six-case Postman request contract and response assertions. This proves the tested code in CI, **not** that the six cases have been captured in Postman against the public Render URL. Challenge 1 deployed screenshots, Challenge 2 Network/hand-drawn evidence, Challenge 3 group-authored provenance, Challenge 4 group interpretation and all Challenge 5 individual recordings remain separate requirements.
+**Verified evidence (November 8):** [PR #37's automated CI run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) passed **104/104 source tests**. Separately, [deployed Challenge 1 run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) verified **16/16 assertions** against the official public Render API; the linked screenshots below show its GitHub Actions summary. These are **not Postman-app screenshots**. Real browser Challenge 2 Network/hand-drawn evidence, group-authored Challenge 3/4 interpretation and all independent Challenge 5 recordings remain to be completed.
 
 ## Earlier Owner/API checks (October 27–28)
 
@@ -28,14 +28,14 @@ The [Postman collection](SlotDrop-Fran.postman_collection.json) covers the imple
 
 Requests 00a and 00b are read-only setup. 00a picked session 1 (Laro Ceramics, Mug-making + painting, 4 of 4 seats left) and 00b fetched the server's two-seat buddy quote, ₱5,130.00 (`513000` centavos). None of the requests creates a booking: `GET /api/metrics` showed `bookingCount: 0` and `GET /api/bookings` returned `[]` in the same run.
 
-| # | Request sent to the deployed API | Expected | Actual status and response | Time | Screenshot |
+| # | Request sent to the deployed API | Expected | Actual status and response | Time | GitHub Actions screenshot (not Postman) |
 |---|---|---|---|---:|---|
-| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms |
-| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms |
-| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms |
-| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms |
-| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms |
-| 6 | `GET /api/slots?q=zzzz-no-match` | 200 and an empty list | **200** `[]` | 246 ms |
+| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms | [View capture](evidence/challenge1-deployed/01-zero-quantity.jpg) |
+| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms | [View capture](evidence/challenge1-deployed/02-fake-total.jpg) |
+| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms | [View capture](evidence/challenge1-deployed/03-more-seats-than-available.jpg) |
+| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms | [View capture](evidence/challenge1-deployed/04-unknown-session.jpg) |
+| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms | [View capture](evidence/challenge1-deployed/05-missing-customer-name.jpg) |
+| 6 | `GET /api/slots?q=zzzz-no-match` | 200 and an empty list | **200** `[]` | 246 ms | [View capture](evidence/challenge1-deployed/06-search-no-matches.jpg) |
 
 Screenshots of the same run: [the four read endpoints](evidence/challenge1-deployed/00-endpoints.jpg) and [the setup quote](evidence/challenge1-deployed/00-setup-session-and-quote.jpg). They were captured from the run's GitHub job summary, which shows the request body, status line, response JSON and assertions for each case. Long one-line responses for cases 1 and 3 are cut off at the right edge of the picture; the full text is in the table above and in the run.
 
