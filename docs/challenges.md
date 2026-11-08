@@ -2,6 +2,8 @@
 
 This record separates repeatable test results from the evidence required on the final deployed group application. Actual request/response captures and group-authored explanations are retained with dates, while earlier integration notes are kept in [historical handoffs](ownership-and-execution.md).
 
+**Latest automated verification (November 8):** [PR #37 GitHub Actions run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) passed **104 of 104 tests**, including the exported six-case Postman request contract and response assertions. This proves the tested code in CI, **not** that the six cases have been captured in Postman against the public Render URL. Challenge 1 deployed screenshots, Challenge 2 Network/hand-drawn evidence, Challenge 3 group-authored provenance, Challenge 4 group interpretation and all Challenge 5 individual recordings remain separate requirements.
+
 ## Earlier Owner/API checks (October 27–28)
 
 These results cover Fran's owner build. They do not complete the deployed customer-booking challenges.
@@ -21,6 +23,8 @@ The restart test creates a session through the API and inserts a fictional recei
 The [Postman collection](SlotDrop-Fran.postman_collection.json) covers the implemented APIs. The recorded October 27 result belongs to that version of the collection.
 
 ## 1. Break the deployed booking API
+
+The exported six-case collection sends an extra unsupported JSON field `"total": 1` for the rubric's invalid browser total case, which yields `400 INVALID_INPUT`. A *different* case with an outdated `expectedTotalCentavos` returns `409 PRICE_CHANGED` and a fresh quote. Document these distinctly; do not present a `409` as the expected result for the collection's fake-field case.
 
 Run these six cases against the final public API and preserve the request, expected status, actual response and any fix:
 
