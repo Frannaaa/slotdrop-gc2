@@ -229,3 +229,9 @@ Challenge 5 is each member's own prediction, experiment and unedited recording.
 - **Sequential vs parallel:** [PR #53](https://github.com/Frannaaa/slotdrop-gc2/pull/53) uses real Selection detail/quote GETs. [Local CI run 42394996195](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42394996195) measured median **5.47ms sequential vs 4.59ms parallel** across seven alternating rounds after warm-up, an observed **0.88ms difference**. Public Browser Network trace and group interpretation are missing; no guaranteed speedup is claimed.
 
 **Evidence provenance:** All generated sessions, seat limits, rates, payments and bookings are fictional. No real business partnership, demand or studio consent is implied. The four challenges require group-authored interpretation; maintain original failure/correction chronology without fabricating screenshots or an earlier checkpoint.
+
+### Newman replay and deployed screenshot checklist
+
+Newman 6.2.3 ran the exported collection against the local disposable PGlite fixture at commit `b1cf5c0`. All 6 requests and 12 assertions passed. [The run record](evidence/challenge1-newman-local-2026-11-08.json) contains each actual request body, status, response body and assertion result.
+
+For the submitted Challenge 1 evidence, run the collection again in Postman against the official group URL. Set the slot variables from that deployment's inventory and record the deployed commit and date. Capture six screenshots showing the method and URL, request Body (or search Params), HTTP status, and response JSON. Use fictional guest details. Save the screenshots under `docs/evidence/` and link each case from the table above. Keep this local Newman record labelled as local evidence.
