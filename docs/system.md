@@ -75,8 +75,10 @@ sequenceDiagram
     end
   end
   C->>A: GET /api/bookings/:id on Confirmation
-  A->>D: Read saved receipt by booking UUID
-  D-->>A: Saved booking snapshot
+  A->>S: findReceipt(id)
+  S->>D: SELECT saved receipt by booking UUID
+  D-->>S: Persisted booking snapshot
+  S-->>A: Receipt without private contact details
   A-->>C: 200 receipt JSON
 ```
 
