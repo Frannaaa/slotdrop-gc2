@@ -85,3 +85,66 @@ jobs:
         with:
           name: challenge1-deployed-evidence
           path: evidence/
+
+  stretch:
+    # Read-only or refused requests only: no booking is created.
+    needs: challenge1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: ${{ inputs.baseUrl || 'https://slotdrop-gc2-group-zx8j.onrender.com' }}
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Sequential versus parallel Selection requests
+        run: |
+          node --input-type=module -e '
+            const base = process.env.BASE_URL;
+            const [slot] = await (await fetch(base + "/api/slots?people=2")).json();
+            const paths = ["/api/slots/" + slot.id, "/api/pricing/quote?slotId=" + slot.id + "&quantity=2"];
+            const get = async path => { const r = await fetch(base + path, { cache: "no-store" }); if (!r.ok) throw new Error(path + " " + r.status); return r.json(); };
+            const time = async run => { const t = performance.now(); await run(); return performance.now() - t; };
+            const sequential = () => time(async () => { for (const p of paths) await get(p); });
+            const parallel = () => time(() => Promise.all(paths.map(get)));
+            for (let i = 0; i < 3; i += 1) { await sequential(); await parallel(); }
+            const seq = [], par = [];
+            for (let i = 0; i < 15; i += 1) { seq.push(await sequential()); par.push(await parallel()); }
+            const median = v => [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)];
+            const lines = ["## Stretch: sequential vs parallel (deployed)", "",
+              "Two independent Selection requests for session " + slot.id + ": `GET " + paths.join("` and `GET ") + "`.",
+              "15 alternating trials after 3 warm-up rounds, from a GitHub Actions runner.", "",
+              "| Mode | Median | Fastest | Slowest |", "|---|---:|---:|---:|",
+              "| Sequential | " + median(seq).toFixed(1) + " ms | " + Math.min(...seq).toFixed(1) + " ms | " + Math.max(...seq).toFixed(1) + " ms |",
+              "| Parallel | " + median(par).toFixed(1) + " ms | " + Math.min(...par).toFixed(1) + " ms | " + Math.max(...par).toFixed(1) + " ms |", ""];
+            (await import("node:fs")).appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+            console.log(lines.join("\n"));
+          '
+      - name: Booking route returns 429 after the limit, then recovers
+        run: |
+          node --input-type=module -e '
+            const base = process.env.BASE_URL;
+            // quantity 0 is always refused with 400, so none of these can save a booking.
+            const post = () => fetch(base + "/api/bookings", { method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ requestId: crypto.randomUUID(), slotId: 1, quantity: 0, customerName: "GC2 QA",
+                customerEmail: "qa@example.com", paymentMethod: "mock_card", expectedTotalCentavos: 1 }) });
+            const counts = {}; let limited;
+            for (let i = 1; i <= 40 && !limited; i += 1) {
+              const r = await post(); counts[r.status] = (counts[r.status] || 0) + 1;
+              if (r.status === 429) limited = { attempt: i, retryAfter: r.headers.get("retry-after"), body: await r.text() };
+            }
+            const lines = ["## Stretch: too many requests (deployed)", ""];
+            if (!limited) { lines.push("No 429 within 40 refused POSTs. Status counts: " + JSON.stringify(counts)); }
+            else {
+              lines.push("POST /api/bookings attempt " + limited.attempt + " → **429**, `Retry-After: " + limited.retryAfter + "`", "", "```json", limited.body, "```",
+                "Status counts before the 429: `" + JSON.stringify(counts) + "`");
+              await new Promise(r => setTimeout(r, (Number(limited.retryAfter) + 1) * 1000));
+              const after = await post();
+              lines.push("", "After waiting " + (Number(limited.retryAfter) + 1) + " s, the same kind of request → **" + after.status + "** " + (await after.text()));
+            }
+            const after = await (await fetch(base + "/api/metrics")).json();
+            lines.push("", "`GET /api/metrics` afterwards: `bookingCount` = " + after.bookingCount + " (no booking was created).", "");
+            (await import("node:fs")).appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+            console.log(lines.join("\n"));
+            if (!limited) process.exit(1);
+          '
