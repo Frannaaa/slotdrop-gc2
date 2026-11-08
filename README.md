@@ -35,7 +35,7 @@ Use the PostgreSQL database initializer and the included Dockerfile for deployme
 3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
 4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
 5. Check /api/health for liveness and /api/slots for a database response. Health does not test the database.
-6. Run Postman against the **final public API**, create a new fictional booking through `POST /api/bookings`, read it by `GET /api/bookings/:id`, restart the service without resetting PostgreSQL, and read that same receipt again. Verify Owner/metrics and remaining seats. No such public flow has yet been verified in this README.
+6. Run Postman against the **final public API**, create a new fictional booking through `POST /api/bookings`, read it by `GET /api/bookings/:id`, restart the service without resetting PostgreSQL, and read that same receipt again. Verify Owner/metrics and remaining seats. Document the tested public URL, deployed commit and observed result in `docs/challenges.md`.
 
 .env.example lists PORT, DATABASE_URL, NODE_ENV and optional TEST_DATABASE_URL with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 
@@ -68,13 +68,13 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 | GitHub Actions | Node 22 workflow | Repeatable checks for each PR |
 | Postman/Newman | v2.1 collection; Newman 6.2.1 | API checks |
 
-package-lock.json pins dependencies. Add the actual public runtime/database versions after deployment.
+`package-lock.json` pins npm dependencies. Record final hosted runtime/database versions with the deployment evidence.
 
 ## Changes since GC1
 
 The build focuses on recurring leisure sessions and released seat allocations. Discovery covers the next 72 hours; each session has its own booking deadline. Studios control standard and optional buddy offers. The course commission is 10%.
 
-Availability and buddy pricing are the two revenue features. The merged server booking path now rechecks remaining seats under a session-row lock, selects stored standard/buddy prices, recomputes the total and commission, and saves a durable receipt. The unmerged customer Checkout/Confirmation pages still need to expose that path in the final public build. Paid add-ons, accounts, real payments, React and optimization are deferred.
+Availability and buddy pricing are the two revenue features. The server booking path rechecks remaining seats under a session-row lock, selects stored standard/buddy prices, recomputes totals and commission, and saves a durable receipt. Paid add-ons, accounts, real payments, React and optimization are deferred.
 
 ## Design and documents
 
@@ -101,7 +101,7 @@ Studio research is available at `/studios.html` through `GET /api/activities`. I
 
 ## Sourced catalog and studio application
 
-The reference catalog contains eight activities across five researched businesses, with sixteen simulated dated allocations. Published business facts/prices have source URLs; discounts, seats and deadlines are sample data. Startup adds records once without renaming historical providers or changing receipts. Never reseed a populated database. `/provider-apply.html` saves a pending demo application, and `/provider-application.html?id=UUID` reads back only status. It does not publish or verify ownership. These supporting pages follow the shared styling; see `docs/provider-onboarding.md`.
+The reference catalog contains eight activities across five researched businesses, with sixteen simulated dated allocations. Published business facts/prices have source URLs; discounts, seats and deadlines are sample data. Startup adds records once without renaming historical providers or changing receipts. Never reseed a populated database. `/provider-apply.html` saves a pending demo application, and `/provider-application.html?id=UUID` reads back only status. It does not publish or verify ownership. See `docs/provider-onboarding.md` for the provider reference and application flow.
 
 ## Demo inventory readiness (read-only)
 
