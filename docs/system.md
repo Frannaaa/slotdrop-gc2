@@ -115,3 +115,10 @@ All money is modeled in PHP centavos. The active commission setting lives in `se
 3. The service validates cutoff/price/capacity, locks the relevant activity or slot and refuses edits conflicting with confirmed seats.
 4. `server/repositories/slots.js` returns the updated offer and available-seat count.
 5. Owner refreshes catalog, metrics and saved bookings. Prior confirmed receipts are not rewritten by later offers.
+
+## Persistence and deployment boundary
+
+Production-mode Node.js reads `DATABASE_URL` from its environment and uses the `pg` connection pool. `server/repositories/database.js` wraps booking operations in PostgreSQL `BEGIN`/`COMMIT` or `ROLLBACK`; `server/index.js` applies additive migrations and the one-time reference catalog setup without resetting saved bookings. A web-server restart does not erase receipts because they live in the database, not the Node process or the browser.
+
+The local `npm run demo` uses a separate PGlite database for development. Neither the health endpoint nor a static page response proves the hosted database is connected; `GET /api/slots`, a saved receipt readback and a restart check establish the relevant persistence path. [Database schema](schema.md) and [API contracts](routes.md) hold the field-level details.
+
