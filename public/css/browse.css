@@ -1,0 +1,50 @@
+/* Browse page layout; shared typography, cards and controls live in style.css. */
+main {
+  width: min(100% - 2rem, 72rem);
+  max-width: 72rem;
+  margin: 3rem auto;
+  padding: 0;
+}
+.browse-hero {
+  margin-bottom: 2rem;
+}
+.browse-hero h1 {
+  margin: .5rem 0 1rem;
+}
+.browse-controls {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(32, 35, 30, .15);
+  border-radius: 12px;
+}
+.browse-controls input {
+  width: 100%;
+  padding: .7rem .8rem;
+  border: 1px solid rgba(32, 35, 30, .25);
+  border-radius: 6px;
+  font: inherit;
+}
+.browse-controls fieldset {
+  border: 0;
+}
+.browse-controls legend {
+  margin-bottom: .5rem;
+  font-weight: 600;
+}
+.activity-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+#status {
+  min-height: 1.5rem;
+}
+@media (max-width: 640px) {
+  main {
+    width: min(100% - 1.25rem, 72rem);
+    margin: 1.5rem auto;
+  }
+}
