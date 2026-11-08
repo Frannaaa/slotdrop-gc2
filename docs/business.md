@@ -34,7 +34,7 @@ Launch geography is a proposed operating boundary, not a distance search feature
 
 Classify the activity once, then describe its attributes. services.category is the broad creative/active grouping; services.activity_type is the primary activity: pottery, painting, pilates, dance or other. Technique and inclusions describe the same service without creating duplicate inventory. Each slot is one dated session with one released-seat counter.
 
-Proposed Browse shortcuts (not yet merged into the official Group 1 `main` as of November 8): All, Pottery and Canvas painting. Unsupported or unverified supply does not get an empty shortcut. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
+Browse activity shortcuts: All, Pottery and Canvas painting. Unsupported or unverified supply does not get an empty shortcut. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
 
 Example: a mug-making session remains pottery even when painting is included. Store handbuilding as its technique and painting/materials/firing as inclusions. A painting search may find it through its attributes; both paths open the same slot ID and consume the same seats. Do not copy the session into a second category.
 
