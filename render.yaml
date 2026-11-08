@@ -21,7 +21,6 @@ services:
 databases:
   - name: slotdrop-gc2-group-db
     region: singapore
-    plan: 0.1c-256mb
-    diskSizeGB: 1
+    plan: free
     postgresMajorVersion: '16'
     ipAllowList: []
