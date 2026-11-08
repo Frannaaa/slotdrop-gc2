@@ -9,8 +9,16 @@ const categoryButtons = [...document.querySelectorAll("[data-category]")];
 let slots = [];
 let category = "all";
 let generation = 0;
+let loading = true;
+let loadError = null;
 
 function render() {
+  if (loading) return;
+  if (loadError) {
+    notice(status, loadError.message || "Could not load sessions. Please try again.", true);
+    return;
+  }
+
   const query = search.value.trim().toLocaleLowerCase();
   const filtered = slots.filter((slot) => {
     const matchesCategory = category === "all" || slot.category === category;
@@ -34,6 +42,8 @@ function render() {
 
 async function load() {
   const current = ++generation;
+  loading = true;
+  loadError = null;
   results.replaceChildren();
   notice(status, "Loading sessions…");
   try {
@@ -41,12 +51,15 @@ async function load() {
     if (current !== generation) return;
     if (!Array.isArray(data)) throw new Error("The sessions response was not a list.");
     slots = data;
+    loading = false;
     render();
   } catch (error) {
     if (current !== generation) return;
     slots = [];
+    loading = false;
+    loadError = error;
     results.replaceChildren();
-    notice(status, error.message || "Could not load sessions. Please try again.", true);
+    render();
   }
 }
 
