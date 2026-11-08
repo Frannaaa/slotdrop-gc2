@@ -1,4 +1,5 @@
-// Exercise the EXACT six exported Challenge 1 Postman requests through real HTTP.
+// Exercise the EXACT six exported Challenge 1 Postman requests through real HTTP,
+// after the read-only 00 request that chooses live variables on the target API.
 // Fran/M1 test. CI is local/isolated, NOT a public Postman screenshot or deployed proof.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -9,7 +10,9 @@ import { fixture } from './helpers.js';
 test('exported six-case Postman collection has accurate requests, assertions and expected API results', async () => {
   const collection = JSON.parse(await readFile(new URL('../docs/SlotDrop-GC2-Challenge1.postman_collection.json',import.meta.url),'utf8'));
   assert.match(collection.info.schema,/collection\/v2\.1\.0/);
-  assert.equal(collection.item.length,6);
+  assert.equal(collection.item.length,7);
+  const [picker,...cases]=collection.item;
+  assert.equal(picker.request.method,'GET','the variable picker must be read-only');
   const expected = [
     {status:400,code:'INVALID_INPUT'},
     {status:400,code:'INVALID_INPUT'},
@@ -21,18 +24,22 @@ test('exported six-case Postman collection has accurate requests, assertions and
   const f=await fixture();
   try {
     const known = Object.fromEntries(collection.variable.map(x=>[x.key,x.value]));
-    assert.equal(Number(known.slotId),1,'fixture must match the collection sample slot');
+    // Mirror the 00 test script: first session with 2+ seats, one seat too many, an unused ID, the server quote.
+    const slots=await fetch(f.base+'/api/slots?people=2').then(x=>x.json());
+    const live=slots.find(row=>row.remainingSeats>=2&&row.remainingSeats<100);
+    assert.ok(live,'fixture has a bookable session');
+    const quote=await fetch(f.base+'/api/pricing/quote?slotId='+live.id+'&quantity=2').then(x=>x.json());
     const replacements={
       ...known,
       baseUrl:f.base,
-      slotId:String(known.slotId),
-      overCapacityQuantity:String(known.overCapacityQuantity),
-      unknownSlotId:String(known.unknownSlotId),
-      expectedTotalCentavos:String(known.expectedTotalCentavos),
+      slotId:String(live.id),
+      overCapacityQuantity:String(live.remainingSeats+1),
+      unknownSlotId:String(Math.max(...slots.map(row=>row.id))+100000),
+      expectedTotalCentavos:String(quote.totalPriceCentavos),
     };
     const expand=text=>text.replace(/\{\{(\$guid|[^{}]+)\}\}/g,(_match,key)=>
       key==='$guid'?randomUUID():String(replacements[key] ?? (()=>{throw new Error('Unknown collection variable '+key)})()));
-    for(const [i,item] of collection.item.entries()){
+    for(const [i,item] of cases.entries()){
       const {status,code,empty}=expected[i];
       const url=expand(typeof item.request.url==='string'?item.request.url:item.request.url.raw);
       const text=item.event?.filter(e=>e.listen==='test').flatMap(e=>e.script?.exec||[]).join('\n')||'';
@@ -52,9 +59,9 @@ test('exported six-case Postman collection has accurate requests, assertions and
     // Rejected requests must not have consumed seats or created bookings.
     const [list,slot]=await Promise.all([
       fetch(f.base+'/api/bookings').then(x=>x.json()),
-      fetch(f.base+'/api/slots/1').then(x=>x.json()),
+      fetch(f.base+'/api/slots/'+live.id).then(x=>x.json()),
     ]);
     assert.deepEqual(list,[]);
-    assert.equal(slot.remainingSeats,4);
+    assert.equal(slot.remainingSeats,live.remainingSeats);
   } finally {await f.close();}
 });

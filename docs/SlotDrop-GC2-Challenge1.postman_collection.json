@@ -2,7 +2,7 @@
   "info": {
     "name": "SlotDrop GC2 | Challenge 1",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Set baseUrl to the official group deployment and slotId to a bookable session. Set overCapacityQuantity to one more than its remaining seats, at most 100. Verify unknownSlotId does not exist. Run all six requests and capture each request body, status and response. The default variables target the local QA fixture."
+    "description": "Set baseUrl to the official group deployment, then run the whole collection in order. Request 00 is read-only: it picks a bookable session, an over-capacity quantity, an unknown ID and the server quote. Requests 01-06 are all refused or read-only, so the run creates no booking and changes no stock."
   },
   "variable": [
     {
@@ -27,6 +27,53 @@
     }
   ],
   "item": [
+    {
+      "name": "00 · Pick a bookable session (read-only)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Read-only: chooses live data so the six cases also work after seeded dates expire.",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const slots = pm.response.json();",
+              "const slot = slots.find(row => row.remainingSeats >= 2 && row.remainingSeats < 100);",
+              "pm.test(\"A bookable session with at least two seats exists\", () => pm.expect(slot, \"Create a future offer on the Owner screen first\").to.be.an(\"object\"));",
+              "if (slot) {",
+              "  pm.collectionVariables.set(\"slotId\", String(slot.id));",
+              "  pm.collectionVariables.set(\"overCapacityQuantity\", String(slot.remainingSeats + 1));",
+              "  pm.collectionVariables.set(\"unknownSlotId\", String(Math.max(...slots.map(row => row.id)) + 100000));",
+              "  pm.sendRequest(pm.collectionVariables.get(\"baseUrl\") + \"/api/pricing/quote?slotId=\" + slot.id + \"&quantity=2\", (error, response) => {",
+              "    pm.test(\"Server quote for two seats\", () => { pm.expect(error).to.equal(null); pm.expect(response.code).to.equal(200); });",
+              "    if (!error && response.code === 200) pm.collectionVariables.set(\"expectedTotalCentavos\", String(response.json().totalPriceCentavos));",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/slots?people=2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "slots"
+          ],
+          "query": [
+            {
+              "key": "people",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
     {
       "name": "01 · Zero quantity",
       "request": {
