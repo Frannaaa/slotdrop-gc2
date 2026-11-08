@@ -16,7 +16,7 @@
 | 3 | PDF, maximum two pages, actual product/business/revenue economics | `docs/SlotDrop_GC2_Summary.pdf` is prepared in open PR #37, not `main` | Group verifies content and two-page limit; PR approved/merged; file/link included in submission |
 | 4 | System diagram and short booking data-flow explanation | `docs/system.md` exists. Merged server booking flow is documented; public Network trace still needed | Diagram and explanation match the final commit; Challenge 2 also has a real Network screenshot and separately hand-drawn request-path diagram |
 | 5 | Route table and database schema | `docs/routes.md`, `docs/schema.md` and SQL are in `main` | Reconcile every final route, filters, input, output, response/status, and migration with code after last merge |
-| 6 | Exported Postman collection in `docs/` | Owner API collection in `main`; six-case booking collection in open PR #37 | Merge/import actual Challenge 1 collection, set public baseUrl/future bookable slot, run all six on public API, save actual response screenshots |
+| 6 | Exported Postman collection in `docs/` | Owner API collection in `main`; six-case booking collection in open PR #37. Its read-only request 00 picks a live session and quote, so no variables need editing for the public run | Merge/import actual Challenge 1 collection, set public baseUrl/future bookable slot, run all six on public API, save actual response screenshots |
 | 7 | `business.md`, `challenges.md`, `baseline.md` | Present but business/challenge updates in open PR #37; baseline presently unmeasured | Group authors approve reasoning; public challenge evidence completed; Lighthouse/Network baseline recorded, including three actual weaknesses |
 | 8 | Stack versions and rationale in README | CI/local versions already listed; public runtime version unverified | Recheck actual deployed Node/Postgres versions and rationale, not just CI versions |
 | 9 | `AI-USAGE.md` | Present in `main` with assistance records | Each member records meaningful assistance; PR assistance lines and final file agree, including later integration work |
@@ -27,7 +27,8 @@
 
 ## Merge and deployment blockers (November 8)
 
-- [ ] PR #45: https://github.com/Frannaaa/slotdrop-gc2/pull/45 — current-head CI passed, but its prior approving account had read permission and did not satisfy required write-access approval. Obtain a genuine review from a teammate with write access and merge through protection.
+- [x] PR #45 (cleanup), #57 (Render configuration) and #56 (429 limiter) were merged into `main` on November 8 after approvals. The Render service itself still has to be connected and verified publicly.
+- [ ] Fran's open PRs, in the suggested merge order: #58 line endings → #61 assistance table → the deployment bootstrap test PR (`g1/m1-deploy-readiness`) → #49 pagination → #37 business case and Challenge 1 collection → #47 this checklist and README → #53 Selection timings → #51 utilization (retarget from the merged `g1/m1-code-readability` branch to `main` first). Each needs a teammate review.
 - [ ] PR #43: https://github.com/Frannaaa/slotdrop-gc2/pull/43 — Checkout/Confirmation; earlier purported approval explicitly said wrong PR. Require valid tested review and fix any post-success resubmission window.
 - [ ] PR #37: https://github.com/Frannaaa/slotdrop-gc2/pull/37 — business/PDF/six-case Postman collection/evidence; require Kat's review and group's business reasoning.
 - [ ] Kirsten: publish reviewed Browse and shared CSS contributions. `css_styling` exists but had no PR at the audit; `/browse.html` is missing from current `main`.

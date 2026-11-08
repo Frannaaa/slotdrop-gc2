@@ -28,14 +28,16 @@ Fresh seeds create 16 simulated sessions across eight researched offerings on th
 
 ## PostgreSQL and deployment
 
-Use the PostgreSQL database initializer and the included Dockerfile for deployment.
+The official deployment is the Render web service in [render.yaml](render.yaml), connected to a hosted PostgreSQL database (Neon). Render builds `main` with `npm ci --omit=dev` and starts it with `node tools/db-bootstrap.mjs && npm start`.
 
-1. Set DATABASE_URL privately in .env or the host's environment settings.
-2. Run `npm run db:init` once against a new, empty course database. It refuses existing tables or data.
-3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
-4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
-5. Check /api/health for liveness and /api/slots for a database response. Health does not test the database.
-6. Run Postman against the **final public API**, create a new fictional booking through `POST /api/bookings`, read it by `GET /api/bookings/:id`, restart the service without resetting PostgreSQL, and read that same receipt again. Verify Owner/metrics and remaining seats. Document the tested public URL, deployed commit and observed result in `docs/challenges.md`.
+1. Create an empty PostgreSQL database and copy its connection string, including `?sslmode=require`. Store it only as the Render `DATABASE_URL` secret (or in a local .env file). Never put it in Git, PR text, comments or screenshots.
+2. On each start, `tools/db-bootstrap.mjs` loads db/schema.sql and db/seed.sql only when none of the SlotDrop tables exist. If all of them exist, it changes nothing. If only some exist, it stops and the server does not start. Saved bookings are never deleted or reseeded.
+3. `npm start` then applies the additive migrations in db/migrations/ and adds any missing reference-catalog records. Production startup refuses to run without `DATABASE_URL`. Render provides `PORT`; `NODE_ENV=production` is set in render.yaml. Keep database TLS verification enabled.
+4. Render polls `/api/health`. In production it returns 200 only when PostgreSQL answers and the slots, services and bookings tables exist; otherwise it returns 503 without database details. Then check `/api/slots` for live sessions.
+5. Run the read-only checks: `npm run check:gc2 -- https://YOUR-APP-HOST` and `npm run check:demo -- https://YOUR-APP-HOST`. Run [the Challenge 1 collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) in Postman (or `npx newman@6.2.1 run docs/SlotDrop-GC2-Challenge1.postman_collection.json --env-var baseUrl=https://YOUR-APP-HOST`). It picks a live session first and creates no booking.
+6. For the persistence proof, place one fictional booking through the public site, read it by `GET /api/bookings/:id`, restart the Render service without touching the database, and read the same receipt again. Check Owner metrics and remaining seats. Record the public URL, deployed commit and observed result in `docs/challenges.md`.
+
+`npm run db:init` is a manual alternative for initializing a new, empty database from a trusted machine. It refuses existing tables and is not part of the Render start command. The Dockerfile serves the same app but does not run the bootstrap step.
 
 .env.example lists PORT, DATABASE_URL, NODE_ENV and optional TEST_DATABASE_URL with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 

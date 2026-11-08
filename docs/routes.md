@@ -6,7 +6,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
-| GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Does not check the database | Fran |
+| GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Production: 503 {status:"unavailable"} unless PostgreSQL answers and the slots, services and bookings tables exist. Local demo health does not check the database | Fran |
 | GET /api/slots | q, category, area, when, people, type, tag, sort | 200 array, including [] | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
@@ -15,7 +15,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
-| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT | Janelle |
+| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT; 429 RATE_LIMITED with Retry-After (30 POSTs per client per minute) | Janelle; 429 limiter Fran |
 | GET /api/bookings/:id | UUID | 200 saved receipt | 400 malformed; 404 BOOKING_NOT_FOUND | Janelle |
 
 Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.

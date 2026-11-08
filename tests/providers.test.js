@@ -50,3 +50,25 @@ test('studio application prefill uses the business site rather than an activity 
  assert.match(source,/source\.origin\s*\+\s*'\/'/);
  assert.doesNotMatch(source,/website:studio\.activities\[0\]\?\.sourceUrl/);
 });
+
+test('studio profile limits its SQL discovery lookup to the requested provider',async()=>{
+ const f=await fixture({realCatalog:true});
+ try{
+  const {rows:[provider]}=await f.db.query("SELECT id FROM providers WHERE reference_key IS NOT NULL ORDER BY id LIMIT 1");
+  const originalQuery=f.db.query.bind(f.db),discoveryQueries=[];
+  f.db.query=async(sql,params)=>{
+   if(typeof sql==='string'&&sql.includes('FROM slots sl JOIN services s')){
+    discoveryQueries.push({sql,params});
+   }
+   return originalQuery(sql,params);
+  };
+  const response=await fetch(f.base+'/api/providers/'+provider.id);
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.ok(data.slots.length>0);
+  assert.ok(data.slots.every(slot=>slot.providerId===Number(provider.id)));
+  assert.equal(discoveryQueries.length,1);
+  assert.match(discoveryQueries[0].sql,/s\.provider_id=\$4/);
+  assert.equal(discoveryQueries[0].params[3],Number(provider.id));
+ }finally{await f.close();}
+});
