@@ -55,3 +55,20 @@ This is a **catalog change, not a claim of new partners**. The existing fictiona
 - **Fran — integration (#29/#34/#32/#39):** own reference data, provider-application safety, migrations, integration checks and deployment. The studio application remains pending; its authorization checkbox is not proof of ownership and it never publishes a business page. Review approvals and the latest CI before merging dependent PRs.
 
 Dependency order: #36 shared helper → Chonel rebases #35 and Kirsten reviews; #29 Owner review/merge → #34 discovery → #32 research → #39 reference catalog/applications. Business #37 can be reviewed separately. These are integration dependencies, not a request for teammates to redo completed work. Internal targets: October 30 styling/layouts; November 1 first code PRs; November 4 deployed API-backed Browse; November 7 complete connected flow; November 9, 11:59 PM PHT final submission.
+
+## Historical business research handoff (October 30)
+
+
+By the 30 October internal review, Fran confirms or revises the proposed target/geography, keeps the pricing/cutoff rules aligned with code, verifies the worked calculations and carries the approved case into docs/business.md. Fran coordinates the API dependencies and real teammate review; a polished Doc alone does not complete GC2.
+
+Kat verifies the supplier register against the exact selected branch and product. For each prospect record: source URL; checked date; branch/address; activity; standard versus sale price; duration; dated session versus recurring schedule; preparation cutoff; included materials; collection time; cancellation/reschedule terms; contradictions; and what remains unknown. State what was checked, rather than writing only “verified.” No outreach is claimed or sent by this draft.
+
+Both decide whether the evidence supports the launch premise. Proposed interview questions: Which classes already run regularly? How many allocated seats were unused across recent sessions? Can seats be ring-fenced from direct sales? What is the last feasible booking time? What is the incremental cost per attendee? What net payout would justify a trial? Would two buddy seats be incremental or replace two standard sales? Record answers and dates if interviews actually occur; leave unanswered fields explicit.
+
+Before a real pilot, require a willing provider, one dated confirmed-to-run session, an agreed dedicated allocation, verified price/inclusions/deadline and a positive provider contribution after marginal costs. These are proposed go/no-go checks, not completed results. If the evidence fails, change the offer or supplier scope; do not convert unknowns into favorable claims.
+
+Course handoff: Oct 30 shared styling/layout and business review; Nov 1 first working code PR target; Nov 4 deployed database-backed Browse checkpoint; Nov 7 internal connected-flow target; Nov 9 final submission at 11:59 PM Philippine time. Oct 30, Nov 1 and Nov 7 are internal targets. Nov 4 and Nov 9 are course checkpoints.
+
+Submit substantive docs/business.md plus the required concise business-summary PDF; this research Doc and the brand book serve different purposes. Documentation-only PRs do not count as a member’s three code PRs. Preserve specific real reviews and merges across the grading windows. Kat’s completed research and the group’s reasoning still need their authors’ confirmation; no interview, profitability or submission approval is implied.
+
+Official repository: https://github.com/Frannaaa/slotdrop-gc2 | Versioned business draft: https://github.com/Frannaaa/slotdrop-gc2/blob/main/docs/business.md
