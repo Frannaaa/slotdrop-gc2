@@ -34,8 +34,22 @@ export async function ensureReferenceCatalog(db) {
         ]
       );
 
-      // An existing activity with cleared inventory must remain cleared after restart.
-      if (!addedServices.length) continue;
+      let serviceId = addedServices[0]?.id;
+      if (!serviceId) {
+        // An existing activity with cleared inventory must remain cleared after restart.
+        // Only roll the sample dates forward when every remaining session has already
+        // started, so a long-lived demo deployment never ends up with an empty catalog.
+        const { rows: [state] } = await client.query(
+          `SELECT s.id, COUNT(sl.id)::int AS total,
+             COUNT(sl.id) FILTER (WHERE sl.starts_at > NOW())::int AS upcoming
+           FROM services s LEFT JOIN slots sl ON sl.service_id = s.id
+           WHERE s.reference_key = $1 AND s.active
+           GROUP BY s.id`,
+          [item.key]
+        );
+        if (!state || state.total === 0 || state.upcoming > 0) continue;
+        serviceId = state.id;
+      }
       const price = Math.round(item.publishedPriceCentavos * 0.9);
       const buddy = index % 3 === 2 ? null : Math.round(price * 0.95);
       await client.query(
@@ -49,7 +63,7 @@ export async function ensureReferenceCatalog(db) {
            4,$4,$5,$6
          FROM base CROSS JOIN (VALUES(0),(24)) AS days(offset_day)
          ON CONFLICT(service_id,starts_at) DO NOTHING`,
-        [addedServices[0].id, 10 + index, bookingLeadMinutes,
+        [serviceId, 10 + index, bookingLeadMinutes,
           item.publishedPriceCentavos, price, buddy]
       );
     }
