@@ -1,50 +1,256 @@
-/* Browse page layout; shared typography, cards and controls live in style.css. */
-main {
-  width: min(100% - 2rem, 72rem);
-  max-width: 72rem;
-  margin: 3rem auto;
-  padding: 0;
+/* Browse page presentation. Scoped to avoid changing other pages or duplicating
+   the shared styling work in PR #60. Values follow the SlotDrop brand tokens. */
+
+.browse-page {
+  --browse-paper: var(--color-paper, #f5f2ea);
+  --browse-ink: var(--color-ink, #20231e);
+  --browse-blue: var(--color-blue, #3048db);
+  --browse-lime: var(--color-lime, #dcfa63);
+  --browse-clay: var(--color-clay, #d8aaa0);
+  --browse-white: var(--color-white, #fff);
+  --browse-border: var(--color-border, rgba(32, 35, 30, .15));
+  min-height: 100vh;
+  background: var(--browse-paper);
+  color: var(--browse-ink);
+  font-family: var(--font-body, "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif);
+  line-height: 1.5;
 }
-.browse-hero {
-  margin-bottom: 2rem;
+
+.browse-page *,
+.browse-page *::before,
+.browse-page *::after { box-sizing: border-box; }
+
+.browse-page a { color: var(--browse-blue); text-underline-offset: .2em; }
+.browse-page a:hover { text-decoration-thickness: 2px; }
+.browse-page button,
+.browse-page input { font: inherit; }
+
+.browse-page .site-header {
+  width: min(100% - 3rem, 76rem);
+  margin: 0 auto;
+  padding: 1.15rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--browse-border);
 }
-.browse-hero h1 {
-  margin: .5rem 0 1rem;
+.browse-page .logo {
+  color: var(--browse-ink);
+  font-family: var(--font-heading, "Space Grotesk", sans-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -.06em;
+  text-decoration: none;
 }
-.browse-controls {
+.browse-page .logo span { color: var(--browse-blue); margin-left: .15rem; }
+.browse-page nav { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1.25rem; }
+.browse-page nav a {
+  color: var(--browse-ink);
+  font-size: .9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.browse-page nav a:hover,
+.browse-page nav a[aria-current="page"] { color: var(--browse-blue); }
+
+.browse-page main {
+  width: min(100% - 3rem, 76rem);
+  max-width: none;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 5rem) 0 4rem;
+}
+.browse-page .browse-hero { max-width: 46rem; margin: 0 0 2.25rem; }
+.browse-page .eyebrow {
+  margin: 0 0 .65rem;
+  color: var(--browse-blue);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.browse-page h1,
+.browse-page h2,
+.browse-page h3 {
+  color: var(--browse-ink);
+  font-family: var(--font-heading, "Space Grotesk", sans-serif);
+  letter-spacing: -.035em;
+}
+.browse-page h1 {
+  margin: 0 0 .8rem;
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  line-height: 1.03;
+}
+.browse-page .browse-hero > p:last-child { max-width: 38rem; color: #5d5b56; font-size: 1.05rem; }
+
+.browse-page .browse-controls {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
-  padding: 1.25rem;
-  margin-bottom: 1.25rem;
-  background: #fff;
-  border: 1px solid rgba(32, 35, 30, .15);
-  border-radius: 12px;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  margin: 0 0 1.25rem;
+  background: var(--browse-white);
+  border: 1px solid var(--browse-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(32, 35, 30, .04);
 }
-.browse-controls input {
+.browse-page .browse-controls label,
+.browse-page .browse-controls legend {
+  color: var(--browse-ink);
+  font-size: .9rem;
+  font-weight: 700;
+}
+.browse-page .browse-controls input {
+  display: block;
   width: 100%;
-  padding: .7rem .8rem;
-  border: 1px solid rgba(32, 35, 30, .25);
-  border-radius: 6px;
-  font: inherit;
+  min-height: 3rem;
+  padding: .75rem .9rem;
+  color: var(--browse-ink);
+  background: #fff;
+  border: 1px solid rgba(32, 35, 30, .22);
+  border-radius: 8px;
+  outline-offset: 2px;
 }
-.browse-controls fieldset {
-  border: 0;
+.browse-page .browse-controls input:focus { border-color: var(--browse-blue); outline: 2px solid rgba(48, 72, 219, .15); }
+.browse-page .browse-controls fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
+.browse-page .browse-controls legend { margin: 0 0 .65rem; }
+.browse-page .activity-types { display: flex; flex-wrap: wrap; gap: .55rem; }
+.browse-page .activity-types button {
+  min-height: 2.35rem;
+  padding: .45rem 1rem;
+  color: var(--browse-ink);
+  background: #fff;
+  border: 1px solid var(--browse-border);
+  border-radius: 999px;
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
-.browse-controls legend {
-  margin-bottom: .5rem;
+.browse-page .activity-types button:hover { border-color: var(--browse-ink); transform: translateY(-1px); }
+.browse-page .activity-types button[aria-pressed="true"] {
+  background: var(--browse-lime);
+  border-color: var(--browse-ink);
+}
+
+.browse-page #status {
+  min-height: 0;
+  margin: 0 0 .8rem;
+  padding: .75rem 1rem;
+  color: #55534d;
+  background: rgba(32, 35, 30, .045);
+  border-radius: 8px;
+  font-size: .9rem;
+}
+.browse-page #status:empty { display: none; }
+.browse-page #status.error { color: #9d2424; background: #fff0ef; border: 1px solid #e8b7b3; }
+.browse-page #retry { margin: 0 0 1.1rem; }
+.browse-page .button {
+  display: inline-flex;
+  min-height: 2.7rem;
+  align-items: center;
+  justify-content: center;
+  padding: .65rem 1.1rem;
+  color: #fff;
+  background: var(--browse-blue);
+  border: 1px solid var(--browse-blue);
+  border-radius: 8px;
+  font-size: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s ease, transform .15s ease;
+}
+.browse-page .button:hover { color: #fff; background: #2437b0; transform: translateY(-1px); }
+.browse-page .button.secondary { color: var(--browse-ink); background: transparent; border-color: var(--browse-border); }
+.browse-page .button.secondary:hover { color: var(--browse-ink); background: #fff; border-color: var(--browse-ink); }
+
+.browse-page .activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1.25rem;
+  margin-top: .5rem;
+}
+.browse-page .activity-card.card {
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--browse-white);
+  border: 1px solid var(--browse-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(32, 35, 30, .045);
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+.browse-page .activity-card.card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(32, 35, 30, .1); }
+.browse-page .card-art {
+  min-height: 7.25rem;
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem 1.2rem;
+  color: var(--browse-ink);
+  background: linear-gradient(135deg, #e5d9cf 0%, #d8aaa0 100%);
+  font-family: var(--font-heading, "Space Grotesk", sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.browse-page .card-art.active { background: linear-gradient(135deg, #e3e9b5 0%, #dcfa63 100%); }
+.browse-page .card-body { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: .75rem; padding: 1.2rem; }
+.browse-page .card-body > * { margin: 0; }
+.browse-page .card-body .eyebrow { font-size: .68rem; letter-spacing: .12em; }
+.browse-page .card-body h2 { font-size: 1.3rem; line-height: 1.2; }
+.browse-page .provider-name { font-size: .92rem; font-weight: 650; }
+.browse-page .session-time { color: #4d4b46; font-size: .88rem; line-height: 1.55; }
+.browse-page .session-time strong { color: var(--browse-ink); font-size: .95rem; }
+.browse-page .session-cutoff { color: #69665f; font-size: .82rem; }
+.browse-page .session-traits { display: flex; flex-wrap: wrap; gap: .4rem; }
+.browse-page .session-traits span {
+  display: inline-flex;
+  padding: .3rem .55rem;
+  color: #49473f;
+  background: #f1efe9;
+  border-radius: 999px;
+  font-size: .72rem;
   font-weight: 600;
 }
-.activity-types {
+.browse-page .party-price {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
-  gap: .5rem;
+  align-items: baseline;
+  gap: .35rem .5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--browse-border);
 }
-#status {
-  min-height: 1.5rem;
+.browse-page .party-price strong { color: var(--browse-ink); font-family: var(--font-heading, sans-serif); font-size: 1.45rem; }
+.browse-page .party-price span { color: #66635d; font-size: .8rem; }
+.browse-page .card-body > p:not(.eyebrow):not(.provider-name):not(.session-time):not(.session-cutoff):not(.reference) { color: #55534d; font-size: .84rem; line-height: 1.55; }
+.browse-page .card-body small { color: #69665f; font-size: .75rem; }
+.browse-page .buddy { display: inline-block; margin-top: .2rem; padding: .2rem .5rem; color: var(--browse-ink); background: var(--browse-lime); border-radius: 999px; font-size: .73rem; font-weight: 700; }
+.browse-page .reference { color: #68655e; font-size: .76rem; line-height: 1.5; }
+.browse-page .card-body .button { width: 100%; margin-top: auto; }
+.browse-page footer {
+  padding: 1.5rem max(1.5rem, calc((100% - 76rem) / 2));
+  color: #69665f;
+  background: #ebe7dc;
+  border-top: 1px solid var(--browse-border);
+  font-size: .8rem;
 }
-@media (max-width: 640px) {
-  main {
-    width: min(100% - 1.25rem, 72rem);
-    margin: 1.5rem auto;
-  }
+.browse-page footer p { max-width: 76rem; margin: 0 auto; }
+
+.browse-page :focus-visible { outline: 3px solid var(--browse-blue); outline-offset: 3px; }
+
+@media (max-width: 900px) {
+  .browse-page .activity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .browse-page .site-header { width: min(100% - 2rem, 76rem); align-items: flex-start; flex-direction: column; gap: .7rem; }
+  .browse-page nav { gap: .5rem 1rem; }
+  .browse-page main { width: min(100% - 2rem, 76rem); padding: 2.5rem 0 3rem; }
+  .browse-page .activity-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .browse-page .card-art { min-height: 6rem; }
+  .browse-page footer { padding: 1.25rem 1rem; }
 }
