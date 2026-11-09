@@ -1,23 +1,28 @@
 // Group assignment: Kaitlyn. See docs/ownership-and-execution.md.
 import { request, money, date, positive, pageParameters, notice } from "./customer-common.js";
+
 const form = document.querySelector("#checkout"),
   button = document.querySelector("#submit"),
   summary = document.querySelector("#summary"),
   status = document.querySelector("#status"),
   ack = document.querySelector("#acceptPrice"),
   retry = document.querySelector("#retry");
+
 let slotId,
   quantity,
   quote,
   pending = null,
   busy = false,
   uncertain = false,
+  navigating = false,
   storageKey,
   generation = 0;
+
 function lockDetails(locked) {
   for (const name of ["customerName", "customerEmail", "paymentMethod"])
     form.elements.namedItem(name).disabled = locked;
 }
+
 function persist() {
   try {
     const serialized = JSON.stringify(pending);
@@ -27,27 +32,33 @@ function persist() {
     return false;
   }
 }
+
 function clear() {
   pending = null;
   try {
     sessionStorage.removeItem(storageKey);
   } catch {}
 }
+
 function showQuote() {
   summary.textContent = `${quantity} × ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " · Buddy price applied" : ""}`;
   document.querySelector("#priceLabel").textContent =
     `I agree to the simulated booking total of ${money(quote.totalPriceCentavos)}.`;
 }
+
 async function load() {
-  if (busy || uncertain) return;
+  if (busy || uncertain || navigating) return;
+
   const current = ++generation;
   quote = null;
   button.disabled = true;
   ack.checked = false;
   ack.disabled = true;
   summary.textContent = "";
+
   notice(status, "Checking session and price…");
   notice(document.querySelector("#chosenSession"), "Loading session details…");
+
   try {
     const [slot, loaded] = await Promise.all([
       request("/api/slots/" + slotId),
@@ -55,27 +66,45 @@ async function load() {
         "/api/pricing/quote?" + new URLSearchParams({ slotId, quantity }),
       ),
     ]);
+
     if (current !== generation) return;
-    notice(document.querySelector("#chosenSession"), slot.serviceName + " · " + date(slot.startsAt));
+
+    notice(
+      document.querySelector("#chosenSession"),
+      slot.serviceName + " · " + date(slot.startsAt),
+    );
+
     quote = loaded;
     ack.disabled = false;
     showQuote();
     notice(status, "Review the total and enter fictional details.");
   } catch (error) {
     if (current !== generation) return;
+
     quote = null;
     notice(status, error.message, true);
     notice(document.querySelector("#chosenSession"), error.message, true);
   }
 }
+
 ack.addEventListener("change", () => {
-  button.disabled = busy || !quote || !ack.checked;
+  button.disabled = busy || navigating || !quote || !ack.checked;
 });
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (busy || !quote || !ack.checked || !form.reportValidity()) return;
+
+  if (
+    busy ||
+    navigating ||
+    !quote ||
+    !ack.checked ||
+    !form.reportValidity()
+  ) return;
+
   if (!pending) {
     const data = new FormData(form);
+
     pending = {
       requestId: crypto.randomUUID(),
       slotId,
@@ -85,25 +114,44 @@ form.addEventListener("submit", async (event) => {
       paymentMethod: data.get("paymentMethod"),
       expectedTotalCentavos: quote.totalPriceCentavos,
     };
+
     if (!persist()) {
       pending = null;
-      notice(status, "Your browser could not save the booking retry details. Allow site storage, then try again. No booking was sent.", true);
+      notice(
+        status,
+        "Your browser could not save the booking retry details. Allow site storage, then try again. No booking was sent.",
+        true,
+      );
       return;
     }
   }
+
   busy = true;
   button.disabled = true;
   ack.disabled = true;
   retry.disabled = true;
   lockDetails(true);
+
   notice(status, "Saving your booking…");
+
   try {
     const receipt = await request("/api/bookings", {
       method: "POST",
       body: JSON.stringify(pending),
     });
+
     clear();
-    location.assign("/confirmation.html?id=" + encodeURIComponent(receipt.id));
+
+    // Keep checkout locked while confirmation navigation is pending.
+    navigating = true;
+    lockDetails(true);
+    ack.disabled = true;
+    retry.disabled = true;
+    button.disabled = true;
+
+    location.assign(
+      "/confirmation.html?id=" + encodeURIComponent(receipt.id),
+    );
   } catch (error) {
     if (error.code === "PRICE_CHANGED") {
       clear();
@@ -111,6 +159,7 @@ form.addEventListener("submit", async (event) => {
       showQuote();
       ack.checked = false;
       uncertain = false;
+
       notice(
         status,
         "The price changed. Review and accept the new total before submitting again.",
@@ -118,6 +167,7 @@ form.addEventListener("submit", async (event) => {
       );
     } else if (error.uncertain || error.status >= 500) {
       uncertain = true;
+
       notice(
         status,
         "Could not confirm the result. Your details are locked so Retry booking sends the same request safely.",
@@ -126,56 +176,83 @@ form.addEventListener("submit", async (event) => {
     } else {
       clear();
       uncertain = false;
+
       if (error.code === "SLOT_UNAVAILABLE") quote = null;
+
       notice(status, error.message, true);
     }
   } finally {
     busy = false;
-    lockDetails(uncertain);
-    ack.disabled = uncertain;
-    retry.disabled = uncertain;
-    button.textContent = uncertain
-      ? "Retry booking"
-      : "Confirm simulated booking";
-    button.disabled = !quote || !ack.checked;
+
+    // Never unlock checkout after a successful booking.
+    if (!navigating) {
+      lockDetails(uncertain);
+      ack.disabled = uncertain;
+      retry.disabled = uncertain;
+
+      button.textContent = uncertain
+        ? "Retry booking"
+        : "Confirm simulated booking";
+
+      button.disabled = !quote || !ack.checked;
+    }
   }
 });
+
 retry.addEventListener("click", load);
+
 try {
   const params = pageParameters(location.search, ["slotId", "quantity"]);
+
   slotId = positive(params.get("slotId"));
   quantity = positive(params.get("quantity"), 100);
   storageKey = `slotdrop-pending-${slotId}-${quantity}`;
+
   let saved;
+
   try {
     saved = JSON.parse(sessionStorage.getItem(storageKey));
   } catch {}
+
   if (validPending(saved)) {
     pending = saved;
     uncertain = true;
+
     quote = {
       unitPriceCentavos: saved.expectedTotalCentavos / quantity,
       totalPriceCentavos: saved.expectedTotalCentavos,
     };
+
     for (const name of ["customerName", "customerEmail", "paymentMethod"])
       form.elements.namedItem(name).value = saved[name];
+
     showQuote();
     lockDetails(true);
+
     ack.checked = true;
     ack.disabled = true;
     retry.disabled = true;
     button.disabled = false;
     button.textContent = "Retry booking";
+
     notice(
       status,
       "An earlier request needs confirmation. Retry uses the same request ID.",
     );
+
     request("/api/slots/" + slotId)
       .then((slot) => {
-        notice(document.querySelector("#chosenSession"), slot.serviceName + " · " + date(slot.startsAt));
+        notice(
+          document.querySelector("#chosenSession"),
+          slot.serviceName + " · " + date(slot.startsAt),
+        );
       })
       .catch((error) =>
-        notice(document.querySelector("#chosenSession"), error.message, true),
+        notice(
+          document.querySelector("#chosenSession"),
+          error.message,
+          true,
+        ),
       );
   } else {
     clear();
@@ -186,6 +263,7 @@ try {
   button.disabled = true;
   ack.disabled = true;
   retry.disabled = true;
+
   notice(
     document.querySelector("#chosenSession"),
     "No valid session selected.",
