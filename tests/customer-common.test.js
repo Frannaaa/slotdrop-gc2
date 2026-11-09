@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import app from '../server/app.js';
-import { card, previewPrice, request, positive, available } from '../public/js/customer-common.js';
+import { card, previewPrice, request, positive, available, safeHttpsUrl, studioEvidence } from '../public/js/customer-common.js';
 import { DISCOVERY_HOURS } from '../public/js/business-config.js';
 
 // Session response before #34's additive metadata: Home must also work with #27.
@@ -71,4 +71,29 @@ test('cards accept the session API before additive attributes and escape studio 
   assert.deepEqual(previewPrice(slot, 1), {buddy:false, unit:160000, total:160000});
   assert.deepEqual(previewPrice(slot, 2), {buddy:true, unit:152000, total:304000});
   assert.deepEqual(previewPrice({...slot, buddyPriceCentavos:null}, 2), {buddy:false, unit:160000, total:320000});
+});
+
+test('studio reference cards and profiles share safe HTTPS source-link validation', () => {
+  assert.equal(safeHttpsUrl('https://example.com/workshops?q=clay'), 'https://example.com/workshops?q=clay');
+  for (const unsafe of [
+    'http://example.com/workshops',
+    'javascript:alert(1)',
+    'https://user:secret@example.com/workshops',
+    '/relative/workshops',
+    null,
+  ]) {
+    assert.equal(safeHttpsUrl(unsafe), null, String(unsafe));
+    assert.equal(studioEvidence({
+      studioReference: { sourceUrl: unsafe, checkedAt: '2026-11-04' },
+    }), '');
+  }
+  const html = studioEvidence({
+    studioReference: {
+      sourceUrl: 'https://example.com/workshops?q=a&category=clay',
+      priceSourceUrl: 'https://user:secret@example.com/prices',
+      checkedAt: '2026-11-04',
+    },
+  });
+  assert.match(html, /href="https:\/\/example\.com\/workshops\?q=a&amp;category=clay"/);
+  assert.doesNotMatch(html, /user:secret|Price source/);
 });

@@ -18,7 +18,7 @@ export function dateRange(when, now) {
   return null;
 }
 
-export async function listSlots(db, query, now) {
+export async function listSlots(db, query, now, providerId = null) {
   for (const key of Object.keys(query)) {
     if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort'].includes(key)) invalid('Unsupported filter: ' + key);
     if (typeof query[key] !== 'string') invalid('Filters must appear once.');
@@ -34,6 +34,11 @@ export async function listSlots(db, query, now) {
   const values = [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
   const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',
     `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
+  // Studio-profile lookups use a bound provider filter; public discovery filters are unchanged.
+  if (providerId !== null) {
+    values.push(integer(providerId, 'providerId'));
+    where.push('s.provider_id=$' + values.length);
+  }
   // position() is a literal substring match, so user %/_ do not become wildcards.
   if (query.q?.trim()) {
     values.push(query.q.trim());

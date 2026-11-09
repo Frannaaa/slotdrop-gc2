@@ -15,7 +15,8 @@
     "demo": "node tools/demo.mjs",
     "db:init": "node tools/db-init.mjs",
     "check:demo": "node tools/check-demo-readiness.mjs",
-    "check:gc2": "node tools/check-gc2-readiness.mjs"
+    "check:gc2": "node tools/check-gc2-readiness.mjs",
+    "check:transaction": "node tools/check-transaction-smoke.mjs"
   },
   "dependencies": {
     "dotenv": "18.0.9",
