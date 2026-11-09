@@ -4,6 +4,9 @@
 **Deadline:** November 9, 2026, 11:59 PM Asia/Manila  
 **Status checked:** November 8, 2026, before final integration  
 **Grading source:** Canvas GC 2: MVP Build; the instructor's current rubric takes precedence over this checklist.
+**Execution plan:** [November 9 GC2 release roadmap, dependency order and score-to-evidence matrix](gc2-release-execution-2026-11-09.md).
+**Deadline warning:** Canvas displays **Mon Nov 16, 2026 11:59 PM**, but the assignment's internal milestone text says **Final Nov 9 11:59 PM** (and incorrectly labels Nov 9 Wednesday). Treat Nov 9 as the conservative code/tag deadline until the instructor confirms whether Nov 16 extends that milestone.
+
 
 **Do not mark an item complete because it works in a private prototype, a local test, an unmerged branch, or an older commit.** Link the public deployment, exact tested commit, dated evidence and actual author/reviewer where applicable. Use fictional details only; sessions and payments are classroom simulations.
 
