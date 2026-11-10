@@ -261,3 +261,132 @@ SEPARATE IDS:
 
 pls enjoy i love you all mwah mwah mwah */
 
+/* Captain integration fix: preserve the native hidden attribute even when a
+   shared class (including .button) sets display explicitly. */
+[hidden] {
+  display: none !important;
+}
+
+/* Shared customer-page structure. Owner and Browse retain their own scoped CSS. */
+body:not(.owner-page) > .site-header,
+body:not(.owner-page) > main,
+body:not(.owner-page) > footer {
+  width: min(calc(100% - 2.25rem), 76rem);
+  margin-inline: auto;
+}
+body:not(.owner-page) > .site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+body:not(.owner-page) > .site-header .logo {
+  font-size: 1.5rem;
+  text-decoration: none;
+  letter-spacing: -.055em;
+}
+body:not(.owner-page) > .site-header .logo span { color: var(--color-blue); }
+body:not(.owner-page) > .site-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .65rem 1.5rem;
+}
+body:not(.owner-page) > .site-header nav a {
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+body:not(.owner-page) > main {
+  padding: clamp(2rem, 5vw, 4.5rem) 0;
+  min-height: 55vh;
+}
+body:not(.owner-page) > main > section + section { margin-top: clamp(2rem, 5vw, 4rem); }
+body:not(.owner-page) > footer {
+  margin-top: 1.5rem;
+  padding: 1.5rem 0 2.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: .85rem;
+}
+body:not(.owner-page) > footer p + p { margin-top: .5rem; }
+body:not(.owner-page) a { text-underline-offset: .2em; }
+body:not(.owner-page) .hero {
+  max-width: 51rem;
+  display: grid;
+  justify-items: start;
+  gap: 1.25rem;
+  padding-block: clamp(.5rem, 3vw, 3rem);
+}
+body:not(.owner-page) .hero h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  letter-spacing: -.055em;
+  line-height: 1.05;
+}
+body:not(.owner-page) .hero > p:not(.eyebrow) { max-width: 40rem; font-size: 1.08rem; }
+body:not(.owner-page) .eyebrow {
+  color: var(--color-blue);
+  text-transform: uppercase;
+  font-size: .76rem;
+  letter-spacing: .14em;
+  font-weight: 800;
+}
+body:not(.owner-page) .section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .6rem 1rem;
+  margin-bottom: 1rem;
+}
+body:not(.owner-page) .section-heading + p { margin-bottom: .85rem; }
+body:not(.owner-page) .panel {
+  max-width: 46rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-block: 1.25rem;
+}
+body:not(.owner-page) form.panel {
+  display: grid;
+  gap: 1rem;
+  justify-items: stretch;
+}
+body:not(.owner-page) .panel label { gap: .35rem; }
+body:not(.owner-page) .panel input:not([type="checkbox"]),
+body:not(.owner-page) .panel select { min-height: 2.8rem; }
+body:not(.owner-page) .checkbox {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: .7rem;
+}
+body:not(.owner-page) .checkbox input { flex: none; width: 1.2rem; height: 1.2rem; margin-top: .15rem; }
+body:not(.owner-page) .total { font-size: 1.2rem; font-weight: 700; }
+body:not(.owner-page) .how-strip {
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background: var(--color-lime);
+  border-radius: var(--radius-lg);
+}
+body:not(.owner-page) .how-strip > * + * { margin-top: .8rem; }
+body:not(.owner-page) .reference { font-size: .82rem; }
+body:not(.owner-page) .button {
+  min-height: 44px;
+  text-decoration: none;
+  text-align: center;
+}
+body:not(.owner-page) .button:disabled,
+body:not(.owner-page) button[type="submit"]:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+@media (max-width: 440px) {
+  body:not(.owner-page) > .site-header,
+  body:not(.owner-page) > main,
+  body:not(.owner-page) > footer { width: min(calc(100% - 2rem), 76rem); }
+  body:not(.owner-page) .activity-grid { grid-template-columns: minmax(0, 1fr); }
+  body:not(.owner-page) .site-header nav { gap: .4rem 1rem; }
+  body:not(.owner-page) .hero h1 { font-size: clamp(2.4rem, 11vw, 3.1rem); }
+}
