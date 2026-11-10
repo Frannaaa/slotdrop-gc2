@@ -144,6 +144,8 @@ button[type="submit"]:active {
    -------------------------------------------------------------------------- */
 input[type="text"],
 input[type="number"],
+input[type="email"],
+input[type="search"],
 select {
   width: 100%;
   padding: 0.6rem 0.75rem;
