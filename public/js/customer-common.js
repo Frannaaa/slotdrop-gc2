@@ -58,6 +58,7 @@ export async function request(path, options = {}) {
       error.code = data?.error?.code;
       error.quote = data?.quote ?? data?.error?.quote;
       error.status = response.status;
+      if (response.status === 429) error.retryAfterSeconds = data?.error?.retryAfterSeconds;
       throw error;
     }
     return data;
@@ -80,6 +81,31 @@ export async function request(path, options = {}) {
     clearTimeout(timeout);
   }
 }
+// Optional Fran-owned helper for Kaitlyn's Checkout handoff.
+// It retries only explicit HTTP 429, never a network-uncertain save, 409, or 400.
+// The SAME already serialized body/requestId is sent again; caller must lock UI during wait.
+export async function retryLimitedBooking(path, options, {
+  maxRetries = 1,
+  onWait = () => {},
+  wait = ms => new Promise(resolve => setTimeout(resolve, ms)),
+} = {}) {
+  if (options?.method !== 'POST' || typeof options.body !== 'string')
+    throw new Error('Booking retry requires a prebuilt POST body with stable requestId.');
+  if (!Number.isSafeInteger(maxRetries) || maxRetries < 0 || maxRetries > 2)
+    throw new Error('Choose at most two rate-limit retries.');
+  const payload = options.body;
+  for (let attempt = 0; ; attempt++) {
+    try { return await request(path, {...options, body: payload}); }
+    catch (error) {
+      if (error.status !== 429 || attempt >= maxRetries) throw error;
+      const seconds = Number.isSafeInteger(error.retryAfterSeconds)
+        ? Math.min(60, Math.max(1, error.retryAfterSeconds)) : 1;
+      onWait(seconds);
+      await wait(seconds * 1000);
+    }
+  }
+}
+
 export function available(slot, quantity = 1) {
   const now = Date.now(),
     start = Date.parse(slot.startsAt);
