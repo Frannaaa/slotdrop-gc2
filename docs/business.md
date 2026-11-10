@@ -1,22 +1,12 @@
-# SlotDrop | Business Case and Real-Studio Research
+# SlotDrop | Quezon City pilot recommendation
 
-**Business proposal:** Launch a focused Quezon City catalog of released seats in sessions already scheduled to proceed. Start with beginner-friendly creative workshops and test the consistency of supplier availability before expanding. Young professionals are the primary customer hypothesis, with students as a secondary audience.
+**Test released seats in already-scheduled workshops around Katipunan before expanding across Quezon City.** Start with beginner-friendly creative workshops and recruit young professionals who sometimes make leisure plans within three days. Include students as a secondary group to test willingness to pay.
 
-The business model uses publicly sourced studio and activity information alongside simulated seat allocations and prices. No supplier partnership, live inventory allocation or validated customer demand is claimed.
+1. **The opportunity is an empty seat in a class that will run anyway.** Studios choose which seats to release and set a booking deadline. Customers see the branch, time and total before committing. SlotDrop models a 10% commission on each saved booking.
+2. **Offer buddy pricing when it is likely to fill a seat that would otherwise go empty.** In the Laro example, a buddy booking adds ₱243 in commission and ₱2,187 in studio proceeds versus one standard seat. If both guests would have paid the standard price, the same discount costs SlotDrop ₱27 and the studio ₱243. The second guest needs to cost the studio less than ₱2,187 to serve in the first scenario, without displacing another buyer.
+3. **Expand only after studios can release seats consistently and bookings make money.** First confirm that studios will allocate seats and accept the fee. Then track how many released seats sell, how often buddy pricing adds a guest, and whether commission covers acquisition and support costs. Published workshop listings establish that these activities exist. Seat allocations, offer prices and bookings are simulated in GC2.
 
-## Executive decision summary
-
-| Business question | SlotDrop GC2 response | Decision implication |
-|---|---|---|
-| Who is this for? | Young professionals making near-term activity plans around Katipunan and neighboring Quezon City areas; students are a secondary hypothesis | Validate spontaneous demand and willingness to pay before expanding beyond the initial area |
-| Where does supply come from? | A studio explicitly releases a **limited allocation** in a class that is already confirmed to run | The allocation must be ring-fenced and kept accurate, rather than assuming every advertised class has vacancies |
-| What creates revenue? | A modeled **10% platform commission** on a confirmed saved booking, deducted from the provider's proceeds | Revenue is realized per successful transaction, not per listing or page view; this is a proposed fee, not a negotiated contract |
-| What are the two distinguishing features? | **Released-seat availability with a booking cutoff** and **optional two-or-more-person buddy pricing** | The first makes released inventory bookable without overselling; the second may convert incremental attendees, but can also discount customers who would have paid more |
-| What makes a trial worth pursuing? | Genuine studio agreement, separately managed inventory, accurate booking/receipt operations, and positive contribution **after** marginal attendance costs | Pilot only where provider proceeds and operational reliability justify the discount; mock bookings and source research do not demonstrate demand |
-
-**Decision:** Keep a narrow, reliable released-seat pilot rather than launching a broad generic activity marketplace. Offer the buddy tier selectively, not automatically: the worked scenarios in Section 6 show that higher order quantity alone does not mean higher margins.
-
-## 1. Positioning, customer and supply
+## 1. Start with near-term workshop plans around Katipunan
 
 Working value proposition: Find an activity near you happening within 72 hours, compare the provider-set price and deadline, and book a released seat. Keep GC1’s “Empty slot, better price.” as the idea, without promising that popular studios always have openings or that every direct price is higher.
 
@@ -84,7 +74,7 @@ Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-inc
 
 DB constraints support the rules but do not replace transactional booking checks. Main must receive the reviewed implementations before the team calls the official flow complete. Scope does not include production account security, real card handling or synchronization with a studio’s direct calendar.
 
-## 6. Two revenue features and worked conclusions
+## 6. Released seats generate commission and buddy pricing can fill a second seat
 
 Feature A — availability: a released allocation, strict deadline and booking-time stock check make a sellable seat reliable. This supports commission income only when a booking is genuinely incremental. Feature B — tiered pricing: optional buddy pricing encourages a shared booking; the server selects the tier and stores its effect. General discounts alone are not being counted as a third custom feature.
 
@@ -116,7 +106,7 @@ After the two-seat buddy booking, two of four allocated seats remain. A request 
 
 Money convention: store whole centavos. Fee per seat = round(unit price × commission basis points / 10,000); multiply that rounded fee by quantity. Payout = total − fee. Keep quote, save, schema documentation and examples consistent with this rounding rule.
 
-## 7. Owner dashboard: five numbers, five decisions
+## 7. What the Owner dashboard can tell us
 
 | Actual metric | Definition / worked value | Decision and limit |
 | --- | --- | --- |
