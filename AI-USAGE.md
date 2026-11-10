@@ -39,4 +39,6 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 
 | 2026-11-08 | Fran / M1 | ChatGPT GPT-6 | Prepare safe optional HTTP 429 rate-limit support for GC2 bonus | Implemented POST-only single-process server limiter, Retry-After JSON/header, safe same-payload optional browser helper and isolated tests/docs; left Kaitlyn's assigned Checkout #43 unchanged | New PR tests/CI to verify actual 429/reset/retry; final front-end wiring, valid human review, public screenshot and graded bonus remain pending |
 
+| 2026-11-08 | Kirsten / M6 | ChatGPT GPT-6 | Convert the assigned Browse PR from an incompatible React component to the app's plain HTML/JS runtime | Added `public/browse.html`, `public/js/browse.js`, safe `serviceName` search, shared session-card rendering and a Browse-specific responsive layout; removed the unused React source | Source/contract review against `/api/slots` and `customer-common.js`; visual pass added scoped responsive card, navigation, filter and status styling in `browse.css`; automated CI and browser checks remain pending |
+
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
