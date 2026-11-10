@@ -1,7 +1,7 @@
 # SlotDrop
 *Empty slot, better price.*
 
-**Start with one neighborhood and one type of booking.** SlotDrop should test last-minute pottery workshops around Katipunan before building a broader appointments marketplace. We need to answer two questions first. Can studios release seats reliably, and do those seats sell to people who would otherwise have booked nothing? GC2 demonstrates the booking mechanics with simulated inventory and payments. A real pilot would test those two assumptions.
+**Run a four-week Katipunan pottery pilot only if a studio can show it has seats worth releasing.** Start with Laro as an outreach prospect. The customer is someone with a free afternoon who wants to book a workshop in the next three days. The studio gets a second sales channel for seats it expects to go unsold. The key question is whether SlotDrop brings in bookings the studio would otherwise miss. GC2 uses simulated allocations, prices and payments to show how a booking would work.
 
 ## 1. Sell seats in classes that are already happening
 
@@ -32,7 +32,9 @@ The proposed commission is **10% of the accepted booking total**, deducted from 
 
 The standard and buddy prices are demo offers. If only one guest would have booked at standard price, the buddy offer brings in **₱243 more commission and ₱2,187 more studio proceeds** before the cost of serving the extra guest. If both would have booked anyway, it gives away **₱27 in commission and ₱243 in studio proceeds**. If the extra guest displaces a direct booking, compare against the proceeds of that booking as well.
 
-That gives the pilot a decision rule. Compare similar sessions with and without the buddy offer. Keep it where the added seats cover the discount given to buyers who would have booked anyway, plus the studio's marginal cost. For SlotDrop, track gross commission per saved booking against acquisition and support costs before treating the fee as viable.
+**A studio's direct price is the real comparison.** One ₱2,700 standard offer leaves the studio ₱2,430 after commission. If that guest would have paid the advertised ₱3,000 directly, the studio gives up ₱570 before any difference in channel costs. If the seat would have stayed empty, the studio gains ₱2,430 before materials, firing and any other costs of serving the guest. That is why the studio should release only a small allocation late enough to protect direct sales and early enough to prepare for the booking.
+
+**How often must buddy pricing add a guest?** For illustration, if serving the extra guest costs ₱500, the studio gains ₱1,687 when the offer brings in a guest and loses ₱243 when both guests would have paid the standard price. Under those two scenarios, the studio breaks even if the offer adds a guest in about **13 of every 100 buddy bookings**. The ₱500 is a sensitivity assumption. The threshold rises if extra guests cost more or displace direct bookings. A pilot can estimate whether the offer clears that threshold by comparing similar sessions, then checking where bookings came from and what customers would have done otherwise.
 
 ## 4. Run a pilot a studio can manage without changing its booking system
 
@@ -43,7 +45,16 @@ That gives the pilot a decision rule. Compare similar sessions with and without 
 | Customers only show up for deals | Recruit people with an upcoming leisure occasion and show the workshop itself, including location, materials and collection requirements. | Ask what they would have booked otherwise and track later bookings at standard offer prices. |
 | Too few workshops to make Browse useful | Start with one area and one workshop type. Review actual class and cancellation records before adding another location. | Track how often customers find a session that fits their date, party size and budget. |
 
-A later release can test calendar coordination, verified provider accounts and real payments once studios can maintain inventory and the booking economics work. GC2 uses HTML, CSS and JavaScript for the screens, Express for the API and PostgreSQL for the booking records. See the [system diagram and booking data flow](system.md).
+### How the four-week pilot would work
+
+| Stage | What we would do | What would change the decision |
+| --- | --- | --- |
+| Before listing | Review four weeks of past class records with a studio. Agree on the cutoff, maximum allocation and minimum net payout. Use the studio's calendar as the record of availability. | If spare seats rarely exist before the cutoff, change the partner or the booking window before spending on acquisition. |
+| Weeks 1–2 | List a small allocation at the standard offer price. Recruit nearby prospects through studio posts and local communities. Log released, withdrawn and sold seats by session. | Pause and reconcile any discrepancy with the studio. If the catalog rarely has a session that fits the customer's date and group size, fix supply before paying to drive traffic. |
+| Weeks 3–4 | Keep standard pricing on some comparable sessions and offer buddy pricing on others. Record both SlotDrop and studio-direct sales for those sessions. Ask booked customers what they would have done without the listing. | Keep buddy pricing only where the evidence suggests more total paid seats and higher studio contribution after discount and attendance costs. Treat a small sample as directional. |
+| After week 4 | Review repeat willingness to release seats, studio proceeds, commission and acquisition and support costs per saved booking. | Run another cycle in the same area if results are promising but unclear. Expand only if the studio wants to continue, availability stays accurate and both sides see a credible financial return. |
+
+A later release can add calendar coordination, verified provider accounts and real payments if the pilot warrants them. GC2 uses HTML, CSS and JavaScript for the screens, Express for the API and PostgreSQL for the booking records. See the [system diagram and booking data flow](system.md).
 
 ## 5. What changed from GC1 to GC2
 
