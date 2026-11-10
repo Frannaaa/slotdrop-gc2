@@ -1,0 +1,11 @@
+/* Group 1 customer mobile layout: loaded by Home, Detail, and Selection. */
+@media (max-width: 480px) {
+  .activity-grid {
+    grid-template-columns: 1fr; /* Single column on phones */
+  }
+  
+  .button {
+    width: 100%; /* Full width touch-friendly buttons */
+    min-height: 44px; /* Touch target minimum size */
+  }
+}
