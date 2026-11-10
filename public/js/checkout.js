@@ -1,5 +1,5 @@
 // Group assignment: Kaitlyn. See docs/ownership-and-execution.md.
-import { request, money, date, positive, pageParameters, notice } from "./customer-common.js";
+import { request, retryLimitedBooking, money, date, positive, pageParameters, notice } from "./customer-common.js";
 
 const form = document.querySelector("#checkout"),
   button = document.querySelector("#submit"),
@@ -135,9 +135,15 @@ form.addEventListener("submit", async (event) => {
   notice(status, "Saving your booking…");
 
   try {
-    const receipt = await request("/api/bookings", {
+    const receipt = await retryLimitedBooking("/api/bookings", {
       method: "POST",
+      // Persisted before send: 429 retry reuses this exact request ID and body.
       body: JSON.stringify(pending),
+    }, {
+      maxRetries: 1,
+      onWait(seconds) {
+        notice(status, `Booking traffic is high. Retrying this same request in ${seconds} seconds…`);
+      },
     });
 
     clear();
