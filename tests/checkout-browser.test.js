@@ -102,6 +102,16 @@ test('successful checkout stays locked while confirmation navigation is pending'
       },
     },
 
+    retryLimitedBooking: async (path, options, {maxRetries, onWait}) => {
+      assert.equal(maxRetries, 1);
+      assert.equal(typeof onWait, 'function');
+      assert.equal(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.equal(body.requestId, '12345678-1234-1234-1234-123456789abc');
+      assert.equal(body.expectedTotalCentavos, 1000);
+      return context.request(path, options);
+    },
+
     request: async path => {
       if (path === '/api/bookings') {
         sent.push(path);
