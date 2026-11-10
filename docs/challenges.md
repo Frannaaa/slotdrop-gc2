@@ -28,16 +28,18 @@ The [Postman collection](SlotDrop-Fran.postman_collection.json) covers the imple
 
 Requests 00a and 00b are read-only setup. 00a picked session 1 (Laro Ceramics, Mug-making + painting, 4 of 4 seats left) and 00b fetched the server's two-seat buddy quote, ₱5,130.00 (`513000` centavos). None of the requests creates a booking: `GET /api/metrics` showed `bookingCount: 0` and `GET /api/bookings` returned `[]` in the same run.
 
-| # | Request sent to the deployed API | Expected | Actual status and response | Time | GitHub Actions screenshot (not Postman) |
-|---|---|---|---|---:|---|
-| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms | [View capture](evidence/challenge1-deployed/01-zero-quantity.jpg) |
-| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms | [View capture](evidence/challenge1-deployed/02-fake-total.jpg) |
-| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms | [View capture](evidence/challenge1-deployed/03-more-seats-than-available.jpg) |
-| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms | [View capture](evidence/challenge1-deployed/04-unknown-session.jpg) |
-| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms | [View capture](evidence/challenge1-deployed/05-missing-customer-name.jpg) |
-| 6 | `GET /api/slots?q=zzzz-no-match` | 200 and an empty list | **200** `[]` | 246 ms | [View capture](evidence/challenge1-deployed/06-search-no-matches.jpg) |
+| # | Request sent to the deployed API | Expected | Actual status and response | Time | GitHub Actions capture | Postman Desktop |
+|---|---|---|---|---:|---|---|
+| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms | [View capture](evidence/challenge1-deployed/01-zero-quantity.jpg) | [Screenshot](evidence/challenge1-postman/01-zero-quantity.png) |
+| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms | [View capture](evidence/challenge1-deployed/02-fake-total.jpg) | [Screenshot](evidence/challenge1-postman/02-client-total.png) |
+| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms | [View capture](evidence/challenge1-deployed/03-more-seats-than-available.jpg) | [Screenshot](evidence/challenge1-postman/03-over-capacity.png) |
+| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms | [View capture](evidence/challenge1-deployed/04-unknown-session.jpg) | [Screenshot](evidence/challenge1-postman/04-unknown-session.png) |
+| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms | [View capture](evidence/challenge1-deployed/05-missing-customer-name.jpg) | [Screenshot](evidence/challenge1-postman/05-missing-name.png) |
+| 6 | `GET /api/slots?q=zzzz-no-match` | 200 and an empty list | **200** `[]` | 246 ms | [View capture](evidence/challenge1-deployed/06-search-no-matches.jpg) | [Screenshot](evidence/challenge1-postman/06-empty-search.png) |
 
-Screenshots of the same run: [the four read endpoints](evidence/challenge1-deployed/00-endpoints.jpg) and [the setup quote](evidence/challenge1-deployed/00-setup-session-and-quote.jpg). They were captured from the run's GitHub job summary, which shows the request body, status line, response JSON and assertions for each case. Long one-line responses for cases 1 and 3 are cut off at the right edge of the picture; the full text is in the table above and in the run.
+**Postman Desktop evidence (November 10).** The last column shows the six requests and responses from the desktop session. The case screenshots display `{{baseUrl}}`; the [health check](evidence/challenge1-postman/health.png) shows the full Render URL. Also see [inventory](evidence/challenge1-postman/inventory.png), [session setup](evidence/challenge1-postman/00a-session-setup.png), and [quote setup](evidence/challenge1-postman/00b-quote-setup.png). The timings in the table are from the November 8 Newman run.
+
+Screenshots of the November 8 Newman run: [the four read endpoints](evidence/challenge1-deployed/00-endpoints.jpg) and [the setup quote](evidence/challenge1-deployed/00-setup-session-and-quote.jpg). They were captured from the run's GitHub job summary, which shows the request body, status line, response JSON and assertions for each case. Long one-line responses for cases 1 and 3 are cut off at the right edge of the picture; the full text is in the table above and in the run.
 
 Every POST also carried a fresh `requestId`, fictional guest details (`GC2 QA`, `qa@example.com`), `paymentMethod: "mock_card"` and the server's `expectedTotalCentavos`; only the listed field changed.
 
