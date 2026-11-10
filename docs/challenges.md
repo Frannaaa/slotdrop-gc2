@@ -82,77 +82,69 @@ After #43 and Browse/CSS are reviewed, merged and deployed, use **fictional** gu
 
 **Evidence status:** Source trace prepared; public browser Network captures, a real booking/Owner screenshot, tested release SHA and the group's hand-drawn image are **pending**.
 
-## 3. Overrule the AI — documented incidents for group verification
+## 3. Overrule the AI: three documented implementation decisions
 
-The repository contains real failures, fixes and tests. The case studies below provide the **technical facts**. **Before claiming each incident was caused by AI output, the teammate involved must check the original AI response/chat or PR assistance record** and confirm which suggestion was wrong or overcomplicated. Git history establishes what failed and how it was fixed; it does **not**, by itself, prove that the model originally proposed the mistake. The final explanation of *why the group rejected it* must be reviewed and expressed by the involved students.
+We used AI to help implement and review SlotDrop, but I did not assume that generated code was automatically ready for production. These are three decisions where I compared the original AI-assisted implementation against the actual system behavior, identified what was insufficient, and changed the approach. The original source, regression and correction are linked for each case. The first is a deployment-test error; the other two concern application correctness.
 
-### Incident A — Challenge 1 setup silently targeted localhost
+### A. Claude-assisted Postman setup sent a quote request to localhost
 
-**Original implementation and expectation:** The Newman/Postman collection's setup step obtained the currently bookable slot and quote. The goal was to test **the deployed Render API**, not whatever server happened to run on a laptop.
+**What AI gave us.** The Claude-co-authored collection combined session selection and a hidden pricing request inside a Postman test script:
 
-**Observed counterexample:** In deployed GitHub Actions [run 42459905436](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436), six invalid-request cases returned their expected codes, but one setup assertion failed (14/15) because the quote setup read `baseUrl` from the **collection default** (`localhost`), rather than the environment value passed to Newman. The stale quote was `304000` centavos instead of the deployed quote `513000`. Local tests had missed the issue because their default host happened to be localhost.
+```js
+pm.sendRequest(
+  pm.collectionVariables.get("baseUrl") +
+    "/api/pricing/quote?slotId=" + slot.id + "&quantity=2",
+  (error, response) => { /* store expectedTotalCentavos */ }
+);
+```
 
-**Actual correction:** Split setup into visible read-only `00a` session selection and `00b` price quote requests, use the run's active `baseUrl`, add a check rejecting hidden `pm.sendRequest` calls, and test on a **non-default local port** before rerunning against Render. [Run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) then passed all **16/16 deployed assertions**. The correction made wrong-host requests easier to detect and made the evidence reproducible. It did not create a booking.
+This appears in the [original AI-co-authored implementation, commit 5bb731a](https://github.com/Frannaaa/slotdrop-gc2/commit/5bb731a3979dbd91bc799639d9ca747a82f51de9), whose message includes `Co-Authored-By: Claude Opus 5.5`. It looked convenient because one setup request populated all six cases, but it read the collection's default `baseUrl` (`http://localhost:3000`) instead of the deployed run's environment URL.
 
-**To verify before final submission:** Identify the specific AI suggestion (if any) that introduced the collection-variable lookup, and add the team member's own reason for favoring explicit setup requests. Do not label this an AI hallucination without that provenance.
+**How I checked it.** In the [first official deployed Newman run 42459905436](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436), the six negative cases returned their expected statuses but the setup failed one assertion: **14/15 passed**. The total stayed at **304000 centavos** instead of the deployed session quote of **513000 centavos**. Local testing had not exposed the bug because the default host was also localhost.
 
-**My evaluation:** I would reject the original AI-assisted setup as insufficient for deployed testing, even though it appeared to work locally. An environment-specific test must not silently fall back to a default local server. The failing assertion was useful because it revealed that the six negative cases could pass for the wrong reason while the quote request was still pointed somewhere else. I favor the visible `00a` and `00b` requests because anyone reviewing the collection can see which host supplied the session and price, and testing on a different port catches hidden environment assumptions. I would not count the first run as a clean deployed verification. The correction is supported by the successful 16/16 rerun, while direct attribution of the mistaken variable lookup to a particular AI response still requires the original chat or PR provenance.
+**What I changed and why.** We split setup into two normal, visible requests, `00a GET /api/slots?people=2` and `00b GET /api/pricing/quote?slotId=…&quantity=2`, each using the same active `{{baseUrl}}` as the rest of the collection. We also checked the collection for hidden `pm.sendRequest` calls and tested on a different local port. The [correction commit 60b0bb2](https://github.com/Frannaaa/slotdrop-gc2/commit/60b0bb29876ae45d0b30b45e525364d0798c6446) shows the before/after, and [deployed rerun 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) passed **16/16 assertions**. My takeaway is that test success does not prove we tested the intended environment unless every request is clearly pointed at the same host.
 
-### Incident B — an HTTP 200 health result was possible without a usable booking database
+### B. ChatGPT's early health-check scaffold was not enough for production
 
-**Original implementation and expectation:** A live HTTP process and `/api/health` response appeared sufficient to declare the service healthy. For a persisted booking application, however, a running Express port is not enough if the PostgreSQL connection or required tables are absent.
+**What AI gave us.** In my **October 27, 2026 ChatGPT discussion**, the assistant proposed this minimal Express health route as part of the starter backend:
 
-**Observed problem:** Earlier health code could return `200 {"status":"ok","app":"SlotDrop"}` despite the DB being unreachable or missing booking tables. That risks a false-green production deployment: the user can open the homepage while Browse/Checkout fail.
+```js
+app.get('/api/health', (req, res) =>
+  res.status(200).json({ status: 'ok' })
+);
+```
 
-**Actual correction:** `server/routes/health.js` now probes required `slots`, `services`, and `bookings` tables in production; on missing data or a failed DB query, it responds `503 {"status":"unavailable","app":"SlotDrop"}` without exposing credentials or SQL errors. `server/lib/lifecycle.js` also requires `DATABASE_URL` for production startup. Regression coverage is in `tests/deployment-bootstrap.test.js` and related deployed readiness tests; #45 records the correction.
+The assistant explicitly warned that this HTTP-only check **did not yet prove the database worked**. A later starter implementation returned `{status: 'ok', app: 'SlotDrop'}`, still without checking PostgreSQL. The [historical health.js source at commit 0193e98](https://github.com/Frannaaa/slotdrop-gc2/blob/0193e9810f838030dc126b57ed9466111d39c617/server/routes/health.js) preserves the same design. It was appropriate for checking a CP0 Express scaffold, but not for declaring our persisted booking service ready.
 
-**To verify before final submission:** Confirm the AI-suggested original health implementation (if applicable) and document, in the involved member's own words, why a health endpoint must test the application's *critical dependency*, not just the web server.
+**How I checked it.** The endpoint had no database operation, so a running Node server could return **200 OK** even when booking data was inaccessible. This is a **demonstrated test scenario**, not a claim that a real production outage occurred. In [tests/health.test.js](../tests/health.test.js), the production route is exercised with both an unreachable database and a reachable database missing required tables. Those cases must return **503**, and the outage response must not reveal SQL errors or credentials. [Test commit a9f1168](https://github.com/Frannaaa/slotdrop-gc2/commit/a9f1168e7dcd37f6df4891f8ea005ccd1ca1a771) shows the initial failure-path cases; [PR #45](https://github.com/Frannaaa/slotdrop-gc2/pull/45) includes the subsequent table-readiness fix.
 
-**My evaluation:** I don't consider an HTTP 200 meaningful if the customer cannot actually browse or save a booking. The first version checked whether the Express process could respond, but the critical dependency for SlotDrop is its persisted PostgreSQL data. A false-green health signal would waste debugging time because Render could call the service healthy while customers see broken APIs. I would rather have an explicit 503 that tells us the application is not ready. Checking the required tables, not just a network connection, makes the signal closer to what our users depend on. The test also must fail safely without leaking a connection string or SQL details. This is a verified correction to AI-assisted deployment work; identifying the exact original model suggestion still needs the assistance record.
+**What I changed and why.** We kept the simple health behavior for local demo mode but made production health query PostgreSQL for the required `slots`, `services` and `bookings` tables. A failed check now returns `503 {status:'unavailable', app:'SlotDrop'}` without exposing internal error details. The [current production health route](../server/routes/health.js) contains this logic. My reasoning was that the real success condition is the ability to serve bookings, not merely the ability to answer HTTP requests. The original AI answer identified its own limitation; the decision we overruled was treating that initial scaffold as sufficient for deployment.
 
-### Incident C — an old Owner form could overwrite later changes to the same offer
+### C. Codex's original Owner editor sent fields the user had not changed
 
-**Original implementation and expectation:** Updating a studio's price from an already-open form should change that **one edited field**, not silently reverse unrelated newer edits to capacity, pause status or booking cutoff.
+**What AI gave us.** The [original Owner dashboard implementation, commit 6e06dde](https://github.com/Frannaaa/slotdrop-gc2/commit/6e06dde742fcecd028bf4d41f6fdee57633c3899), explicitly states in its then-existing `AI-USAGE.md` that **Codex implemented the Owner workspace**. That commit's `public/js/owner.js` builds the following full-field payload before every edit:
 
-**Observed problem:** The earlier Owner edit path sent a full-field `PATCH` payload including stale values. If a later change had paused the offer or updated its capacity/deadline, submitting an older price form could overwrite those newer fields. The regression was reproduced in `tests/owner-edit.test.js`.
+```js
+const body = {
+  capacity: Number(field('capacity').value),
+  offerPriceCentavos: cents(field('offerPriceCentavos').value),
+  buddyPriceCentavos: cents(field('buddyPriceCentavos').value, true),
+  bookingClosesAt: new Date($('cutoff').value + '+08:00').toISOString()
+};
+if (editing) body.status = field('status').value;
+await api(editing ? '/api/slots/' + editing : '/api/slots', {
+  method: editing ? 'PATCH' : 'POST',
+  body: JSON.stringify(body)
+});
+```
 
-**Actual correction:** The Owner form now sends **only changed fields**. The backend validates the submitted changes and applies controlled locking/rules rather than trusting the browser's earlier copy of the whole offer. Source: `public/js/owner.js` plus the Owner offer routes/services; the retained regression covers the stale edit case.
+The code was valid syntactically, but the edit request included capacity, status and booking deadline even when the owner only changed the price.
 
-**To verify before final submission:** Find any relevant AI-generated full-PATCH advice or earlier implementation in the recorded assistance/PR history, then state the group's own reason for choosing narrower PATCH semantics. Without confirmed AI provenance, report this as a **verified design correction**, not an invented AI mistake.
+**How I checked it.** In the reproducible [tests/owner-edit.test.js](../tests/owner-edit.test.js) scenario, a newer edit first pauses a session, changes capacity to **8**, and moves the deadline forward **15 minutes**. An older form then changes only the price to **161000 centavos (₱1,610)**. The original all-fields PATCH could overwrite those newer values with the older tab's stale data.
 
-**My evaluation:** I reject a full-form PATCH for an edit screen because it confuses “what was present when the page loaded” with “what the user meant to change now.” For example, if someone pauses a session and an older tab later edits only its price, sending every stale field could unintentionally reopen it. Sending only modified fields narrows the update to the actual intent and preserves unrelated changes. I prefer this even if serializing the whole form is simpler to implement. This addresses unrelated-field overwrites, not every possible simultaneous-edit conflict; stricter same-field conflict detection would need additional version checks. The regression test demonstrates the correction. We should only call it an AI mistake if we can trace the original broad-PATCH idea to AI output.
+**What I changed and why.** The corrected [`changedOfferFields()` helper](../public/js/owner-policy.js) compares the edit against the original loaded snapshot and submits only changed fields. The [Owner save handler](../public/js/owner.js) uses it before PATCH. The regression verifies the price becomes **₱1,610** while the new pause, capacity **8** and updated deadline remain intact. Our dated **October 28 AI-assistance record** explicitly describes this Owner-edit correction as ChatGPT/Codex-assisted and records the reproduced overwrite and HTTP checks. My reasoning is that an edit should express what the owner meant to change; resending cached values is not a harmless shortcut in a multi-user system. This correction does not solve two people changing the *same* field simultaneously, which would require version checks.
 
-### AI-assisted implementation decisions: source code, counterexamples and fixes
-
-**Evidence basis:** The examples below describe actual code decisions, tests, and changes. The original code and commit history, rather than invented model quotations, establish what was implemented. The Postman implementation explicitly credits Claude as co-author. The health and Owner fixes occurred during documented AI-assisted development, although no original model response is available to attribute their initial implementations directly to AI.
-
-**A. Hidden Postman quote request used the wrong base URL**
-
-- **Original AI-assisted approach:** The setup picked an available slot and fetched its quote with a hidden `pm.sendRequest`, using `pm.collectionVariables.get('baseUrl')` for the request URL. This appeared convenient because it filled the total for all subsequent cases without creating a separate visible request.
-- **Actual flawed line, present in an AI-co-authored commit:** `pm.sendRequest(pm.collectionVariables.get("baseUrl") + "/api/pricing/quote?slotId=" + slot.id + "&quantity=2", ...)`. [Before commit, 5bb731a](https://github.com/Frannaaa/slotdrop-gc2/commit/5bb731a3979dbd91bc799639d9ca747a82f51de9) has the exact statement and a `Co-Authored-By: Claude Opus 5.5` trailer. The collection default `baseUrl` was `http://localhost:3000`, while the deployed Newman run supplied Render's URL as an environment variable.
-- **Observed failure:** [Deployed run 42459905436](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436), **14/15 assertions passed**, but the quote setup failed because it used localhost; `expectedTotalCentavos` was stale at `304000` rather than the deployed `513000`. All six negative cases still showed their intended error codes, so their success alone could have hidden the mistake.
-- **My correction:** Remove the hidden `pm.sendRequest`; create visible, sequential `GET {{baseUrl}}/api/slots?people=2` and `GET {{baseUrl}}/api/pricing/quote?slotId={{slotId}}&quantity=2` requests named **00a** and **00b**. [Fix commit 60b0bb2](https://github.com/Frannaaa/slotdrop-gc2/commit/60b0bb29876ae45d0b30b45e525364d0798c6446) shows the exact deletion and replacement; [deployed rerun 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) passed **16/16 assertions**. The existing [collection](SlotDrop-GC2-Challenge1.postman_collection.json) exposes both requests.
-- **My reason for overruling it:** Passing tests are not credible evidence of a specific deployed environment when one dependent request can silently target a different host. Visible requests and consistent variable precedence are easier for other group members and graders to inspect.
-
-**B. An HTTP-only health endpoint returned a misleading 200**
-
-- **Original design approach:** The lightweight Express health route returned `{status: 'ok', app: 'SlotDrop'}` whenever the web process responded, without checking whether the PostgreSQL data required for booking was usable.
-- **Old code:** `router.get('/', (_req, res) => res.json({ status: 'ok', app: 'SlotDrop' }));` appears in [the historical file at commit 0193e98](https://github.com/Frannaaa/slotdrop-gc2/blob/0193e9810f838030dc126b57ed9466111d39c617/server/routes/health.js). There is **no PostgreSQL query** and therefore no way for the endpoint to detect a broken database.
-- **Observed testable counterexample, not a claimed real outage:** A database stub throwing an error (including a fake credential-bearing connection string) must produce **503** and a sanitized response. A reachable but uninitialized database, where the `bookings` table is missing, must also produce **503**. These exact cases are asserted in [tests/health.test.js](../tests/health.test.js). [Test-creation commit a9f1168](https://github.com/Frannaaa/slotdrop-gc2/commit/a9f1168e7dcd37f6df4891f8ea005ccd1ca1a771) added the outage case; [PR #45](https://github.com/Frannaaa/slotdrop-gc2/pull/45) and [CI run 41678796020](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/41678796020) document the later readiness checks.
-- **My correction:** The current [production health route](../server/routes/health.js) uses `to_regclass` to ensure `slots`, `services` and `bookings` exist, returning a safe **503** when the database is unavailable or incomplete. Local demo mode retains a lightweight 200 so isolated development still works.
-- **My reason for overruling it:** SlotDrop's core transaction requires PostgreSQL. A successful HTTP response from Express is not equivalent to successful business-function readiness. The fix makes deployment signals meaningful without exposing credentials. AI assistance with this workflow is documented in the existing assistance history, but the source does not prove who originally suggested the HTTP-only route.
-
-**C. Updating one Owner field could overwrite newer unrelated changes**
-
-- **Original design approach:** The edit flow could send the whole offer form in one `PATCH /api/slots/:id`, including values cached when the form first loaded rather than only the fields the owner intentionally changed.
-- **Specific test scenario:** [tests/owner-edit.test.js](../tests/owner-edit.test.js) starts with an existing session, then applies a newer `PATCH` setting `status: 'paused'`, `capacity: 8`, and `bookingClosesAt` 15 minutes later. It next models an **older tab** in which only `offerPriceCentavos` was changed to **161000 centavos (₱1,610)** while the tab's other fields remained stale.
-- **What would go wrong:** Sending the entire older form would risk restoring the old `status`, capacity and deadline. The actual corrected test sends `changedOfferFields(draft, original)` and asserts the saved session still has `status: 'paused'`, `capacity: 8` and the newer deadline, while the price updates to `161000`.
-- **My correction:** [public/js/owner-policy.js](../public/js/owner-policy.js) defines `changedOfferFields(values, original)` by filtering to fields whose values differ from the loaded snapshot. The save handler in [public/js/owner.js](../public/js/owner.js) uses that helper before `PATCH`. The [#29 Owner PR review trail](https://github.com/Frannaaa/slotdrop-gc2/pull/29) and regression test substantiate the behavior.
-- **My reason for overruling it:** A PATCH should express the customer's/owner's *intended edit*, not overwrite every field cached in an older browser tab. Narrowing the payload protects unrelated recent changes. It does not by itself resolve two editors racing to change the *same* field; optimistic version checks would be a separate enhancement.
-
-**Attribution:** The code and tests substantiate all three corrections. Git history identifies Claude co-authorship for the faulty Postman implementation (A). For health readiness (B) and Owner edits (C), the repository supports the design corrections and documents AI-assisted work, but does not establish that an assistant originated the initial choices. Any stronger claim about original model advice requires the relevant chat or prompt record.
-
-**Supporting evidence:** Each case links its GitHub Actions run or identifies the relevant regression test; the original PR history supplies the correction chronology. The team may choose three different, better-attributed AI examples instead. Do not fabricate prompts, original screenshots, failure logs or personal observations.
+**Evidence summary:** The original Postman code and Claude co-authorship are preserved in commit `5bb731a`; the October 27 ChatGPT starter suggestion is supported by the contemporaneous discussion and original `health.js` implementation; the original Codex Owner code and its assistance credit are both preserved in commit `6e06dde`. Each correction has an actual regression/test outcome or deployed rerun. No error logs, AI quotations or production failures were invented for this report.
 
 ## 4. Change an owner rule — commission rate
 
