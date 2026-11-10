@@ -4,6 +4,16 @@ This record separates repeatable test results from the evidence required on the 
 
 **Verified evidence (November 8):** [PR #37's automated CI run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) passed **104/104 source tests**. Separately, [deployed Challenge 1 run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) verified **16/16 assertions** against the official public Render API; the linked screenshots below show its GitHub Actions summary. These are **not Postman-app screenshots**. Real browser Challenge 2 Network/hand-drawn evidence, group-authored Challenge 3/4 interpretation and all independent Challenge 5 recordings remain to be completed.
 
+
+## Challenge 1–4 evidence at a glance
+
+| Challenge | Evidence in this document | Remaining submission check |
+| --- | --- | --- |
+| 1. API validation | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run. | Confirm the evidence points to the deployment being submitted. Rerun against that URL if it changed. |
+| 2. Trace a booking | Source trace from Checkout through the database to Confirmation. | Capture the actual save and receipt readback in DevTools Network on the final deployment. Match the booking reference to Owner and attach the group's hand-drawn trace. |
+| 3. Overrule the AI | Three cases connect the original assistance to the check that revealed the problem and the fix that followed. | Have the contributors verify the attribution and check that it agrees with the PRs and `AI-USAGE.md`. |
+| 4. Change a rule | The commission setting, worked 10% vs. 12% example, and automated checks for quote, receipt and Owner behavior. | Link the passing test run for the final reviewed commit. Keep the 12% scenario labelled as a hypothetical change. |
+
 ## Earlier Owner/API checks (October 27–28)
 
 These results cover Fran's owner build. They do not complete the deployed customer-booking challenges.
