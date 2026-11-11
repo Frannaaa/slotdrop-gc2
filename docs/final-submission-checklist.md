@@ -2,7 +2,7 @@
 
 **Owner:** Group 1 captain and all members  
 **Deadline shown in Canvas:** November 16, 2026, 11:59 PM Asia/Manila. The assignment body lists November 9 at 11:59 PM. Confirm the applicable cutoff and grading windows with the instructor.  
-**Status checked:** November 11, 2026, against `main` at `2e36148` and the open PRs  
+**Status checked:** November 12, 2026, against `main` at `285ce61` and the open PRs  
 **Grading source:** Canvas GC 2: MVP Build; the instructor's current rubric takes precedence over this checklist.
 
 
@@ -10,7 +10,7 @@
 
 ## Eleven required submission items
 
-| # | Item / exact evidence | Current repo state, November 11 | Complete only when |
+| # | Item / exact evidence | Current repo state, November 12 | Complete only when |
 |---|---|---|---|
 | 1 | Public Group 1 repository, reviewed `main`, tag `gc2-v1.0` | Repo: https://github.com/Frannaaa/slotdrop-gc2 ; tag `gc2-v1.0` **absent** | All approved changes merged, checks run against final `main`, and the matching commit tagged |
 | 2 | Public deployed URL with all six customer screens and Owner | Live at https://slotdrop-gc2-group-zx8j.onrender.com on `96d4a31`: the four read APIs return 200 and the six Challenge 1 cases pass ([run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586)). Browse, Checkout and Confirmation are absent from current `main` | Outside-group user completes Home → Browse → Detail → Selection → Checkout → Confirmation on phone; Owner shows that same saved booking |
@@ -26,16 +26,17 @@
 
 **Submission channel:** Canvas says "to be announced." Captain must use the channel actually announced; do not invent it.
 
-## Merge and deployment blockers (November 11)
+## Merge and deployment blockers (November 12)
 
 - [x] PR #45 (cleanup), #57 (Render configuration) and #56 (429 limiter) were merged into `main` on November 8 after approvals. The official Render service is live and its read APIs and six deployed Challenge 1 cases were independently verified in Actions run 42460049586; the **six-screen browser flow** is not deployed yet.
 - [x] PR #37 (business case, two-page PDF, deployed six-case Challenge 1 record, Postman collection) merged into `main` after Kat's tested approval and green CI.
-- [ ] PRIORITY: #67 Vercel deploy preparation (104/104 CI passing; Janelle/Kat review requested), #43 Kaitlyn Checkout/Confirmation (current head has passing CI and needs renewed teammate approval), #62 Kirsten Browse and #60 shared CSS (CI green; peer approvals needed), #68 Chonel Home→Browse (after #62), and #59 Janelle future inventory (GitHub now reports mergeable and review-blocked). Do not merge a dependent PR before its page exists.
+- [x] #49 pagination API, #59 inventory rollover, #60 shared CSS and #67 Vercel setup are merged into `main`.
+- [ ] Priority: merge reviewed Browse #62 using GitHub’s stacked-PR merge interface. Checkout/Confirmation #43 has passing CI and still needs resolution of the teammate review. Recheck #68 after Browse reaches `main`.
 - [ ] Fran's #47 (this documentation) was reconciled with the now-merged #37 on Nov 8; it still requires green current-head CI and a valid teammate approval. Secondary Fran PRs: #58 Windows line endings, #61 assistance formatting, #65 deployment bootstrap tests; bonuses #49 pagination, #53 timing and #51 Owner utilization only after the core transaction flow is functional. Each needs independent review.
 - [ ] PR #43: https://github.com/Frannaaa/slotdrop-gc2/pull/43 — Checkout/Confirmation; earlier purported approval explicitly said wrong PR. The current head includes the post-success navigation guard and regression test. Ask the human reviewer to rerun the test and resolve their changes-requested review.
 - [x] PR #37: https://github.com/Frannaaa/slotdrop-gc2/pull/37 — merged after Kat's substantive current-head approval. The group still owes its own business interpretation. PR #47 contains the Postman Desktop screenshots.
-- [ ] Kirsten: #62 Browse and #60 CSS are open with CI passes and requested peer reviews; #64 mobile and #63 stacked pagination are further authored work. Merge validated, reviewed Browse/CSS and test phone width; `/browse.html` remains absent from `main` until that merge.
-- [ ] Deploy the **final six-screen build** on the official Group 1 backend with persistent Neon PostgreSQL. The current Render backend and Challenge 1 tests are live/verified but incomplete on the frontend. The alternative Vercel Express/Neon setup in #67 is pending review and actual deployment. Keep `DATABASE_URL` only in host secrets; never expose a connection string.
+- [ ] Kirsten’s Browse #62 has a tested approval and passing CI after the sync with `main`. #63 is stacked on #62 and still has a conflict. Verify phone width on the final deployment.
+- [ ] Deploy the **final six-screen build** on the official Group 1 backend with persistent Neon PostgreSQL. The current Render backend and Challenge 1 tests are live/verified but incomplete on the frontend. The alternative Vercel Express/Neon setup in #67 is merged. The final public six-screen flow still requires deployment verification. Keep `DATABASE_URL` only in host secrets; never expose a connection string.
 - [ ] Create new future, fictional open offers through Owner if /api/slots is empty; **do not** reseed an existing database or alter historical bookings.
 
 **Local browser evidence.** On November 11, Chrome DevTools at `localhost:4331` showed a `201` booking POST and `200` receipt GET with the same reference in Confirmation and Owner. A separate 400 px Chrome emulation completed all six customer screens on the local integration build. The traced booking reference is `ae9ed892-67c7-4603-9244-17f186f637bc`. Final public evidence and the outside-group phone test remain pending.
