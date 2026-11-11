@@ -29,7 +29,7 @@ test('utilization joins eligible owner catalog slots to confirmed booking summar
     {slotId:6,quantity:8,status:'confirmed'},
   ];
   assert.deepEqual(openReleaseUtilization(catalog(), bookings, NOW), {
-    eligibleSessions:2,releasedSeats:10,confirmedSeats:3,utilizationPercent:30,
+    eligibleSessions:2,releasedSeats:10,confirmedSeats:3,inconsistent:false,utilizationPercent:30,
   });
 });
 
@@ -37,7 +37,7 @@ test('no currently eligible demo inventory returns an explicit unmeasurable stat
   const c = catalog();
   c.slots = c.slots.map(slot => ({...slot,status:'paused'}));
   assert.deepEqual(openReleaseUtilization(c, [{slotId:1,quantity:1,status:'confirmed'}], NOW), {
-    eligibleSessions:0,releasedSeats:0,confirmedSeats:0,utilizationPercent:null,
+    eligibleSessions:0,releasedSeats:0,confirmedSeats:0,inconsistent:false,utilizationPercent:null,
   });
 });
 
@@ -51,6 +51,16 @@ test('ineligible, malformed and non-confirmed rows do not invent sold seats', ()
     {slotId:2,quantity:3,status:'confirmed'},
   ], NOW);
   assert.deepEqual(result, {
-    eligibleSessions:1,releasedSeats:4,confirmedSeats:0,utilizationPercent:0,
+    eligibleSessions:1,releasedSeats:4,confirmedSeats:0,inconsistent:false,utilizationPercent:0,
   });
+});
+
+test('utilization is unavailable when one slot exceeds capacity despite spare seats elsewhere', () => {
+  const result = openReleaseUtilization(catalog(), [
+    {slotId:1,quantity:3,status:'confirmed'},
+    {slotId:1,quantity:2,status:'confirmed'},
+  ], NOW);
+  assert.equal(result.confirmedSeats, 5);
+  assert.equal(result.inconsistent, true);
+  assert.equal(result.utilizationPercent, null);
 });

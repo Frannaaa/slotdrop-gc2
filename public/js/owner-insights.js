@@ -18,16 +18,22 @@ export function openReleaseUtilization(catalog, bookings, now = Date.now()) {
     Date.parse(slot.startsAt) < nowMs + discoveryHours * 3600000
   );
   const eligibleIds = new Set(eligible.map(slot => slot.id));
+  const confirmedBySlot = new Map();
+  for (const receipt of receipts) {
+    if (receipt.status === 'confirmed' && eligibleIds.has(receipt.slotId)
+        && Number.isSafeInteger(receipt.quantity) && receipt.quantity > 0) {
+      confirmedBySlot.set(receipt.slotId, (confirmedBySlot.get(receipt.slotId) ?? 0) + receipt.quantity);
+    }
+  }
   const releasedSeats = eligible.reduce((sum, slot) => sum + slot.capacity, 0);
-  const confirmedSeats = receipts.reduce((sum, receipt) =>
-    sum + (receipt.status === 'confirmed' && eligibleIds.has(receipt.slotId)
-      && Number.isSafeInteger(receipt.quantity) && receipt.quantity > 0
-      ? receipt.quantity : 0), 0);
+  const confirmedSeats = [...confirmedBySlot.values()].reduce((sum, quantity) => sum + quantity, 0);
+  const inconsistent = eligible.some(slot => (confirmedBySlot.get(slot.id) ?? 0) > slot.capacity);
   return {
     eligibleSessions: eligible.length,
     releasedSeats,
     confirmedSeats,
-    utilizationPercent: releasedSeats === 0
+    inconsistent,
+    utilizationPercent: releasedSeats === 0 || inconsistent
       ? null : Math.round(100 * confirmedSeats / releasedSeats),
   };
 }

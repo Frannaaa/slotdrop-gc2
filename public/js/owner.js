@@ -219,9 +219,13 @@ function renderMetrics(metrics) {
 }
 function renderOpenUtilization(bookings) {
   const value = openReleaseUtilization(catalog, bookings);
-  $("open-utilization").textContent = value.utilizationPercent === null
-    ? "No eligible, open demo sessions are in the current discovery window."
-    : `${value.confirmedSeats} of ${value.releasedSeats} released demo seats booked (${value.utilizationPercent}%) across ${value.eligibleSessions} currently eligible sessions.`;
+  let message = "No eligible, open demo sessions are in the current discovery window.";
+  if (value.inconsistent) {
+    message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
+  } else if (value.utilizationPercent !== null) {
+    message = `${value.confirmedSeats} of ${value.releasedSeats} released demo seats booked (${value.utilizationPercent}%) across ${value.eligibleSessions} currently eligible sessions.`;
+  }
+  $("open-utilization").textContent = message;
 }
 function refreshDemoReadiness(now = Date.now()) {
   const info = demoInventoryStatus(
@@ -313,6 +317,7 @@ function renderSessions() {
       const toggle = element(
         "button",
         slot.status === "paused" ? "Resume sales" : "Pause sales",
+        slot.status === "paused" ? "resume-sales" : "pause-sales",
       );
       toggle.type = "button";
       view.toggle = toggle;

@@ -1,0 +1,305 @@
+{
+  "info": {
+    "name": "SlotDrop GC2 | Challenge 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set baseUrl to the official group deployment, then run the whole collection in order. Requests 00a and 00b are read-only: they pick a bookable session, an over-capacity quantity, an unknown ID and the server quote. Requests 01-06 are all refused or read-only, so the run creates no booking and changes no stock."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "slotId",
+      "value": "1"
+    },
+    {
+      "key": "overCapacityQuantity",
+      "value": "5"
+    },
+    {
+      "key": "unknownSlotId",
+      "value": "999"
+    },
+    {
+      "key": "expectedTotalCentavos",
+      "value": "304000"
+    }
+  ],
+  "item": [
+    {
+      "name": "00a · Pick a bookable session (read-only)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Read-only: chooses live data so the six cases also work after seeded dates expire.",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const slots = pm.response.json();",
+              "const slot = slots.find(row => row.remainingSeats >= 2 && row.remainingSeats < 100);",
+              "pm.test(\"A bookable session with at least two seats exists\", () => pm.expect(slot, \"Create a future offer on the Owner screen first\").to.be.an(\"object\"));",
+              "if (slot) {",
+              "  pm.collectionVariables.set(\"slotId\", String(slot.id));",
+              "  pm.collectionVariables.set(\"overCapacityQuantity\", String(slot.remainingSeats + 1));",
+              "  pm.collectionVariables.set(\"unknownSlotId\", String(Math.max(...slots.map(row => row.id)) + 100000));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/slots?people=2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "slots"
+          ],
+          "query": [
+            {
+              "key": "people",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "00b · Server quote for two seats (read-only)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const quote = pm.response.json();",
+              "pm.test(\"Quote has a server total\", () => pm.expect(quote.totalPriceCentavos).to.be.a(\"number\"));",
+              "pm.collectionVariables.set(\"expectedTotalCentavos\", String(quote.totalPriceCentavos));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/pricing/quote?slotId={{slotId}}&quantity=2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "pricing",
+            "quote"
+          ],
+          "query": [
+            {
+              "key": "slotId",
+              "value": "{{slotId}}"
+            },
+            {
+              "key": "quantity",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "01 · Zero quantity",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": 0,\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"INVALID_INPUT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_INPUT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 · Browser sends a fake total",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": 2,\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\",\n  \"total\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"INVALID_INPUT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_INPUT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 · More seats than available",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": {{overCapacityQuantity}},\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"SLOT_UNAVAILABLE\", () => pm.expect(pm.response.json().error.code).to.eql(\"SLOT_UNAVAILABLE\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 · Unknown session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{unknownSlotId}},\n  \"quantity\": 2,\n  \"customerName\": \"GC2 QA\",\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"SLOT_NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"SLOT_NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 · Missing customer name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"slotId\": {{slotId}},\n  \"quantity\": 2,\n  \"customerEmail\": \"qa@example.com\",\n  \"paymentMethod\": \"mock_card\",\n  \"expectedTotalCentavos\": {{expectedTotalCentavos}},\n  \"requestId\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"INVALID_INPUT\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_INPUT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 · Search has no matches",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/slots?q=zzzz-no-match"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Empty results\", () => pm.expect(pm.response.json()).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
