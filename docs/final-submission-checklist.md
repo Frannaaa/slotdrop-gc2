@@ -38,7 +38,7 @@
 - [ ] Deploy the **final six-screen build** on the official Group 1 backend with persistent Neon PostgreSQL. The current Render backend and Challenge 1 tests are live/verified but incomplete on the frontend. The alternative Vercel Express/Neon setup in #67 is pending review and actual deployment. Keep `DATABASE_URL` only in host secrets; never expose a connection string.
 - [ ] Create new future, fictional open offers through Owner if /api/slots is empty; **do not** reseed an existing database or alter historical bookings.
 
-**Local browser evidence.** On November 11, Chrome DevTools at `localhost:4331` showed a `201` booking POST and `200` receipt GET with the same reference in Confirmation and Owner. A separate 400 px Chrome emulation completed all six customer screens on the local integration build. [Challenge 2 local trace](https://chatgpt.com/library?file_id=libfile_e94365d4cbcc81919b8f0ee707b5e03c&account_id=personal) · [Mobile QA](https://chatgpt.com/library?file_id=libfile_e9bf4612f55881919291fa68533dd491&account_id=personal). Final public evidence and the outside-group phone test remain pending.
+**Local browser evidence.** On November 11, Chrome DevTools at `localhost:4331` showed a `201` booking POST and `200` receipt GET with the same reference in Confirmation and Owner. A separate 400 px Chrome emulation completed all six customer screens on the local integration build. The traced booking reference is `ae9ed892-67c7-4603-9244-17f186f637bc`. Final public evidence and the outside-group phone test remain pending.
 
 ## Public verification matrix
 
