@@ -37,11 +37,11 @@ export async function ensureReferenceCatalog(db) {
       let serviceId = addedServices[0]?.id;
       if (!serviceId) {
         // An existing activity with cleared inventory must remain cleared after restart.
-        // Only roll the sample dates forward when every remaining session has already
-        // started, so a long-lived demo deployment never ends up with an empty catalog.
+        // Only roll the sample dates forward when no remaining session can still be booked
+        // (booking cutoff passed), so a long-lived demo deployment never ends up with an empty catalog.
         const { rows: [state] } = await client.query(
           `SELECT s.id, COUNT(sl.id)::int AS total,
-             COUNT(sl.id) FILTER (WHERE sl.starts_at > NOW())::int AS upcoming
+             COUNT(sl.id) FILTER (WHERE sl.booking_closes_at > NOW())::int AS upcoming
            FROM services s LEFT JOIN slots sl ON sl.service_id = s.id
            WHERE s.reference_key = $1 AND s.active
            GROUP BY s.id`,

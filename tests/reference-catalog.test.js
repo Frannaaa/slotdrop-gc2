@@ -137,3 +137,20 @@ test('inactive reference activities are not rolled forward',async()=>{
   assert.equal(Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1',[service.id])).rows[0].n),2);
  }finally{await f.close();}
 });
+
+test('sessions that start later but are past their booking cutoff do not block the roll-forward',async()=>{
+ const f=await fixture();
+ try{
+  await ensureReferenceCatalog(f.db);
+  const key=referenceCatalog.offerings[2].key;
+  const {rows:[service]}=await f.db.query('SELECT id FROM services WHERE reference_key=$1',[key]);
+  // Every session still starts in the future, but customers can no longer book any of them.
+  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '30 minutes',booking_closes_at=NOW()-INTERVAL '1 minute' WHERE id=(SELECT MIN(id) FROM slots WHERE service_id=$1)",[service.id]);
+  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '40 minutes',booking_closes_at=NOW()-INTERVAL '2 minutes' WHERE id=(SELECT MAX(id) FROM slots WHERE service_id=$1)",[service.id]);
+  const bookable=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND booking_closes_at>NOW()',[service.id])).rows[0].n);
+  assert.equal(await bookable(),0);
+  await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  assert.equal(await bookable(),2,'Two bookable sample sessions, added once');
+ }finally{await f.close();}
+});
