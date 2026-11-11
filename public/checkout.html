@@ -22,10 +22,11 @@
           Use fictional details for this demo. No payment will be collected.
         </p>
         <p id="chosenSession" role="status">Loading session details…</p>
-<p id="summary" class="total"></p>
+        <p id="summary" class="total"></p>
         <label
           >Your name<input
             name="customerName"
+            type="text"
             required
             maxlength="100"
             autocomplete="off"
@@ -50,11 +51,12 @@
           ></label
         >
         <p id="status" role="status"></p>
-        <button id="retry" class="text-button" type="button">
-          Refresh quote</button
-        ><button id="submit" class="button" type="submit" disabled>
-          Confirm simulated booking
-        </button>
+        <div class="booking-actions">
+          <button id="retry" class="text-button" type="button">Refresh quote</button>
+          <button id="submit" class="button" type="submit" disabled>
+            Confirm simulated booking
+          </button>
+        </div>
       </form>
       <a href="/#featured">Back to featured sessions</a>
     </main>
