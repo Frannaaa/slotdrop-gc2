@@ -392,3 +392,111 @@ body:not(.owner-page) button[type="submit"]:disabled {
   body:not(.owner-page) .site-header nav { gap: .4rem 1rem; }
   body:not(.owner-page) .hero h1 { font-size: clamp(2.4rem, 11vw, 3.1rem); }
 }
+
+
+/* Sonatina review follow-ups: responsive Home, Owner and provider form polish. */
+body:not(.owner-page) .hero {
+  color: var(--color-ink);
+  gap: clamp(.8rem, 2vw, 1.25rem);
+}
+body:not(.owner-page) .hero h1 {
+  color: var(--color-ink);
+  font-size: clamp(2.35rem, 6.5vw, 4.75rem);
+}
+body:not(.owner-page) .hero > p:not(.eyebrow) {
+  color: #555b52;
+}
+body:not(.owner-page) .section-heading h2,
+body:not(.owner-page) .how-strip h2 {
+  color: var(--color-ink);
+}
+body:not(.owner-page) .how-strip {
+  color: var(--color-ink);
+}
+@media (max-width: 440px) {
+  body:not(.owner-page) .hero h1 {
+    font-size: clamp(2.15rem, 9.5vw, 2.85rem);
+    line-height: 1.08;
+  }
+  body:not(.owner-page) .hero > p:not(.eyebrow) {
+    font-size: 1rem;
+  }
+}
+
+/* Owner workspace refinements. */
+body.owner-page .workspace .editor select[name="serviceId"] {
+  padding-right: 2.75rem;
+}
+body.owner-page .metric strong {
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
+}
+body.owner-page .tag[data-state="open"] {
+  color: #245a37;
+  background: #e2f0df;
+}
+body.owner-page .tag[data-state="paused"] {
+  color: #75413a;
+  background: #f3e2dd;
+}
+body.owner-page .session .actions .pause-sales {
+  color: #773b35;
+  background: #f6e6e3;
+  border-color: #e8c9c3;
+}
+body.owner-page .session .actions .pause-sales:hover {
+  color: #642d28;
+  background: #efd6d1;
+  border-color: #d8aaa0;
+}
+body.owner-page .session .actions .resume-sales {
+  color: #245a37;
+  background: #e2f0df;
+  border-color: #c7dfc3;
+}
+@media (max-width: 760px) {
+  body.owner-page .metric strong {
+    font-size: 1.3rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Provider application form alignment and tighter heading rhythm. */
+.provider-main > .eyebrow {
+  margin-bottom: .35rem;
+}
+.provider-main > h1 {
+  margin-top: 0;
+  margin-bottom: .7rem;
+}
+.provider-main > .intro {
+  margin-top: 0;
+}
+.provider-main .checks .check,
+.provider-main label.check {
+  align-items: center;
+  gap: .65rem;
+}
+.provider-main .checks .check input,
+.provider-main label.check input {
+  flex: 0 0 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+}
+.provider-main .checks {
+  align-items: center;
+  column-gap: 1rem;
+  row-gap: .65rem;
+}
+@media (max-width: 600px) {
+  .provider-main > .eyebrow {
+    margin-bottom: .25rem;
+  }
+  .provider-main .steps {
+    margin-top: 1.1rem;
+  }
+  .provider-main fieldset {
+    margin-top: 1rem;
+  }
+}
