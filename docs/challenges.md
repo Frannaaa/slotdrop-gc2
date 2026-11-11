@@ -191,7 +191,7 @@ The code was valid syntactically, but the edit request included capacity, status
 
 ## 5. Predict, then run
 
-Recording links are pending verification. Each member writes three predictions before running a function they wrote, records the actual outputs, and explains any mismatches. Each member submits their own unedited voice recording of up to three minutes.
+Recording links are pending verification. Each member writes three predictions before running a function they wrote, records the actual outputs, and explains any mismatches. Each member makes and submits their own unedited voice recording of up to three minutes without AI assistance.
 
 ## Stretch challenges — deployed evidence
 
@@ -277,7 +277,7 @@ This run covers HTTP and persistence. Browser interaction, deployed challenge sc
 
 ## November 8 local challenge evidence
 
-These requests ran against the assembled local Express app using the disposable PGlite test fixture. The official deployment, Postman screenshots, browser Network recording and hand-drawn diagram remain pending.
+These November 8 requests ran against local Express with a disposable PGlite database. The deployed Newman results and November 10 Postman Desktop screenshots are linked in Challenge 1. The final public browser Network trace and the hand-drawn diagram are tracked in Challenge 2.
 
 ### 1. Six API cases
 
