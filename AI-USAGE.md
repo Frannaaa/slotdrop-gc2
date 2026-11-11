@@ -55,4 +55,6 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 
 | 2026-11-08 | Fran / M1 | ChatGPT GPT-6 | Implement backend pagination for bonus, audit eligibility, and prepare tests | Added optional bounded page/limit to Fran-owned discovery query, regression tests, and route contract; deliberately left Browse UI with its assigned author | GitHub CI to check syntax, SQL and test suite on PR; requires teammate review and final public Browse evidence |
 
+| 2026-11-08 | Fran / M1 | ChatGPT GPT-6 | Prepare Vercel Hobby deployment of the existing Group 1 Express/Neon app, rather than pay for Render | Improved existing PR #67 to use the documented root Express entrypoint, Singapore region, CDN static assets, original API routes, cold-start persistence tests and a complete private-secret deployment runbook | GitHub Actions tests on the updated PR; no Vercel account connected, no claimed public deployment, no teammate page changes, no live database writes |
+
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
