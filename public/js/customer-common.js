@@ -183,7 +183,7 @@ export function card(slot, quantity = 1) {
     </div>
     <div class="card-body">
       <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
-      <h2>${escapeHtml(slot.serviceName)}</h2>
+      <h2>${escapeHtml(slot.serviceName || slot.title || 'Untitled Session')}</h2>
       <p class="provider-name">
         ${slot.studioReference
           ? `<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>`
