@@ -96,3 +96,44 @@ test('catalog startup retires only old fictional fixtures, not newly created ser
   assert.ok(oldServices.every(row=>row.active===false),'Original retired fixture activities remain inactive');
  }finally{await f.close();}
 });
+
+test('startup rolls expired reference sessions forward without touching past sessions or receipts',async()=>{
+ const f=await fixture();
+ try{
+  await ensureReferenceCatalog(f.db);
+  const key=referenceCatalog.offerings[0].key;
+  const {rows:[service]}=await f.db.query('SELECT id FROM services WHERE reference_key=$1',[key]);
+  const {rows:[slot]}=await f.db.query('SELECT id FROM slots WHERE service_id=$1 ORDER BY starts_at LIMIT 1',[service.id]);
+  const quote=await (await fetch(f.base+'/api/pricing/quote?slotId='+slot.id+'&quantity=1')).json();
+  const saved=await fetch(f.base+'/api/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+   requestId:crypto.randomUUID(),slotId:Number(slot.id),quantity:1,customerName:'Fictional QA',customerEmail:'qa@example.com',
+   paymentMethod:'mock_card',expectedTotalCentavos:quote.totalPriceCentavos})});
+  const receipt=await saved.json();
+  assert.equal(saved.status,201,JSON.stringify({quote,receipt}));
+  // Simulate a deployment that kept running after every sample date passed.
+  await f.db.query("UPDATE slots SET starts_at=starts_at-INTERVAL '10 days',booking_closes_at=booking_closes_at-INTERVAL '10 days' WHERE service_id=$1",[service.id]);
+  const past=(await f.db.query('SELECT id,starts_at FROM slots WHERE service_id=$1 ORDER BY id',[service.id])).rows;
+  const upcoming=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND starts_at>NOW()',[service.id])).rows[0].n);
+  assert.equal(await upcoming(),0);
+  await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  assert.equal(await upcoming(),2,'Two fresh sample sessions, added once');
+  assert.deepEqual((await f.db.query('SELECT id,starts_at FROM slots WHERE id=ANY($1) ORDER BY id',[past.map(r=>r.id)])).rows,past,'Past sessions keep their dates');
+  const readback=await (await fetch(f.base+'/api/bookings/'+receipt.id)).json();
+  assert.equal(readback.slotId,Number(slot.id));assert.equal(readback.totalPriceCentavos,receipt.totalPriceCentavos);
+  const other=(await f.db.query("SELECT COUNT(*)::int AS n FROM slots s JOIN services v ON v.id=s.service_id WHERE v.reference_key<>$1 AND s.starts_at>NOW()",[key])).rows[0].n;
+  assert.equal(other,14,'Services with upcoming sessions get nothing extra');
+ }finally{await f.close();}
+});
+
+test('inactive reference activities are not rolled forward',async()=>{
+ const f=await fixture();
+ try{
+  await ensureReferenceCatalog(f.db);
+  const key=referenceCatalog.offerings[1].key;
+  const {rows:[service]}=await f.db.query('UPDATE services SET active=false WHERE reference_key=$1 RETURNING id',[key]);
+  await f.db.query("UPDATE slots SET starts_at=starts_at-INTERVAL '10 days',booking_closes_at=booking_closes_at-INTERVAL '10 days' WHERE service_id=$1",[service.id]);
+  await ensureReferenceCatalog(f.db);
+  assert.equal(Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1',[service.id])).rows[0].n),2);
+ }finally{await f.close();}
+});

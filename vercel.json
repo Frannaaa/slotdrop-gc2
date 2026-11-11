@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "express",
+  "regions": [
+    "sin1"
+  ],
+  "functions": {
+    "index.js": {
+      "includeFiles": "{db/**,public/data/**}",
+      "maxDuration": 30
+    }
+  }
+}
