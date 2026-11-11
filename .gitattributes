@@ -1,0 +1,14 @@
+# Keep JavaScript and project source consistent across Windows, macOS and Linux.
+# Tests that inspect source need predictable newlines; avoid CRLF-only failures.
+* text=auto
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.sql text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf

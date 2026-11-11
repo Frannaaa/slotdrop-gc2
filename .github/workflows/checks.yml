@@ -61,3 +61,18 @@ jobs:
       - name: Stop production test container
         if: ${{ always() && hashFiles('tools/check-release.mjs') != '' }}
         run: docker rm -f slotdrop-ci || true
+  windows-owner-eol:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Verify Owner tests with Windows CRLF source
+        shell: pwsh
+        run: |
+          node -e "const fs=require('node:fs'); const p='public/js/owner.js'; const src=fs.readFileSync(p,'utf8').replace(/\r?\n/g,'\r\n'); fs.writeFileSync(p,src);"
+          node --test tests/owner-clock.test.js tests/owner-toggle.test.js
+

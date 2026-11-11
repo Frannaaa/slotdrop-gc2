@@ -34,6 +34,7 @@ test('the owner clock updates existing cards across deadlines without disturbing
     {...slot,id:2,status:'paused'},
     {...slot,id:3,startsAt:new Date(now+72*3600000+1000).toISOString(),bookingClosesAt:new Date(now+71*3600000).toISOString()}]};
   const source = (await readFile(new URL('../public/js/owner.js', import.meta.url), 'utf8'))
+    .replace(/\r\n?/g, '\n') // Windows CRLF must not change the source patterns under test.
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/, '')
     .replace(/^import \{ api \} from "\.\/api\.js";\n/m, '')
     .replace(/reset\(\);\nload\(\);\s*$/, '');
@@ -107,6 +108,7 @@ test('a saved offer with failed refresh warns against a duplicate submission', a
   get('runsAsScheduled').checked=true;
   const doc={getElementById:get,createElement:()=>new El(),addEventListener() {},hidden:false};
   const source=(await readFile(new URL('../public/js/owner.js',import.meta.url),'utf8'))
+    .replace(/\r\n?/g, '\n')
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/,'')
     .replace(/^import \{ api \} from "\.\/api\.js";\n/m,'')
     .replace(/reset\(\);\nload\(\);\s*$/,'');
