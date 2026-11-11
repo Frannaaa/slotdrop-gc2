@@ -60,3 +60,43 @@ test('null characters in search filters return input errors before SQL', async (
     assert.ok((await response.json()).length > 0);
   } finally { await f.close(); }
 });
+
+test('optional page/limit paginate eligible slots with stable ordering and 400 validation', async () => {
+  const f = await fixture();
+  try {
+    const fetchList = async query => {
+      const response = await fetch(f.base + '/api/slots' + query);
+      assert.equal(response.status, 200, query);
+      return response.json();
+    };
+    const all = await fetchList('');
+    const first = await fetchList('?page=1&limit=3');
+    const second = await fetchList('?page=2&limit=3');
+    const third = await fetchList('?page=3&limit=3');
+    assert.deepEqual([...first, ...second, ...third], all);
+    assert.equal(first.length, 3);
+    assert.deepEqual(await fetchList('?page=1'), all);
+    assert.deepEqual(await fetchList('?limit=2'), all.slice(0, 2));
+    assert.deepEqual(await fetchList('?page=25&limit=3'), []);
+
+    const filtered = await fetchList('?type=pottery&sort=price-low&people=2');
+    assert.deepEqual(
+      await fetchList('?type=pottery&sort=price-low&people=2&page=1&limit=2'),
+      filtered.slice(0, 2),
+    );
+    assert.deepEqual(
+      await fetchList('?type=pottery&sort=price-low&people=2&page=2&limit=2'),
+      filtered.slice(2, 4),
+    );
+
+    for (const query of [
+      '?page=0', '?page=-1', '?page=1.5', '?page=10001',
+      '?limit=0', '?limit=51', '?limit=x', '?limit=2&limit=3',
+      '?page=1&page=2',
+    ]) {
+      const response = await fetch(f.base + '/api/slots' + query);
+      assert.equal(response.status, 400, query);
+      assert.equal((await response.json()).error.code, 'INVALID_INPUT', query);
+    }
+  } finally { await f.close(); }
+});

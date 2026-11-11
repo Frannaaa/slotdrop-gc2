@@ -1,0 +1,150 @@
+# Group assignment: Fran. Runs the Challenge 1 Postman collection against the
+# official deployed API from GitHub's network. Read-only: no request creates a booking.
+name: Deployed Challenge 1
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseUrl:
+        description: Public SlotDrop URL
+        default: https://slotdrop-gc2-group-zx8j.onrender.com
+  push:
+    branches: [g1/m1-business-case]
+    paths:
+      - .github/workflows/deployed-challenge1.yml
+      - docs/SlotDrop-GC2-Challenge1.postman_collection.json
+
+permissions:
+  contents: read
+
+jobs:
+  challenge1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: ${{ inputs.baseUrl || 'https://slotdrop-gc2-group-zx8j.onrender.com' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Wake the free Render instance
+        run: |
+          for attempt in $(seq 1 12); do
+            status=$(curl -s -m 30 -o /dev/null -w '%{http_code}' "$BASE_URL/api/health" || true)
+            echo "attempt $attempt: /api/health $status"
+            [ "$status" = "200" ] && exit 0
+            sleep 10
+          done
+          exit 1
+      - name: Record the four read endpoints
+        run: |
+          mkdir -p evidence
+          {
+            echo "## Deployed endpoints"
+            echo
+            echo "Base URL: $BASE_URL · checked $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            for path in /api/health /api/slots /api/metrics /api/bookings; do
+              file="evidence/$(echo "$path" | tr '/' '_').json"
+              status=$(curl -s -m 60 -o "$file" -w '%{http_code} %{time_total}s' "$BASE_URL$path")
+              echo "### GET $path → $status"
+              echo '```json'
+              head -c 1500 "$file"
+              echo
+              echo '```'
+            done
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Run the Challenge 1 collection
+        run: |
+          npx -y newman@6.2.1 run docs/SlotDrop-GC2-Challenge1.postman_collection.json \
+            --env-var "baseUrl=$BASE_URL" --timeout-request 60000 \
+            --reporters cli,json --reporter-json-export evidence/challenge1-deployed-newman.json
+      - name: Summarize each request and response
+        if: always()
+        run: |
+          node -e '
+            const run = require("./evidence/challenge1-deployed-newman.json").run;
+            const out = ["## Challenge 1 against the deployed API", ""];
+            for (const e of run.executions) {
+              const req = e.request, res = e.response || {};
+              const url = req.url.protocol + "://" + req.url.host.join(".") + "/" + req.url.path.join("/") + (req.url.query?.length ? "?" + req.url.query.map(q => q.key + "=" + q.value).join("&") : "");
+              const body = res.stream ? Buffer.from(res.stream.data).toString("utf8") : "";
+              out.push("### " + e.item.name, "", "`" + req.method + " " + url + "` → **" + res.code + " " + (res.status || "") + "** (" + res.responseTime + " ms)", "");
+              if (req.body?.raw) out.push("Request body:", "```json", req.body.raw, "```");
+              out.push("Response:", "```json", body.slice(0, 1200), "```");
+              for (const a of e.assertions || []) out.push("- " + (a.error ? "❌ " : "✅ ") + a.assertion);
+              out.push("");
+            }
+            out.push("Assertions: " + (run.stats.assertions.total - run.stats.assertions.failed) + "/" + run.stats.assertions.total + " passed");
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+            console.log(out.join("\n"));
+          '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: challenge1-deployed-evidence
+          path: evidence/
+
+  stretch:
+    # Read-only or refused requests only: no booking is created.
+    needs: challenge1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: ${{ inputs.baseUrl || 'https://slotdrop-gc2-group-zx8j.onrender.com' }}
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Sequential versus parallel Selection requests
+        run: |
+          node --input-type=module -e '
+            const base = process.env.BASE_URL;
+            const [slot] = await (await fetch(base + "/api/slots?people=2")).json();
+            const paths = ["/api/slots/" + slot.id, "/api/pricing/quote?slotId=" + slot.id + "&quantity=2"];
+            const get = async path => { const r = await fetch(base + path, { cache: "no-store" }); if (!r.ok) throw new Error(path + " " + r.status); return r.json(); };
+            const time = async run => { const t = performance.now(); await run(); return performance.now() - t; };
+            const sequential = () => time(async () => { for (const p of paths) await get(p); });
+            const parallel = () => time(() => Promise.all(paths.map(get)));
+            for (let i = 0; i < 3; i += 1) { await sequential(); await parallel(); }
+            const seq = [], par = [];
+            for (let i = 0; i < 15; i += 1) { seq.push(await sequential()); par.push(await parallel()); }
+            const median = v => [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)];
+            const lines = ["## Stretch: sequential vs parallel (deployed)", "",
+              "Two independent Selection requests for session " + slot.id + ": `GET " + paths.join("` and `GET ") + "`.",
+              "15 alternating trials after 3 warm-up rounds, from a GitHub Actions runner.", "",
+              "| Mode | Median | Fastest | Slowest |", "|---|---:|---:|---:|",
+              "| Sequential | " + median(seq).toFixed(1) + " ms | " + Math.min(...seq).toFixed(1) + " ms | " + Math.max(...seq).toFixed(1) + " ms |",
+              "| Parallel | " + median(par).toFixed(1) + " ms | " + Math.min(...par).toFixed(1) + " ms | " + Math.max(...par).toFixed(1) + " ms |", ""];
+            (await import("node:fs")).appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+            console.log(lines.join("\n"));
+          '
+      - name: Booking route returns 429 after the limit, then recovers
+        run: |
+          node --input-type=module -e '
+            const base = process.env.BASE_URL;
+            // quantity 0 is always refused with 400, so none of these can save a booking.
+            const post = () => fetch(base + "/api/bookings", { method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ requestId: crypto.randomUUID(), slotId: 1, quantity: 0, customerName: "GC2 QA",
+                customerEmail: "qa@example.com", paymentMethod: "mock_card", expectedTotalCentavos: 1 }) });
+            const counts = {}; let limited;
+            for (let i = 1; i <= 40 && !limited; i += 1) {
+              const r = await post(); counts[r.status] = (counts[r.status] || 0) + 1;
+              if (r.status === 429) limited = { attempt: i, retryAfter: r.headers.get("retry-after"), body: await r.text() };
+            }
+            const lines = ["## Stretch: too many requests (deployed)", ""];
+            if (!limited) { lines.push("No 429 within 40 refused POSTs. Status counts: " + JSON.stringify(counts)); }
+            else {
+              lines.push("POST /api/bookings attempt " + limited.attempt + " → **429**, `Retry-After: " + limited.retryAfter + "`", "", "```json", limited.body, "```",
+                "Status counts before the 429: `" + JSON.stringify(counts) + "`");
+              await new Promise(r => setTimeout(r, (Number(limited.retryAfter) + 1) * 1000));
+              const after = await post();
+              lines.push("", "After waiting " + (Number(limited.retryAfter) + 1) + " s, the same kind of request → **" + after.status + "** " + (await after.text()));
+            }
+            const after = await (await fetch(base + "/api/metrics")).json();
+            lines.push("", "`GET /api/metrics` afterwards: `bookingCount` = " + after.bookingCount + " (no booking was created).", "");
+            (await import("node:fs")).appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+            console.log(lines.join("\n"));
+            if (!limited) process.exit(1);
+          '
