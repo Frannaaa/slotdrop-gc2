@@ -306,6 +306,7 @@ function renderSessions() {
       const toggle = element(
         "button",
         slot.status === "paused" ? "Resume sales" : "Pause sales",
+        slot.status === "paused" ? "resume-sales" : "pause-sales",
       );
       toggle.type = "button";
       view.toggle = toggle;

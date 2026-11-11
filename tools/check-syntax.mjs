@@ -10,4 +10,6 @@ async function check(directory) {
     }
   }
 }
+const root = spawnSync(process.execPath, ['--check', 'index.js'], { stdio: 'inherit' });
+if (root.status !== 0) process.exit(root.status || 1);
 for (const directory of ['server','public','tests','tools']) await check(directory);
