@@ -288,9 +288,9 @@ function renderSessions() {
       const toggle = element(
         "button",
         slot.status === "paused" ? "Resume sales" : "Pause sales",
+        slot.status === "paused" ? "resume-sales" : "pause-sales",
       );
       toggle.type = "button";
-      toggle.classList.add(slot.status === "paused" ? "resume-sales" : "pause-sales");
       view.toggle = toggle;
       if (Date.parse(slot.startsAt) <= Date.now() || (slot.status === "paused" && !state.canResume)) toggle.disabled = true;
       toggle.addEventListener("click", async () => {
