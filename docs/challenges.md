@@ -84,11 +84,19 @@ Line numbers are from `main` at `d10e830` for the server and shared code, and fr
 | **Response** | `server/routes/bookings.js:9`, shaped by `receiptResponse()` (`bookings.js:56`) | 201 with the saved receipt, or 200 for an identical retry. |
 | **What renders** | `checkout.js:153` sets `navigating`, which keeps Submit disabled, and line 159 goes to `/confirmation.html?id=…`. `load()` in `public/js/confirmation.js:6` calls `GET /api/bookings/:id` (line 14) → `server/routes/bookings.js:11` → `findReceipt()` (`bookings.js:134`) | Confirmation (line 17) shows the booking reference, seats, price per person, saved total and payment choice, read back from PostgreSQL. |
 
+An independent check follows the trip: `load()` in `public/js/owner.js` reads `GET /api/bookings` and `GET /api/metrics`, so the Owner screen shows the saved booking and the five numbers without relying on the customer's page.
+
 Seats are not stored as a counter. Seats left = released seats − confirmed bookings, so saving the booking row is what makes the seats unavailable.
+
+### Why the request is built this way
+
+**Why the order matters.** Showing a quote does not reserve a seat. Booking locks the session row and rechecks the seats and the agreed total inside the same database transaction. Otherwise two customers could both be told the last seat is free. The booking ID and the saved prices stay in PostgreSQL, so refreshing Confirmation reads the saved result even if the offer is edited later. The public receipt leaves out private contact details and the request key.
+
+**Fran's explanation of the design.** I separate a displayed price estimate from the actual act of booking. The browser can request a quote, but it cannot decide whether a seat still exists or send its own authoritative price. On submission, the backend validates the payload, locks the selected session and recomputes both availability and price before writing a row. This is important because two customers could see the same last seat before either checks out. The lock means their writes are handled in sequence, and the later request must recheck remaining inventory before saving. An identical network retry uses the same `requestId`, so a successful but delayed response does not become a second booking. Only after the server commits do we have a real booking ID. I treat the new `201` response, the later `GET` receipt, and the independent Owner records as different checks of the same saved transaction, rather than treating a confirmation message as proof. All payments and guest details used for our class are simulated.
 
 ### A local example of the same request
 
-This is from a local run on 7 November, **not** the deployed capture. `POST /api/bookings` returned 201, and `GET /api/bookings/917d1fa9-9a71-4a2f-873e-78c6ea4b8c9e` returned the same receipt with 200. The names and prices are from the older fictional test data.
+This is from a local run on 7 November, **not** the deployed capture. A second local run on 11 November, with Chrome DevTools open on a local build of all six screens, showed the booking POST return 201 and the receipt GET return 200 for booking `ae9ed892-67c7-4603-9244-17f186f637bc`, with the same reference on Confirmation and Owner (recorded in the submission checklist in PR #47). `POST /api/bookings` returned 201, and `GET /api/bookings/917d1fa9-9a71-4a2f-873e-78c6ea4b8c9e` returned the same receipt with 200. The names and prices are from the older fictional test data.
 
 Request body:
 

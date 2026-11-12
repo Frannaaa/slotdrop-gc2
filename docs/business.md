@@ -28,7 +28,7 @@
 | What are the two revenue features? | **Released-seat availability with a booking deadline**, and **optional buddy pricing** for two or more people. | The first makes released seats bookable without overselling. The second can bring an extra attendee, but can also discount people who would have paid more. |
 | When is a pilot worth running? | When a studio genuinely agrees, manages its released seats separately, and still earns after the cost of serving each extra attendee. | Mock bookings and website research do not prove demand. |
 
-**Decision.** Run a narrow, reliable released-seat pilot, not a broad activity marketplace. Offer the buddy price selectively, not on every session: [section 5](#5-revenue-features-with-a-number) shows that a bigger booking does not always mean more money.
+**Decision.** Run a four-week Katipunan pottery pilot, and only if a studio can show it has seats worth releasing. This is a narrow released-seat pilot, not a broad activity marketplace. The key question is whether SlotDrop brings in bookings the studio would otherwise miss. The pilot plan is in [section 10](#10-risks-and-what-is-still-unknown). Offer the buddy price selectively, not on every session: [section 5](#5-revenue-features-with-a-number) shows that a bigger booking does not always mean more money.
 
 ## 2. GC1 traceability
 
@@ -124,6 +124,8 @@ Both examples use the seeded Laro Ceramics session. Laro publishes mug-making + 
 | 2 standard seats | ₱5,400 | ₱540 | ₱4,860 |
 | 2 buddy seats | ₱5,130 | ₱513 | ₱4,617 |
 
+**The studio's direct price is the real comparison.** One ₱2,700 standard offer leaves the studio ₱2,430 after commission. If that guest would have paid the advertised ₱3,000 directly, the studio gives up ₱570 before any difference in channel costs. If the seat would have stayed empty, the studio gains ₱2,430 before materials, firing and its other costs of serving the guest. That is why a studio should release only a few seats, late enough to protect direct sales and early enough to prepare for the booking.
+
 ### Feature A: released-seat availability
 
 | Saved in the database | Enforced on the server |
@@ -147,9 +149,9 @@ Both examples use the seeded Laro Ceramics session. Laro publishes mug-making + 
 | **Both people would have paid the standard price** (₱5,400) | Customers pay **₱270 less** (−5%). SlotDrop's fee falls **₱27**. The studio receives **₱243 less**. | We discounted two sales we already had. |
 | **Only one would have come, and the second seat stays empty** (₱2,700) | The booking grows by **₱2,430** (+90%). SlotDrop's fee rises **₱243**. The studio receives **₱2,187 more**. | The second seat is new income, if serving that person costs the studio less than ₱2,187 and nobody else would have bought the seat. |
 
-**Break-even.** A buddy booking that brings a new person adds ₱243 to our fee. One that would have happened anyway at the standard price costs us ₱27. The two cancel out when 1 buddy booking in 10 brings a new person (27 ÷ (243 + 27) = 10%). The studio's break-even is the same 10% before its cost of serving the extra attendee, and higher after it.
+**Break-even.** A buddy booking that brings a new person adds ₱243 to our fee. One that would have happened anyway at the standard price costs us ₱27. The two cancel out when 1 buddy booking in 10 brings a new person (27 ÷ (243 + 27) = 10%). For the studio the answer depends on what it costs to serve the extra guest. For illustration, at ₱500 the studio gains ₱1,687 when the offer brings in a guest and loses ₱243 when both guests would have paid the standard price, so it breaks even when the offer adds a guest in about 13 of every 100 buddy bookings. The ₱500 is an assumption. The threshold rises if extra guests cost more or displace direct bookings.
 
-**So** buddy pricing pays only when it brings a person who would not have come otherwise, and it needs to do that in more than 1 of every 10 buddy bookings. We keep it optional for each session and let the studio decide, and we do not treat a larger booking as proof of a better result. These are two scenarios, not forecasts: we have no data yet on studio costs, conversion or whether studios would accept the rate.
+**So** buddy pricing pays only when it brings a person who would not have come otherwise, and it needs to do that in more than 1 of every 10 buddy bookings for SlotDrop, and in about 13 of every 100 for a studio with a ₱500 serving cost. A pilot can test this by comparing similar sessions with and without the buddy price, then checking where the bookings came from and what those customers would have done otherwise. We keep it optional for each session and let the studio decide, and we do not treat a larger booking as proof of a better result. These are two scenarios, not forecasts: we have no data yet on studio costs, conversion or whether studios would accept the rate.
 
 **Money convention.** Amounts are stored in whole centavos. Fee per seat = round(price per seat × commission basis points ÷ 10,000), then multiplied by the number of seats. Studio payout = total − fee. The quote, the saved booking and the examples above all use this rule.
 
@@ -173,7 +175,7 @@ The example values are after one 2-seat buddy booking on the Laro session.
 
 ### Who we are building for
 
-**Customer.** Young professionals who live, study or work around Katipunan, UP Village and nearby Quezon City, can pay for an occasional leisure activity, and sometimes decide within three days. We would recruit by location, leisure spending and planning habits. Their age range, income, willingness to pay and how often they would book are not yet measured. Students are a secondary group; we do not assume workshops are affordable for them.
+**Customer.** Young professionals who live, study or work around Katipunan, UP Village and nearby Quezon City, can pay for an occasional leisure activity, and sometimes decide within three days. For a pilot we would recruit adults of about 22–34 who have room in their leisure budget for an occasional ₱2,500–₱3,000 activity and sometimes decide one to three days ahead. The typical use is a free weekend afternoon with a friend. The age range and budget are recruitment criteria: income, willingness to pay and how often they would book are not yet measured. Students are a secondary group. We would interview them separately and do not assume workshops are affordable for them.
 
 **What the customer needs.** To choose a workable activity without checking several calendars and finding out the deadline or materials cost late. So the date and time, branch, duration, included materials, collection requirements, total price and last booking time are all shown before we ask for contact details.
 
@@ -268,6 +270,7 @@ Official websites were checked on 29–30 October 2026. A published product show
 1. Verify Laro's next dated QC session and Tahanan's recurring schedule.
 2. Use Marz to test whether appointment-based crafts fit the model at all.
 3. Keep Metals & Gems as a higher-cost comparison until its duration and availability are resolved.
+4. Before building out the catalog, ask each studio for four weeks of class records: scheduled capacity, paid seats, late cancellations and unfilled seats, and which openings could have been released before its preparation cutoff. That tells us how many seats we could really list, a number the public catalogs cannot supply.
 
 This is our proposed next step, not a ranking backed by bookings.
 
@@ -278,6 +281,8 @@ This is our proposed next step, not a ranking backed by bookings.
 | **ClassPass Manila** | A named local option for finding fitness and wellness classes. Its partner pages describe selling excess capacity, pricing and inventory tools, and rate protection. These are ClassPass's own claims. | Stay much smaller: a cash price set by the studio, one release of seats, no membership or credits. This is a choice of focus, not proof that we are better. |
 | **Studios' own sites** | Laro, Bumi & Ashe and Tahanan already publish products, schedules and policies. Customers can book without a marketplace. | Show near-term details side by side across willing studios. A studio needs extra customers or simpler selling to justify our fee. |
 | **FunNow** | A near-term experience-booking service we use as an analogy. We did not confirm that it operates in the Philippines. | We do not claim last-minute booking is new, and we do not present FunNow as a confirmed local competitor. |
+
+The GC1 feedback cited HotelTonight and Fresha as precedents for selling spare capacity. The question for SlotDrop is whether it can bring a studio a booking it would have missed through its existing channels.
 
 Sources: https://classpass.com/search-index/manila | https://classpass.com/partners/faqs | https://www.events.myfunnow.com/whyfunnow-en
 
@@ -293,6 +298,19 @@ ClassPass is a comparison. It is not evidence that our 10% fee, manual seat rele
 | **Deal-only customers who do not return** | Show the session's value, location and inclusions clearly; never promise permanent discounts. | No study of repeat visits or willingness to pay. Pottery is unlikely to be weekly. |
 | **Too little suitable supply** | A small area; verify recurring, confirmed sessions and their lead times. | Published catalogs are not a supply pipeline. If too few sessions qualify, we revisit the area or the 72-hour window. We do not invent dates. |
 | **Materials, preparation or collection surprises** | Show technique, inclusions, preparation and collection notes on Detail. | Real studio data must be verified before a pilot. Cancellations, refunds and real payment are not built. |
+
+### How a four-week pilot would work
+
+A studio must be able to run this without changing its own booking system.
+
+| Stage | What we would do | What would change the decision |
+|---|---|---|
+| **Before listing** | Review four weeks of past class records with the studio. Agree on the cutoff, the largest release and the lowest net payout it accepts. Treat the studio's calendar as the record of availability. | If spare seats rarely exist before the cutoff, change the partner or the booking window before spending on finding customers. |
+| **Weeks 1–2** | List a small release at the standard offer price. Recruit nearby prospects through studio posts and local communities. Log released, withdrawn and sold seats for each session. | Pause and reconcile any mismatch with the studio. If the catalog rarely has a session that fits a customer's date and group size, fix supply before paying for traffic. |
+| **Weeks 3–4** | Keep the standard price on some comparable sessions and offer the buddy price on others. Record SlotDrop and studio-direct sales for those sessions. Ask booked customers what they would have done without the listing. | Keep buddy pricing only where the evidence suggests more paid seats in total and a higher studio contribution after the discount and the cost of attendance. Treat a small sample as directional. |
+| **After week 4** | Review the studio's willingness to keep releasing seats, its proceeds, our commission, and our cost of acquisition and support per saved booking. | Run another cycle in the same area if results are promising but unclear. Expand only if the studio wants to continue, availability stays accurate and both sides see a credible return. |
+
+Calendar coordination, verified provider accounts and real payments would come later, and only if the pilot warrants them.
 
 ## 11. Studio applications
 
