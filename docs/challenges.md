@@ -253,7 +253,7 @@ Deployed measurements are from [run 42462032799, attempt 3](https://github.com/F
 | [Too many requests](#too-many-requests) | **Server done; page in review** | 429 with `Retry-After` shown on the deployed API | Checkout's wait-and-retry is in PR #43 |
 | [The double click](#the-double-click) | **Server done; page in review** | Retries and last-seat races are safe in tests | Show a real double click once Checkout is merged |
 | [Pagination](#pagination) | **API done; page in review** | `?page=` and `?limit=` are on `main` (PR #49) | Browse uses them in PR #63 |
-| [Join and compute](#join-and-compute) | **In review** | Seat utilization from two Owner routes (PR #51) | Address review feedback, merge and show it on the deployed site |
+| [Join and compute](#join-and-compute) | **In review** | Seat utilization from two Owner routes (PR #51) | Follow-up approval, merge and a deployed Owner screenshot |
 
 ### Sequential or parallel
 
@@ -294,7 +294,7 @@ This was not run on the deployed site because it would create bookings. A real d
 
 ### Join and compute
 
-PR #51 combines `GET /api/owner/catalog` and `GET /api/bookings` on the Owner screen to show how many released seats in open sessions are booked. Kirsten reviewed the calculation and requested follow-up on the branch relationship and a regression case for booked quantity above eligible capacity. Approval, merge and a deployed Owner screenshot are pending.
+PR #51 combines `GET /api/owner/catalog` and `GET /api/bookings` on the Owner screen to show how many released seats in open sessions are booked. Kirsten requested a regression case for booked quantity above eligible capacity and clarification of the base branch. The regression test is in #51, which now targets `main` directly and passed GC2 checks. A follow-up approval, merge and deployed Owner screenshot are pending.
 
 ## Earlier test records
 
