@@ -9,7 +9,7 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 | Challenge | Status | Evidence here | Still needed |
 |---|---|---|---|
 | [1. Break your own API](#challenge-1--break-your-own-api) | **Complete** on the deployed API | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run | Rerun if the submission URL changes |
-| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Trace written; live capture pending** | Every hop named by file, function and line | One booking on the deployed site with the Network tab open, and the hand-drawn diagram. Browse is deployed. Checkout and Confirmation (PR #43) are not. |
+| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Trace written; live capture pending** | Every hop named by file, function and line | One booking on the deployed site with the Network tab open, and the hand-drawn diagram. Browse is deployed. Checkout and Confirmation (PR #43) are merged, with deployment verification pending. |
 | [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three cases written** | Fran’s three examples and Janelle’s cross-check | Confirm the AI attribution with the contributors and `AI-USAGE.md` |
 | [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | Link CI for the final release commit |
 | [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
@@ -68,7 +68,7 @@ To repeat the Desktop run, import the collection, set `baseUrl` to the submitted
 
 ## Challenge 2 — Trace one real request
 
-**Status: the trace is written; the live capture is still pending.** The deployed site has Home, Browse, Detail, Selection and Owner. It has no Checkout page yet: `/checkout.html` returned 404 on 12 November. Checkout and Confirmation are in PR #43.
+**Status: the trace is written; the live capture is still pending.** The deployed site had Home, Browse, Detail, Selection and Owner when `/checkout.html` returned 404 on 12 November. Checkout and Confirmation have since merged in PR #43. Verify the deployed pages before recording the booking.
 
 ### Every hop, by file and function
 
@@ -138,7 +138,7 @@ Response (201):
 
 ### Still needed
 
-1. Merge and deploy Checkout and Confirmation (PR #43). Browse (PR #62) was merged and deployed on 12 November.
+1. Verify the deployment serves Checkout and Confirmation from merged PR #43. Browse (PR #62) was merged and deployed on 12 November.
 2. Place one fictional booking on the deployed site with DevTools → Network open. Record the method, URL, request body, status and response of `POST /api/bookings`, and the `GET /api/bookings/:id` that follows.
 3. Match the same booking reference in the POST response, the GET response, Confirmation and Owner. Save the screenshots in `docs/evidence/challenge2/` and add the reference here.
 4. Attach the hand-drawn diagram of the trip (a photo is fine).
@@ -267,8 +267,8 @@ Individual work. Each member picks one function they wrote, writes three inputs 
 | Stretch | Status | Shown on the deployed site | What is left |
 |---|---|---|---|
 | [Sequential or parallel](#sequential-or-parallel) | **Complete** | Load time before and after | |
-| [Too many requests](#too-many-requests) | **Server complete; page waiting on PR #43** | 429 with `Retry-After`, then recovery | Checkout waiting and retrying on the deployed page |
-| [The double click](#the-double-click) | **Made safe; live demonstration waiting on PR #43** | Not yet: it needs the Checkout page | A real double click on the deployed Checkout |
+| [Too many requests](#too-many-requests) | **Server evidence saved; deployed Checkout test pending** | 429 with `Retry-After`, then recovery | Checkout waiting and retrying on the deployed page |
+| [The double click](#the-double-click) | **Checkout fix merged; live demonstration pending** | Not yet: it needs the Checkout page | A real double click on the deployed Checkout |
 | [Pagination](#pagination) | **API complete; Browse page waiting on PR #63** | `?page=` and `?limit=` return the right slices | Browse using them on the deployed page |
 | [Join and compute](#join-and-compute) | **Approved; waiting for merge (PR #51)** | Not yet | Merge, then the deployed Owner screen |
 
@@ -301,7 +301,7 @@ The 429 arrived on attempt 26 because the Challenge 1 job in the same run had al
 
 **The front end waits and retries.** `retryLimitedBooking()` (`public/js/customer-common.js:87`, on `main`) waits for the time the server gives and resends the same body once, with the same `requestId`, so a retry cannot become a second booking. It retries only a 429, never a 400, a 409 or a lost connection. `tests/booking-rate-limit.test.js` covers both halves. Checkout calls the helper in PR #43 (`checkout.js:139`) and shows "Booking traffic is high. Retrying this same request in … seconds…" (line 146).
 
-**Still to show.** The deployed Checkout page waiting and retrying. This needs PR #43.
+**Still to show.** The deployed Checkout page waiting and retrying. PR #43 is merged. Verify the deployed page first.
 
 **Deployment check pending.** The API run verified the 429 and retry interval. It did not establish whether requests from different visitors are counted separately behind Render’s proxy.
 
@@ -319,7 +319,7 @@ The 429 arrived on attempt 26 because the Challenge 1 job in the same run had al
 | The same booking sent twice | Each booking carries one `requestId`. `createBooking()` returns the saved receipt with 200 for an identical retry, and 409 when a key is reused with different details. | `tests/bookings.test.js`: "an identical retry returns the same booking with 200, even after the session closes" and "concurrent identical retries create exactly one booking" |
 | Two customers, last seats | `SELECT … FOR UPDATE` locks the session row (`server/services/bookings.js:99`), so the second booking sees the seats already taken. One gets 201 and the other 409. | `tests/bookings.test.js`: "concurrent bookings for the last seats never oversell". `tests/postgres-locking.test.js` shows the same row lock holding back an Owner seat edit on PostgreSQL in CI. |
 
-**Still to show.** A real double click on the deployed Checkout page, with the Network tab showing one POST and the Owner screen showing one booking. This needs PR #43. It creates a booking, so we will record it together with the Challenge 2 capture, using fictional guest details.
+**Still to show.** A real double click on the deployed Checkout page, with the Network tab showing one POST and the Owner screen showing one booking. PR #43 is merged. Verify the deployed page first. It creates a booking, so we will record it together with the Challenge 2 capture, using fictional guest details.
 
 ### Pagination
 
