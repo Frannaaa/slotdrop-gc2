@@ -14,7 +14,7 @@ Customer-facing screens, integration status and final test evidence are tracked 
 
 **Live URL:** https://slotdrop-gc2-group-zx8j.onrender.com (Render free web service `slotdrop-gc2-group-zx8j`, branch `main`, with a hosted PostgreSQL database). The free instance sleeps when idle, so the first request can take about a minute.
 
-On November 8, deployed commit `96d4a31` answered `/api/health`, `/api/slots`, `/api/metrics` and `/api/bookings` with 200, and passed all six Challenge 1 cases ([run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586)). Browse, Checkout and Confirmation are not yet merged, so the full customer flow cannot be completed on the live site yet.
+On November 8, deployed commit `96d4a31` answered `/api/health`, `/api/slots`, `/api/metrics` and `/api/bookings` with 200, and passed all six Challenge 1 cases ([run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586)). On November 12, Browse (PR #62) was merged and deployed, so the live site serves Home, Browse, Detail, Selection and Owner. Checkout and Confirmation (PR #43) are not merged yet, so the full customer flow cannot be completed on the live site yet.
 
 ## Run locally
 
@@ -30,7 +30,7 @@ npm run demo
 
 Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
-Fresh seeds create 16 simulated sessions across eight researched offerings on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
+Fresh seeds create 16 simulated sessions across eight researched offerings on the next two Philippine calendar days. Existing sessions keep their saved dates. Since PR #59, each server start adds two new sample sessions for any reference activity whose sessions have all started. Nothing is shifted or deleted.
 
 ## PostgreSQL and deployment
 
@@ -113,7 +113,7 @@ The reference catalog contains eight activities across five researched businesse
 
 ## Demo inventory readiness (read-only)
 
-Sample allocations are dated for the two days following the initial database seed. They **do not roll forward** on restart and may eventually fall outside the discovery window. Expired inventory is not a database failure.
+Sample allocations are dated for the two days after they are created. Since PR #59, a server start adds two new sample sessions for any reference activity whose earlier sessions have all started, so a long-running deployment does not end up with an empty catalog. Sessions can still pass their booking deadline before the next start (PR #71 tightens this), so check before each demo. Expired inventory is not a database failure.
 
 Before each deployed demo/checkpoint, with the app running, run:
 
