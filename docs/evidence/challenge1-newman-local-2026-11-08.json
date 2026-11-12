@@ -1,0 +1,190 @@
+{
+  "environment": "Local disposable PGlite fixture",
+  "commit": "b1cf5c0",
+  "runner": "Newman 6.2.3",
+  "cases": [
+    {
+      "name": "01 · Zero quantity",
+      "method": "POST",
+      "url": "http://127.0.0.1:37297/api/bookings",
+      "requestBody": {
+        "slotId": 1,
+        "quantity": 0,
+        "customerName": "GC2 QA",
+        "customerEmail": "qa@example.com",
+        "paymentMethod": "mock_card",
+        "expectedTotalCentavos": 304000,
+        "requestId": "34cce6e0-97de-4227-8f44-f8fb9b5685c6"
+      },
+      "status": 400,
+      "response": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "quantity is outside the allowed range."
+        }
+      },
+      "assertions": [
+        {
+          "name": "HTTP 400",
+          "passed": true
+        },
+        {
+          "name": "INVALID_INPUT",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "02 · Browser sends a fake total",
+      "method": "POST",
+      "url": "http://127.0.0.1:37297/api/bookings",
+      "requestBody": {
+        "slotId": 1,
+        "quantity": 2,
+        "customerName": "GC2 QA",
+        "customerEmail": "qa@example.com",
+        "paymentMethod": "mock_card",
+        "expectedTotalCentavos": 304000,
+        "requestId": "857900b7-dc04-4860-b97b-faf94397ecbe",
+        "total": 1
+      },
+      "status": 400,
+      "response": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "Unsupported field: total"
+        }
+      },
+      "assertions": [
+        {
+          "name": "HTTP 400",
+          "passed": true
+        },
+        {
+          "name": "INVALID_INPUT",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "03 · More seats than available",
+      "method": "POST",
+      "url": "http://127.0.0.1:37297/api/bookings",
+      "requestBody": {
+        "slotId": 1,
+        "quantity": 5,
+        "customerName": "GC2 QA",
+        "customerEmail": "qa@example.com",
+        "paymentMethod": "mock_card",
+        "expectedTotalCentavos": 304000,
+        "requestId": "b27b6e94-ce2f-4709-b266-19ad8b0993cd"
+      },
+      "status": 409,
+      "response": {
+        "error": {
+          "code": "SLOT_UNAVAILABLE",
+          "message": "Only 4 seats are left for this session."
+        }
+      },
+      "assertions": [
+        {
+          "name": "HTTP 409",
+          "passed": true
+        },
+        {
+          "name": "SLOT_UNAVAILABLE",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "04 · Unknown session",
+      "method": "POST",
+      "url": "http://127.0.0.1:37297/api/bookings",
+      "requestBody": {
+        "slotId": 999,
+        "quantity": 2,
+        "customerName": "GC2 QA",
+        "customerEmail": "qa@example.com",
+        "paymentMethod": "mock_card",
+        "expectedTotalCentavos": 304000,
+        "requestId": "ff560340-60e8-4370-99c4-e1fb95513b95"
+      },
+      "status": 404,
+      "response": {
+        "error": {
+          "code": "SLOT_NOT_FOUND",
+          "message": "Session not found."
+        }
+      },
+      "assertions": [
+        {
+          "name": "HTTP 404",
+          "passed": true
+        },
+        {
+          "name": "SLOT_NOT_FOUND",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "05 · Missing customer name",
+      "method": "POST",
+      "url": "http://127.0.0.1:37297/api/bookings",
+      "requestBody": {
+        "slotId": 1,
+        "quantity": 2,
+        "customerEmail": "qa@example.com",
+        "paymentMethod": "mock_card",
+        "expectedTotalCentavos": 304000,
+        "requestId": "65c04e1d-ad22-4ad0-926a-b2dd967b744d"
+      },
+      "status": 400,
+      "response": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "Provide customerName."
+        }
+      },
+      "assertions": [
+        {
+          "name": "HTTP 400",
+          "passed": true
+        },
+        {
+          "name": "INVALID_INPUT",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "06 · Search has no matches",
+      "method": "GET",
+      "url": "http://127.0.0.1:37297/api/slots?q=zzzz-no-match",
+      "requestBody": null,
+      "status": 200,
+      "response": [],
+      "assertions": [
+        {
+          "name": "HTTP 200",
+          "passed": true
+        },
+        {
+          "name": "Empty results",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "requests": {
+    "total": 6,
+    "pending": 0,
+    "failed": 0
+  },
+  "assertions": {
+    "total": 12,
+    "pending": 0,
+    "failed": 0
+  }
+}

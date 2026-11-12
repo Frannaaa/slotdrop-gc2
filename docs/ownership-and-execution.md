@@ -61,3 +61,34 @@ Current review order: Home #35 is already merged; Kaitlyn reviews Detail/Selecti
 The shared card helper emits both `activity-card` (existing page styles) and `card` (Kirsten's css_styling branch). Preserve both selectors during integration. Kirsten still owns font loading, form styling and the `[hidden]` safeguard in shared CSS. Kaitlyn owns locking Checkout after a successful receipt so delayed navigation cannot submit a new request ID. Home is merged, but its session links require the reviewed Detail/Selection PR #41; do not report a complete customer flow until the remaining pages and Browse are integrated.
 
 Fran-owned research, studio and application return links temporarily target `/#featured` while Browse is absent. Restore these destinations to `/browse.html`, alongside the customer-page return links, during the reviewed Browse integration.
+
+## Historical business research handoff (October 30)
+
+
+By the 30 October internal review, Fran confirms or revises the proposed target/geography, keeps the pricing/cutoff rules aligned with code, verifies the worked calculations and carries the approved case into docs/business.md. Fran coordinates the API dependencies and real teammate review; a polished Doc alone does not complete GC2.
+
+Kat verifies the supplier register against the exact selected branch and product. For each prospect record: source URL; checked date; branch/address; activity; standard versus sale price; duration; dated session versus recurring schedule; preparation cutoff; included materials; collection time; cancellation/reschedule terms; contradictions; and what remains unknown. State what was checked, rather than writing only “verified.” No outreach is claimed or sent by this draft.
+
+Both decide whether the evidence supports the launch premise. Proposed interview questions: Which classes already run regularly? How many allocated seats were unused across recent sessions? Can seats be ring-fenced from direct sales? What is the last feasible booking time? What is the incremental cost per attendee? What net payout would justify a trial? Would two buddy seats be incremental or replace two standard sales? Record answers and dates if interviews actually occur; leave unanswered fields explicit.
+
+Before a real pilot, require a willing provider, one dated confirmed-to-run session, an agreed dedicated allocation, verified price/inclusions/deadline and a positive provider contribution after marginal costs. These are proposed go/no-go checks, not completed results. If the evidence fails, change the offer or supplier scope; do not convert unknowns into favorable claims.
+
+Course handoff: Oct 30 shared styling/layout and business review; Nov 1 first working code PR target; Nov 4 deployed database-backed Browse checkpoint; Nov 7 internal connected-flow target; Nov 9 final submission at 11:59 PM Philippine time. Oct 30, Nov 1 and Nov 7 are internal targets. Nov 4 and Nov 9 are course checkpoints.
+
+Submit substantive docs/business.md plus the required concise business-summary PDF; this research Doc and the brand book serve different purposes. Documentation-only PRs do not count as a member’s three code PRs. Preserve specific real reviews and merges across the grading windows. Kat’s completed research and the group’s reasoning still need their authors’ confirmation; no interview, profitability or submission approval is implied.
+
+Official repository: https://github.com/Frannaaa/slotdrop-gc2 | Versioned business draft: https://github.com/Frannaaa/slotdrop-gc2/blob/main/docs/business.md
+
+## November 3 integration snapshot (historical)
+
+Historical update: #32 and #39 were approved and merged, research/catalog/application work became available in main, and business PR #37 was refreshed. Customer pages still needed reviews, and CSS/Browse was unpublished. Historical test entries below describe their actual earlier state; newer CI and current implementation evidence is added in dated sections.
+
+### Integration test record
+
+Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery #34 and booking/receipt #42 are reviewed and merged into main. The dated results below are historical; references there to an unimplemented booking endpoint describe the earlier owner-only build.
+
+A fresh check of main 06a3e42 passed syntax, 73 tests and eight SQL groups; one PostgreSQL-only test was skipped locally. The merged booking CI also passed PostgreSQL and production restart checks. Receipt responses exclude contacts and retry keys; the browser helper accepts both changed-price quote envelopes.
+
+Open customer PRs #35/#41/#43 have passing CI and captain integration checks, but still require assigned peer reviews, author records and shared CSS integration. CSS/Browse are not published yet. Official group deployment, deployed challenge screenshots, baseline, outside-group phone test, member explanations and individual recordings remain pending. The private reference does not satisfy group collaboration evidence.
+
+The exact private reference commit 0ac4712 passed syntax, 60 tests (one PostgreSQL-only local skip), eight SQL groups and all seven browser scripts, including full booking/reload/Owner at 320–1280px, recovery, stale responses, studio applications and discovery. These used disposable local data, not the official group deployment. On November 3 the private live Browse had no discoverable sessions because its sample dates expired; new simulated November 4 offers were added through Owner without reseeding or changing historical receipts.
