@@ -14,6 +14,38 @@ test('discovery respects filters, released capacity, cutoffs and known unavailab
     assert.equal((await get('/api/slots?people=7'))[1].length, 1);
     assert.equal((await get('/api/slots?q=%27%20OR%201%3D1--'))[1].length, 0);
     assert.equal((await get('/api/slots?area=UP%20Village'))[1].length, 2);
+    const firstPage = await get('/api/slots?page=1&limit=3');
+    const secondPage = await get('/api/slots?page=2&limit=3');
+    const thirdPage = await get('/api/slots?page=3&limit=3');
+
+    assert.equal(firstPage[0], 200);
+    assert.equal(secondPage[0], 200);
+    assert.equal(thirdPage[0], 200);
+    assert.equal(firstPage[1].length, 3);
+    assert.equal(secondPage[1].length, 3);
+    assert.equal(thirdPage[1].length, 2);
+
+    const allPagedIds = [...firstPage[1], ...secondPage[1], ...thirdPage[1]]
+      .map(slot => slot.id);
+    assert.equal(new Set(allPagedIds).size, 8);
+
+    assert.deepEqual(
+      allPagedIds,
+      (await get('/api/slots'))[1].map(slot => slot.id)
+    );
+
+    assert.equal((await get('/api/slots?page=1&limit=3&category=active'))[1].length, 2);
+
+    for (const path of [
+      '/api/slots?page=0',
+      '/api/slots?page=-1',
+      '/api/slots?page=abc',
+      '/api/slots?limit=0',
+      '/api/slots?limit=51',
+      '/api/slots?page=1&page=2',
+    ]) {
+      assert.equal((await get(path))[0], 400);
+    }
     for (const path of ['/api/slots?people=0','/api/slots?people=2&people=3','/api/slots?when=nextyear','/api/slots/no','/api/slots/9007199254740992']) assert.equal((await get(path))[0], 400);
     assert.equal((await get('/api/slots/999'))[0], 404);
     await f.database.query('UPDATE slots SET booking_closes_at=$1 WHERE id=1', [f.now]);

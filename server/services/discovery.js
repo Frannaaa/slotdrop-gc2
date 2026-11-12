@@ -20,7 +20,7 @@ export function dateRange(when, now) {
 
 export async function listSlots(db, query, now, providerId = null) {
   for (const key of Object.keys(query)) {
-    if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort'].includes(key)) invalid('Unsupported filter: ' + key);
+    if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort', 'page', 'limit'].includes(key)) invalid('Unsupported filter: ' + key);
     if (typeof query[key] !== 'string') invalid('Filters must appear once.');
   }
   if (query.category !== undefined && !['creative','active'].includes(query.category)) invalid('Invalid category.');
@@ -61,6 +61,16 @@ export async function listSlots(db, query, now, providerId = null) {
   if (range) { values.push(...range); where.push(`sl.starts_at >= $${values.length - 1} AND sl.starts_at < $${values.length}`); }
   const effectivePrice = 'CASE WHEN $3 >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END';
   const order = query.sort === 'price-low' ? effectivePrice + ' ASC, sl.starts_at, sl.id' : query.sort === 'price-high' ? effectivePrice + ' DESC, sl.starts_at, sl.id' : 'sl.starts_at, sl.id';
-  const result = await db.query(SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order, values);
+  const paginated = query.page !== undefined || query.limit !== undefined;
+  let sql = SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order;
+
+  if (paginated) {
+    const page = integer(query.page ?? '1', 'page', 1, 1000000);
+    const limit = integer(query.limit ?? '6', 'limit', 1, 50);
+    values.push(limit, (page - 1) * limit);
+    sql += ` LIMIT $${values.length - 1} OFFSET $${values.length}`;
+  }
+
+  const result = await db.query(sql, values);
   return result.rows.map(slotResponse);
 }
