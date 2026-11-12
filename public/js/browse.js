@@ -22,8 +22,8 @@ function render() {
   const query = search.value.trim().toLocaleLowerCase();
   const filtered = slots.filter((slot) => {
     const matchesCategory = category === "all" || slot.category === category;
-    // The discovery API returns serviceName, not title.
-    const searchable = [slot.serviceName, slot.providerName, slot.area, slot.city]
+    const displayTitle = slot.serviceName || slot.title || "Untitled Session";
+    const searchable = [displayTitle, slot.providerName, slot.area, slot.city]
       .filter((value) => typeof value === "string")
       .join(" ")
       .toLocaleLowerCase();
