@@ -47,11 +47,11 @@ Quotes are from our GC1 proposal (page numbers in brackets) and the instructor's
 | GC1 feature | GC1 system logic | GC2 status |
 |---|---|---|
 | Slot Manager | "Stores service, date/time, location, original price, discounted price, and availability." | **Built.** Owner screen; `POST /api/slots`, `PATCH /api/slots/:id`. |
-| Marketplace Feed | "Displays only upcoming slots that are still available." | **Built.** `GET /api/slots` hides inactive, paused, not-confirmed, full and expired sessions. Home shows up to three. The Browse page is in review (PR #62, with pagination in #63). |
+| Marketplace Feed | "Displays only upcoming slots that are still available." | **Built.** `GET /api/slots` hides inactive, paused, not-confirmed, full and expired sessions. Home shows up to three, and Browse lists them all with a search box and category buttons. Page controls for Browse are in review (PR #63). |
 | Simulated Booking | "Checks availability, marks the slot as booked, and creates a booking record." | **Built on the server.** `POST /api/bookings` checks seats and saves in one transaction; `GET /api/bookings/:id` reads the receipt back. The Checkout and Confirmation pages are in review (PR #43). |
 | User Schedules | "Shows bookings associated with the logged-in customer or provider." | **Partly built.** The Owner screen lists saved bookings (`GET /api/bookings`). A customer's own schedule needs accounts: Final Project. |
 | Auth & Roles | "Stores the user's account type and limits features based on their role." | **Final Project.** The GC2 brief does not require login. |
-| Search & Filters (GC1 Phase 2) | "Displays slots that match the selected criteria." | **Brought forward** because Browse must narrow the list: search text, category, area, date, people, activity type, one attribute and sort. |
+| Search & Filters (GC1 Phase 2) | "Displays slots that match the selected criteria." | **Brought forward** because Browse must narrow the list. The Browse page narrows by search text and category. `GET /api/slots` also accepts area, date, people, activity type, one attribute and sort, which the page does not use yet. |
 | Provider Analytics (GC1 Phase 2) | "Calculates metrics from total slots, booked slots, and completed bookings." | **Partly built** as the five owner numbers (`GET /api/metrics`). |
 | Time-based price drops, favorites and alerts, cancellations and reviews, admin panel, real payment | GC1 Phase 2 | **Final Project.** |
 
@@ -85,7 +85,7 @@ SlotDrop earns only when a visitor reaches a saved booking. No conversion events
 | Stage | Screen | Page elements used, and why those | Endpoint behind it | The number it moves |
 |---|---|---|---|---|
 | **Browse** | Home | One-line value proposition and up to three session cards. Three cards, not the full list, so the offer is understood before the visitor has to filter. | `GET /api/slots` | Home visits that open Browse or a session |
-| **Browse** | Browse *(in review, PR #62 and #63)* | Session cards, a search box, and All / Creative / Active buttons. Cards, not a table, because each session needs its time, deadline, seats left and price read together. Buttons for the category, not free text, because there are only two categories. Previous / Next page controls keep the list short on a phone. | `GET /api/slots?q=&category=&page=&limit=` | Click-through to Detail |
+| **Browse** | Browse | Session cards, a search box, All / Creative / Active buttons, a line saying how many sessions match, and a Refresh button. Cards, not a table, because each session needs its time, deadline, seats left and price read together. Buttons for the category, not free text, because there are only two categories. The search box and buttons narrow the list that is already loaded, so results change as the visitor types. Previous / Next page controls are in review (PR #63). | `GET /api/slots`. The route also accepts `?q=`, `?category=`, `?page=` and `?limit=`. | Click-through to Detail |
 | **Select** | Detail | One session's studio, activity, inclusions, preparation notes, start time, duration, booking deadline and seats left. Shown as a labelled list so the facts that decide a booking are not buried in a paragraph. | `GET /api/slots/:id` | Detail visits that continue to Selection |
 | **Select** | Selection | A number field for people, and a summary line: people × price = total, with "Buddy price applied" when it applies. A number field, not a dropdown, because a booking can be for 1 to 100 people. The price comes from the server each time the number changes. No seat is held here. | `GET /api/slots/:id` and `GET /api/pricing/quote`, loaded in parallel | Selections that continue to Checkout |
 | **Confirm** | Checkout *(in review, PR #43)* | Labelled name and email fields, a payment dropdown with two simulated options, a checkbox to accept the total, and the Submit button. A dropdown for payment, not free text, because the server accepts only `pay_on_site` and `mock_card`. The checkbox makes the customer agree to the exact total before anything is saved. | `POST /api/bookings` | Checkout completion (each `requestId` counted once) |
@@ -144,10 +144,12 @@ Both examples use the seeded Laro Ceramics session. Laro publishes mug-making + 
 
 | Without buddy pricing… | With a 2-seat buddy booking (₱5,130) | Result |
 |---|---|---|
-| **Both people would have paid the standard price** (₱5,400) | Customers pay **₱270 less**. SlotDrop's fee falls **₱27**. The studio receives **₱243 less**. | We discounted two sales we already had. |
-| **Only one would have come, and the second seat stays empty** (₱2,700) | The booking grows by **₱2,430**. SlotDrop's fee rises **₱243**. The studio receives **₱2,187 more**. | The second seat is new income, if serving that person costs the studio less than ₱2,187 and nobody else would have bought the seat. |
+| **Both people would have paid the standard price** (₱5,400) | Customers pay **₱270 less** (−5%). SlotDrop's fee falls **₱27**. The studio receives **₱243 less**. | We discounted two sales we already had. |
+| **Only one would have come, and the second seat stays empty** (₱2,700) | The booking grows by **₱2,430** (+90%). SlotDrop's fee rises **₱243**. The studio receives **₱2,187 more**. | The second seat is new income, if serving that person costs the studio less than ₱2,187 and nobody else would have bought the seat. |
 
-**So** buddy pricing pays only when it brings a person who would not have come otherwise. We keep it optional for each session and let the studio decide, and we do not treat a larger booking as proof of a better result. These are two scenarios, not forecasts: we have no data yet on studio costs, conversion or whether studios would accept the rate.
+**Break-even.** A buddy booking that brings a new person adds ₱243 to our fee. One that would have happened anyway at the standard price costs us ₱27. The two cancel out when 1 buddy booking in 10 brings a new person (27 ÷ (243 + 27) = 10%). The studio's break-even is the same 10% before its cost of serving the extra attendee, and higher after it.
+
+**So** buddy pricing pays only when it brings a person who would not have come otherwise, and it needs to do that in more than 1 of every 10 buddy bookings. We keep it optional for each session and let the studio decide, and we do not treat a larger booking as proof of a better result. These are two scenarios, not forecasts: we have no data yet on studio costs, conversion or whether studios would accept the rate.
 
 **Money convention.** Amounts are stored in whole centavos. Fee per seat = round(price per seat × commission basis points ÷ 10,000), then multiplied by the number of seats. Studio payout = total − fee. The quote, the saved booking and the examples above all use this rule.
 
@@ -200,7 +202,7 @@ A mug-making session stays under pottery even when painting is included. A searc
 
 `GET /api/slots` accepts search text, category, area, date (today, tomorrow, weekend), number of people, activity type, one attribute, sort order and paging. Price sorting uses the per-person price for the chosen number of people. The attributes are a fixed list: beginner, handbuilding, wheel-throwing, painting-included, materials-included. We avoid labels such as "popular" that we cannot support with evidence.
 
-The Browse page in review (PR #62 and #63) uses the search box, the All / Creative / Active buttons and paging. There is no price slider, map filter or studio-created tags. Pilates is supported by the data but has no bookable sessions; crafts, jewelry and printmaking are research only.
+The Browse page loads the eligible sessions once and narrows them in the browser with the search box and the All / Creative / Active buttons. Paging on the page is in review (PR #63). There is no price slider, map filter or studio-created tags. Pilates is supported by the data but has no bookable sessions; crafts, jewelry and printmaking are research only.
 
 ## 8. Studio research
 
