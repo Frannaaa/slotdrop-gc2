@@ -9,11 +9,11 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 | Challenge | Status | Evidence here | Still needed |
 |---|---|---|---|
 | [1. Break your own API](#challenge-1--break-your-own-api) | **Complete** on the deployed API | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run | Rerun if the submission URL changes |
-| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Trace written; live capture pending** | Every hop named by file, function and line | One booking on the deployed site with the Network tab open, and the hand-drawn diagram. Browse is deployed. Checkout and Confirmation (PR #43) are merged and both deployed page routes returned HTTP 200. The booking capture is pending. |
+| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Live booking and receipt recorded** | Matching Confirmation and Owner reference, and an HTTP 200 receipt readback | Browser Network POST and GET capture, plus the group’s hand-drawn diagram |
 | [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three cases written** | Fran’s three examples and Janelle’s cross-check | Confirm the AI attribution with the contributors and `AI-USAGE.md` |
-| [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | Link CI for the final release commit |
+| [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | [Passing main CI at `340110f8`](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43204060376). Update if the final release commit changes. |
 | [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
-| [Stretch challenges](#stretch-challenges) | **1 complete; 4 waiting on a merge** | Deployed timings, the 429 result and paged list responses | See the [stretch table](#stretch-challenges) |
+| [Stretch challenges](#stretch-challenges) | **Four demonstrated, with some Network evidence pending** | Timings, double-click result, Browse pagination and Owner utilization | Capture the Checkout 429 wait/retry and the missing Network views |
 
 ## Challenge 1 — Break your own API
 
@@ -68,7 +68,7 @@ To repeat the Desktop run, import the collection, set `baseUrl` to the submitted
 
 ## Challenge 2 — Trace one real request
 
-**Status: the trace is written; the live capture is still pending.** The deployed site had Home, Browse, Detail, Selection and Owner when `/checkout.html` returned 404 on 12 November. Checkout and Confirmation have since merged in PR #43. The deployed Checkout and Confirmation page routes both returned HTTP 200 after the merge.
+**Live booking, 12 November at 21:41 PHT.** One double-click on Checkout using fictional details produced a saved one-seat booking for ₱2,700. The reference `84bba718-430e-4dca-9676-9764a36bf018` appears in [Confirmation](evidence/challenge2/confirmation.jpg) and in one [Owner booking row](evidence/challenge2/owner-booking.jpg). A separate read-only `GET /api/bookings/:id` returned HTTP 200 and the same saved receipt. [HTTP receipt record](evidence/challenge2/receipt-get.json). The Checkout POST request/response and Confirmation GET were not recorded in a browser Network panel during this run.
 
 ### Every hop, by file and function
 
@@ -139,8 +139,8 @@ Response (201):
 ### Still needed
 
 1. Use the deployed Browse, Checkout and Confirmation pages. All three page routes returned HTTP 200 after PR #43 merged.
-2. Place one fictional booking on the deployed site with DevTools → Network open. Record the method, URL, request body, status and response of `POST /api/bookings`, and the `GET /api/bookings/:id` that follows.
-3. Match the same booking reference in the POST response, the GET response, Confirmation and Owner. Save the screenshots in `docs/evidence/challenge2/` and add the reference here.
+2. Capture the browser Network request and response for `POST /api/bookings` and the Confirmation `GET /api/bookings/:id` with Preserve log enabled.
+3. For that Network capture, match the reference in the POST, GET, Confirmation and Owner. The first live booking’s Confirmation, receipt readback and Owner reference are already attached above.
 4. Attach the hand-drawn diagram of the trip (a photo is fine).
 
 If no session can be booked, add a future one on the Owner screen. Do not reseed the database. Since PR #59, the sample dates also move forward on restart once every sample session has started.
@@ -268,9 +268,9 @@ Individual work. Each member picks one function they wrote, writes three inputs 
 |---|---|---|---|
 | [Sequential or parallel](#sequential-or-parallel) | **Complete** | Load time before and after | |
 | [Too many requests](#too-many-requests) | **Server evidence saved; deployed Checkout test pending** | 429 with `Retry-After`, then recovery | Checkout waiting and retrying on the deployed page |
-| [The double click](#the-double-click) | **Checkout fix merged; live demonstration pending** | Not yet: it needs the Checkout page | A real double click on the deployed Checkout |
-| [Pagination](#pagination) | **API complete; Browse page waiting on PR #63** | `?page=` and `?limit=` return the right slices | Browse using them on the deployed page |
-| [Join and compute](#join-and-compute) | **Merged in PR #51; deployed evidence pending** | Not yet | Capture the deployed Owner screen |
+| [The double click](#the-double-click) | **One saved booking observed on live double-click** | One matching Owner row and one confirmed receipt | Browser Network POST count |
+| [Pagination](#pagination) | **Demonstrated on deployed Browse** | Previous and Next switched between sessions 1–6 and 7–8 | |
+| [Join and compute](#join-and-compute) | **Deployed before/after recorded** | 0 of 32 to 1 of 32 booked seats in Owner | Add a browser Network view of both source requests if required |
 
 **Where the deployed results come from.** Timings and the 429 result: [run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799), 8 November 2026, 08:36–08:38 UTC, commit `96d4a31`. Paged list responses: read-only requests on 12 November 2026 at 07:59 UTC, after Browse (PR #62) was deployed. None of these requests created a booking: `GET /api/metrics` showed `bookingCount: 0` on both dates.
 
@@ -319,7 +319,7 @@ The 429 arrived on attempt 26 because the Challenge 1 job in the same run had al
 | The same booking sent twice | Each booking carries one `requestId`. `createBooking()` returns the saved receipt with 200 for an identical retry, and 409 when a key is reused with different details. | `tests/bookings.test.js`: "an identical retry returns the same booking with 200, even after the session closes" and "concurrent identical retries create exactly one booking" |
 | Two customers, last seats | `SELECT … FOR UPDATE` locks the session row (`server/services/bookings.js:99`), so the second booking sees the seats already taken. One gets 201 and the other 409. | `tests/bookings.test.js`: "concurrent bookings for the last seats never oversell". `tests/postgres-locking.test.js` shows the same row lock holding back an Owner seat edit on PostgreSQL in CI. |
 
-**Still to show.** A real double click on the deployed Checkout page, with the Network tab showing one POST and the Owner screen showing one booking. PR #43 is merged. Verify the deployed page first. It creates a booking, so we will record it together with the Challenge 2 capture, using fictional guest details.
+**Live result, 12 November.** A browser double-click on Confirm simulated booking led to [one confirmation](evidence/challenge2/confirmation.jpg) and [one matching saved row](evidence/challenge2/owner-booking.jpg). The number of browser POST attempts was not captured.
 
 ### Pagination
 
@@ -340,7 +340,7 @@ The 429 arrived on attempt 26 because the Challenge 1 job in the same run had al
 
 The three pages together return each session once, in the same order as the full list. A page past the end is an empty list with 200, not an error.
 
-**Still to show.** The brief asks for the List screen to use these. The deployed Browse page loads the full list. PR #63 makes Browse request `/api/slots?page=…&limit=6` and adds Previous and Next buttons. It has an approval, but it was branched before Browse was merged and now conflicts with `main` in `public/browse.html` and `public/js/browse.js`. Once that is resolved and merged, we will record Previous and Next loading different pages on the deployed site.
+**Live result, 12 November.** After PR #63 merged, [Browse page 1](evidence/challenge2/browse-page-1.jpg) showed sessions 1–6. Next displayed [page 2](evidence/challenge2/browse-page-2.jpg), sessions 7–8. Previous returned to page 1.
 
 ### Join and compute
 
@@ -359,7 +359,7 @@ P = round(100 × N ÷ M). Neither route returns this figure alone. With no eligi
 
 `tests/owner-insights.test.js` covers a 3-of-10-seat example, cancelled bookings, paused and out-of-window sessions, empty inventory, and the over-capacity case Kirsten asked for in review. [Kirsten approved the PR on 12 November](https://github.com/Frannaaa/slotdrop-gc2/pull/51#pullrequestreview-5869740111).
 
-**Still to show.** PR #51 is merged. Record the deployed Owner screen with both requests in the Network tab, before and after one booking. This is released-seat utilization in the demo, not a studio's real occupancy.
+**Live result, 12 November.** Across eight eligible sessions, Owner showed [0 of 32 seats booked (0%)](evidence/challenge2/owner-utilization-before.jpg) before the booking and [1 of 32 seats booked (3%)](evidence/challenge2/owner-utilization-after.jpg) after it. This is utilization of released fictional seats. A browser Network view of the two Owner requests was not captured.
 
 ## Earlier test records
 
