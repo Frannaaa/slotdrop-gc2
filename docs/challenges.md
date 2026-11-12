@@ -9,7 +9,7 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 | Challenge | Status | Evidence here | Still needed |
 |---|---|---|---|
 | [1. Break your own API](#challenge-1--break-your-own-api) | **Complete** on the deployed API | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run | Rerun if the submission URL changes |
-| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Trace written; live capture pending** | Every hop named by file, function and line | One booking on the deployed site with the Network tab open, and the hand-drawn diagram. Browse is deployed. Checkout and Confirmation (PR #43) are merged, with deployment verification pending. |
+| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Trace written; live capture pending** | Every hop named by file, function and line | One booking on the deployed site with the Network tab open, and the hand-drawn diagram. Browse is deployed. Checkout and Confirmation (PR #43) are merged and both deployed page routes returned HTTP 200. The booking capture is pending. |
 | [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three cases written** | Fran’s three examples and Janelle’s cross-check | Confirm the AI attribution with the contributors and `AI-USAGE.md` |
 | [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | Link CI for the final release commit |
 | [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
@@ -68,7 +68,7 @@ To repeat the Desktop run, import the collection, set `baseUrl` to the submitted
 
 ## Challenge 2 — Trace one real request
 
-**Status: the trace is written; the live capture is still pending.** The deployed site had Home, Browse, Detail, Selection and Owner when `/checkout.html` returned 404 on 12 November. Checkout and Confirmation have since merged in PR #43. Verify the deployed pages before recording the booking.
+**Status: the trace is written; the live capture is still pending.** The deployed site had Home, Browse, Detail, Selection and Owner when `/checkout.html` returned 404 on 12 November. Checkout and Confirmation have since merged in PR #43. The deployed Checkout and Confirmation page routes both returned HTTP 200 after the merge.
 
 ### Every hop, by file and function
 
@@ -138,7 +138,7 @@ Response (201):
 
 ### Still needed
 
-1. Verify the deployment serves Checkout and Confirmation from merged PR #43. Browse (PR #62) was merged and deployed on 12 November.
+1. Use the deployed Browse, Checkout and Confirmation pages. All three page routes returned HTTP 200 after PR #43 merged.
 2. Place one fictional booking on the deployed site with DevTools → Network open. Record the method, URL, request body, status and response of `POST /api/bookings`, and the `GET /api/bookings/:id` that follows.
 3. Match the same booking reference in the POST response, the GET response, Confirmation and Owner. Save the screenshots in `docs/evidence/challenge2/` and add the reference here.
 4. Attach the hand-drawn diagram of the trip (a photo is fine).
@@ -270,7 +270,7 @@ Individual work. Each member picks one function they wrote, writes three inputs 
 | [Too many requests](#too-many-requests) | **Server evidence saved; deployed Checkout test pending** | 429 with `Retry-After`, then recovery | Checkout waiting and retrying on the deployed page |
 | [The double click](#the-double-click) | **Checkout fix merged; live demonstration pending** | Not yet: it needs the Checkout page | A real double click on the deployed Checkout |
 | [Pagination](#pagination) | **API complete; Browse page waiting on PR #63** | `?page=` and `?limit=` return the right slices | Browse using them on the deployed page |
-| [Join and compute](#join-and-compute) | **Approved; waiting for merge (PR #51)** | Not yet | Merge, then the deployed Owner screen |
+| [Join and compute](#join-and-compute) | **Merged in PR #51; deployed evidence pending** | Not yet | Capture the deployed Owner screen |
 
 **Where the deployed results come from.** Timings and the 429 result: [run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799), 8 November 2026, 08:36–08:38 UTC, commit `96d4a31`. Paged list responses: read-only requests on 12 November 2026 at 07:59 UTC, after Browse (PR #62) was deployed. None of these requests created a booking: `GET /api/metrics` showed `bookingCount: 0` on both dates.
 
@@ -359,7 +359,7 @@ P = round(100 × N ÷ M). Neither route returns this figure alone. With no eligi
 
 `tests/owner-insights.test.js` covers a 3-of-10-seat example, cancelled bookings, paused and out-of-window sessions, empty inventory, and the over-capacity case Kirsten asked for in review. [Kirsten approved the PR on 12 November](https://github.com/Frannaaa/slotdrop-gc2/pull/51#pullrequestreview-5869740111).
 
-**Still to show.** Merge PR #51, then record the deployed Owner screen with both requests in the Network tab, before and after one booking. This is released-seat utilization in the demo, not a studio's real occupancy.
+**Still to show.** PR #51 is merged. Record the deployed Owner screen with both requests in the Network tab, before and after one booking. This is released-seat utilization in the demo, not a studio's real occupancy.
 
 ## Earlier test records
 
