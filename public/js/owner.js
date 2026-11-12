@@ -7,6 +7,7 @@ import {
   salesState,
   preferredServiceId,
   demoInventoryStatus,
+  openReleaseUtilization,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -216,6 +217,16 @@ function renderMetrics(metrics) {
     $("metrics").append(card);
   }
 }
+function renderOpenUtilization(bookings) {
+  const value = openReleaseUtilization(catalog, bookings);
+  let message = "No eligible, open demo sessions are in the current discovery window.";
+  if (value.inconsistent) {
+    message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
+  } else if (value.utilizationPercent !== null) {
+    message = `${value.confirmedSeats} of ${value.releasedSeats} released demo seats booked (${value.utilizationPercent}%) across ${value.eligibleSessions} currently eligible sessions.`;
+  }
+  $("open-utilization").textContent = message;
+}
 function refreshDemoReadiness(now = Date.now()) {
   const info = demoInventoryStatus(
     catalog.slots,
@@ -421,6 +432,7 @@ async function load() {
       editing,
     );
     renderMetrics(metrics);
+    renderOpenUtilization(bookings);
     renderSessions();
     renderBookings(bookings);
     refreshDemoReadiness();
@@ -436,6 +448,7 @@ async function load() {
     $("inventory-warning").textContent = "";
     message("page-message", error.message, true);
     $("metrics").replaceChildren();
+    $("open-utilization").textContent = "Utilization unavailable. Use Refresh data to retry.";
     $("sessions").textContent =
       "Sessions could not be loaded. Use Refresh data to retry.";
     $("bookings").textContent = "Bookings could not be loaded.";
