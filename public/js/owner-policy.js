@@ -99,3 +99,6 @@ export function demoInventoryStatus(slots, services, now = Date.now(), discovery
   return {state: 'ready', count: available.length,
     message: available.length + ' demo session(s) are currently discoverable. These are classroom offers, not real studio availability.'};
 }
+
+// Keep a single Owner policy import for browser and isolated clock/toggle harnesses.
+export { openReleaseUtilization } from './owner-insights.js';
