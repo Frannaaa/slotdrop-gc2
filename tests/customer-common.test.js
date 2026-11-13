@@ -97,3 +97,9 @@ test('studio reference cards and profiles share safe HTTPS source-link validatio
   assert.match(html, /href="https:\/\/example\.com\/workshops\?q=a&amp;category=clay"/);
   assert.doesNotMatch(html, /user:secret|Price source/);
 });
+
+test('card title falls back from serviceName to title to Untitled Session', () => {
+  assert.match(card({ ...slot, serviceName: 'Wheel Pottery' }), /<h2>Wheel Pottery<\/h2>/);
+  assert.match(card({ ...slot, serviceName: undefined, title: 'Legacy Title' }), /<h2>Legacy Title<\/h2>/);
+  assert.match(card({ ...slot, serviceName: '', title: '' }), /<h2>Untitled Session<\/h2>/);
+});
