@@ -19,6 +19,6 @@ Three sequential curl requests from the review environment. The latency includes
 
 - Browse waits for another List request when a page contains six sessions. If that lookahead fails, it hides the already-loaded cards. PR #77 addresses the failed-lookahead case.
 - Browse currently exposes search and category controls. PR #77 adds the sort control backed by the existing API.
-- The catalog rolls forward on startup. PR #71 fixes the startup eligibility check for sessions that have closed, are paused or have sold out.
+- Catalog replenishment runs on startup. PR #71 now uses bookability to decide when to replenish, but an instance that stays up can still run short between restarts.
 
 Capture the mobile Lighthouse scores and cache-disabled Network totals from the final public Browse URL. Confirm the weaknesses against that release before submission.

@@ -4,7 +4,7 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 
 **Deployed site:** https://slotdrop-gc2-group-zx8j.onrender.com (Render service `slotdrop-gc2-group-zx8j`, branch `main`)
 
-## Status on 12 November 2026
+## Status on 13 November 2026
 
 | Challenge | Status | Evidence here | Still needed |
 |---|---|---|---|
@@ -72,7 +72,7 @@ To repeat the Desktop run, import the collection, set `baseUrl` to the submitted
 
 ### Every hop, by file and function
 
-Line numbers are from `main` at `d10e830` for the server and shared code, and from PR #43 at `bdbf7b4` for Checkout and Confirmation.
+Line numbers below were checked against `main` at `8bdcfcb`.
 
 | Hop | File and function | What happens |
 |---|---|---|
@@ -217,7 +217,7 @@ The code was valid syntactically, but the edit request included capacity, status
 
 ## Challenge 4 — The owner changes a rule
 
-**The rule:** "Change the commission from 10%." **Answer: one line.** Checked on `main` at `d10e830`. No rate was changed on the deployed site.
+**The rule:** "Change the commission from 10%." **Answer: one line.** Checked on `main` at `8bdcfcb`. No rate was changed on the deployed site.
 
 ### Every place the commission appears
 
@@ -227,7 +227,7 @@ The code was valid syntactically, but the edit request included capacity, status
 | `server/services/pricing.js:22` and `:25` | `priceQuote()` takes the rate and computes the fee for quotes and bookings | No |
 | `server/services/bookings.js:109` and `:120` | Passes the rate to `priceQuote()` and saves it with the booking | No |
 | `server/repositories/owner.js:3` and `:8` | Sends the rate to the Owner screen | No |
-| `public/js/owner.js:87` | Previews a studio's earnings using the rate from the API | No |
+| `public/js/owner.js:88` | Previews a studio's earnings using the rate from the API | No |
 | `db/schema.sql:78` | Checks that each saved fee matches its saved rate | No |
 
 `tests/challenge4-rate.test.js` (merged in PR #37) checks that only the config file defines the rate, and that the quote, the saved booking and the Owner screen all use it.
@@ -260,7 +260,7 @@ The customer's total stays at ₱5,130 because this changes the platform's commi
 
 ## Challenge 5 — Predict, then run
 
-Individual work. Each member picks one function they wrote, writes three inputs and the output they predict for each, runs them, and explains any mismatch. The recording is unedited, has the member's own voice, lasts at most three minutes, and is made without AI assistance.
+Individual work. Each member picks one function they wrote, writes three inputs and the output they predict for each, runs them, and explains any mismatch. The screen recording is unedited, has the member's own voice, lasts at most three minutes, and is made without AI assistance. Show the function, the three predictions and actual runs, then change one input or one line and explain the result.
 
 ## Stretch challenges
 
