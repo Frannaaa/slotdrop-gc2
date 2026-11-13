@@ -1,22 +1,8 @@
 # GC2 Criterion 1 — Transaction flow works (20 points)
 
-**Status checked November 8, 2026.** This is an evidence checklist, not a claim of full deployed success.
+**Status checked 13 November 2026 (PHT).** Home (#35, #68), Browse (#62, #63), Detail and Selection (#41), Checkout and Confirmation (#43), booking and receipt APIs (#42), and the Owner workspace (#29, #51) are merged.
 
-### Source status
-
-| Screen / route | Group `main` | Captain gate |
-|---|---|---|
-| Home | merged PR #35 | Confirm Home→Browse link resolves after Browse PR |
-| Browse | **absent** from `main` | Kirsten must author and merge API-backed Browse, search/filter and empty/error states |
-| Detail | merged PR #41 | Validate link from Browse |
-| Selection | merged PR #41 | Validate server quote and correct quantity |
-| Checkout | **PR #43 unmerged** | Kaitlyn must prevent resubmit after success, show errors, obtain real Kat review |
-| Confirmation | **PR #43 unmerged** | Fetch saved receipt by ID on refresh |
-| Booking POST /api/bookings and GET /api/bookings/:id | merged PR #42 | Fran can smoke-test, final public browser proof remains pending |
-| Owner booking list | merged PR #29 | Confirm *same* booking ID appears from public customer journey |
-| Official group public deployment | **not verified** | Must use shared Group 1 `main`; private reference-only Render app does **not** count |
-
-The relevant rubric bands are Exemplary 20/20 (a stranger completes all six screens + Owner order on deployed link), Proficient around 16/20 (only one minor defect/thin screen), Developing around 12/20 (local-only or workaround), and Missing 0–8/20 (cannot complete). Current strict provisional assessment: **5/20**, because missing Browse and Checkout/Confirmation on group main prevent the full flow. This is a captain estimate, not the instructor's grade.
+The live Render walkthrough on 12 November produced a Confirmation receipt and one matching Owner row. The separate receipt readback returned 200. See [the deployed evidence](challenges.md#challenge-2--trace-one-real-request). Browser Network capture and the outside-group phone test remain pending.
 
 ### Fran-owned automated acceptance check
 
@@ -55,11 +41,11 @@ The test fixture used a PGlite database and local `127.0.0.1` HTTP app. This ver
 
 ### Full-credit browser acceptance — actual evidence to collect
 
-- [ ] Member-owned, validly reviewed Browse + CSS PRs and Checkout/Confirmation PR #43 merged into main, all page links actually wired.
+- [x] Reviewed Browse, shared CSS and Checkout/Confirmation are merged. The deployed browser walkthrough reached Confirmation from Browse.
 - [ ] Final reviewed `main` deployed with persistent PostgreSQL and discoverable **future fictional** sessions. Record exact public origin, commit SHA, test timestamp and tested booking ID.
 - [ ] **Independent non-member**, using a real phone without instructions, starts on Home, finds Browse, applies a filter, opens Detail, chooses quantity, sees server total on Selection, fills Checkout with fictional contact/payment, submits once, and gets Confirmation.
 - [ ] Confirm the URL contains the saved receipt ID and refreshing Confirmation **GETs that receipt by ID** rather than relying on browser storage.
-- [ ] Open Owner on the deployed link and show **the exact same booking ID**, matching activity, quantity, price and status. Record a screenshot with no personal/contact details.
+- [x] The 12 November deployed capture shows the same booking ID in Confirmation and Owner, with no real customer details.
 - [ ] Confirm the number of available seats dropped by the correct quantity; duplicate clicks must not produce two bookings; one clear success state.
 - [ ] Test 320–390px width, error recovery and all forward/back links; note any defect and retest after fix.
 - [ ] Put independent tester's date/device, observed success/failures, non-sensitive screenshots and the exact deployed commit in `docs/challenges.md` or `docs/evidence/`; use real observations, not reconstructed results.

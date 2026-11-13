@@ -6,7 +6,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
-| GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Does not check the database | Fran |
+| GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | 503 if the production database or required tables are unavailable | Fran |
 | GET /api/slots | q, category, area, when, people, type, tag, sort, optional page, limit | 200 array, including [] | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
@@ -15,14 +15,14 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
-| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT | Janelle |
+| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT; 429 RATE_LIMITED with Retry-After | Janelle |
 | GET /api/bookings/:id | UUID | 200 saved receipt | 400 malformed; 404 BOOKING_NOT_FOUND | Janelle |
 
 Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.
 
 ## Discovery and session responses
 
-Optional **pagination** (GC2 +1 bonus preparation, backend only): `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. The List UI must actually use these parameters and demonstrate pagination on the deployed group site before claiming the bonus. Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
+Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. Browse requests six sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination). Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
 
 q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
 
@@ -122,13 +122,13 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 |---|---|---|
 | Home | / | Cholo |
 | Browse | /browse.html | Kirsten |
-| Detail | /detail.html?slotId=1 | Kaithlyn |
+| Detail | /detail.html?slotId=1 | Kat |
 | Selection | /selection.html?slotId=1 | Kaithlyn |
 | Booking form | /checkout.html?slotId=1&quantity=2 | Kaitlyn |
 | Confirmation | /confirmation.html?id=UUID | Kaitlyn |
 | Owner workspace | /owner.html | Fran |
 
-Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
+The customer screens and Owner workspace are merged. The outside-group phone walkthrough is tracked in [Transaction acceptance](transaction-flow-acceptance.md).
 
 The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
 
