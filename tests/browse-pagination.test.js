@@ -26,7 +26,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   }
 
   const elements = new Map(
-    ['#results', '#status', '#search', '#pagination', '#retry'].map(key => [key, new Element()])
+    ['#results', '#status', '#search', '#sort', '#pagination', '#retry'].map(key => [key, new Element()])
   );
   const categories = ['all', 'creative', 'active'].map(category => {
     const button = new Element();
@@ -37,7 +37,9 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     id:i+1, serviceName:'Pottery '+(i+1), providerName:'Demo Studio',
     category:i%2===0?'creative':'active',
   }));
+  elements.get('#sort').value = 'soonest';
   const sent = [];
+  let failLookahead = false;
   const source = (await readFile(new URL('../public/js/browse.js', import.meta.url), 'utf8'))
     .replace(/^import .*?;\r?\n/m, '');
 
@@ -55,6 +57,8 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
       (!params.has('category') || slot.category === params.get('category')) &&
       (!params.has('q') || slot.serviceName.toLowerCase().includes(params.get('q').toLowerCase()))
     );
+    if (failLookahead && page === 2) throw new Error('Lookahead unavailable');
+    if (params.get('sort') === 'price-high') match.reverse();
     return match.slice((page-1)*limit, page*limit);
   };
 
@@ -108,5 +112,20 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   assert.deepEqual(shownIds(), [2,4,6,8,10,12]);
   assert.ok(sent.some(path => path.includes('category=active') && path.includes('limit=6')));
   assert.equal(pagination.children.length, 0, 'exactly one full page has no phantom next button');
+  failLookahead = true;
+  elements.get('#sort').value = 'price-high';
+  categories[0].handlers.click();
+  await flush();
+  assert.deepEqual(shownIds(), [13,12,11,10,9,8], 'failed lookahead keeps the sorted first page');
+  assert.equal(pageButton('Next').disabled, false);
+  failLookahead = false;
+  pageButton('Next').handlers.click();
+  await flush();
+  assert.deepEqual(shownIds(), [7,6,5,4,3,2]);
+  elements.get('#sort').value = 'soonest';
+  elements.get('#sort').handlers.change();
+  await flush();
+  assert.deepEqual(shownIds(), [1,2,3,4,5,6], 'changing the sort resets to the first page');
+  assert.ok(sent.some(path => path.includes('sort=price-high')));
   assert.ok(sent.every(path => path !== '/api/slots'), 'never fetch the unpaginated list');
 });

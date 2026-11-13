@@ -5,6 +5,7 @@ import { request, card, notice } from "./customer-common.js";
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const search = document.querySelector("#search");
+const sort = document.querySelector("#sort");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
@@ -24,6 +25,7 @@ function pageUrl(page) {
   });
   const query = search.value.trim();
   if (query) params.set("q", query);
+  if (sort.value !== "soonest") params.set("sort", sort.value);
   if (category !== "all") params.set("category", category);
   return "/api/slots?" + params;
 }
@@ -91,10 +93,15 @@ async function load(page = 1) {
     if (items.length === ITEMS_PER_PAGE) {
       // The API returns an array, not total-count metadata. A small lookahead
       // prevents a fake Next button when the last page has exactly six items.
-      const nextItems = await request(pageUrl(page + 1));
+      try {
+        const nextItems = await request(pageUrl(page + 1));
+        if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
+        more = nextItems.length > 0;
+      } catch {
+        // Keep the loaded page usable. Next can retry the unavailable page.
+        more = true;
+      }
       if (current !== generation) return;
-      if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
-      more = nextItems.length > 0;
     }
 
     currentPage = page;
@@ -122,6 +129,10 @@ function resetSearchPage() {
 }
 
 search.addEventListener("input", resetSearchPage);
+sort.addEventListener("change", () => {
+  clearTimeout(searchTimer);
+  load(1);
+});
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     clearTimeout(searchTimer);
