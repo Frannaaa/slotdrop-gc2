@@ -367,6 +367,39 @@ body:not(.owner-page) .checkbox {
 }
 body:not(.owner-page) .checkbox input { flex: none; width: 1.2rem; height: 1.2rem; margin-top: .15rem; }
 body:not(.owner-page) .total { font-size: 1.2rem; font-weight: 700; }
+
+#checkout .booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem;
+}
+#checkout .booking-actions button { min-height: 44px; }
+#checkout #status:empty,
+#receipt:empty { display: none; }
+
+#receipt {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+#receipt dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: .65rem 1rem;
+  width: 100%;
+  padding-block: 1rem;
+  border-block: 1px solid var(--color-border);
+}
+#receipt dt { font-weight: 700; }
+#receipt dd { overflow-wrap: anywhere; }
+
+@media (max-width: 440px) {
+  #checkout .booking-actions { flex-direction: column; align-items: stretch; }
+  #receipt dl { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+  #receipt dd + dt { margin-top: .5rem; }
+}
+
 body:not(.owner-page) .how-strip {
   padding: clamp(1.25rem, 4vw, 2.5rem);
   background: var(--color-lime);
