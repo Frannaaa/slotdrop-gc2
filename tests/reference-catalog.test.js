@@ -137,3 +137,54 @@ test('inactive reference activities are not rolled forward',async()=>{
   assert.equal(Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1',[service.id])).rows[0].n),2);
  }finally{await f.close();}
 });
+
+test('sessions that start later but are past their booking cutoff do not block the roll-forward',async()=>{
+ const f=await fixture();
+ try{
+  await ensureReferenceCatalog(f.db);
+  const key=referenceCatalog.offerings[2].key;
+  const {rows:[service]}=await f.db.query('SELECT id FROM services WHERE reference_key=$1',[key]);
+  // Every session still starts in the future, but customers can no longer book any of them.
+  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '30 minutes',booking_closes_at=NOW()-INTERVAL '1 minute' WHERE id=(SELECT MIN(id) FROM slots WHERE service_id=$1)",[service.id]);
+  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '40 minutes',booking_closes_at=NOW()-INTERVAL '2 minutes' WHERE id=(SELECT MAX(id) FROM slots WHERE service_id=$1)",[service.id]);
+  const bookable=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND booking_closes_at>NOW()',[service.id])).rows[0].n);
+  assert.equal(await bookable(),0);
+  await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  assert.equal(await bookable(),2,'Two bookable sample sessions, added once');
+ }finally{await f.close();}
+});
+
+test('paused or sold-out sessions with a future cutoff do not block the roll-forward',async()=>{
+ const f=await fixture();
+ try{
+  await ensureReferenceCatalog(f.db);
+  const serviceFor=async index=>(await f.db.query('SELECT id FROM services WHERE reference_key=$1',[referenceCatalog.offerings[index].key])).rows[0].id;
+  const open=async id=>Number((await f.db.query("SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND booking_closes_at>NOW() AND status='open'",[id])).rows[0].n);
+  // Paused: the owner paused every session, but they still start later.
+  const paused=await serviceFor(3);
+  await f.db.query("UPDATE slots SET status='paused' WHERE service_id=$1",[paused]);
+  // Sold out: every seat in every session is booked through the real API.
+  const soldOut=await serviceFor(4);
+  for(const {id,capacity} of (await f.db.query('SELECT id,capacity FROM slots WHERE service_id=$1',[soldOut])).rows){
+   const quote=await (await fetch(f.base+'/api/pricing/quote?slotId='+id+'&quantity='+capacity)).json();
+   const saved=await fetch(f.base+'/api/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    requestId:crypto.randomUUID(),slotId:Number(id),quantity:Number(capacity),customerName:'Fictional QA',customerEmail:'qa@example.com',
+    paymentMethod:'mock_card',expectedTotalCentavos:quote.totalPriceCentavos})});
+   assert.equal(saved.status,201,JSON.stringify(await saved.json()));
+  }
+  // Move them off the start times the roll-forward would generate, so the test checks the counting rule
+  // rather than the (service, start time) uniqueness that already prevents duplicate sessions.
+  for(const id of [paused,soldOut]){
+   await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '2 hours',booking_closes_at=NOW()+INTERVAL '1 hour' WHERE id=(SELECT MIN(id) FROM slots WHERE service_id=$1)",[id]);
+   await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '3 hours',booking_closes_at=NOW()+INTERVAL '1 hour' WHERE id=(SELECT MAX(id) FROM slots WHERE service_id=$1)",[id]);
+  }
+  assert.equal(await open(paused),0);
+  await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  assert.equal(await open(paused),2,'Two open sessions added next to the paused ones, once');
+  const bookableSoldOut=Number((await f.db.query("SELECT COUNT(*) AS n FROM slots sl WHERE sl.service_id=$1 AND sl.booking_closes_at>NOW() AND sl.capacity>COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0)",[soldOut])).rows[0].n);
+  assert.equal(bookableSoldOut,2,'Two bookable sessions added after the sold-out ones, once');
+  assert.equal(Number((await f.db.query("SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND status='paused'",[paused])).rows[0].n),2,'Paused sessions stay paused');
+ }finally{await f.close();}
+});
