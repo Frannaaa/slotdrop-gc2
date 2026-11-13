@@ -1,78 +1,136 @@
-// Group assignment: Kirsten. See docs/ownership-and-execution.md.
+// Group assignment: Kirsten. Captain integration: consume Fran's #49
+// server-side discovery pagination, with filtering applied before LIMIT/OFFSET.
 import { request, card, notice } from "./customer-common.js";
 
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const search = document.querySelector("#search");
+const pagination = document.querySelector("#pagination");
+const retry = document.querySelector("#retry");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
 
-let slots = [];
+const ITEMS_PER_PAGE = 6;
 let category = "all";
+let currentPage = 1;
+let slots = [];
+let hasNextPage = false;
 let generation = 0;
-let loading = true;
-let loadError = null;
+let searchTimer = null;
 
-function render() {
-  if (loading) return;
-  if (loadError) {
-    notice(status, loadError.message || "Could not load sessions. Please try again.", true);
-    return;
-  }
-
-  const query = search.value.trim().toLocaleLowerCase();
-  const filtered = slots.filter((slot) => {
-    const matchesCategory = category === "all" || slot.category === category;
-    // The discovery API returns serviceName, not title.
-    const searchable = [slot.serviceName, slot.providerName, slot.area, slot.city]
-      .filter((value) => typeof value === "string")
-      .join(" ")
-      .toLocaleLowerCase();
-    return matchesCategory && searchable.includes(query);
+function pageUrl(page) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(ITEMS_PER_PAGE),
   });
-
-  results.innerHTML = filtered.map((slot) => card(slot)).join("");
-  if (!filtered.length) {
-    notice(status, slots.length
-      ? "No sessions match those filters. Try another search or category."
-      : "No sessions are available right now. Check back soon.");
-  } else {
-    notice(status, `${filtered.length} ${filtered.length === 1 ? "session" : "sessions"} found.`);
-  }
+  const query = search.value.trim();
+  if (query) params.set("q", query);
+  if (category !== "all") params.set("category", category);
+  return "/api/slots?" + params;
 }
 
-async function load() {
+function renderPagination() {
+  pagination.replaceChildren();
+  if (currentPage === 1 && !hasNextPage) return;
+
+  const previous = document.createElement("button");
+  previous.type = "button";
+  previous.className = "button secondary";
+  previous.textContent = "Previous";
+  previous.disabled = currentPage <= 1;
+  previous.addEventListener("click", () => {
+    if (currentPage > 1) load(currentPage - 1);
+  });
+
+  const label = document.createElement("span");
+  label.className = "pagination-label";
+  label.textContent = `Page ${currentPage}`;
+  label.setAttribute("aria-live", "polite");
+
+  const next = document.createElement("button");
+  next.type = "button";
+  next.className = "button secondary";
+  next.textContent = "Next";
+  next.disabled = !hasNextPage;
+  next.addEventListener("click", () => {
+    if (hasNextPage) load(currentPage + 1);
+  });
+  pagination.append(previous, label, next);
+}
+
+function render() {
+  results.innerHTML = slots.map((slot) => card(slot)).join("");
+  renderPagination();
+  if (!slots.length) {
+    notice(status, search.value.trim() || category !== "all"
+      ? "No sessions match those filters. Try another search or category."
+      : "No sessions are available right now. Check back soon.");
+    return;
+  }
+  const first = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  notice(status, `Showing sessions ${first}–${first + slots.length - 1} · page ${currentPage}.`);
+}
+
+async function load(page = 1) {
   const current = ++generation;
-  loading = true;
-  loadError = null;
   results.replaceChildren();
+  pagination.replaceChildren();
+  retry.disabled = true;
   notice(status, "Loading sessions…");
+
   try {
-    const data = await request("/api/slots");
+    // Filters and LIMIT/OFFSET are handled by GET /api/slots on the server.
+    const items = await request(pageUrl(page));
     if (current !== generation) return;
-    if (!Array.isArray(data)) throw new Error("The sessions response was not a list.");
-    slots = data;
-    loading = false;
+    if (!Array.isArray(items)) throw new Error("The sessions response was not a list.");
+    if (items.length === 0 && page > 1) {
+      // Inventory may change between clicks. Don't strand the customer on an empty page.
+      return load(page - 1);
+    }
+
+    let more = false;
+    if (items.length === ITEMS_PER_PAGE) {
+      // The API returns an array, not total-count metadata. A small lookahead
+      // prevents a fake Next button when the last page has exactly six items.
+      const nextItems = await request(pageUrl(page + 1));
+      if (current !== generation) return;
+      if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
+      more = nextItems.length > 0;
+    }
+
+    currentPage = page;
+    slots = items;
+    hasNextPage = more;
     render();
   } catch (error) {
     if (current !== generation) return;
     slots = [];
-    loading = false;
-    loadError = error;
-    results.replaceChildren();
-    render();
+    hasNextPage = false;
+    notice(status, error.message || "Could not load sessions. Please try again.", true);
+  } finally {
+    if (current === generation) retry.disabled = false;
   }
 }
 
-search.addEventListener("input", render);
+function resetSearchPage() {
+  clearTimeout(searchTimer);
+  // Invalidate any older in-flight responses immediately.
+  generation++;
+  results.replaceChildren();
+  pagination.replaceChildren();
+  notice(status, "Searching sessions…");
+  searchTimer = setTimeout(() => load(1), 180);
+}
+
+search.addEventListener("input", resetSearchPage);
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
+    clearTimeout(searchTimer);
     category = button.dataset.category;
     categoryButtons.forEach((item) => {
       item.setAttribute("aria-pressed", String(item === button));
     });
-    render();
+    load(1);
   });
 });
-
-document.querySelector("#retry").addEventListener("click", load);
-load();
+retry.addEventListener("click", () => load(currentPage));
+load(1);
