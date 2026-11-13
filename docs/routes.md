@@ -6,7 +6,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
-| GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Does not check the database | Fran |
+| GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Production: 503 {status:"unavailable"} unless PostgreSQL answers and the slots, services and bookings tables exist. Local demo health does not check the database | Fran |
 | GET /api/slots | q, category, area, when, people, type, tag, sort, optional page, limit | 200 array, including [] | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
@@ -15,16 +15,16 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
-| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT | Janelle |
+| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT; 429 RATE_LIMITED with Retry-After (30 POSTs per client per minute) | Janelle; 429 limiter Fran |
 | GET /api/bookings/:id | UUID | 200 saved receipt | 400 malformed; 404 BOOKING_NOT_FOUND | Janelle |
 
 Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.
 
 ## Discovery and session responses
 
-Optional **pagination** (GC2 +1 bonus preparation, backend only): `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. The List UI must actually use these parameters and demonstrate pagination on the deployed group site before claiming the bonus. Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
+Optional **pagination** (GC2 +1 bonus preparation, backend only): `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. The List UI must actually use these parameters and demonstrate pagination on the deployed group site before claiming the bonus.
 
-q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
+q is a case-insensitive literal substring of the provider, service, activity type, technique or inclusion. category is creative or active; area matches an area name case-insensitively; people is an integer from 1 to 100. type accepts pottery, painting, pilates, dance or other. tag accepts beginner, handbuilding, wheel-throwing, painting-included or materials-included. sort accepts soonest, price-low or price-high; the price sort uses the party-size-aware standard/buddy rate. Repeated query keys, unsupported filters, overlong q/area and null characters in q or area return 400.
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
@@ -81,7 +81,7 @@ providerPayout = total - platformFee
 discountPercent = Math.round((regular - unitPrice) * 10000 / regular) / 100
 ```
 
-The active model rate is 1000 basis points in server/config/business.js on the development branches. It is deducted from the accepted price, with no customer surcharge. Money is saved in centavos. The server chooses the tier; the client cannot choose a rate or pricingType.
+The active modeled commission rate is 1000 basis points in `server/config/business.js`. It is deducted from the accepted price, with no customer surcharge. Money is saved in centavos. The server chooses the tier; the client cannot choose a rate or pricingType.
 
 POST /api/bookings accepts requestId, slotId, quantity, customerName, customerEmail, paymentMethod and expectedTotalCentavos. Validate a UUID retry key, quantity 1–100, trimmed name 1–100 characters, trimmed basic email up to 254 characters, mock_card/pay_on_site and a nonnegative safe-integer acknowledged total. Reject unsupported price fields such as total with 400. Do not collect card numbers.
 
@@ -128,11 +128,11 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 | Confirmation | /confirmation.html?id=UUID | Kaitlyn |
 | Owner workspace | /owner.html | Fran |
 
-Other than the owner workspace, customer screens remain team implementation work in these PRs. Each page needs loading, empty, error and phone states. No login or real payment is required for GC2.
+Customer pages should handle loading, empty and error states at phone widths. GC2 uses fictional payments and does not require a login.
 
 The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
 
-## Released-seat discovery contract (Issue #33)
+## Released-seat discovery contract
 
 The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
 

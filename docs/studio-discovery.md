@@ -1,6 +1,6 @@
 # Real studios and activity discovery
 
-Checked 30 October 2026. Studio names, advertised activity facts and source prices are public research, not negotiated SlotDrop rates. The private build now uses eight of these real activity references for explicitly simulated sessions. No listed business has confirmed a partnership, seat allocation, discount or SlotDrop deadline. Historical synthetic provider records and their receipts are preserved unchanged; they are retired from new customer discovery.
+Research checked October 30, 2026. Studio names, advertised activity facts and source prices are public references, not negotiated SlotDrop rates. The catalog uses eight researched activities as references for explicitly simulated sessions. No listed business has confirmed a partnership, seat allocation, discount or SlotDrop deadline. Historical synthetic provider records and their receipts are preserved unchanged; they are retired from new customer discovery.
 
 ## Navigation and classification
 
@@ -45,9 +45,9 @@ Before a real offering can accept an actual reservation, confirm the branch, dat
 
 Private build: 33 API/unit tests passed locally, with one PostgreSQL-only lock test reserved for CI; eight SQL scenario groups passed. The complete customer booking/receipt/owner flow passed with no page or console errors, plus 18 customer recovery/state scenarios. Four discovery/reset browser scenarios passed, including empty/error/retry, shared URLs, browser Back, disjoint primary types, official source links and layouts at 320, 390, 768 and 1280px. Fixed the stale reset request in Browse and the researched directory. Prototype classification also no longer includes ceramic painting under Painting. Local automated evidence uses disposable data and is not proof of a production transaction or real studio allocation.
 
-## Current priority
+## Relationship to the booking flow
 
-Home and the main navigation lead to bookable released sessions in /browse.html. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See released-seat-discovery.md for the current product and UI contract.
+Home and the main navigation lead to bookable released sessions in /browse.html. This directory supports the concept and is linked in the footer. Its official-site links are not the graded transaction funnel. See [released-seat-discovery.md](released-seat-discovery.md) for the product and UI contract.
 
 ## Studio pages and applications
 

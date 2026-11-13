@@ -4,9 +4,17 @@ Group 1 · ITMGT 45.03-YZW
 
 SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. The sample catalog uses real studio names and sourced published facts; session dates, allocated seats, cutoffs, offers, bookings and payments are simulated. No partnership or real reservation is created.
 
-## Build status
+## Architecture and functionality
 
-Current official group status (November 4): the database, Owner, discovery, shared helpers, pricing, persisted booking/receipt APIs, and studio reference catalog are merged into `main`. Home (#35) is merged. Detail/Selection (#41) and Checkout/Confirmation (#43) remain open for teammate reviews, so Home session links still require #41. Kirsten has published the css_styling branch, but Browse and a CSS/Browse PR remain outstanding. Fran's shared cleanup/release checks (#45) and business case (#37) also await review. Passing individual CI does not prove the assembled six-screen journey; the group web service has not been deployed. The separate `reference-only-slotdrop` deployment is not the graded application.
+The frontend uses native HTML, CSS and JavaScript to request session listings and quotes from the Express API. Express validates requests, applies booking rules and uses PostgreSQL for persistent sessions, bookings, receipts and Owner metrics. The server calculates prices, locks the session row before booking, checks remaining seats and retains receipts across restarts.
+
+Customer-facing screens, integration status and final test evidence are tracked in the [submission checklist](docs/final-submission-checklist.md). The [system diagram](docs/system.md) explains the request and data flow.
+
+## Deployed app
+
+**Live URL:** https://slotdrop-gc2-group-zx8j.onrender.com (Render free web service `slotdrop-gc2-group-zx8j`, branch `main`, with a hosted PostgreSQL database). The free instance sleeps when idle, so the first request can take about a minute.
+
+On November 8, deployed commit `96d4a31` answered `/api/health`, `/api/slots`, `/api/metrics` and `/api/bookings` with 200, and passed all six Challenge 1 cases ([run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586)). On November 12, Browse (PR #62) was merged and deployed, so the live site serves Home, Browse, Detail, Selection and Owner. Checkout and Confirmation (PR #43) are not merged yet, so the full customer flow cannot be completed on the live site yet.
 
 ## Run locally
 
@@ -22,20 +30,22 @@ npm run demo
 
 Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
-Fresh seeds create 16 simulated sessions across eight researched offerings on the next two Philippine calendar days. Existing sessions keep their saved dates; restarting does not renew expired offers.
+Fresh seeds create 16 simulated sessions across eight researched offerings on the next two Philippine calendar days. Existing sessions keep their saved dates. Since PR #59, each server start adds two new sample sessions for any reference activity whose sessions have all started. Nothing is shifted or deleted.
 
 ## PostgreSQL and deployment
 
-Database tools and Docker are available from PR #27.
+The official deployment is the Render web service in [render.yaml](render.yaml), connected to a hosted PostgreSQL database (Neon). Render builds `main` with `npm ci --omit=dev` and starts it with `node tools/db-bootstrap.mjs && npm start`.
 
-1. Set DATABASE_URL privately in .env or the host's environment settings.
-2. Run `npm run db:init` **once** against a new, empty course database. It must not be rerun on a populated database and must not target the reference-only project's database.
-3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
-4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
-5. Check `/api/health` and `/api/slots`. In production, health probes PostgreSQL *and* the required booking tables; local demo health is deliberately lightweight.
-6. Run Postman against the public URL. After booking integration, save a booking, restart the server and read the same receipt back.
+1. Create an empty PostgreSQL database and copy its connection string, including `?sslmode=require`. Store it only as the Render `DATABASE_URL` secret (or in a local .env file). Never put it in Git, PR text, comments or screenshots.
+2. On each start, `tools/db-bootstrap.mjs` loads db/schema.sql and db/seed.sql only when none of the SlotDrop tables exist. If all of them exist, it changes nothing. If only some exist, it stops and the server does not start. Saved bookings are never deleted or reseeded.
+3. `npm start` then applies the additive migrations in db/migrations/ and adds any missing reference-catalog records. Production startup refuses to run without `DATABASE_URL`. Render provides `PORT`; `NODE_ENV=production` is set in render.yaml. Keep database TLS verification enabled.
+4. Render polls `/api/health`. In production it returns 200 only when PostgreSQL answers and the slots, services and bookings tables exist; otherwise it returns 503 without database details. Then check `/api/slots` for live sessions.
+5. Run the read-only checks: `npm run check:gc2 -- https://slotdrop-gc2-group-zx8j.onrender.com` and `npm run check:demo -- https://slotdrop-gc2-group-zx8j.onrender.com`. Run [the Challenge 1 collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) in Postman (or `npx newman@6.2.1 run docs/SlotDrop-GC2-Challenge1.postman_collection.json --env-var baseUrl=https://slotdrop-gc2-group-zx8j.onrender.com`). It picks a live session first and creates no booking.
+6. For the persistence proof, place one fictional booking through the public site, read it by `GET /api/bookings/:id`, restart the Render service without touching the database, and read the same receipt again. Check Owner metrics and remaining seats. Record the public URL, deployed commit and observed result in `docs/challenges.md`.
 
-.env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
+`npm run db:init` is a manual alternative for initializing a new, empty database from a trusted machine. It refuses existing tables and is not part of the Render start command. The Dockerfile serves the same app but does not run the bootstrap step.
+
+.env.example lists PORT, DATABASE_URL, NODE_ENV and optional TEST_DATABASE_URL with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 
 TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. Without it, local tests use PGlite and skip the PostgreSQL lock test.
 
@@ -57,7 +67,7 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 | Tool | Version | Why |
 |---|---|---|
 | HTML, CSS and JavaScript | GC2 frontend | Fetch JSON and render each page; prepare for the later React upgrade |
-| Node.js | 22 in CI/Docker; local checks on 24.19.0 | JavaScript server |
+| Node.js | 22 in CI/Docker; minimum 22 | Runtime for Express and build/test scripts |
 | Express | 5.3.0 | API between the browser and database |
 | PostgreSQL | 16 in CI | Persistent tables, constraints and transactions |
 | pg | 8.23.1 | SQL queries and checked-out transaction clients |
@@ -66,17 +76,17 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 | GitHub Actions | Node 22 workflow | Repeatable checks for each PR |
 | Postman/Newman | v2.1 collection; Newman 6.2.1 | API checks |
 
-package-lock.json pins dependencies. Add the actual public runtime/database versions after deployment.
+`package-lock.json` pins npm dependencies. Record final hosted runtime/database versions with the deployment evidence.
 
 ## Changes since GC1
 
 The build focuses on recurring leisure sessions and released seat allocations. Discovery covers the next 72 hours; each session has its own booking deadline. Studios control standard and optional buddy offers. The course commission is 10%.
 
-Availability and buddy pricing are the two revenue features. The merged booking API enforces both availability and buddy pricing under a database transaction, with persisted receipt snapshots and stable request-ID retries. Paid add-ons, accounts, real payments, React and optimization are deferred.
+Availability and buddy pricing are the two revenue features. The server booking path rechecks remaining seats under a session-row lock, selects stored standard/buddy prices, recomputes totals and commission, and saves a durable receipt. Paid add-ons, accounts, real payments, React and optimization are deferred.
 
 ## Design and documents
 
-The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. That prototype saves sample data in the browser; it is separate from this API-backed app. The owner branch serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
+The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) provide visual references. The prototype is a separate, browser-storage demonstration, not a live PostgreSQL-backed booking service. DM Sans and Space Grotesk are served locally; their licenses are in `public/fonts/`.
 
 - [Business case and sources](docs/business.md)
 - [Route contract](docs/routes.md)
@@ -85,15 +95,11 @@ The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.ch
 - [Challenges and test results](docs/challenges.md)
 - [Deployed List baseline](docs/baseline.md)
 
-The [Postman collection](docs/SlotDrop-Fran.postman_collection.json) is included in the official repository. Set `baseUrl` and the active `serviceId` before running it against fictional data. Test records are in that branch's docs/evidence/.
+The [Owner and session Postman collection](docs/SlotDrop-Fran.postman_collection.json) covers administrative API checks. The [Challenge 1 booking collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) covers six required API cases; its run records and supporting evidence belong in [challenges](docs/challenges.md).
 
-## Dates and remaining work
+## Release verification
 
-- **October 28:** finish access/assignments, verify main's protection settings, review and merge routes/schema/business draft. [Issue #1](https://github.com/Frannaaa/slotdrop-gc2/issues/1) tracks the remaining CP0 steps.
-- **November 4:** deployed Browse must load database sessions through the API.
-- **November 9, 11:59 PM Philippine time:** submit the deployed flow, reviewed main tagged gc2-v1.0, two-page PDF, Postman collection, diagram, business/challenge/baseline evidence and recordings.
-
-Fran still needs approved code merges, her remaining required teammate reviews, the public group deployment and integration checks. Keep meaningful code work for a second grading window after October 28. Complete the deployed group challenges, baseline and outside-group phone test, then make the personal predictions and unedited recording required by the brief.
+Final release verification includes a reviewed `main` tagged `gc2-v1.0`, a working deployed booking and receipt, reproducible Postman evidence, accurate documentation and individual recordings. See the [submission checklist](docs/final-submission-checklist.md) for acceptance conditions and the [challenge evidence record](docs/challenges.md) for observed results.
 
 ## Released-seat discovery revision
 
@@ -103,20 +109,20 @@ Studio research is available at `/studios.html` through `GET /api/activities`. I
 
 ## Sourced catalog and studio application
 
-Fran's additional reference-catalog work supplies eight activities at five real businesses, with sixteen explicitly simulated dated allocations. Published business facts/prices have source URLs; discounts, seats and deadlines are sample data. Startup adds records once without renaming historical providers or changing receipts. Never reseed a populated database. `/provider-apply.html` saves a pending demo application, and `/provider-application.html?id=UUID` reads back only status. It does not publish or verify ownership. These supporting pages follow the shared styling; see `docs/provider-onboarding.md`.
+The reference catalog contains eight activities across five researched businesses, with sixteen simulated dated allocations. Published business facts/prices have source URLs; discounts, seats and deadlines are sample data. Startup adds records once without renaming historical providers or changing receipts. Never reseed a populated database. `/provider-apply.html` saves a pending demo application, and `/provider-application.html?id=UUID` reads back only status. It does not publish or verify ownership. See `docs/provider-onboarding.md` for the provider reference and application flow.
 
-## Pre-checkpoint demo inventory check (read-only)
+## Demo inventory readiness (read-only)
 
-**Important for November 4, 7 and 9:** The sample allocations start only on the two days after the database is first seeded. They **do not roll forward** when the server restarts. An unchanged demo database first seeded on October 30 will therefore have no bookable sample sessions by November 4. This is expected expiry, not a database failure.
+Sample allocations are dated for the two days after they are created. Since PR #59, a server start adds two new sample sessions for any reference activity whose earlier sessions have all started, so a long-running deployment does not end up with an empty catalog. Sessions can still pass their booking deadline before the next start (PR #71 tightens this), so check before each demo. Expired inventory is not a database failure.
 
 Before each deployed demo/checkpoint, with the app running, run:
 
 ```sh
-npm run check:demo -- https://YOUR-APP-HOST
+npm run check:demo -- https://slotdrop-gc2-group-zx8j.onrender.com
 ```
 
 Or run `npm run check:demo` against local `http://localhost:3000`. The check fetches `GET /api/slots`, reports remaining bookable demo allocations, and returns a failure exit code if none remain. It **never** creates offers, shifts existing dates, reactivates sold-out seats, modifies receipts or touches the database.
 
 If inventory is absent or about to expire, open the **Owner course-demo screen** and create *new, future, explicitly simulated* allocations for active sample activities, with future cutoffs and the intended prices. Test Browse again. Do not rerun `db:init` on a populated database, overwrite historic bookings, silently reseed or claim real studio consent. Because the public demo has no owner login, use fictional test data only and do not expose real provider management as a production feature.
 
-This check tests availability only. It does **not** prove that Detail, Selection, Checkout, Confirmation, PostgreSQL persistence or customer booking are integrated. Run those separately once teammates' PRs merge.
+This check covers discoverable inventory only. Use the transaction smoke and browser acceptance checks for saved bookings and receipt persistence.
