@@ -20,6 +20,8 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 
 Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.
 
+Booking POSTs have a 30-attempt, 60-second limit per client IP. Render uses the address supplied by its public ingress. Other environments use the connected peer. See the [rate-limit contract and evidence](bonus-rate-limit.md).
+
 ## Discovery and session responses
 
 Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. Browse requests six sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination). Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.

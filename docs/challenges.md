@@ -13,7 +13,7 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 | [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three corrections documented** | Deployed Postman rerun, Owner edit regression, and reviewed catalog rollover regression | |
 | [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | [Passing main CI at `8bdcfcb`](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43354906742). Update if the final release commit changes. |
 | [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
-| [Stretch challenges](#stretch-challenges) | **See individual evidence below** | Timings, double-click result, Browse pagination and Owner utilization | Deployed Checkout 429 wait/retry remains unverified |
+| [Stretch challenges](#stretch-challenges) | **Evidence for all five** | Double-click, pagination, Checkout retry, Owner utilization and parallel loading | Verify the Render client-IP change after deploy |
 
 ## Challenge 1 — Break your own API
 
@@ -220,12 +220,12 @@ Individual work. Each member picks one function they wrote, writes three inputs 
 | Stretch | Status | Shown on the deployed site | What is left |
 |---|---|---|---|
 | [Sequential or parallel](#sequential-or-parallel) | **Complete** | Load time before and after | |
-| [Too many requests](#too-many-requests) | **Deployed API and local Checkout verified** | Render returned 429 with `Retry-After`. A separate browser run verified the wait and retry against the local API. | Deployed Checkout wait and retry and visitor isolation remain unverified |
+| [Too many requests](#too-many-requests) | **Verified on deployed Checkout** | 429 → 59-second wait → identical POST → one saved receipt | Client-address change in #72 has a separate regression test |
 | [The double click](#the-double-click) | **Verified on live double-click** | One browser POST, one confirmed receipt and one Owner row | |
 | [Pagination](#pagination) | **Demonstrated on deployed Browse** | Previous and Next switched between sessions 1–6 and 7–8 | |
 | [Join and compute](#join-and-compute) | **Verified on the deployed Owner page** | 0 of 32 to 1 of 32 booked seats, with both source requests observed in the later walkthrough | |
 
-**Where the deployed results come from.** Timings and the 429 result: [run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799), 8 November 2026, 08:36–08:38 UTC, commit `96d4a31`. Paged list responses: read-only requests on 12 November 2026 at 07:59 UTC, after Browse (PR #62) was deployed. None of these requests created a booking: `GET /api/metrics` showed `bookingCount: 0` on both dates.
+**Evidence index.** The [Checkout capture](evidence/stretch-deployed/checkout-429/network.json) records the live 429 and retry. The [14 November read-only browser record](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) records Browse page changes, overlapping Selection requests and both Owner inputs. The earlier sequential/parallel benchmark came from [CI run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799) on 8 November, targeting `96d4a31`.
 
 ### Sequential or parallel
 
@@ -236,27 +236,22 @@ Selection loads the session and the price quote together with `Promise.all` (`pu
 | One after the other (before) | 398.0 ms | 385.6 ms | 730.8 ms |
 | Together (after, the current code) | 200.2 ms | 194.3 ms | 535.5 ms |
 
-The requests were `GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quantity=2`, 15 alternating trials after 3 warm-ups. Sending them together halved the wait, because each costs about one round trip to Singapore and the two now overlap. The times were measured from a GitHub server, not a phone browser. [Screenshot](evidence/stretch-deployed/sequential-vs-parallel.jpg).
+The requests were `GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quantity=2`, 15 alternating trials after 3 warm-ups. Sending them together halved the wait, because each costs about one round trip to Singapore and the two now overlap. The benchmark ran from GitHub. The [14 November browser readback](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) also confirmed that the two public Selection requests started 0.3 ms apart and overlapped. [Benchmark screenshot](evidence/stretch-deployed/sequential-vs-parallel.jpg).
 
 ### Too many requests
 
-**The limit.** 30 booking POSTs per minute for each client address (`server/middleware/booking-rate-limit.js`). Reading a receipt and the Owner list are not limited.
+**Public Checkout run, 14 November at 6:29 PM PHT.** A 390 px Chromium window opened Checkout on [Render commit `8bdcfcb`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920). Thirty invalid POSTs from the same browser filled the 60-second window with 400 responses and created no bookings.
 
-**On the deployed API.**
-
-| Step | Result |
+| Step | What the browser saw |
 |---|---|
-| 25 refused `POST /api/bookings` requests (quantity 0) | 25 × **400** |
-| The next POST | **429** `RATE_LIMITED`, with `Retry-After: 30` |
-| The same request 31 seconds later | **400** again, so the limit had reset |
+| Submit one fictional booking | `POST /api/bookings` returned **429 `RATE_LIMITED`** with **`Retry-After: 59`** |
+| Wait | Checkout displayed the 59-second message and kept Submit disabled |
+| Retry | After **59,003 ms**, the browser sent the identical body and request ID. The server returned **201** and saved one ₱2,880 booking |
+| Confirm | Receipt `26ccfbce-9a9d-49f6-b3c1-35674477ebf5` read back with **200**. Owner showed one matching row. Available seats fell from **3 to 2** |
 
-The 429 arrived on attempt 26 because the Challenge 1 job in the same run had already sent 5 POSTs that minute. [Screenshot](evidence/stretch-deployed/too-many-requests-429.jpg).
+[Waiting state](evidence/stretch-deployed/checkout-429/waiting.jpg) · [Booking request and response record](evidence/stretch-deployed/checkout-429/network.json) · [Confirmation](evidence/stretch-deployed/checkout-429/confirmation.jpg) · [Owner](evidence/stretch-deployed/checkout-429/owner.jpg)
 
-**The front end waits and retries.** `retryLimitedBooking()` (`public/js/customer-common.js:87`, on `main`) waits for the time the server gives and resends the same body once, with the same `requestId`, so a retry cannot become a second booking. It retries only a 429, never a 400, a 409 or a lost connection. `tests/booking-rate-limit.test.js` covers both halves. Checkout calls the helper in PR #43 (`checkout.js:139`) and shows "Booking traffic is high. Retrying this same request in … seconds…" (line 146).
-
-**Local browser proof, 14 November.** A disposable local app with a five-second limit window returned 429 with `Retry-After: 5` to Checkout. While Submit was disabled, the page showed the retry message. After 5,031 ms, Checkout resent the identical body and request ID, received 201 and rendered the single saved receipt. [Waiting state](evidence/challenge2-final/checkout-retry-local.jpg) · [Request and timing record](evidence/challenge2-final/checkout-retry-local.json).
-
-**Scope of the API result.** The current key is the socket peer address. The deployed run establishes throttling for the test traffic. It does not establish separate limits for different visitors behind Render’s proxy.
+**How it works.** The limiter counts 30 POSTs per address in each 60-second window. The Checkout helper waits only for an explicit 429 and sends the same request once more. Receipt and Owner reads are outside the limit. The live capture used the limiter keyed by socket address. PR #72 adds Render’s client address handling and tests that two addresses behind the same proxy have separate counters. See the [rate-limit implementation and verification](bonus-rate-limit.md).
 
 ### The double click
 
@@ -293,7 +288,7 @@ The 429 arrived on attempt 26 because the Challenge 1 job in the same run had al
 
 The three pages together return each session once, in the same order as the full list. A page past the end is an empty list with 200, not an error.
 
-**Live result, 12 November.** After PR #63 merged, [Browse page 1](evidence/challenge2/browse-page-1.jpg) showed sessions 1–6. Next displayed [page 2](evidence/challenge2/browse-page-2.jpg), sessions 7–8. Previous returned to page 1. The [14 November browser capture](evidence/challenge2-final/browser-network.json) also records the page 2 and return-to-page 1 requests.
+**Live result, 12 November.** After PR #63 merged, [Browse page 1](evidence/challenge2/browse-page-1.jpg) showed sessions 1–6. Next displayed [page 2](evidence/challenge2/browse-page-2.jpg), sessions 7–8. Previous returned to page 1. The [14 November browser capture](evidence/challenge2-final/browser-network.json) also records the page 2 and return-to-page 1 requests. A [separate read-only rerun](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) verified that the six page-one IDs returned unchanged after Previous and had no overlap with the five page-two IDs.
 
 ### Join and compute
 
@@ -312,7 +307,7 @@ P = round(100 × N ÷ M). Neither route returns this figure alone. With no eligi
 
 `tests/owner-insights.test.js` covers a 3-of-10-seat example, cancelled bookings, paused and out-of-window sessions, empty inventory, and the over-capacity case Kirsten asked for in review. [Kirsten approved the PR on 12 November](https://github.com/Frannaaa/slotdrop-gc2/pull/51#pullrequestreview-5869740111).
 
-**Live result, 12 November.** Across eight eligible sessions, Owner showed [0 of 32 seats booked (0%)](evidence/challenge2/owner-utilization-before.jpg) before the booking and [1 of 32 seats booked (3%)](evidence/challenge2/owner-utilization-after.jpg) after it. This is utilization of released fictional seats. The [14 November browser run](evidence/challenge2-final/browser-network.json) observed both source requests while opening Owner.
+**Live result, 12 November.** Across eight eligible sessions, Owner showed [0 of 32 seats booked (0%)](evidence/challenge2/owner-utilization-before.jpg) before the booking and [1 of 32 seats booked (3%)](evidence/challenge2/owner-utilization-after.jpg) after it. This is utilization of released fictional seats. The [14 November browser run](evidence/challenge2-final/browser-network.json) observed both source requests while opening Owner. The [read-only browser record](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) includes a separate recalculation from the two fetched responses: 6 ÷ 48 rounded to the 13% shown in Owner.
 
 ## Earlier test records
 

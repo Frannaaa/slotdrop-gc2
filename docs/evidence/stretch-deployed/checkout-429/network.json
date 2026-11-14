@@ -1,0 +1,97 @@
+{
+  "origin": "https://slotdrop-gc2-group-zx8j.onrender.com",
+  "capturedAt": "2026-11-14T10:29:03.831Z",
+  "viewport": "390 × 844 CSS px",
+  "setup": {
+    "method": "POST",
+    "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings",
+    "requestBody": {
+      "quantity": 0
+    },
+    "statuses": {
+      "400": 30
+    },
+    "elapsedMs": 1977
+  },
+  "initialSeats": 3,
+  "slotId": 36,
+  "displayOrigin": "https://slotdrop-gc2-group-zx8j.onrender.com",
+  "waitMessage": "Booking traffic is high. Retrying this same request in 59 seconds…",
+  "waitSubmitDisabled": true,
+  "confirmation": {
+    "id": "26ccfbce-9a9d-49f6-b3c1-35674477ebf5",
+    "readbackMethod": "GET",
+    "readbackUrl": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings/26ccfbce-9a9d-49f6-b3c1-35674477ebf5",
+    "readbackStatus": 200,
+    "totalPriceCentavos": 288000
+  },
+  "ownerRows": 1,
+  "finalSeats": 2,
+  "finishedAt": "2026-11-14T10:30:22.947Z",
+  "checkoutAttempts": [
+    {
+      "method": "POST",
+      "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings",
+      "sentAt": "2026-11-14T10:29:18.987Z",
+      "requestBody": {
+        "requestId": "bf536c08-e273-486d-858f-7f4dc433e585",
+        "slotId": 36,
+        "quantity": 1,
+        "customerName": "GC2 Retry Evidence",
+        "customerEmail": "gc2-retry-proof@example.com",
+        "paymentMethod": "pay_on_site",
+        "expectedTotalCentavos": 288000
+      },
+      "receivedAt": "2026-11-14T10:29:19.239Z",
+      "status": 429,
+      "retryAfter": "59",
+      "response": {
+        "error": {
+          "code": "RATE_LIMITED",
+          "message": "Too many booking attempts. Try again shortly.",
+          "retryAfterSeconds": 59
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings",
+      "sentAt": "2026-11-14T10:30:18.242Z",
+      "requestBody": {
+        "requestId": "bf536c08-e273-486d-858f-7f4dc433e585",
+        "slotId": 36,
+        "quantity": 1,
+        "customerName": "GC2 Retry Evidence",
+        "customerEmail": "gc2-retry-proof@example.com",
+        "paymentMethod": "pay_on_site",
+        "expectedTotalCentavos": 288000
+      },
+      "receivedAt": "2026-11-14T10:30:18.523Z",
+      "status": 201,
+      "retryAfter": null,
+      "response": {
+        "id": "26ccfbce-9a9d-49f6-b3c1-35674477ebf5",
+        "slotId": 36,
+        "quantity": 1,
+        "paymentMethod": "pay_on_site",
+        "status": "confirmed",
+        "serviceName": "Beginner’s wheel-throwing",
+        "providerName": "Laro Ceramics",
+        "sessionStartsAt": "2026-11-15T03:00:00.000Z",
+        "originalUnitPriceCentavos": 320000,
+        "offerUnitPriceCentavos": 288000,
+        "unitPriceCentavos": 288000,
+        "pricingType": "standard",
+        "commissionBasisPoints": 1000,
+        "totalPriceCentavos": 288000,
+        "platformFeeCentavos": 28800,
+        "providerPayoutCentavos": 259200,
+        "createdAt": "2026-11-14T10:30:18.378Z"
+      }
+    }
+  ],
+  "waitMs": 59003,
+  "receiptReadbackMatchesCheckout": true,
+  "measurement": "Browser fetch capture on the public Render build. Setup POSTs are separated from the two Checkout submissions by matching the generated requestId.",
+  "renderCommit": "8bdcfcbd3e24b58e70bdac48effb017146112fcb"
+}

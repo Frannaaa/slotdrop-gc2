@@ -4,14 +4,16 @@
 
 ## Backend contract — Group 1 server
 
-Only `POST /api/bookings` counts toward a single-process, fixed 60-second demo limit of 30 attempts per socket IP. Other routes, including GET saved receipts and Owner, are unaffected. Failed/invalid booking attempts count so abuse cannot evade limits. The limiter does not trust user-controlled `X-Forwarded-For`.
+Only `POST /api/bookings` counts toward the fixed 60-second limit of 30 attempts per client IP. Invalid booking attempts count. Receipt and Owner reads continue normally.
+
+On Render the limiter reads the first client IP set by Render’s public ingress. Other runtimes use the socket address. A missing or invalid ingress address falls back to the socket. The limiter uses this address only for the booking counter, so it leaves Express’s other proxy settings alone. The public course service uses one Render Free instance. [Render client IP guidance](https://render.com/articles/how-render-handles-ddos-attacks#reading-the-true-client-ip) · [Render ingress header behavior](https://feedback.render.com/features/p/send-the-correct-x-forwarded-for) · [Render Free networking](https://render.com/docs/free)
 
 On excess attempts:
 - HTTP **429 Too Many Requests**
 - `Retry-After: N` response header, integer seconds until current window resets
 - JSON `{ "error": { "code": "RATE_LIMITED", "message": "...", "retryAfterSeconds": N } }`
 
-Caveats: This is a classroom-grade **single-process** limiter, not a multi-host distributed gate. Users behind one reverse proxy/NAT may share a counter; testers should avoid flooding the group demo. New web processes clear counters. No guest names, contact details or request bodies are logged by this middleware.
+The counters are in memory and reset when the process restarts. Clients sharing a public IP share its counter. The limiter does not log contact details or request bodies.
 
 ## Fran-owned shared browser support
 
@@ -19,8 +21,7 @@ Caveats: This is a classroom-grade **single-process** limiter, not a multi-host 
 
 ## Verification
 
-- The public API returned 429 with `Retry-After: 30` and resumed normal responses after the window.
-- The disposable local browser run showed the Checkout waiting state, sent the same body and request ID after about five seconds, received 201 and displayed one saved receipt.
-- The deployed Checkout wait and whether visitors receive separate counters behind Render’s proxy remain unverified.
+- Public Checkout on `8bdcfcb` returned 429 with `Retry-After: 59`, waited 59,003 ms, and resent an identical body to save one booking. Confirmation, Owner and the seat count matched.
+- The public run verifies the retry behavior on the older socket-address build. The integration test uses two Render ingress addresses to verify separate counters and tests the fallback for an invalid forwarded address. The direct-socket test also checks that forwarded headers do not alter the counter on a direct deployment.
 
 See the [request records and screenshots](challenges.md#too-many-requests).
