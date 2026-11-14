@@ -22,6 +22,7 @@ function pageUrl(page) {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(ITEMS_PER_PAGE),
+    pagination: "metadata",
   });
   const query = search.value.trim();
   if (query) params.set("q", query);
@@ -82,9 +83,9 @@ async function load(page = 1) {
 
   try {
     // Filters and LIMIT/OFFSET are handled by GET /api/slots on the server.
-    const items = await request(pageUrl(page));
+    const { slots: items, hasNextPage: more } = await request(pageUrl(page));
     if (current !== generation) return;
-    if (!Array.isArray(items)) throw new Error("The sessions response was not a list.");
+    if (!Array.isArray(items) || typeof more !== "boolean") throw new Error("Invalid sessions response.");
     if (items.length === 0 && page > 1) {
       // Inventory may change between clicks. Don't strand the customer on an empty page.
       return load(page - 1);
@@ -92,27 +93,9 @@ async function load(page = 1) {
 
     currentPage = page;
     slots = items;
-    hasNextPage = false;
+    hasNextPage = more;
     results.setAttribute("aria-busy", "false");
     render();
-
-    let more = false;
-    if (items.length === ITEMS_PER_PAGE) {
-      // The API returns an array, not total-count metadata. A small lookahead
-      // prevents a fake Next button when the last page has exactly six items.
-      try {
-        const nextItems = await request(pageUrl(page + 1));
-        if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
-        more = nextItems.length > 0;
-      } catch {
-        // Keep the loaded page usable. Next can retry the unavailable page.
-        more = true;
-      }
-      if (current !== generation) return;
-    }
-
-    hasNextPage = more;
-    renderPagination();
   } catch (error) {
     if (current !== generation) return;
     slots = [];

@@ -1,5 +1,4 @@
-/* Browse page presentation. Scoped to avoid changing other pages or duplicating
-   the shared styling work in PR #60. Values follow the SlotDrop brand tokens. */
+/* Standalone Browse styles using the SlotDrop palette. */
 
 .browse-page {
   --browse-paper: var(--color-paper, #f5f2ea);
@@ -10,10 +9,12 @@
   --browse-white: var(--color-white, #fff);
   --browse-border: var(--color-border, rgba(32, 35, 30, .15));
   min-height: 100vh;
+  margin: 0;
   background: var(--browse-paper);
   color: var(--browse-ink);
   font-family: var(--font-body, "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 .browse-page *,
@@ -25,6 +26,18 @@
 .browse-page button,
 .browse-page input,
 .browse-page select { font: inherit; }
+
+.browse-page .skip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: .5rem 1rem;
+  color: var(--browse-paper);
+  background: var(--browse-ink);
+  transform: translateY(-120%);
+}
+.browse-page .skip:focus { transform: none; }
 
 .browse-page .site-header {
   width: min(100% - 3rem, 76rem);
@@ -175,6 +188,20 @@
 .browse-page .button:hover { color: #fff; background: #2437b0; transform: translateY(-1px); }
 .browse-page .button.secondary { color: var(--browse-ink); background: transparent; border-color: var(--browse-border); }
 .browse-page .button.secondary:hover { color: var(--browse-ink); background: #fff; border-color: var(--browse-ink); }
+.browse-page .button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.browse-page .pagination {
+  justify-content: center;
+  gap: .85rem;
+  margin: 1.75rem 0 0;
+}
+.browse-page .pagination:empty { display: none; }
+.browse-page .pagination-label {
+  min-width: 7rem;
+  font-size: .9rem;
+  font-weight: 700;
+  text-align: center;
+}
 
 .browse-page .activity-grid {
   display: grid;

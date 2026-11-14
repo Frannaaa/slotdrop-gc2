@@ -78,6 +78,15 @@ test('optional page/limit paginate eligible slots with stable ordering and 400 v
     assert.deepEqual(await fetchList('?page=1'), all);
     assert.deepEqual(await fetchList('?limit=2'), all.slice(0, 2));
     assert.deepEqual(await fetchList('?page=25&limit=3'), []);
+    assert.deepEqual(await fetchList('?page=1&limit=3&pagination=metadata'), {
+      slots: first, hasNextPage: true,
+    });
+    assert.deepEqual(await fetchList('?page=2&limit=3&pagination=metadata'), {
+      slots: second, hasNextPage: all.length > 6,
+    });
+    assert.deepEqual(await fetchList('?page=25&limit=3&pagination=metadata'), {
+      slots: [], hasNextPage: false,
+    });
 
     const filtered = await fetchList('?type=pottery&sort=price-low&people=2');
     assert.deepEqual(
@@ -93,6 +102,7 @@ test('optional page/limit paginate eligible slots with stable ordering and 400 v
       '?page=0', '?page=-1', '?page=1.5', '?page=10001',
       '?limit=0', '?limit=51', '?limit=x', '?limit=2&limit=3',
       '?page=1&page=2',
+      '?pagination=invalid', '?pagination=metadata&pagination=metadata',
     ]) {
       const response = await fetch(f.base + '/api/slots' + query);
       assert.equal(response.status, 400, query);

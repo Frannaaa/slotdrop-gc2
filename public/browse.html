@@ -5,9 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Browse sessions | SlotDrop</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="preload" href="/api/slots?page=1&amp;limit=6&amp;pagination=metadata" as="fetch" crossorigin />
+    <link rel="modulepreload" href="/js/customer-common.js" />
+    <link rel="modulepreload" href="/js/business-config.js" />
     <link rel="stylesheet" href="/css/browse.css" />
-    <link rel="stylesheet" href="/css/pagination.css" />
     <script type="module" src="/js/browse.js"></script>
   </head>
   <body class="browse-page">
