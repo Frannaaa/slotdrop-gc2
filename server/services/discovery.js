@@ -20,7 +20,7 @@ export function dateRange(when, now) {
 
 export async function listSlots(db, query, now, providerId = null) {
   for (const key of Object.keys(query)) {
-    if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort', 'page', 'limit'].includes(key)) invalid('Unsupported filter: ' + key);
+    if (!['q', 'category', 'area', 'when', 'people', 'type', 'tag', 'sort', 'page', 'limit', 'view'].includes(key)) invalid('Unsupported filter: ' + key);
     if (typeof query[key] !== 'string') invalid('Filters must appear once.');
   }
   if (query.category !== undefined && !['creative','active'].includes(query.category)) invalid('Invalid category.');
@@ -28,16 +28,26 @@ export async function listSlots(db, query, now, providerId = null) {
   if (query.tag !== undefined && !['beginner','handbuilding','wheel-throwing','painting-included','materials-included'].includes(query.tag)) invalid('Invalid activity attribute.');
   if (query.sort !== undefined && !['soonest','price-low','price-high'].includes(query.sort)) invalid('Invalid sort.');
   if (query.when !== undefined && !['today','tomorrow','weekend'].includes(query.when)) invalid('Invalid date filter.');
+  if (query.view !== undefined && query.view !== 'closed') invalid('Invalid session view.');
   if ((query.q?.length ?? 0) > 100 || (query.area?.length ?? 0) > 100) invalid('Search text is too long.');
   if ([query.q, query.area].some(value => value?.includes('\u0000'))) invalid('Search text cannot contain null characters.');
   const people = query.people === undefined ? 1 : integer(query.people, 'people', 1, MAX_SEATS);
-  // Pagination is opt-in so existing Home/Owner callers still receive the full array.
-  const paginated = query.page !== undefined || query.limit !== undefined;
+  const closed = query.view === 'closed';
+  // Bound the closed view. Keep pagination opt-in for existing callers.
+  const paginated = closed || query.page !== undefined || query.limit !== undefined;
   const page = query.page === undefined ? 1 : integer(query.page, 'page', 1, 10000);
   const limit = query.limit === undefined ? 12 : integer(query.limit, 'limit', 1, 50);
-  const values = [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
-  const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, SLOT_BOOKING_WINDOW,
-    `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
+  const values = closed
+    ? [now, people]
+    : [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
+  const partySize = '$' + values.length;
+  const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`];
+  if (closed) {
+    where.push('sl.booking_closes_at <= $1', 'sl.capacity >= ' + partySize);
+  } else {
+    where.push(SLOT_BOOKING_WINDOW,
+      `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`);
+  }
   // Studio-profile lookups use a bound provider filter; public discovery filters are unchanged.
   if (providerId !== null) {
     values.push(integer(providerId, 'providerId'));
@@ -63,10 +73,11 @@ export async function listSlots(db, query, now, providerId = null) {
   if (query.tag === 'materials-included') where.push("'materials'=ANY(s.inclusions)");
   const range = dateRange(query.when, now);
   if (range) { values.push(...range); where.push(`sl.starts_at >= $${values.length - 1} AND sl.starts_at < $${values.length}`); }
-  const effectivePrice = 'CASE WHEN $3 >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END';
+  const effectivePrice = `CASE WHEN ${partySize} >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END`;
   const scheduleOrder = 'sl.starts_at NULLS FIRST, sl.id';
+  const defaultOrder = closed && !query.sort ? 'sl.booking_closes_at DESC, sl.id DESC' : scheduleOrder;
   const order = query.sort === 'price-low' ? effectivePrice + ' ASC, ' + scheduleOrder
-    : query.sort === 'price-high' ? effectivePrice + ' DESC, ' + scheduleOrder : scheduleOrder;
+    : query.sort === 'price-high' ? effectivePrice + ' DESC, ' + scheduleOrder : defaultOrder;
   let sql = SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order;
   if (paginated) {
     // Apply LIMIT/OFFSET after discovery filters and deterministic ORDER BY.

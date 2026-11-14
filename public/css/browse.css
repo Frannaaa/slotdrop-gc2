@@ -145,6 +145,15 @@
 .browse-page #status:empty { display: none; }
 .browse-page #status.error { color: #9d2424; background: #fff0ef; border: 1px solid #e8b7b3; }
 .browse-page #retry { margin: 0 0 1.1rem; }
+.browse-page .closed-sessions {
+  margin-top: 2rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--browse-border);
+}
+.browse-page .closed-sessions summary { font-weight: 700; cursor: pointer; }
+.browse-page .closed-sessions > p { color: #55534d; font-size: .9rem; }
+.browse-page .closed-sessions > .error { color: #9d2424; }
+.browse-page #closed-status:empty { display: none; }
 .browse-page .button {
   display: inline-flex;
   min-height: 2.7rem;
@@ -207,6 +216,13 @@
 .browse-page .session-time { color: #4d4b46; font-size: .88rem; line-height: 1.55; }
 .browse-page .session-time strong { color: var(--browse-ink); font-size: .95rem; }
 .browse-page .session-cutoff { color: #69665f; font-size: .82rem; }
+.browse-page .session-cutoff.closed {
+  padding: .3rem .65rem;
+  color: #49473f;
+  background: #f1efe9;
+  border-radius: 999px;
+  font-weight: 700;
+}
 .browse-page .session-traits { display: flex; flex-wrap: wrap; gap: .4rem; }
 .browse-page .session-traits span {
   display: inline-flex;

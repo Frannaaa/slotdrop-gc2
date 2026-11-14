@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import app from '../server/app.js';
-import { card, previewPrice, request, positive, available, safeHttpsUrl, studioEvidence } from '../public/js/customer-common.js';
+import { card, previewPrice, request, positive, available, closedSessionLabel, safeHttpsUrl, studioEvidence } from '../public/js/customer-common.js';
 import { DISCOVERY_HOURS } from '../public/js/business-config.js';
 
 // Session response before #34's additive metadata: Home must also work with #27.
@@ -71,6 +71,20 @@ test('cards accept the session API before additive attributes and escape studio 
   assert.deepEqual(previewPrice(slot, 1), {buddy:false, unit:160000, total:160000});
   assert.deepEqual(previewPrice(slot, 2), {buddy:true, unit:152000, total:304000});
   assert.deepEqual(previewPrice({...slot, buddyPriceCentavos:null}, 2), {buddy:false, unit:160000, total:320000});
+});
+
+test('closed cards label the cutoff and event end separately and omit the price and seats', t => {
+  const when = time => Date.parse('2026-11-01T' + time + ':00Z');
+  assert.equal(closedSessionLabel(slot, when('03:59')), '');
+  assert.equal(closedSessionLabel(slot, when('04:00')), 'Booking closed');
+  assert.equal(closedSessionLabel(slot, when('08:59')), 'Booking closed');
+  assert.equal(closedSessionLabel(slot, when('09:00')), 'Event ended');
+  assert.equal(closedSessionLabel({ ...slot, startsAt: null, bookingClosesAt: null }, when('09:00')), '');
+  t.mock.method(Date, 'now', () => when('09:00'));
+  const html = card(slot, 1, { closed: true });
+  assert.match(html, /Event ended/);
+  assert.match(html, /detail\.html\?slotId=1&quantity=1/);
+  assert.doesNotMatch(html, /Book before|seats left|party-price/);
 });
 
 test('studio reference cards and profiles share safe HTTPS source-link validation', () => {

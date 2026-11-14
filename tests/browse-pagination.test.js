@@ -26,7 +26,8 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   }
 
   const elements = new Map(
-    ['#results', '#status', '#search', '#pagination', '#retry'].map(key => [key, new Element()])
+    ['#results', '#status', '#search', '#pagination', '#retry',
+      '#closed-sessions', '#closed-results', '#closed-status', '#closed-retry'].map(key => [key, new Element()])
   );
   const categories = ['all', 'creative', 'active'].map(category => {
     const button = new Element();
@@ -38,6 +39,8 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     category:i%2===0?'creative':'active',
   }));
   const sent = [];
+  let failLookahead = false;
+  let failClosed = false;
   const source = (await readFile(new URL('../public/js/browse.js', import.meta.url), 'utf8'))
     .replace(/^import .*?;\r?\n/m, '');
 
@@ -46,11 +49,17 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     const url = new URL(path, 'http://example.test');
     assert.equal(url.pathname, '/api/slots');
     const params = url.searchParams;
-    assert.ok(params.has('page'), 'API pagination must be used on every Browse request');
-    assert.ok(params.has('limit'), 'a bounded API limit must be used');
     const page = Number(params.get('page')), limit = Number(params.get('limit'));
+    if (params.get('view') === 'closed') {
+      assert.equal(limit, 16);
+      if (failClosed) throw new Error('Request failed');
+      return [{ id: 17 }];
+    }
+    assert.ok(params.has('page'), 'API pagination must be used on every available page request');
+    assert.ok(params.has('limit'), 'a bounded API limit must be used');
     assert.equal(limit, 6);
     assert.ok(Number.isSafeInteger(page) && page > 0);
+    if (failLookahead && page === 2) throw new Error('Request failed');
     const match = catalog.filter(slot =>
       (!params.has('category') || slot.category === params.get('category')) &&
       (!params.has('q') || slot.serviceName.toLowerCase().includes(params.get('q').toLowerCase()))
@@ -65,7 +74,8 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
       createElement: () => new Element(),
     },
     URLSearchParams, request,
-    card: slot => '<article data-slot="' + slot.id + '"></article>',
+    card: (slot, _quantity, { closed = false } = {}) =>
+      '<article data-slot="' + slot.id + '" data-closed="' + closed + '"></article>',
     notice(el, text) { el.textContent = text; },
     setTimeout(fn) { fn(); return 1; },
     clearTimeout() {},
@@ -109,4 +119,24 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   assert.ok(sent.some(path => path.includes('category=active') && path.includes('limit=6')));
   assert.equal(pagination.children.length, 0, 'exactly one full page has no phantom next button');
   assert.ok(sent.every(path => path !== '/api/slots'), 'never fetch the unpaginated list');
+
+  failLookahead = true;
+  categories[0].handlers.click();
+  await flush();
+  assert.deepEqual(shownIds(), [1,2,3,4,5,6], 'valid results stay visible when lookahead fails');
+  assert.match(elements.get('#status').textContent, /Could not check for more pages/);
+  assert.equal(elements.get('#retry').disabled, false);
+  assert.ok(sent.every(path => !path.includes('view=closed')), 'closed results load on demand');
+  const disclosure = elements.get('#closed-sessions');
+  const closedRetry = elements.get('#closed-retry');
+  disclosure.open = true;
+  failClosed = true;
+  disclosure.handlers.toggle();
+  await flush();
+  assert.equal(closedRetry.hidden, false);
+  failClosed = false;
+  closedRetry.handlers.click();
+  await flush();
+  assert.match(elements.get('#closed-results').innerHTML, /data-slot="17" data-closed="true"/);
+  assert.deepEqual(shownIds(), [1,2,3,4,5,6]);
 });

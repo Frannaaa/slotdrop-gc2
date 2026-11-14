@@ -41,7 +41,7 @@ Owner sits beside the funnel. The release form changes future availability. The 
 
 ## 4.3 Business rules
 
-The 72-hour window and booking cutoffs apply to scheduled offers. Two clearly labeled practice offers have no date cutoff so the instructor can test price, seats and receipt persistence after the scheduled samples run out.
+The 72-hour window and booking cutoffs apply to scheduled offers. Expired offers can still be viewed under Closed sessions. Two clearly labeled practice offers have no date cutoff so the instructor can test price, seats and receipt persistence after the scheduled samples run out.
 
 | Rule, in the owner’s words | Where it’s enforced | What the customer sees |
 |---|---|---|

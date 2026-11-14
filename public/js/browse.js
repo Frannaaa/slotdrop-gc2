@@ -7,15 +7,21 @@ const status = document.querySelector("#status");
 const search = document.querySelector("#search");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
+const closedSessions = document.querySelector("#closed-sessions");
+const closedResults = document.querySelector("#closed-results");
+const closedStatus = document.querySelector("#closed-status");
+const closedRetry = document.querySelector("#closed-retry");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
 
 const ITEMS_PER_PAGE = 6;
 let category = "all";
 let currentPage = 1;
+let requestedPage = 1;
 let slots = [];
 let hasNextPage = false;
 let generation = 0;
 let searchTimer = null;
+let loadingClosedSessions = false;
 
 function pageUrl(page) {
   const params = new URLSearchParams({
@@ -71,6 +77,7 @@ function render() {
 }
 
 async function load(page = 1) {
+  requestedPage = page;
   const current = ++generation;
   results.replaceChildren();
   pagination.replaceChildren();
@@ -87,20 +94,25 @@ async function load(page = 1) {
       return load(page - 1);
     }
 
-    let more = false;
-    if (items.length === ITEMS_PER_PAGE) {
-      // The API returns an array, not total-count metadata. A small lookahead
-      // prevents a fake Next button when the last page has exactly six items.
+    currentPage = page;
+    slots = items;
+    hasNextPage = false;
+    render();
+    retry.disabled = false;
+    if (items.length !== ITEMS_PER_PAGE) return;
+
+    // Check for another page after showing the current results.
+    try {
       const nextItems = await request(pageUrl(page + 1));
       if (current !== generation) return;
       if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
-      more = nextItems.length > 0;
+      hasNextPage = nextItems.length > 0;
+      renderPagination();
+    } catch {
+      if (current === generation) {
+        notice(status, "Could not check for more pages. Refresh sessions to try again.");
+      }
     }
-
-    currentPage = page;
-    slots = items;
-    hasNextPage = more;
-    render();
   } catch (error) {
     if (current !== generation) return;
     slots = [];
@@ -108,6 +120,25 @@ async function load(page = 1) {
     notice(status, error.message || "Could not load sessions. Please try again.", true);
   } finally {
     if (current === generation) retry.disabled = false;
+  }
+}
+
+async function loadClosedSessions() {
+  if (loadingClosedSessions) return;
+  loadingClosedSessions = true;
+  closedRetry.hidden = true;
+  closedResults.replaceChildren();
+  notice(closedStatus, "Loading recently closed sessions…");
+  try {
+    const items = await request("/api/slots?view=closed&limit=16");
+    if (!Array.isArray(items)) throw new Error("The sessions response was not a list.");
+    closedResults.innerHTML = items.map(slot => card(slot, 1, { closed: true })).join("");
+    notice(closedStatus, items.length ? "" : "No closed sessions yet.");
+  } catch {
+    notice(closedStatus, "Could not load recently closed sessions. Please try again.", true);
+    closedRetry.hidden = false;
+  } finally {
+    loadingClosedSessions = false;
   }
 }
 
@@ -132,5 +163,9 @@ categoryButtons.forEach((button) => {
     load(1);
   });
 });
-retry.addEventListener("click", () => load(currentPage));
+retry.addEventListener("click", () => load(requestedPage));
+closedSessions.addEventListener("toggle", () => {
+  if (closedSessions.open) loadClosedSessions();
+});
+closedRetry.addEventListener("click", loadClosedSessions);
 load(1);

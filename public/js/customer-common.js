@@ -117,6 +117,13 @@ export function available(slot, quantity = 1) {
     withinBookingWindow(slot, Date.now())
   );
 }
+export function closedSessionLabel(slot, now = Date.now()) {
+  if (slot.startsAt === null) return "";
+  const end = Date.parse(slot.startsAt) + slot.durationMinutes * 60000;
+  if (end <= now) return "Event ended";
+  if (Date.parse(slot.bookingClosesAt) <= now) return "Booking closed";
+  return "";
+}
 export const activityLabel = (type) =>
   ({
     pottery: "Pottery",
@@ -157,12 +164,12 @@ export function studioEvidence(slot) {
   const priceSource = safeHttpsUrl(reference.priceSourceUrl);
   return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Seats and prices are simulated. Booking here does not reserve a place with the studio.</p>`;
 }
-export function card(slot, quantity = 1) {
+export function card(slot, quantity = 1, { closed = false } = {}) {
   const selectedQuantity =
     Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 100
       ? quantity
       : 1;
-  const price = previewPrice(slot, selectedQuantity);
+  const price = closed ? null : previewPrice(slot, selectedQuantity);
   const practice = slot.startsAt === null;
   const photo = slot.studioReference?.photo;
   const photoPage = safeHttpsUrl(photo?.page);
@@ -191,16 +198,17 @@ export function card(slot, quantity = 1) {
       </p>
       <p class="session-time">
         <strong>${date(slot.startsAt)}</strong>
-        <br />${slot.durationMinutes} minutes · ${slot.remainingSeats} seats
-        left
+        <br />${slot.durationMinutes} minutes${closed ? "" : ` · ${slot.remainingSeats} seats left`}
       </p>
-      <p class="session-cutoff">${practice
-        ? "Demo only · No booking cutoff"
-        : "Book before " + date(slot.bookingClosesAt)}</p>
+      ${closed
+        ? `<p class="session-cutoff closed">${closedSessionLabel(slot) || "Booking closed"}</p>`
+        : `<p class="session-cutoff">${practice
+          ? "Demo only · No booking cutoff"
+          : "Book before " + date(slot.bookingClosesAt)}</p>`}
       <div class="session-traits">
         ${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}
       </div>
-      <div class="party-price">
+      ${price ? `<div class="party-price">
         <strong>${money(price.total)}</strong>
         <span
           >total for ${selectedQuantity}
@@ -217,7 +225,7 @@ export function card(slot, quantity = 1) {
           ? `<br>
     <span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`
           : ""}
-      </p>
+      </p>` : ""}
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"

@@ -6,6 +6,7 @@ positive,
 pageParameters,
 escapeHtml,
 available,
+closedSessionLabel,
 notice,
 inclusionLabel,
 activityLabel,
@@ -23,8 +24,12 @@ function sync() {
   const link = document.querySelector("#continue");
   if (!link || !slot) return;
   const open = available(slot, quantity);
+  const closed = slot.serviceActive && slot.status === "open" && slot.runsAsScheduled
+    ? closedSessionLabel(slot) : "";
+  const message = open ? "" : (closed || "This session is unavailable") + ". Browse for another session.";
   link.hidden = !open;
-  notice(status, open ? "" : "This session is unavailable. Choose another featured session from Home.");
+  document.querySelector("#offer").hidden = Boolean(closed);
+  if (status.textContent !== message) notice(status, message);
 }
 
 async function load() {
@@ -41,7 +46,7 @@ async function load() {
     slot = loaded;
     const schedule = slot.startsAt === null
       ? "<dt>Schedule</dt><dd>Practice booking · No booking cutoff</dd>"
-      : `<dt>Starts</dt><dd>${date(slot.startsAt)}</dd><dt>Book before</dt><dd>${date(slot.bookingClosesAt)}</dd>`;
+      : `<dt>Starts</dt><dd>${date(slot.startsAt)}</dd><dt>Booking cutoff</dt><dd>${date(slot.bookingClosesAt)}</dd>`;
     content.innerHTML = `<p class="eyebrow">${escapeHtml(slot.providerName)}</p><h1>${escapeHtml(slot.serviceName)}</h1>
       <p>${escapeHtml(slot.recurrenceNote)}</p>${slot.beginnerFriendly ? "<p>Beginner friendly</p>" : ""}
       <dl>
@@ -52,6 +57,8 @@ async function load() {
         <dt>Where</dt><dd>${escapeHtml(slot.area)}, ${escapeHtml(slot.city)}</dd>
         ${schedule}
         <dt>Duration</dt><dd>${slot.durationMinutes} minutes</dd>
+      </dl>
+      <dl id="offer">
         <dt>Seats left</dt><dd>${slot.remainingSeats}</dd>
         <dt>${comparisonLabel(slot)}</dt><dd><del>${money(slot.originalPriceCentavos)}</del> / person</dd>
         <dt>Offer per person</dt><dd>${money(slot.offerPriceCentavos)} ${slot.discountPercent}% off</dd>

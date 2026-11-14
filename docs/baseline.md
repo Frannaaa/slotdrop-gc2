@@ -19,7 +19,7 @@ Measured on 14 November 2026 at 5:16 PM Philippine time on the [deployed Browse 
 - **Chromium 153.0.8010.0**, separate first-load Network capture with the cache explicitly disabled. Totals include the page, its assets and both List API requests. Transfer sizes come from Chromium's Network events and include the encoded bytes it recorded.
 - The document request took about 8.55 seconds in the separate Network capture. The previous day's curl sample had a median List API time to first byte of 6.59 seconds. Those runs used different clients and conditions. The 259 ms is one API request in the Lighthouse trace. The 8.55 s is an HTML document request in a separate capture. The measurements do not isolate the cause of the slow page load.
 
-Use this dated public measurement as the comparison point. The separate [PR #77](https://github.com/Frannaaa/slotdrop-gc2/pull/77) comparison used local Chromium with DevTools throttling. If that change ships in the GC2 release, append a second public measurement using the settings above.
+Use this dated public measurement as the comparison point. [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) changes Browse’s render timing and adds workshop photos. Measure the reviewed release using the same settings after it deploys. The separate [PR #77](https://github.com/Frannaaa/slotdrop-gc2/pull/77) comparison used local Chromium with DevTools throttling.
 
 ## Three weaknesses to check in the Final Project
 

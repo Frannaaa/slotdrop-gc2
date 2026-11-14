@@ -46,6 +46,14 @@
         <div id="results" class="activity-grid" aria-label="Available sessions"></div>
         <nav id="pagination" class="pagination" aria-label="Session pages"></nav>
       </section>
+
+      <details id="closed-sessions" class="closed-sessions">
+        <summary>Closed sessions</summary>
+        <p>Recent offers whose booking cutoff has passed.</p>
+        <p id="closed-status" class="notice" role="status"></p>
+        <button id="closed-retry" class="button secondary" type="button" hidden>Retry closed sessions</button>
+        <div id="closed-results" class="activity-grid" aria-label="Closed sessions"></div>
+      </details>
     </main>
 
     <footer>

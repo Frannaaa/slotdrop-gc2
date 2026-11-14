@@ -103,7 +103,7 @@ Fran's additional reference-catalog work supplies eight activities at five real 
 
 ## Pre-checkpoint demo inventory check (read-only)
 
-Scheduled allocations close at their booking deadlines. The two practice offers stay discoverable without a date cutoff while they have available seats. Owner can add practice capacity when needed. Startup preserves existing bookings and offer edits.
+Scheduled allocations close at their booking deadlines. Browse’s **Closed sessions** section shows the last 16 closed offers and labels each as “Booking closed” or “Event ended.” The two practice offers stay discoverable without a date cutoff while they have available seats. Owner can add practice capacity when needed. Startup preserves existing bookings and offer edits.
 
 Before each deployed demo/checkpoint, with the app running, run:
 

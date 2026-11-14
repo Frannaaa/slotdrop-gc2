@@ -7,7 +7,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
 | GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | 503 if the production database or required tables are unavailable | Fran |
-| GET /api/slots | q, category, area, when, people, type, tag, sort, optional page, limit | 200 array, including [] | 400 bad filter | Fran |
+| GET /api/slots | q, category, area, when, people, type, tag, sort, page, limit, view | 200 array, including [] | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 session started, or capacity/cancellation/resumption conflict | Fran |
@@ -28,13 +28,15 @@ Booking POSTs have a 30-attempt, 60-second limit per client IP. Render uses the 
 
 ## Discovery and session responses
 
-Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. Browse requests six sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination). Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
+Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. The default bookable view returns the full eligible array when both fields are omitted. Browse requests six bookable sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination).
 
 q searches the provider and activity names, primary activity type, technique and inclusions using case-insensitive literal substrings. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
 The list excludes inactive activities, paused/cancelled sessions and allocations too small for the requested group. Scheduled offers also require a confirmed session inside the 72-hour window and a future booking cutoff. Two startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
+
+`view=closed` lists dated, active, open, confirmed-to-run sessions whose cutoff has passed, including offers that sold out. The `people` filter uses total capacity in this view. Without an explicit sort, the most recent cutoffs appear first. The view always applies pagination. Browse fetches the latest 16 only when someone opens **Closed sessions**. Its cards say “Booking closed” or “Event ended” and link to read-only details. Closed offers still return 409 from a new quote or booking.
 
 List and detail use the same session shape:
 
