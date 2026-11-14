@@ -4,6 +4,8 @@
 
 We’d start with one pottery studio and a small release of seats it expects to go unsold. The [four-week pilot plan](#pilot-and-risks) explains how we’d check that. Studio details and published prices come from [public research](#studio-research). The course demo uses simulated dates, seat releases, offers, bookings and payments.
 
+The [post-feedback revision of GC1](gc1-post-feedback-revision.md) documents the instructor's strategic feedback, the originally missing monetization/features/tech-stack sections, updated competitor categories and the proposed partner validation plan. It is a **later working draft**, not a replacement for the original assessed GC1 proposal. The original proposal and instructor feedback are retained as separate course source files; the GC2 submission brief requires quotations and traceability, but does not explicitly request that feedback PDF as an additional public attachment.
+
 ## 4.1 GC1 traceability
 
 The quotes below come from our GC1 proposal and the instructor’s feedback.
@@ -107,7 +109,7 @@ Nearly full counts eligible releases with **at least one and at most 25% of rele
 
 ### Customer and supply
 
-For the pilot we’d look for people near Katipunan or UP Village who sometimes make plans one to three days ahead and can consider a ₱2,500–₱3,000 workshop. That range comes from the initial offers we researched. We’d interview students separately to learn what price works for them. We don’t have a measured purchase frequency yet.
+For the pilot we’d **test** working adults aged **22–35**, living, studying or working near Katipunan, UP Village or Teachers Village, who sometimes make plans one to three days ahead and might spend ₱2,500–₱3,000 on a workshop. A proposed ₱35,000–₱80,000 monthly gross income *screening band* is a research hypothesis, not a measured income profile. We’d screen for discretionary spending, interest in a hands-on activity with a friend, and willingness to book inside a short window. Those proposed ages, income limits and preferences need real interviews before we treat them as market facts. We’d interview students separately to learn what price works for them. We do not have measured purchase frequency or demand yet.
 
 A studio can run a class every week even if one guest only does pottery once in a while. We’d check which studios regularly have seats to release before looking for more activities. For example, Laro is close to our first customer area, but we still need to confirm which dates are in QC. Tahanan’s published Saturday schedule makes it a useful comparison for recurring supply.
 
@@ -186,17 +188,26 @@ We checked the studios’ public pages on 29–30 October 2026. We’d confirm t
 
 ### Competitors
 
-| Alternative | What it already does | Our response |
-|---|---|---|
-| **ClassPass Manila** | A named local option for finding fitness and wellness classes. Its partner pages describe selling excess capacity, pricing and inventory tools, and rate protection. These are ClassPass's own claims. | Use a public cash price for a few pottery workshop seats. Keep the studio in control of the release. |
-| **Studios' own sites** | Laro, Bumi & Ashe and Tahanan already publish products, schedules and policies. Customers can book without a marketplace. | Show near-term details side by side across willing studios. A studio needs extra customers or simpler selling to justify our fee. |
-| **FunNow** | A near-term experience-booking service we use as an analogy. We did not confirm that it operates in the Philippines. | Use it as a reference for near-term booking. Local comparison focuses on studio-direct sites and ClassPass. |
+GC1's feedback called out that our SWOT mentioned “established booking giants” without naming a single competitor. For this narrower QC-workshop concept, we classify competitors by whether they help customers book the *same kind of experience*, offer another booking channel, or compete for discovery and leisure spending. Categories are **our analytical labels**, not formal categories imposed by the GC2 brief.
 
-The GC1 feedback cited HotelTonight and Fresha as precedents for selling spare capacity. The question for SlotDrop is whether it can bring a studio a booking it would have missed through its existing channels.
+| Category | Real alternative and evidence | What it offers / why it threatens us | What SlotDrop would need to prove |
+|---|---|---|---|
+| **Direct marketplace** | **[Klook Philippines](https://www.klook.com/en-PH/activity/116888-pottery-workshop-wabi-sabi/)** lists a Wabi Sabi pottery workshop in Metro Manila | A customer can discover beginner-friendly pottery through an existing experiences marketplace. We **did not confirm a currently purchasable pass** on the page checked. | Reliable near-term QC releases with explicit peso totals, not just another marketplace listing. |
+| **Closest adjacent capacity model** | **[ClassPass Manila](https://classpass.com/search-index/manila)**; its [partner documentation](https://classpass.com/partners/faqs) describes excess-inventory tools and payout floors | ClassPass already markets incremental reservations from idle capacity, primarily in fitness/wellness. Spare-seat discounting is **not** SlotDrop's unique innovation. | A differentiated workshop category, relevant studio partnerships, and economics that protect direct demand. |
+| **Indirect: studio-direct bookings** | **[Laro Ceramics](https://laro-ceramics.com/products/mug-making-class-manila)**, Bumi & Ashe and Tahanan's own websites | A customer can buy a class directly; a studio can keep its full direct-sale proceeds. The same potential partners are also substitutes for using SlotDrop. | Demonstrate genuinely incremental customers or simpler cross-studio discovery; otherwise our commission is unnecessary. |
+| **Indirect: neighboring appointment marketplaces** | **[Fresha's Philippine salon listings](https://www.fresha.com/lp/en/bt/beauty-salons/in/philippines)** | Relevant to GC1's *original* broad salons/appointments concept, but not proof that Fresha lists QC pottery seats. | Avoid an unsupported claim that we can compete broadly across salons, spas and creative classes on day one. |
+| **Auxiliary: discovery channels** | Studio Instagram/Facebook pages and Google Maps/search | Customers can discover and contact a studio without another marketplace. These compete for attention rather than providing exactly the same booking service. | Present useful dates, remaining seats, cutoffs and group totals more clearly than separately checking studio pages and messages. |
+| **Auxiliary: experience substitutes** | Cinema dates, café visits, at-home crafting and free local events | Compete for an optional afternoon or date budget; not identical last-minute workshop-booking platforms. | Test the actual workshop value and total cost instead of assuming discounted pottery automatically wins. |
 
-[ClassPass Manila](https://classpass.com/search-index/manila) · [ClassPass partner FAQs](https://classpass.com/partners/faqs) · [FunNow](https://www.events.myfunnow.com/whyfunnow-en)
+**Geography and precision matter.** Klook's local listing is closer to our *creative experience* category than the international [HotelTonight](https://www.hoteltonight.com/) analogy. ClassPass competes more directly with our *spare-capacity economics*. Fresha is important background for our old appointment-marketplace idea, but it does not establish pottery supply. [FunNow](https://www.events.myfunnow.com/whyfunnow-en) is a near-term experiences analogy; its Philippine operation was not verified. None of these references proves that a specific competitor has an available QC pottery seat today.
+
+**Where we would try to win:** one QC neighborhood, a limited studio-approved allocation, transparent price/seat/cutoff information, and the ability to confirm and retrieve a saved booking. Those are **pilot hypotheses**, not demonstrated advantages. A [ClassPass-style payout floor](https://classpass.com/partners/faqs) cannot be claimed as our implemented feature: in GC2 the Owner sets prices, but our system does not independently enforce a negotiated minimum studio payout.
+
+**Supplier choice and cannibalization:** A studio receives **₱2,430** before attendance costs on our simulated ₱2,700 single seat, versus **₱3,000** in gross revenue if the same customer booked direct at the published price. The ₱570 difference is a warning: the platform must earn its share through additional bookings that would not have occurred otherwise. Before any real pilot, we would request four weeks of filled/empty seats, agree a ring-fenced release allocation and a minimum acceptable net price, and compare direct *plus* marketplace paid attendance rather than counting discounted bookings alone. No such supplier records or agreements are available yet.
 
 ### Pilot and risks
+
+The instructor's GC1 feedback also named three concrete risks. **Ghost slots:** the production pilot must ring-fence agreed seats in the studio's own calendar because SlotDrop's server protects only its own allocations; no external calendar sync exists. **Premium studios rejecting discounts:** operators set their own offer and buddy prices, with a negotiated minimum net payout required *before* a real listing; there is no automatically enforced provider-specific floor in GC2. **Deal-only buyers:** compare direct and marketplace sales and selectively test buddy discounts so cannibalized full-price bookings do not masquerade as growth. These are proposed controls, not live partner processes.
 
 | When | What we’d do | What would change our decision |
 |---|---|---|
