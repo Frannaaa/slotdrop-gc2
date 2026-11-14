@@ -23,6 +23,6 @@ Use this dated public measurement as the comparison point. [PR #72](https://gith
 
 ## Three weaknesses to check in the Final Project
 
-1. Browse makes a second List API request on a full page just to see whether Next should appear. That adds a round trip before the current results render.
+1. In the measured build, Browse waited for a second List API request on full pages before rendering the first set of results. PR #72 displays the current results first and still uses the second request to decide whether to show Next.
 2. First load can be slow. The document took about 8.55 seconds in this capture, and Lighthouse reported an 11.2-second Speed Index.
 3. The layout shifts as the page settles. Mobile Lighthouse reported a cumulative layout shift of 0.086. Reserving room for the results may help.

@@ -1,0 +1,78 @@
+{
+  "source": "Chrome DevTools Network sanitized HAR, with Keep log enabled. Only the booking and receipt entries are included, with request and response headers omitted.",
+  "renderCommit": "93d931aff00363e09120c5d5c590b12b4aeeb897",
+  "capturedAt": "2026-11-14T18:01:17.207Z",
+  "viewport": {
+    "width": 400,
+    "height": 552
+  },
+  "post": {
+    "startedAt": "2026-11-14T18:01:17.207Z",
+    "elapsedMs": 135,
+    "method": "POST",
+    "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings",
+    "requestBody": {
+      "requestId": "45eff918-d60e-43e0-9ed0-77c2a0ed014e",
+      "slotId": 38,
+      "quantity": 1,
+      "customerName": "GC2 DevTools Guest",
+      "customerEmail": "gc2-network@example.com",
+      "paymentMethod": "pay_on_site",
+      "expectedTotalCentavos": 238500
+    },
+    "status": 201,
+    "response": {
+      "id": "f6148274-8de0-4558-ada3-2a8b3dc68217",
+      "slotId": 38,
+      "quantity": 1,
+      "paymentMethod": "pay_on_site",
+      "status": "confirmed",
+      "serviceName": "Mug-making workshop",
+      "providerName": "Bumi & Ashe",
+      "sessionStartsAt": "2026-11-15T04:00:00.000Z",
+      "originalUnitPriceCentavos": 265000,
+      "offerUnitPriceCentavos": 238500,
+      "unitPriceCentavos": 238500,
+      "pricingType": "standard",
+      "commissionBasisPoints": 1000,
+      "totalPriceCentavos": 238500,
+      "platformFeeCentavos": 23850,
+      "providerPayoutCentavos": 214650,
+      "createdAt": "2026-11-14T18:01:17.407Z"
+    }
+  },
+  "receipt": {
+    "startedAt": "2026-11-14T18:01:17.919Z",
+    "elapsedMs": 101,
+    "method": "GET",
+    "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings/f6148274-8de0-4558-ada3-2a8b3dc68217",
+    "status": 200,
+    "response": {
+      "id": "f6148274-8de0-4558-ada3-2a8b3dc68217",
+      "slotId": 38,
+      "quantity": 1,
+      "paymentMethod": "pay_on_site",
+      "status": "confirmed",
+      "serviceName": "Mug-making workshop",
+      "providerName": "Bumi & Ashe",
+      "sessionStartsAt": "2026-11-15T04:00:00.000Z",
+      "originalUnitPriceCentavos": 265000,
+      "offerUnitPriceCentavos": 238500,
+      "unitPriceCentavos": 238500,
+      "pricingType": "standard",
+      "commissionBasisPoints": 1000,
+      "totalPriceCentavos": 238500,
+      "platformFeeCentavos": 23850,
+      "providerPayoutCentavos": 214650,
+      "createdAt": "2026-11-14T18:01:17.407Z"
+    }
+  },
+  "owner": {
+    "url": "https://slotdrop-gc2-group-zx8j.onrender.com/owner.html",
+    "matchingRows": 1,
+    "bookingId": "f6148274-8de0-4558-ada3-2a8b3dc68217",
+    "totalPriceCentavos": 238500,
+    "platformFeeCentavos": 23850,
+    "providerPayoutCentavos": 214650
+  }
+}

@@ -19,7 +19,7 @@ The quotes below come from our GC1 proposal and the instructor’s feedback.
 | GC1 feature | GC2 decision |
 |---|---|
 | Slot Manager | “Stores service, date/time, location, original price, discounted price, and availability.” Owner creates a dated offer with prices, a cutoff and released seats. The edit route updates the cutoff, offer prices, capacity and sale status. |
-| Marketplace Feed and search | “Displays only upcoming slots that are still available.” Home shows up to three eligible sessions. Browse adds search, category buttons and six sessions per page. |
+| Marketplace Feed and search | “Displays only upcoming slots that are still available.” The bookable list follows that rule for dated offers. Browse adds search, category buttons, six offers per page and a separate Closed sessions section. Two undated practice offers let the instructor test bookings after the dated samples expire. |
 | Simulated Booking | “Checks availability, marks the slot as booked, and creates a booking record.” We added Detail after the GC1 feedback, followed by quantity and quote on Selection, simulated payment on Checkout, and a saved receipt on Confirmation. The server checks stock and price when the booking is saved. The five-minute hold from the wireframe was dropped. |
 | User Schedules and Provider Analytics | Partial. Owner can see saved bookings and five metrics. Personal schedules and role-specific reporting need accounts. |
 | Auth & Roles, real payments, integrations and paid placements | Deferred to the Final Project. The GC2 demo uses one set of linked provider, service, slot and booking tables. |
@@ -30,23 +30,23 @@ The rates are what we’d measure in a pilot. GC2 records bookings and Owner met
 
 | Stage | Screen | What we put there and why | Endpoint | What we’d measure |
 |---|---|---|---|---|
-| Browse | Home | Up to three dated offers give someone with a free afternoon a quick sense of what’s available. “Browse all sessions” opens the full list. | `GET /api/slots` | Home visits that open Browse or Detail ÷ Home visits |
-| Browse | Browse | A card keeps the studio, time, cutoff, seats left and price together. Search takes studio or activity names. Buttons make the two broad categories easy to switch, and six cards per page keep the phone list short. | `GET /api/slots?q=…&category=…&page=…&limit=6` | Browse visits that open Detail ÷ Browse visits |
+| Browse | Home | Up to three bookable offers give someone with a free afternoon a quick sense of what’s available. Practice offers are labeled. “Browse all sessions” opens the full list. | `GET /api/slots` | Home visits that open Browse or Detail ÷ Home visits |
+| Browse | Browse | A bookable card keeps the studio, time, cutoff, seats left and price together. Search takes studio or activity names. Buttons switch between the broad categories, and six cards per page keep the phone list short. | `GET /api/slots?q=…&category=…&page=…&limit=6` | Browse visits that open a bookable session’s Detail page ÷ Browse visits |
 | Select | Detail | A labelled list puts inclusions, preparation, location and the deadline where a customer can scan them before choosing seats. | `GET /api/slots/:id` | Detail visits that continue to Selection ÷ Detail visits |
 | Select | Selection | A number field lets the customer enter the group size directly. The server returns a new price as it changes, so a pair can see what the buddy rate does to the total. | `GET /api/slots/:id`, `GET /api/pricing/quote` | Selection visits that open Checkout ÷ Selection visits |
-| Confirm | Checkout | Labelled contact fields show validation errors. A dropdown offers the two simulated payment choices. The agreement checkbox sits with the quoted amount so the customer can see what they’re accepting. | `POST /api/bookings` | Confirmed saves ÷ unique submitted request IDs |
+| Confirm | Checkout | Labelled contact fields show validation errors. A dropdown offers the two simulated payment choices. The agreement checkbox sits with the quoted amount so the customer can see what they’re accepting. | `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings` | Confirmed saves ÷ unique submitted request IDs |
 | Save | Confirmation | The page fetches the saved booking by its reference. Refreshing it shows the accepted seat count, price and payment choice again. The reference also lets Owner find the same booking. | `GET /api/bookings/:id` | Saved bookings and average booking value |
 
 Owner sits beside the funnel. The release form changes future availability. The bookings table and five metrics come from saved data via `GET /api/bookings` and `GET /api/metrics`.
 
 ## 4.3 Business rules
 
-The 72-hour window and booking cutoffs apply to scheduled offers. Expired offers can still be viewed under Closed sessions. Two clearly labeled practice offers have no date cutoff so the instructor can test price, seats and receipt persistence after the scheduled samples run out.
+The 72-hour window and booking cutoffs apply to scheduled offers. Closed sessions keeps the latest 16 scheduled offers whose cutoffs have passed. Two practice offers show “Demo only · No booking cutoff” so the instructor can test price, seat limits and receipt persistence after the scheduled samples run out.
 
 | Rule, in the owner’s words | Where it’s enforced | What the customer sees |
 |---|---|---|
 | “Only offer seats we’ve released for a class that’s going ahead.” | `createOffer()` requires the class to be marked as running. `listSlots()` filters for active, open, confirmed sessions with seats left. | Browse shows eligible sessions with their remaining allocation. |
-| “Show the next three days. Close each listing at that studio’s cutoff.” | `listSlots()` and `checkBookable()` check the start and cutoff. `createOffer()` and `editOffer()` check the deadline when the offer is saved. | The card says “Book before …”. Passed-cutoff sessions leave Browse. Saving one from an old page returns 409. |
+| “Show the next three days. Close each listing at that studio’s cutoff.” | `listSlots()` and `checkBookable()` check the start and cutoff. `createOffer()` and `editOffer()` check the deadline when the offer is saved. | Dated bookable cards show the deadline. After the cutoff, recent offers move to Closed sessions and show “Booking closed” or “Event ended.” A new quote or booking after the cutoff returns 409. |
 | “Set the regular price above the offer price. The buddy price goes lower if we offer it.” | `createOffer()`, `editOffer()` and the price constraints in [`db/schema.sql`](../db/schema.sql). | The card shows the prices side by side and only shows a buddy price when one is set. |
 | “Give the buddy rate to two or more people in the same booking.” | `priceQuote()` selects the tier. `createBooking()` saves it in `bookings.pricing_type`. | Selection displays “Buddy price applied” for a qualifying group. |
 | “Never book more seats than we’ve set aside.” | `createBooking()` locks the `slots` row, then calls `checkBookable()` before the insert. `editOffer()` guards against lowering capacity below sold seats. | A request for three when only two remain is refused with 409 and creates no booking. |
