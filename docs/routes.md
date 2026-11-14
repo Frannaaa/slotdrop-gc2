@@ -34,7 +34,7 @@ q searches the provider and activity names, primary activity type, technique and
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
-The list excludes inactive activities, paused/cancelled sessions, passed cutoffs, sessions not already going ahead, starts outside the window and allocations too small for the requested group.
+The list excludes inactive activities, paused/cancelled sessions and allocations too small for the requested group. Scheduled offers also require a confirmed session inside the 72-hour window and a future booking cutoff. Two startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
 
 List and detail use the same session shape:
 
@@ -47,6 +47,8 @@ discountPercent, status, serviceActive, recurrenceNote, runsAsScheduled, default
 ```
 
 Prices are per seat. discountPercent describes the standard offer versus the regular price. A null buddyPriceCentavos disables buddy pricing. A known unavailable session still returns 200 detail; the customer must not be allowed to book it. serviceActive identifies inactive activities, including when a session is opened through a direct link.
+
+Practice offers have `startsAt: null` and `bookingClosesAt: null`. Their receipts have `sessionStartsAt: null`. The optional `studioReference.photo` contains alt text, credit and a link to the listing. Card images are served locally using the reference key. See [photo sources](workshop-photos.md).
 
 The owner catalog includes paused and expired inventory. Its services include id, providerId, providerName, name, active and defaultBookingCutoffMinutes. Its discoveryHours value comes from the server configuration so the owner page can distinguish future inventory from offers already in discovery.
 
@@ -61,7 +63,8 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - Capacity cannot fall below confirmed seats.
 - A new standard offer cannot leave an incompatible buddy rate; update or disable the buddy rate in the same request.
 - A passed cutoff can close sales immediately.
-- Reopening paused or cancelled inventory requires a future cutoff/start, available allocation, an active activity and a session confirmed to run. Read the current time after acquiring the database lock.
+- Reopening paused or cancelled inventory requires available allocation and an active activity. Scheduled offers also need a future cutoff/start and a session confirmed to run. Read the current time after acquiring the database lock.
+- Practice offers accept price, capacity and status edits. Their dates are set by startup, and a cutoff edit returns 400.
 - Cancelling with confirmed bookings returns 409.
 - Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
 - Changing the start time is unsupported and returns 400.
@@ -117,7 +120,7 @@ Metrics use confirmed bookings only:
 | platformRevenueCentavos | Sum of saved commission |
 | averageOrderValueCentavos | Rounded mean transaction total; zero when empty |
 | topSellingService | {serviceId,serviceName,seatsSold}, ranked by sum of quantity; lowest ID breaks ties; null when empty |
-| nearlyFullSessionCount | Eligible-time active/open/running sessions with 1–25% of released capacity remaining; sold-out sessions are excluded |
+| nearlyFullSessionCount | Active/open/running scheduled or practice offers with 1–25% of released capacity remaining; scheduled offers must still be in their booking window |
 
 Payments are simulated. Platform revenue is modeled commission, not cash collected or total booking value.
 
@@ -145,7 +148,7 @@ The customer journey starts at `/browse.html` and stays in the app through savin
 
 GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. Sort uses the effective per-seat tier for the requested party; results still obey dates, provider cutoffs, confirmed-to-run state and remaining allocation. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
 
-Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes, not arbitrary public tags. The existing quote and receipt contracts do not change. Cards may preview the stored standard/buddy tier, but quote and save remain server-authoritative.
+Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes. Cards preview the stored standard/buddy tier. The server still computes the quote and save totals.
 
 The shipped Browse UI uses text search, category buttons and pagination. Cards show the per-person price, cutoff, duration and remaining seats. Selection accepts the party size and fetches its total. A ceramic painting session has primary type pottery but can match a painting search.
 

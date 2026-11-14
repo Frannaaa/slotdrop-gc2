@@ -1,7 +1,7 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
 import { DISCOVERY_HOURS, MAX_SEATS } from '../config/business.js';
 import { integer, invalid } from '../lib/validation.js';
-import { SLOT_SELECT, slotResponse } from '../repositories/slots.js';
+import { SLOT_BOOKING_WINDOW, SLOT_SELECT, slotResponse } from '../repositories/slots.js';
 
 export function dateRange(when, now) {
   // Manila has a fixed UTC+08 offset; calculate its midnight in UTC.
@@ -36,7 +36,7 @@ export async function listSlots(db, query, now, providerId = null) {
   const page = query.page === undefined ? 1 : integer(query.page, 'page', 1, 10000);
   const limit = query.limit === undefined ? 12 : integer(query.limit, 'limit', 1, 50);
   const values = [now, new Date(now.getTime() + DISCOVERY_HOURS * 3600000), people];
-  const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, 'sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1',
+  const where = [`s.active AND sl.status='open' AND sl.runs_as_scheduled`, SLOT_BOOKING_WINDOW,
     `sl.capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE slot_id=sl.id AND status='confirmed'),0) >= $3`];
   // Studio-profile lookups use a bound provider filter; public discovery filters are unchanged.
   if (providerId !== null) {
@@ -64,7 +64,9 @@ export async function listSlots(db, query, now, providerId = null) {
   const range = dateRange(query.when, now);
   if (range) { values.push(...range); where.push(`sl.starts_at >= $${values.length - 1} AND sl.starts_at < $${values.length}`); }
   const effectivePrice = 'CASE WHEN $3 >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END';
-  const order = query.sort === 'price-low' ? effectivePrice + ' ASC, sl.starts_at, sl.id' : query.sort === 'price-high' ? effectivePrice + ' DESC, sl.starts_at, sl.id' : 'sl.starts_at, sl.id';
+  const scheduleOrder = 'sl.starts_at NULLS FIRST, sl.id';
+  const order = query.sort === 'price-low' ? effectivePrice + ' ASC, ' + scheduleOrder
+    : query.sort === 'price-high' ? effectivePrice + ' DESC, ' + scheduleOrder : scheduleOrder;
   let sql = SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order;
   if (paginated) {
     // Apply LIMIT/OFFSET after discovery filters and deterministic ORDER BY.

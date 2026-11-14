@@ -73,7 +73,8 @@ export async function inspectGC2(origin) {
     const first=available[0];
     if(first && Number.isSafeInteger(first.id)) {
       results.push(await inspect(base,'Session detail API','/api/slots/'+first.id,'json',
-        v=>v && v.id===first.id && v.remainingSeats>=1 && typeof v.startsAt==='string'));
+        v=>v && v.id===first.id && v.remainingSeats>=1 &&
+          (typeof v.startsAt==='string' || v.startsAt===null && v.bookingClosesAt===null)));
       results.push(await inspect(base,'Quantity-aware quote API','/api/pricing/quote?slotId='+first.id+'&quantity=1','json',
         v=>v && v.slotId===first.id && v.quantity===1 && Number.isSafeInteger(v.totalPriceCentavos)));
     } else {

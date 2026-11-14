@@ -33,8 +33,8 @@ CREATE TABLE services (
 CREATE TABLE slots (
  id BIGSERIAL PRIMARY KEY,
  service_id BIGINT NOT NULL REFERENCES services(id),
- starts_at TIMESTAMPTZ NOT NULL,
- booking_closes_at TIMESTAMPTZ NOT NULL,
+ starts_at TIMESTAMPTZ,
+ booking_closes_at TIMESTAMPTZ,
  -- Only seats allocated to SlotDrop; not the venue's complete class capacity.
  capacity INTEGER NOT NULL CHECK (capacity BETWEEN 1 AND 100),
  original_price_centavos INTEGER NOT NULL CHECK (original_price_centavos BETWEEN 1 AND 100000000),
@@ -45,6 +45,7 @@ CREATE TABLE slots (
  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','paused','cancelled')),
  runs_as_scheduled BOOLEAN NOT NULL DEFAULT TRUE,
  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ CONSTRAINT slots_schedule_pair_check CHECK ((starts_at IS NULL) = (booking_closes_at IS NULL)),
  CHECK (booking_closes_at < starts_at),
  CHECK (offer_price_centavos < original_price_centavos),
  CHECK (buddy_price_centavos IS NULL OR buddy_price_centavos < offer_price_centavos),
@@ -61,7 +62,7 @@ CREATE TABLE bookings (
  payment_method TEXT NOT NULL CHECK (payment_method IN ('mock_card','pay_on_site')),
  status TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed','cancelled')),
  -- Immutable receipt fields; later offer edits do not rewrite a saved booking.
- session_starts_at TIMESTAMPTZ NOT NULL,
+ session_starts_at TIMESTAMPTZ,
  original_unit_price_centavos INTEGER NOT NULL CHECK (original_unit_price_centavos BETWEEN 1 AND 100000000),
  offer_unit_price_centavos INTEGER NOT NULL CHECK (offer_unit_price_centavos BETWEEN 1 AND 100000000),
  pricing_type TEXT NOT NULL CHECK (pricing_type IN ('standard','buddy')),
@@ -80,6 +81,7 @@ CREATE TABLE bookings (
 );
 CREATE UNIQUE INDEX providers_reference_key_idx ON providers(reference_key);
 CREATE UNIQUE INDEX services_reference_key_idx ON services(reference_key);
+CREATE UNIQUE INDEX slots_practice_service_idx ON slots(service_id) WHERE starts_at IS NULL;
 CREATE TABLE provider_applications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   request_id UUID NOT NULL UNIQUE,

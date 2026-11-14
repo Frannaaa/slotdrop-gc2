@@ -1,3 +1,5 @@
+import { DISCOVERY_HOURS, withinBookingWindow } from './business-config.js';
+
 export function sessionDate(value) {
   const date = new Date(value + "+08:00");
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ||
@@ -76,23 +78,20 @@ export function preferredServiceId(services, selected, editing = null) {
  * Operational warning for the course demo, not a substitute for GET /api/slots.
  * Count only sessions that can appear in Browse *now*, with no database writes.
  */
-export function demoInventoryStatus(slots, services, now = Date.now(), discoveryHours = 72) {
-  const hours = Number.isFinite(discoveryHours) && discoveryHours > 0 ? discoveryHours : 72;
+export function demoInventoryStatus(slots, services, now = Date.now(), discoveryHours = DISCOVERY_HOURS) {
+  const hours = Number.isFinite(discoveryHours) && discoveryHours > 0 ? discoveryHours : DISCOVERY_HOURS;
   const active = new Set(services.filter(service => service.active).map(service => service.id));
   const available = slots.filter(slot => {
-    const starts = Date.parse(slot.startsAt);
-    const cutoff = Date.parse(slot.bookingClosesAt);
     return active.has(slot.serviceId) && slot.status === 'open' &&
       slot.runsAsScheduled === true && slot.remainingSeats >= 1 &&
-      Number.isFinite(starts) && Number.isFinite(cutoff) &&
-      starts > now && starts < now + hours * 3600000 && cutoff > now;
+      withinBookingWindow(slot, now, hours);
   });
   if (!available.length) {
     return {state: 'empty', count: 0,
       message: 'No demo sessions are currently discoverable in Browse. Create a future simulated session within the discovery window, with an open booking deadline and available seats; do not reseed saved bookings.'};
   }
-  const latestCutoff = Math.max(...available.map(slot => Date.parse(slot.bookingClosesAt)));
-  if (latestCutoff <= now + 24 * 3600000) {
+  if (available.every(slot => slot.bookingClosesAt !== null &&
+      Date.parse(slot.bookingClosesAt) <= now + 24 * 3600000)) {
     return {state: 'soon', count: available.length,
       message: available.length + ' demo session(s) are discoverable, but all current booking deadlines expire within 24 hours. Prepare future simulated offers for the checkpoint.'};
   }

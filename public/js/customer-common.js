@@ -1,5 +1,5 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
-import { DISCOVERY_HOURS, partyPrice as previewPrice } from "./business-config.js";
+import { withinBookingWindow, partyPrice as previewPrice } from "./business-config.js";
 
 export { previewPrice };
 export const money = (value) =>
@@ -7,7 +7,7 @@ export const money = (value) =>
     value / 100,
   );
 export const date = (value) =>
-  new Intl.DateTimeFormat("en-PH", {
+  value === null ? "Practice booking" : new Intl.DateTimeFormat("en-PH", {
     timeZone: "Asia/Manila",
     dateStyle: "medium",
     timeStyle: "short",
@@ -109,16 +109,12 @@ export async function retryLimitedBooking(path, options, {
 }
 
 export function available(slot, quantity = 1) {
-  const now = Date.now(),
-    start = Date.parse(slot.startsAt);
   return (
     slot.serviceActive &&
     slot.status === "open" &&
     slot.runsAsScheduled &&
     slot.remainingSeats >= quantity &&
-    Date.parse(slot.bookingClosesAt) > now &&
-    start > now &&
-    start < now + DISCOVERY_HOURS * 3600000
+    withinBookingWindow(slot, Date.now())
   );
 }
 export const activityLabel = (type) =>
@@ -140,7 +136,7 @@ export const comparisonLabel = (slot) =>
   !slot.studioReference
     ? "Regular price"
     : slot.originalPriceCentavos === slot.studioReference.publishedPriceCentavos
-      ? "Published reference price"
+      ? "Reference price"
       : "Demo base price";
 // Use the same source-link rules on cards and studio profiles.
 export function safeHttpsUrl(value) {
@@ -159,7 +155,7 @@ export function studioEvidence(slot) {
   const source = safeHttpsUrl(reference.sourceUrl);
   if (!source) return "";
   const priceSource = safeHttpsUrl(reference.priceSourceUrl);
-  return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
+  return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Seats and prices are simulated. Booking here does not reserve a place with the studio.</p>`;
 }
 export function card(slot, quantity = 1) {
   const selectedQuantity =
@@ -167,17 +163,24 @@ export function card(slot, quantity = 1) {
       ? quantity
       : 1;
   const price = previewPrice(slot, selectedQuantity);
+  const practice = slot.startsAt === null;
+  const photo = slot.studioReference?.photo;
+  const photoPage = safeHttpsUrl(photo?.page);
+  const photoKey = slot.studioReference?.key;
+  const hasPhoto = photoPage && typeof photoKey === "string"
+    && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
+    && typeof photo.credit === "string";
   const traits = [
     slot.beginnerFriendly ? "Beginner-friendly" : "",
     ...(slot.inclusions || []).map(inclusionLabel),
   ].filter(Boolean);
   return /* HTML */ `<article class="activity-card card">
-    <div
-      class="card-art ${slot.category === "active" ? "active" : ""}"
-      aria-hidden="true"
-    >
-      ${escapeHtml(activityLabel(slot.activityType))}
-    </div>
+    ${hasPhoto
+      ? `<figure class="card-photo">
+          <img src="/images/workshops/${photoKey}.webp" alt="${escapeHtml(photo.alt)}" width="720" height="405" loading="lazy" decoding="async">
+          <figcaption><a href="${escapeHtml(photoPage)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml("Photo source: " + photo.credit)}">Photo source ↗</a></figcaption>
+        </figure>`
+      : `<div class="card-art ${slot.category === "active" ? "active" : ""}" aria-hidden="true">${escapeHtml(activityLabel(slot.activityType))}</div>`}
     <div class="card-body">
       <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
       <h2>${escapeHtml(slot.serviceName || slot.title || "Untitled Session")}</h2>
@@ -191,7 +194,9 @@ export function card(slot, quantity = 1) {
         <br />${slot.durationMinutes} minutes · ${slot.remainingSeats} seats
         left
       </p>
-      <p class="session-cutoff">Book before ${date(slot.bookingClosesAt)}</p>
+      <p class="session-cutoff">${practice
+        ? "Demo only · No booking cutoff"
+        : "Book before " + date(slot.bookingClosesAt)}</p>
       <div class="session-traits">
         ${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}
       </div>
@@ -213,8 +218,6 @@ export function card(slot, quantity = 1) {
     <span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`
           : ""}
       </p>
-      ${studioEvidence(slot)}
-      <p class="reference">Price preview. Rechecked before saving.</p>
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"

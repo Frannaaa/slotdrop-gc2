@@ -41,6 +41,8 @@ Owner sits beside the funnel. The release form changes future availability. The 
 
 ## 4.3 Business rules
 
+The 72-hour window and booking cutoffs apply to scheduled offers. Two clearly labeled practice offers have no date cutoff so the instructor can test price, seats and receipt persistence after the scheduled samples run out.
+
 | Rule, in the owner’s words | Where it’s enforced | What the customer sees |
 |---|---|---|
 | “Only offer seats we’ve released for a class that’s going ahead.” | `createOffer()` requires the class to be marked as running. `listSlots()` filters for active, open, confirmed sessions with seats left. | Browse shows eligible sessions with their remaining allocation. |

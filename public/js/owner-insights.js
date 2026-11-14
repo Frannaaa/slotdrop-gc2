@@ -1,21 +1,21 @@
 // Derived Owner insight: joins two different API responses without trusting browser totals.
 // Group assignment: Fran (M1). This is simulated released-seat utilization, not venue occupancy.
+import { DISCOVERY_HOURS, withinBookingWindow } from './business-config.js';
+
 export function openReleaseUtilization(catalog, bookings, now = Date.now()) {
   const services = Array.isArray(catalog?.services) ? catalog.services : [];
   const slots = Array.isArray(catalog?.slots) ? catalog.slots : [];
   const receipts = Array.isArray(bookings) ? bookings : [];
   const nowMs = Number(now);
   const discoveryHours = Number.isFinite(catalog?.discoveryHours)
-    ? catalog.discoveryHours : 72;
+    ? catalog.discoveryHours : DISCOVERY_HOURS;
   const activeServiceIds = new Set(services.filter(service => service.active).map(service => service.id));
   const eligible = slots.filter(slot =>
     activeServiceIds.has(slot.serviceId) &&
     slot.status === 'open' &&
     slot.runsAsScheduled === true &&
     Number.isSafeInteger(slot.capacity) && slot.capacity > 0 &&
-    Date.parse(slot.bookingClosesAt) > nowMs &&
-    Date.parse(slot.startsAt) > nowMs &&
-    Date.parse(slot.startsAt) < nowMs + discoveryHours * 3600000
+    withinBookingWindow(slot, nowMs, discoveryHours)
   );
   const eligibleIds = new Set(eligible.map(slot => slot.id));
   const confirmedBySlot = new Map();

@@ -1,5 +1,5 @@
 import { safeNumber } from '../lib/validation.js';
-import { SLOT_SELECT, slotResponse } from './slots.js';
+import { SLOT_BOOKING_WINDOW, SLOT_SELECT, slotResponse } from './slots.js';
 import { COMMISSION_BASIS_POINTS, DISCOVERY_HOURS } from '../config/business.js';
 
 export async function ownerCatalog(db) {
@@ -28,7 +28,7 @@ export async function ownerMetrics(db, now) {
       (SELECT COALESCE(ROUND(AVG(total_price_centavos)),0) FROM confirmed) AS average,
       (SELECT json_build_object('serviceId',id,'serviceName',name,'seatsSold',seats) FROM rankings) AS top,
       (SELECT COUNT(*) FROM slots sl JOIN services s ON s.id=sl.service_id
-       WHERE s.active AND sl.status='open' AND sl.runs_as_scheduled AND sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1
+       WHERE s.active AND sl.status='open' AND sl.runs_as_scheduled AND ${SLOT_BOOKING_WINDOW}
        AND sl.capacity-COALESCE((SELECT SUM(quantity) FROM confirmed WHERE slot_id=sl.id),0) BETWEEN 1 AND sl.capacity*0.25) AS nearly_full`,
     [now,new Date(now.getTime()+DISCOVERY_HOURS*3600000)]);
   return {bookingCount:safeNumber(row.count),platformRevenueCentavos:safeNumber(row.revenue),averageOrderValueCentavos:safeNumber(row.average),

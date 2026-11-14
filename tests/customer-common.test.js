@@ -103,3 +103,16 @@ test('card title falls back from serviceName to title to Untitled Session', () =
   assert.match(card({ ...slot, serviceName: undefined, title: 'Legacy Title' }), /<h2>Legacy Title<\/h2>/);
   assert.match(card({ ...slot, serviceName: '', title: '' }), /<h2>Untitled Session<\/h2>/);
 });
+
+test('practice cards show the cutoff exception and render a credited local workshop photo', () => {
+  const practice = { ...slot, startsAt: null, bookingClosesAt: null,
+    studioReference: { key: 'laro-mug', sourceUrl: 'https://example.com/source', checkedAt: '2026-11-04',
+      photo: { alt: 'Pottery & painting', credit: 'Example Studio', page: 'https://example.com/workshop' } } };
+  const html = card(practice);
+  assert.match(html, /Demo only · No booking cutoff/);
+  assert.match(html, /src="\/images\/workshops\/laro-mug\.webp" alt="Pottery &amp; painting"/);
+  assert.match(html, /aria-label="Photo source: Example Studio"/);
+  assert.doesNotMatch(html, /Real studio reference|1970|Book before/);
+  const unsafe = { ...practice, studioReference: { ...practice.studioReference, key: '../../elsewhere' } };
+  assert.doesNotMatch(card(unsafe), /<img/);
+});

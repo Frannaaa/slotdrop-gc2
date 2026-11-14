@@ -22,7 +22,7 @@ npm run demo
 
 Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
 
-Fresh seeds create 16 simulated sessions across eight researched offerings on the next two Philippine calendar days. Startup can add future sample allocations for active reference activities when their existing inventory is no longer bookable. It preserves existing rows and saved receipts.
+Fresh seeds create 16 dated sample sessions across eight researched offerings. Startup can replenish dated allocations and supplies two undated practice offers for grading. The practice cards say “Demo only · No booking cutoff.” They use the same seat limits, server pricing and saved receipts as scheduled offers.
 
 ## PostgreSQL and deployment
 
@@ -103,7 +103,7 @@ Fran's additional reference-catalog work supplies eight activities at five real 
 
 ## Pre-checkpoint demo inventory check (read-only)
 
-Sample allocations expire at their booking deadlines. Startup can add future sample allocations for active reference activities when existing allocations are no longer bookable. It does not rewrite historic sessions or bookings.
+Scheduled allocations close at their booking deadlines. The two practice offers stay discoverable without a date cutoff while they have available seats. Owner can add practice capacity when needed. Startup preserves existing bookings and offer edits.
 
 Before each deployed demo/checkpoint, with the app running, run:
 

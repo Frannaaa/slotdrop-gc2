@@ -9,6 +9,7 @@ export const SLOT_SELECT = `SELECT sl.*, s.provider_id, s.name AS service_name, 
   s.default_booking_cutoff_minutes, p.name AS provider_name, p.city, p.area,
   COALESCE((SELECT SUM(b.quantity) FROM bookings b WHERE b.slot_id=sl.id AND b.status='confirmed'),0) AS seats_booked
   FROM slots sl JOIN services s ON s.id=sl.service_id JOIN providers p ON p.id=s.provider_id`;
+export const SLOT_BOOKING_WINDOW = '(sl.starts_at IS NULL OR (sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1))';
 
 export function slotResponse(row) {
   const number = key => safeNumber(row[key]);
@@ -21,7 +22,8 @@ export function slotResponse(row) {
     activityType: row.activity_type, technique: row.technique, inclusions: row.inclusions,
     preparationNote: row.preparation_note, cancellationNote: row.cancellation_note,
     city: row.city, area: row.area, durationMinutes: number('duration_minutes'), beginnerFriendly: row.beginner_friendly,
-    startsAt: new Date(row.starts_at).toISOString(), bookingClosesAt: new Date(row.booking_closes_at).toISOString(),
+    startsAt: row.starts_at === null ? null : new Date(row.starts_at).toISOString(),
+    bookingClosesAt: row.booking_closes_at === null ? null : new Date(row.booking_closes_at).toISOString(),
     capacity: number('capacity'), remainingSeats: number('capacity') - number('seats_booked'),
     originalPriceCentavos, offerPriceCentavos,
     buddyPriceCentavos: row.buddy_price_centavos === null ? null : number('buddy_price_centavos'),

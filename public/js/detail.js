@@ -39,7 +39,26 @@ async function load() {
     const loaded = await request("/api/slots/" + id);
     if (current !== generation) return;
     slot = loaded;
-    content.innerHTML = `<p class="eyebrow">${escapeHtml(slot.providerName)}</p><h1>${escapeHtml(slot.serviceName)}</h1><p>${escapeHtml(slot.recurrenceNote)}</p>${slot.beginnerFriendly ? "<p>Beginner friendly</p>" : ""}<dl><dt>Activity</dt><dd>${escapeHtml(activityLabel(slot.activityType))}${slot.technique ? " + " + escapeHtml(slot.technique) : ""}</dd><dt>Included</dt><dd>${(slot.inclusions || []).length ? slot.inclusions.map(value => escapeHtml(inclusionLabel(value))).join(", ") : "No inclusions specified."}</dd><dt>Before you go</dt><dd>${escapeHtml(slot.preparationNote || "Confirm preparation details with the provider.")}</dd><dt>Changes</dt><dd>${escapeHtml(slot.cancellationNote)}</dd><dt>Where</dt><dd>${escapeHtml(slot.area)}, ${escapeHtml(slot.city)}</dd><dt>Starts</dt><dd>${date(slot.startsAt)}</dd><dt>Duration</dt><dd>${slot.durationMinutes} minutes</dd><dt>Book before</dt><dd>${date(slot.bookingClosesAt)}</dd><dt>Seats left</dt><dd>${slot.remainingSeats}</dd><dt>${comparisonLabel(slot)}</dt><dd><del>${money(slot.originalPriceCentavos)}</del> / person</dd><dt>Offer per person</dt><dd>${money(slot.offerPriceCentavos)} ${slot.discountPercent}% off</dd>${slot.buddyPriceCentavos != null ? `<dt>Bring a friend</dt><dd>${money(slot.buddyPriceCentavos)} each for 2 or more</dd>` : ""}</dl>${studioEvidence(slot)}<a id="continue" class="button" href="/selection.html?slotId=${id}&quantity=${quantity}">Choose seats</a>`;
+    const schedule = slot.startsAt === null
+      ? "<dt>Schedule</dt><dd>Practice booking · No booking cutoff</dd>"
+      : `<dt>Starts</dt><dd>${date(slot.startsAt)}</dd><dt>Book before</dt><dd>${date(slot.bookingClosesAt)}</dd>`;
+    content.innerHTML = `<p class="eyebrow">${escapeHtml(slot.providerName)}</p><h1>${escapeHtml(slot.serviceName)}</h1>
+      <p>${escapeHtml(slot.recurrenceNote)}</p>${slot.beginnerFriendly ? "<p>Beginner friendly</p>" : ""}
+      <dl>
+        <dt>Activity</dt><dd>${escapeHtml(activityLabel(slot.activityType))}${slot.technique ? " + " + escapeHtml(slot.technique) : ""}</dd>
+        <dt>Included</dt><dd>${(slot.inclusions || []).length ? slot.inclusions.map(value => escapeHtml(inclusionLabel(value))).join(", ") : "No inclusions specified."}</dd>
+        <dt>Before you go</dt><dd>${escapeHtml(slot.preparationNote || "Confirm preparation details with the provider.")}</dd>
+        <dt>Changes</dt><dd>${escapeHtml(slot.cancellationNote)}</dd>
+        <dt>Where</dt><dd>${escapeHtml(slot.area)}, ${escapeHtml(slot.city)}</dd>
+        ${schedule}
+        <dt>Duration</dt><dd>${slot.durationMinutes} minutes</dd>
+        <dt>Seats left</dt><dd>${slot.remainingSeats}</dd>
+        <dt>${comparisonLabel(slot)}</dt><dd><del>${money(slot.originalPriceCentavos)}</del> / person</dd>
+        <dt>Offer per person</dt><dd>${money(slot.offerPriceCentavos)} ${slot.discountPercent}% off</dd>
+        ${slot.buddyPriceCentavos != null ? `<dt>Bring a friend</dt><dd>${money(slot.buddyPriceCentavos)} each for 2 or more</dd>` : ""}
+      </dl>
+      ${studioEvidence(slot)}
+      <a id="continue" class="button" href="/selection.html?slotId=${id}&quantity=${quantity}">Choose seats</a>`;
     sync();
   } catch (error) {
     if (current === generation) notice(status, error.message, true);

@@ -131,6 +131,7 @@ function reset() {
   $("status-field").hidden = true;
   for (const name of ["serviceId", "startsAt", "originalPriceCentavos"])
     field(name).disabled = false;
+  $("cutoff").disabled = false;
   field("runsAsScheduled").disabled = false;
   $("starts").value = localTime(new Date(Date.now() + 24 * 3600000));
   defaultCutoff();
@@ -149,8 +150,10 @@ function edit(slot) {
   $("save").textContent = "Save session changes";
   $("status-field").hidden = false;
   $("service").value = String(slot.serviceId);
-  $("starts").value = localTime(slot.startsAt);
-  $("cutoff").value = localTime(slot.bookingClosesAt);
+  const practice = slot.startsAt === null;
+  $("starts").value = practice ? "" : localTime(slot.startsAt);
+  $("cutoff").value = practice ? "" : localTime(slot.bookingClosesAt);
+  $("cutoff").disabled = practice;
   field("capacity").value = slot.capacity;
   field("originalPriceCentavos").value = (
     slot.originalPriceCentavos / 100
@@ -171,11 +174,12 @@ function edit(slot) {
     "runsAsScheduled",
   ])
     field(name).disabled = true;
-  $("cutoff-hint").textContent =
-    "This deadline belongs to this session. An elapsed deadline closes new bookings.";
+  $("cutoff-hint").textContent = practice
+    ? "Practice booking · No booking cutoff."
+    : "This deadline belongs to this session. An elapsed deadline closes new bookings.";
   preview();
   $("editor-title").scrollIntoView({ behavior: "smooth", block: "start" });
-  $("cutoff").focus({ preventScroll: true });
+  (practice ? field("offerPriceCentavos") : $("cutoff")).focus({ preventScroll: true });
   setBusy(false);
 }
 function renderMetrics(metrics) {
@@ -220,7 +224,7 @@ function renderMetrics(metrics) {
 }
 function renderOpenUtilization(bookings) {
   const value = openReleaseUtilization(catalog, bookings);
-  let message = "No eligible, open demo sessions are in the current discovery window.";
+  let message = "No eligible, open demo sessions.";
   if (value.inconsistent) {
     message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
   } else if (value.utilizationPercent !== null) {
@@ -279,8 +283,8 @@ function renderSessions() {
     card.append(
       heading,
       element("p", slot.providerName + " · " + slot.area),
-      element("p", time(slot.startsAt)),
-      element("p", "Bookings close " + time(slot.bookingClosesAt)),
+      element("p", slot.startsAt === null ? "Practice booking" : time(slot.startsAt)),
+      element("p", slot.bookingClosesAt === null ? "No booking cutoff" : "Bookings close " + time(slot.bookingClosesAt)),
     );
     card.append(
       element(
@@ -389,7 +393,7 @@ function renderBookings(rows) {
     const tr = element("tr");
     for (const value of [
       row.id + " · " + row.serviceName,
-      time(row.sessionStartsAt),
+      row.sessionStartsAt === null ? "Practice booking" : time(row.sessionStartsAt),
       String(row.quantity),
       row.pricingType + " · " + money(row.unitPriceCentavos),
       money(row.totalPriceCentavos),
@@ -466,8 +470,10 @@ form.addEventListener("submit", async (event) => {
       capacity: Number(field("capacity").value),
       offerPriceCentavos: cents(field("offerPriceCentavos").value),
       buddyPriceCentavos: cents(field("buddyPriceCentavos").value, true),
-      bookingClosesAt: cutoffRequestValue($("cutoff").value, editingCutoff),
     };
+    if (editingSnapshot?.startsAt !== null) {
+      body.bookingClosesAt = cutoffRequestValue($("cutoff").value, editingCutoff);
+    }
     if (editing) {
       body.status = field("status").value;
       body = changedOfferFields(body, editingSnapshot);

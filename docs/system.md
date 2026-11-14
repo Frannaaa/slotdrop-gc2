@@ -32,7 +32,7 @@ The customer and Owner pages share the same Express application and database. UI
 | Hop | Code location | Behavior |
 |---|---|---|
 | 1. Browse | Home and Browse interface → `GET /api/slots` | Requests eligible sessions. Browse sends search text, category and pagination to the list API |
-| 2. Discover | `server/routes/slots.js` → `listSlots()` in `server/services/discovery.js` → `server/repositories/slots.js` | Filters active sessions, future cutoff, remaining released seats and discovery window; returns JSON |
+| 2. Discover | `server/routes/slots.js` → `listSlots()` in `server/services/discovery.js` → `server/repositories/slots.js` | Filters active offers and remaining seats. Scheduled sessions also follow the 72-hour window and cutoff. |
 | 3. Choose | `public/js/detail.js` and `public/js/selection.js` | Fetches detail and quantity-aware quote; displays the selected session and party price |
 | 4. Quote | `server/routes/pricing.js` → `server/services/pricing.js` | Validates session and quantity; selects standard or buddy tier stored in DB, never browser money |
 | 5. Submit | Checkout submit → `retryLimitedBooking()` → `request()` in `public/js/customer-common.js` | Sends session ID, quantity, fictional guest details, accepted quote and a stable UUID request ID |
