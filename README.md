@@ -57,7 +57,7 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 | Tool | Version | Why |
 |---|---|---|
 | HTML, CSS and JavaScript | GC2 frontend | Fetch JSON and render each page; prepare for the later React upgrade |
-| Node.js | 22 in CI/Docker; local checks on 24.19.0 | JavaScript server |
+| Node.js | 22 configured for Render, CI and Docker | JavaScript server |
 | Express | 5.3.0 | API between the browser and database |
 | PostgreSQL | 16 in CI | Persistent tables, constraints and transactions |
 | pg | 8.23.1 | SQL queries and checked-out transaction clients |

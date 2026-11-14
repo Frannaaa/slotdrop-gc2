@@ -2,6 +2,7 @@
 import { COMMISSION_BASIS_POINTS, DISCOVERY_HOURS, MAX_SEATS } from '../config/business.js';
 import { ApiError, integer, invalid } from '../lib/validation.js';
 import { findSlot } from '../repositories/slots.js';
+import { commissionPerSeat, discountPercent, partyPrice } from '../../public/js/business-config.js';
 
 // Same rules as discovery: only open, confirmed, active sessions inside the
 // 72-hour window with a future cutoff and enough released seats can be priced.
@@ -20,11 +21,8 @@ export function checkBookable(slot, quantity, now) {
 // Pure calculation, reused later by POST /api/bookings so quote and save always agree.
 // All amounts are integer centavos. The server picks the tier; the client never sends a price.
 export function priceQuote(slot, quantity, now, commissionBasisPoints = COMMISSION_BASIS_POINTS) {
-  const buddy = quantity >= 2 && slot.buddyPriceCentavos !== null;
-  const unitPrice = buddy ? slot.buddyPriceCentavos : slot.offerPriceCentavos;
-  const unitFee = Math.round(unitPrice * commissionBasisPoints / 10000);
-  const total = unitPrice * quantity;
-  const platformFee = unitFee * quantity;
+  const { buddy, unit: unitPrice, total } = partyPrice(slot, quantity);
+  const platformFee = commissionPerSeat(unitPrice, commissionBasisPoints) * quantity;
   return {
     slotId: slot.id,
     quantity,
@@ -36,7 +34,7 @@ export function priceQuote(slot, quantity, now, commissionBasisPoints = COMMISSI
     totalPriceCentavos: total,
     platformFeeCentavos: platformFee,
     providerPayoutCentavos: total - platformFee,
-    discountPercent: Math.round((slot.originalPriceCentavos - unitPrice) * 10000 / slot.originalPriceCentavos) / 100,
+    discountPercent: discountPercent(slot.originalPriceCentavos, unitPrice),
     quotedAt: now.toISOString()
   };
 }

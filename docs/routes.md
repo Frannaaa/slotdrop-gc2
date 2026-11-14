@@ -10,13 +10,17 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | GET /api/slots | q, category, area, when, people, type, tag, sort, optional page, limit | 200 array, including [] | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
-| PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
-| GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints} | 500 unexpected failure | Fran |
+| PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 session started, or capacity/cancellation/resumption conflict | Fran |
+| GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints,discoveryHours} | 500 unexpected failure | Fran |
 | GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
 | GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
 | POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT; 429 RATE_LIMITED with Retry-After | Janelle |
 | GET /api/bookings/:id | UUID | 200 saved receipt | 400 malformed; 404 BOOKING_NOT_FOUND | Janelle |
+| GET /api/activities | Optional q, type, area, tag | 200 sourced research with an offerings array | 400 bad filter | Fran |
+| GET /api/providers/:id | Positive safe integer | 200 public studio reference and eligible demo slots | 400 malformed; 404 unknown or legacy fixture | Fran |
+| POST /api/provider-applications | Pending application fields | 201 created; 200 identical retry | 400 invalid; 404 unknown referenced studio; 409 conflicting request key | Fran |
+| GET /api/provider-applications/:id | UUID | 200 id, status and createdAt | 400 malformed; 404 unknown | Fran |
 
 Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.
 
@@ -26,7 +30,7 @@ Booking POSTs have a 30-attempt, 60-second limit per client IP. Render uses the 
 
 Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. Browse requests six sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination). Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
 
-q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
+q searches the provider and activity names, primary activity type, technique and inclusions using case-insensitive literal substrings. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
@@ -36,6 +40,7 @@ List and detail use the same session shape:
 
 ```text
 id, serviceId, providerId, providerName, serviceName, category, city, area,
+activityType, technique, inclusions, preparationNote, cancellationNote, studioReference,
 durationMinutes, beginnerFriendly, startsAt, bookingClosesAt, capacity,
 remainingSeats, originalPriceCentavos, offerPriceCentavos, buddyPriceCentavos,
 discountPercent, status, serviceActive, recurrenceNote, runsAsScheduled, defaultBookingCutoffMinutes
@@ -83,7 +88,7 @@ providerPayout = total - platformFee
 discountPercent = Math.round((regular - unitPrice) * 10000 / regular) / 100
 ```
 
-The active model rate is 1000 basis points in server/config/business.js on the development branches. It is deducted from the accepted price, with no customer surcharge. Money is saved in centavos. The server chooses the tier; the client cannot choose a rate or pricingType.
+The active rate is 1000 basis points in `server/config/business.js`. Both the server and the browser previews use the calculations in `public/js/business-config.js`. The server chooses the tier and fee from the stored prices and configured rate before saving. Money is stored in centavos, and commission is deducted from the studio’s share.
 
 POST /api/bookings accepts requestId, slotId, quantity, customerName, customerEmail, paymentMethod and expectedTotalCentavos. Validate a UUID retry key, quantity 1–100, trimmed name 1–100 characters, trimmed basic email up to 254 characters, mock_card/pay_on_site and a nonnegative safe-integer acknowledged total. Reject unsupported price fields such as total with 400. Do not collect card numbers.
 
@@ -142,7 +147,7 @@ GET /api/slots keeps q/category/area/when/people and adds optional type (pottery
 
 Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes, not arbitrary public tags. The existing quote and receipt contracts do not change. Cards may preview the stored standard/buddy tier, but quote and save remain server-authoritative.
 
-Primary UI controls are When, Area and People, with optional activity shortcuts and search/category/attribute/sort under More filters. Show selected party total, per-person price, actual cutoff, duration and remaining seats. A ceramic painting session has primary type pottery but can match a painting search; use Canvas painting as the narrower painting-type label. Do not force a category choice before showing results.
+The shipped Browse UI uses text search, category buttons and pagination. Cards show the per-person price, cutoff, duration and remaining seats. Selection accepts the party size and fetches its total. A ceramic painting session has primary type pottery but can match a painting search.
 
 Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.
 

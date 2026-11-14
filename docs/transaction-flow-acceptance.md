@@ -43,12 +43,12 @@ The test fixture used a PGlite database and local `127.0.0.1` HTTP app. This ver
 
 - [x] Reviewed Browse, shared CSS and Checkout/Confirmation are merged. The deployed browser walkthrough reached Confirmation from Browse.
 - [ ] Final reviewed `main` deployed with persistent PostgreSQL and discoverable **future fictional** sessions. Record exact public origin, commit SHA, test timestamp and tested booking ID.
-- [ ] **Independent non-member**, using a real phone without instructions, starts on Home, finds Browse, applies a filter, opens Detail, chooses quantity, sees server total on Selection, fills Checkout with fictional contact/payment, submits once, and gets Confirmation.
+- [ ] **Outside-group tester** opens the deployed link on their phone and completes the six-screen booking flow without help. The team checks that the same booking appears in Owner.
 - [ ] Confirm the URL contains the saved receipt ID and refreshing Confirmation **GETs that receipt by ID** rather than relying on browser storage.
 - [x] The 14 November deployed capture shows the same booking ID in Confirmation and Owner after one browser POST from a double-click.
 - [ ] Confirm the number of available seats dropped by the correct quantity; duplicate clicks must not produce two bookings; one clear success state.
 - [ ] Test 320–390px width, error recovery and all forward/back links; note any defect and retest after fix.
-- [ ] Put independent tester's date/device, observed success/failures, non-sensitive screenshots and the exact deployed commit in `docs/challenges.md` or `docs/evidence/`; use real observations, not reconstructed results.
+- [ ] Record the independent test date, device/browser, observed result, booking reference and deployed commit in `docs/challenges.md` or `docs/evidence/`. An optional screenshot can show the saved reference with fictional details.
 
 ### Who owns what
 

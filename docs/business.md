@@ -18,7 +18,7 @@ The quotes below come from our GC1 proposal and the instructor’s feedback.
 
 | GC1 feature | GC2 decision |
 |---|---|
-| Slot Manager | “Stores service, date/time, location, original price, discounted price, and availability.” Owner sets the date, cutoff, price and number of released seats via `POST /api/slots` and `PATCH /api/slots/:id`. |
+| Slot Manager | “Stores service, date/time, location, original price, discounted price, and availability.” Owner creates a dated offer with prices, a cutoff and released seats. The edit route updates the cutoff, offer prices, capacity and sale status. |
 | Marketplace Feed and search | “Displays only upcoming slots that are still available.” Home shows up to three eligible sessions. Browse adds search, category buttons and six sessions per page. |
 | Simulated Booking | “Checks availability, marks the slot as booked, and creates a booking record.” We added Detail after the GC1 feedback, followed by quantity and quote on Selection, simulated payment on Checkout, and a saved receipt on Confirmation. The server checks stock and price when the booking is saved. The five-minute hold from the wireframe was dropped. |
 | User Schedules and Provider Analytics | Partial. Owner can see saved bookings and five metrics. Personal schedules and role-specific reporting need accounts. |
@@ -109,7 +109,7 @@ For the pilot we’d look for people near Katipunan or UP Village who sometimes 
 
 A studio can run a class every week even if one guest only does pottery once in a while. We’d check which studios regularly have seats to release before looking for more activities. For example, Laro is close to our first customer area, but we still need to confirm which dates are in QC. Tahanan’s published Saturday schedule makes it a useful comparison for recurring supply.
 
-The app stores one activity type per session, plus technique and inclusions. A mug-making class stays under pottery even if it includes painting. Someone searching “painting” can find that same session and book from the same allocation. Browse exposes text, broad category and pagination. The API also supports date, area, party size, type, attributes and sorting.
+Each activity stores one primary type, plus technique and inclusions. A mug-making class stays under pottery even if it includes painting. Someone searching “painting” can find that same session and book from the same allocation. Browse exposes text, broad category and pagination. The API also supports date, area, party size, type, attributes and sorting.
 
 ### Studio research
 

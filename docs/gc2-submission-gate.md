@@ -1,4 +1,4 @@
-# GC2 submission gate — teacher brief, not production scope
+# GC2 submission checklist
 
 This checklist follows the Canvas **GC 2: MVP Build** assignment. The extended submission deadline is **November 16, 2026 at 11:59 PM Philippine time**.
 
@@ -20,9 +20,24 @@ Internal Nov 1 first PR and Nov 7 fully connected flow are team targets, not ins
 - Owner screen lists saved demo bookings and five computed metrics: booking count, modeled revenue, average booking, top-selling service, and nearly-full sessions.
 - Both revenue features, availability and buddy/tier pricing, must be **enforced by the server and persisted**. Database columns and UI previews alone do not satisfy the rubric.
 - Every fetch-backed screen should handle loading, no results/unknown record, failure and recovery; work on phone width without dead buttons or Console errors.
-- Git: Issue → member's branch/code → PR → **real human review** → Captain merges. Each member needs 3 merged code PRs and 2 substantive reviews in 2 of 3 grading windows. AI usage must be disclosed; no teammate's code should be attributed to another.
+- Git: Issue → member's branch → PR → substantive teammate review → Captain merges. Each member needs three authored code PRs merged, two substantive reviews, and contributions across two grading windows. Each author records their AI assistance.
 - docs/business.md must show GC1 traceability, funnel, ≥5 enforced rules, calculations/conclusions for the 2 revenue features and decisions supported by the 5 metrics. Final business PDF is at most two pages.
-- Submission: main tagged `gc2-v1.0`, deployed URL, system/data-flow diagram, route/schema docs, Postman collection, business/challenges/baseline, stack/versions, AI-USAGE.md and each member's own unedited ≤3-minute Challenge 5 recording. Outside-group phone test required.
+
+## What the captain submits
+
+| # | Deliverable | Location |
+|---|---|---|
+| 1 | Group repository and `gc2-v1.0` tag on reviewed `main` | GitHub and submission |
+| 2 | Working [public booking URL](https://slotdrop-gc2-group-zx8j.onrender.com/) | Submission and [README](../README.md#deployed-course-demo) |
+| 3 | [Two-page business summary](SlotDrop_GC2_Summary.pdf) | Upload the PDF to the submission |
+| 4 | [System diagram and booking data flow](system.md) | `docs/` |
+| 5 | [Route table](routes.md) and [database schema](schema.md) | `docs/` |
+| 6 | [Exported Postman collection](SlotDrop-GC2-Challenge1.postman_collection.json) | `docs/` |
+| 7 | [Business case](business.md), [Challenges](challenges.md) and [measured Browse baseline](baseline.md) | `docs/` |
+| 8 | [Stack versions and rationale](../README.md#stack) | README |
+| 9 | [AI assistance record](../AI-USAGE.md) | Repository root and matching PR disclosures |
+| 10 | [Run and environment setup](../README.md#run-locally), [roster and ownership](../README.md#team), [changes since GC1](../README.md#changes-since-gc1) | README |
+| 11 | Each member’s unedited, voiced Challenge 5 recording, at most three minutes | Six accessible links in the submission |
 
 ## Not required in GC2
 
@@ -55,7 +70,7 @@ The private reference/demo and `/studios.html` are supporting artifacts. The gra
 ## Final checks on the group deployment
 
 - [Render course demo](https://slotdrop-gc2-group-zx8j.onrender.com/) serves the merged customer and Owner pages. Run the read-only readiness checks against the exact URL listed in the submission.
-- Review the [challenge evidence](challenges.md) and [measured public baseline](baseline.md). Attach the team’s hand-drawn trace and the outside-group phone walkthrough, then verify that all six individual recordings are accessible from the submission.
+- Review the [challenge evidence](challenges.md) and [measured public baseline](baseline.md). Attach the group’s hand-drawn trace to Challenge 2. Have an outside-group tester complete the flow unaided on their phone and check that the same reference appears in Owner. Record the date, device, reference and result. Verify that all six individual recording links open for the instructor.
 - Verify the final PR reviews and CI before tagging `main` as `gc2-v1.0`. Verify protection settings and instructor access in GitHub.
 
 ## Checkpoint and individual evidence

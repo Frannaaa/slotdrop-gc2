@@ -228,41 +228,6 @@ label {
   display: inline-block;
 }
 
-/* hello there! these are your classes and ids:
-
-CSS VARIABLES:
---color-paper
---color-ink
---color-blue
---color-lime
---color-clay 
---font-heading
---font-body 
-
-BUTTONS: 
-.button
-.text-button
-.activity-types 
-
-FORM INPUTS: 
-input[type="text"]
-input[type="number"]
-select
-
-GRIDS AND CARDS:
-.activity-grid 
-.card
-
-BADGES:
-.badge-buddy (this is lime)
-.badge-editorial (this is clay)
-
-SEPARATE IDS:
-#status 
-#status.error
-
-pls enjoy i love you all mwah mwah mwah */
-
 /* Captain integration fix: preserve the native hidden attribute even when a
    shared class (including .button) sets display explicitly. */
 [hidden] {

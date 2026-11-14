@@ -102,3 +102,4 @@ export function demoInventoryStatus(slots, services, now = Date.now(), discovery
 
 // Keep a single Owner policy import for browser and isolated clock/toggle harnesses.
 export { openReleaseUtilization } from './owner-insights.js';
+export { commissionPerSeat } from './business-config.js';

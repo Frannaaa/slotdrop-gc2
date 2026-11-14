@@ -1,5 +1,7 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
-import { DISCOVERY_HOURS } from "./business-config.js";
+import { DISCOVERY_HOURS, partyPrice as previewPrice } from "./business-config.js";
+
+export { previewPrice };
 export const money = (value) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(
     value / 100,
@@ -118,11 +120,6 @@ export function available(slot, quantity = 1) {
     start > now &&
     start < now + DISCOVERY_HOURS * 3600000
   );
-}
-export function previewPrice(slot, quantity = 1) {
-  const buddy = quantity >= 2 && slot.buddyPriceCentavos !== null;
-  const unit = buddy ? slot.buddyPriceCentavos : slot.offerPriceCentavos;
-  return { buddy, unit, total: unit * quantity };
 }
 export const activityLabel = (type) =>
   ({

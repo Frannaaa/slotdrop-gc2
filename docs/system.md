@@ -120,6 +120,6 @@ All money is modeled in PHP centavos. The active commission setting lives in `se
 
 ## Persistence and deployment boundary
 
-Production-mode Node.js reads `DATABASE_URL` from its environment and uses the `pg` connection pool. `server/repositories/database.js` wraps booking operations in PostgreSQL `BEGIN`/`COMMIT` or `ROLLBACK`; `server/index.js` applies additive migrations and the one-time reference catalog setup without resetting saved bookings. A web-server restart does not erase receipts because they live in the database, not the Node process or the browser.
+Production-mode Node.js reads `DATABASE_URL` from its environment and uses the `pg` connection pool. `server/repositories/database.js` wraps booking operations in PostgreSQL `BEGIN`/`COMMIT` or `ROLLBACK`. At startup, `server/index.js` applies additive migrations and checks whether the reference catalog needs fresh demo allocations. Saved bookings remain in PostgreSQL across web-server restarts.
 
 The local `npm run demo` uses a separate PGlite database for development. Production health checks database reachability and required tables. The [deployed booking trace](challenges.md#challenge-2--trace-one-real-request) and [PostgreSQL restart check](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43354906742) verify separate parts of the persistence path. [Database schema](schema.md) and [API contracts](routes.md) hold the field-level details.

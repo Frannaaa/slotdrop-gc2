@@ -1,6 +1,7 @@
 // Group assignment: Fran. See docs/ownership-and-execution.md.
 import { safeNumber } from '../lib/validation.js';
 import { studioReferences } from './reference-catalog.js';
+import { discountPercent } from '../../public/js/business-config.js';
 
 export const SLOT_SELECT = `SELECT sl.*, s.provider_id, s.name AS service_name, s.category,
   s.reference_key, s.activity_type, s.technique, s.inclusions, s.preparation_note, s.cancellation_note,
@@ -11,6 +12,8 @@ export const SLOT_SELECT = `SELECT sl.*, s.provider_id, s.name AS service_name, 
 
 export function slotResponse(row) {
   const number = key => safeNumber(row[key]);
+  const originalPriceCentavos = number('original_price_centavos');
+  const offerPriceCentavos = number('offer_price_centavos');
   return {
     id: number('id'), serviceId: number('service_id'), providerId: number('provider_id'),
     studioReference: studioReferences.get(row.reference_key) || null,
@@ -20,9 +23,9 @@ export function slotResponse(row) {
     city: row.city, area: row.area, durationMinutes: number('duration_minutes'), beginnerFriendly: row.beginner_friendly,
     startsAt: new Date(row.starts_at).toISOString(), bookingClosesAt: new Date(row.booking_closes_at).toISOString(),
     capacity: number('capacity'), remainingSeats: number('capacity') - number('seats_booked'),
-    originalPriceCentavos: number('original_price_centavos'), offerPriceCentavos: number('offer_price_centavos'),
+    originalPriceCentavos, offerPriceCentavos,
     buddyPriceCentavos: row.buddy_price_centavos === null ? null : number('buddy_price_centavos'),
-    discountPercent: Math.round((number('original_price_centavos') - number('offer_price_centavos')) * 10000 / number('original_price_centavos')) / 100,
+    discountPercent: discountPercent(originalPriceCentavos, offerPriceCentavos),
     status: row.status, serviceActive: row.active, recurrenceNote: row.recurrence_note, runsAsScheduled: row.runs_as_scheduled,
     defaultBookingCutoffMinutes: number('default_booking_cutoff_minutes')
   };

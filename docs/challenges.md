@@ -82,6 +82,8 @@ The browser hook forwarded the actual Checkout POST to Render and recorded the r
 
 **Earlier live booking, 12 November at 21:41 PHT.** One double-click on Checkout using fictional details produced a saved one-seat booking for ₱2,700. The reference `84bba718-430e-4dca-9676-9764a36bf018` appears in [Confirmation](evidence/challenge2/confirmation.jpg) and in one [Owner booking row](evidence/challenge2/owner-booking.jpg). A separate read-only `GET /api/bookings/:id` returned HTTP 200 and the same saved receipt. [HTTP receipt record](evidence/challenge2/receipt-get.json). The Checkout POST request/response and Confirmation GET were not recorded in a browser Network panel during this run.
 
+**Persistence check, 14 November.** The 12 November receipt still returned HTTP 200 after the [13 November Render deployment](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920). Its JSON matched the archived [12 November response](evidence/challenge2/receipt-get.json) field for field.
+
 ### Every hop, by file and function
 
 Line numbers below refer to the traced [deployment commit `8bdcfcb`](https://github.com/Frannaaa/slotdrop-gc2/tree/8bdcfcbd3e24b58e70bdac48effb017146112fcb).
@@ -170,17 +172,18 @@ The code was valid syntactically, but the edit request included capacity, status
 
 ## Challenge 4 — The owner changes a rule
 
-**The rule:** "Change the commission from 10%." **Answer: one line.** Checked on `main` at `8bdcfcb`. No rate was changed on the deployed site.
+**The rule:** “Change the commission from 10%.” **Answer: one line.** The rate remains 10% on the deployed site. Line numbers in this section refer to the release candidate.
 
 ### Every place the commission appears
 
 | File and line | What it does | Edit it to change the rate? |
 |---|---|---|
 | `server/config/business.js:1` | `COMMISSION_BASIS_POINTS = 1000` | **Yes. This is the only edit.** |
-| `server/services/pricing.js:22` and `:25` | `priceQuote()` takes the rate and computes the fee for quotes and bookings | No |
+| `server/services/pricing.js:23` and `:25` | `priceQuote()` computes the booking fee from the shared per-seat calculation | No |
 | `server/services/bookings.js:109` and `:120` | Passes the rate to `priceQuote()` and saves it with the booking | No |
 | `server/repositories/owner.js:3` and `:8` | Sends the rate to the Owner screen | No |
-| `public/js/owner.js:88` | Previews a studio's earnings using the rate from the API | No |
+| `public/js/business-config.js:10` | `commissionPerSeat()` rounds the fee in centavos | No |
+| `public/js/owner.js:89` | Previews studio earnings with the shared fee function and the rate from the API | No |
 | `db/schema.sql:78` | Checks that each saved fee matches its saved rate | No |
 
 `tests/challenge4-rate.test.js` (merged in PR #37) checks that only the config file defines the rate, and that the quote, the saved booking and the Owner screen all use it.
@@ -188,11 +191,8 @@ The code was valid syntactically, but the edit request included capacity, status
 ### Why the answer is one place
 
 - **One rate.** The business rate comes from one server constant. Quotes, saved bookings and the Owner screen read `COMMISSION_BASIS_POINTS`. None of them keeps its own 10%.
-- **One formula, used for three jobs.** Price × rate ÷ 10,000, rounded per seat, appears in three layers. `server/services/pricing.js:25` computes the amount to save. `public/js/owner.js:87` previews a studio's proceeds before an edit is saved. `db/schema.sql:78` checks each stored fee against the rate stored with it. These are not three rates that can be edited separately, and changing the percentage touches none of them. Changing how the fee is *rounded* would mean checking all three.
+- **Shared fee calculation.** [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) moves the server calculation and the Owner estimate to the same `commissionPerSeat()` function. The SQL constraint independently checks the saved fee using the rate on that receipt. A rate change leaves the constraint valid because it reads the saved rate.
 - **Old bookings keep their old rate.** Each receipt saves the rate, fee and payout it was made with. Changing the active rate does not rewrite existing bookings.
-- **A possible clean-up.** The Owner preview could ask the server for a quote, which would remove the copy of the formula in the browser. It would also add a network request with its own loading and error states.
-
-Because the answer was already one place, there was no refactor to make and no refactor PR to show.
 
 ### What 12% would change
 

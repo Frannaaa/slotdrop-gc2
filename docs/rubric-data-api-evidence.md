@@ -11,7 +11,7 @@
 | Server validates and recomputes totals | `server/services/pricing.js` and `server/services/bookings.js` share authoritative pricing; reject browser-supplied price fields (400) and mismatched acknowledged amount (409 PRICE_CHANGED); verify standard/buddy, per-seat fee and total snapshots. | **Passed with real PostgreSQL CI** |
 | Stock/slots change exactly once | POST /api/bookings locks session row, checks free seats, saves booking and recomputes remaining seats from confirmed bookings; identical retry returns same receipt 200. | **Passed**: 4 → 2 for two seats, sold-out returns 409; one-seat smoke 4 → 3 |
 | Confirmation reads by ID | `GET /api/bookings/:id` loads saved DB receipt by UUID (200), malformed ID (400), missing ID (404). The merged `public/js/confirmation.js` calls this API by URL ID. | **Passed in CI and the public browser trace** |
-| Survives restart | `tools/check-release.mjs` creates API offer, quotes/saves a real SQL booking in a production Docker container backed by PostgreSQL 16; restarts that container and checks same receipt, replay, seat count, Owner metrics. | **Passed in disposable production-container CI**; official hosted service restart remains unverified |
+| Survives restart | `tools/check-release.mjs` creates API offer, quotes/saves a real SQL booking in a production Docker container backed by PostgreSQL 16; restarts that container and checks same receipt, replay, seat count, Owner metrics. | **Passed in disposable production-container CI.** The [12 November public receipt](challenges.md#challenge-2--trace-one-real-request) also matched its archived response after the 13 November Render deployment. |
 
 ### Verified CI run (implementation commit)
 

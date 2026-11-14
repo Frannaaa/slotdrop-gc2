@@ -1,6 +1,6 @@
 # Assistance record
 
-This records assistance on Fran's Group 1 work. Each teammate records their own uses when opening a PR.
+This records Group 1’s AI assistance. Each teammate records their own uses and links the relevant entry from their PR.
 
 | Date | Member | Tool | What we asked for | What we kept or changed | How we checked it |
 |---|---|---|---|---|---|
@@ -72,5 +72,6 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 | 2026-11-14 | Fran / M1 | ChatGPT Codex | Fix release evidence and a Checkout consent regression | Revised the existing business wording and two-page PDF, verified the Render build for the public baseline, brought the system diagram up to date, and required explicit acceptance after the quote loads. | Compared Render deployment history and GitHub, rendered the PDF, and verified the updated Checkout flow in tests. |
 | 2026-11-14 | Fran / M1 | ChatGPT Codex | Verify the third Challenge 3 example and resweep the submission | Reworded the catalog rollover case using Janelle’s existing PR disclosure and Kirsten’s review. Updated submission dates and reconciled supporting docs. | Compared the merged implementations and reran the cutoff regression with both versions. |
 | 2026-11-14 | Fran / M1 | ChatGPT Codex | Check all five stretch challenges and edit the business case for clarity | Captured the public Checkout 429 retry, added Render client-address handling with a regression test, and tightened the team’s existing GC1 traceability, funnel, pricing examples and Owner decisions. | Verified the same request body after a 59-second wait, one saved live receipt and one seat taken. Checked the limiter, seeded pricing and Owner totals in tests. |
+| 2026-11-14 | Fran / M1 | ChatGPT Codex | Audit the release against the Canvas rubric | Consolidated tier, discount and commission calculations, corrected the route and schema contracts and submission checklist, and carried the existing Owner decisions into the two-page PDF. | Ran pricing, booking, Owner and SQL checks, verified the relative documentation links, and rendered both PDF pages. |
 
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.

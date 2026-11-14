@@ -8,6 +8,7 @@ import {
   preferredServiceId,
   demoInventoryStatus,
   openReleaseUtilization,
+  commissionPerSeat,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -85,7 +86,7 @@ function preview() {
     const standard = cents(field("offerPriceCentavos").value),
       buddy = cents(field("buddyPriceCentavos").value, true);
     const net = (price) =>
-      price - Math.round((price * catalog.commissionBasisPoints) / 10000);
+      price - commissionPerSeat(price, catalog.commissionBasisPoints);
     $("net-preview").textContent =
       `Estimated earnings after the ${catalog.commissionBasisPoints / 100}% fee: ${money(net(standard))} per seat.` +
       (buddy === null

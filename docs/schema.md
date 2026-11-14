@@ -59,7 +59,7 @@ The API accepts price, capacity, cutoff and status edits. It rejects unknown fie
 
 Schema creation refuses existing tables. Seeding refuses existing data. Neither script resets a shared database or migrates an older schema. Restarting the app preserves saved rows and does not refresh their timestamps.
 
-PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the explicit local demo and SQL checks. The reference deployment uses persistent PostgreSQL on Render.
+PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the local demo and SQL checks. The group’s Render web service connects to a persistent Neon PostgreSQL database.
 
 
 ## Explicit activity attributes and safe upgrade
@@ -70,4 +70,4 @@ Fresh schema and seed contain these fields. Existing databases use db/migrations
 
 ## Reference and application upgrades
 
-Migration 002 adds unique nullable `reference_key` values to providers and services. `ensureReferenceCatalog()` adds source-backed records and their first sample allocations once; it never renames old providers or changes historical receipts. Known legacy fixture services are deactivated for customer discovery. Migration 003 adds `provider_applications` without deleting data. The provider FK is optional because a new studio may not have a reference page. Applications are pending; they cannot update providers, create accounts or publish offers. Public readback exposes only application UUID, status and received time. Contacts, retry keys and signatures remain private.
+Migration 002 adds unique nullable `reference_key` values to providers and services. `ensureReferenceCatalog()` adds any missing source-backed records at startup and can add future sample allocations for active reference activities whose existing sessions are no longer bookable. Historical bookings and session dates are preserved. Known legacy fixture services are deactivated for customer discovery. Migration 003 adds `provider_applications` without deleting data. The provider FK is optional because a new studio may not have a reference page. Applications are pending; they cannot update providers, create accounts or publish offers. Public readback exposes only application UUID, status and received time. Contacts, retry keys and signatures remain private.
