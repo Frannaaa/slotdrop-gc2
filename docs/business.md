@@ -26,6 +26,19 @@ The quotes below come from our GC1 proposal and the instructor’s feedback.
 | User Schedules and Provider Analytics | Partial. Owner can see saved bookings and five metrics. Personal schedules and role-specific reporting need accounts. |
 | Auth & Roles, real payments, integrations and paid placements | Deferred to the Final Project. The GC2 demo uses one set of linked provider, service, slot and booking tables. |
 
+### Instructor's GC1 feedback: response and remaining proof
+
+| Feedback raised in GC1 | What changed in GC2 | Still requires real-world evidence |
+|---|---|---|
+| Vague age/income/area and no measured vacant-seat frequency | Defined a **proposed** QC pilot segment (age, income-screening and psychographics above) and limited booking discovery | Customer interviews and a studio's four weeks of actual capacity/sales |
+| “Established booking giants” unnamed | Compared **Klook**, ClassPass, studio-direct websites and Fresha, and distinguished direct, indirect and auxiliary alternatives in [Competitors](#competitors) | Verify active local listings and why customers/providers would actually switch |
+| Overpromised openings at popular providers | Offers only an allocation a studio deliberately releases from a class going ahead | Written partner agreement and realistic unfilled-seat data |
+| Ghost slots, discount-resistant studios and deal-only customers | Server capacity checks, Owner pause/resume and prices; proposed ring-fenced inventory, minimum net payout and cannibalization test | The latter three safeguards are **pilot arrangements**, not implemented integrations or proven results |
+| Commission, platform features and stack missing | Modeled **10% studio-paid commission**, persisted quotes and receipts, clear built/deferred features and stack in README | Real supplier unit costs, acquisition costs and agreed commercial terms |
+| Duplicate role-based stores and incomplete user journey | Entity-oriented PostgreSQL, detailed receipt/data flow, Detail page and Owner metrics | Login/admin separation, real cancellations and external calendar sync are still deferred |
+
+The original instructor feedback is the evidence for these gaps; this matrix is a **later interpretation of the group's response**, not proof that the early proposal contained the corrected sections. The [post-feedback GC1 working draft](gc1-post-feedback-revision.md) keeps the deeper comparison and explicitly labels untested assumptions.
+
 ## 4.2 Funnel map
 
 The rates are what we’d measure in a pilot. GC2 records bookings and Owner metrics.
