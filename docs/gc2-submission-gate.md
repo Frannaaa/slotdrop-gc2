@@ -2,6 +2,42 @@
 
 This checklist follows the Canvas **GC 2: MVP Build** assignment. The extended submission deadline is **November 16, 2026 at 11:59 PM Philippine time**.
 
+## Final 105-point audit — checked 15 November 2026
+
+**Score target:** 100 group points + up to five stretch points, followed by each person's separate individual gate. This is an **evidence audit**, not a grade prediction. A passing GitHub CI run establishes automated checks, **not** independent phone usability, video compliance, a Vercel deployment, or timely checkpoint credit.
+
+| Brief deliverable | Status on PR #72 | Required final check |
+|---|---|---|
+| 1. Reviewed `main` and `gc2-v1.0` tag | **Not complete.** #72 is open and has no submitted approval. The release tag was not found in GitHub. | Human independent approval; merge green PR; test reviewed `main`; tag only that accepted commit |
+| 2. Deployed six-screen URL + Owner | **Earlier Render live evidence exists**; #72 final version not yet deployed. #67 added Vercel code, but no verified public Vercel URL was found in the submission README. | Choose the **actual working host** (Render or Vercel); record URL and exact SHA; redo one final booking on that host, including receipt refresh and Owner |
+| 3. Maximum two-page business PDF | `docs/SlotDrop_GC2_Summary.pdf` exists on #72 | **Page count and rendered content not yet independently verified**. Open/download it and check both pages, accurate current prices, feature business outcomes and Owner metrics |
+| 4. System diagram + data flow | `docs/system.md` exists, with Mermaid and hop table | Confirm paths/functions still match deployed code; **Challenge 2 additionally requires a separately hand-drawn trace** |
+| 5. Route table + schema | `docs/routes.md` and `docs/schema.md` exist | Final source-to-document check after #72 merges |
+| 6. Exported Postman collection | Exported `.postman_collection.json` present; six deployed-case screenshots and 16/16 Newman evidence in Challenges | Ensure the submitted host and `baseUrl` match. Rerun on Vercel if Vercel is chosen |
+| 7. `business.md`, `challenges.md`, `baseline.md` | All exist on #72. Baseline was measured on Render **14 Nov**, prior to the newest Browse changes | Group must endorse business judgments; attach Challenge 2 drawing; refresh baseline on **final host/build** |
+| 8. Stack, versions and why | README stack table exists | Check against `package-lock.json`, deployed Node version and actual host |
+| 9. AI disclosure | `AI-USAGE.md` exists | Each author verifies their own meaningful entries and PR disclosure; no fabricated or delegated AI disclosures |
+| 10. README run steps, roster, environment names, changes since GC1 | Present in README | Final host URL must agree with actual submitted deployment |
+| 11. One Challenge 5 video per member | [Drive folder](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj) lists **Cholo, Janelle and Kirsten** | **Fran, Kaitlyn, Kat not found in that folder**. Individually verify all six show owned function, 3 prior predictions, actual outcomes, one changed input/line, voice, unedited ≤3 minutes and instructor view access |
+
+**Two additional final-human gates:** (a) someone **outside the group** completes the booking flow unaided on their own phone; record device, tested URL/SHA, booking ID, Owner confirmation and any defects; (b) attach a **group hand-drawn** Checkout → API → DB → Confirmation trace to Challenge 2. Neither can be inferred from CI or existing DevTools screenshots.
+
+### Five one-point stretch challenges
+
+| Point | Current evidence in [Challenges](challenges.md#stretch-challenges) | Final check |
+|---|---|---|
+| Sequential/parallel | Timing benchmark **398.0 ms → 200.2 ms median**, overlapping Selection requests | Keep exact screenshot and timing method linked |
+| HTTP 429 and retry | Live 429 → wait → identical POST → saved receipt; client-address limiter changes on #72 | Verify limiter behavior on the **final host**, especially if moving from Render to Vercel |
+| Double-click | Deployed browser saw **one POST and one booking**; server idempotency and row locking tested | One confirmation and one Owner row on the accepted build |
+| Pagination | Server `page`/`limit`, Browse page transitions and captured network evidence | Verify current deployed list and filters |
+| Join and compute | Owner combines catalog and booking routes into utilization % | Recheck both inputs and computed percentage after latest code deploy |
+
+**Individual gate (separate from the group 100+5):** Github merged authored-code PRs checked: Fran **17**, Janelle **4**, Cholo **3**, Kirsten **3**, Kaitlyn **3**, Kat **1**. Code PR counts alone do **not** prove two historical merge windows. The last defined window ended **9 November**; many teammates' qualifying merges were after that date. Confirm window records with the instructor rather than attributing someone's code to another member or backdating merges. Under the brief, missing one of the Git or recording gate parts can reduce that individual's percentage of the group score. Everyone also needs substantive human reviews.
+
+**Checkpoint risk:** Browse was not merged until 12 November, after the 4 November CP1 date. The extended **16 November final deadline** does not explicitly retroactively change CP1. The group should ask whether late CP1 and historical window exceptions apply, and preserve truthful timestamps.
+
+**Drive access safety:** Metadata for the three linked recordings currently reports `anyone` **writer** access. Their owners should change link access to **Viewer** (not Editor), confirm the instructor can play each video and retain ownership. Do not change another member's sharing or replace their recording on their behalf.
+
 ## Mandatory milestones
 
 | Date | Actual assignment requirement | Owner / handoff |
