@@ -230,6 +230,22 @@ The customer's total stays at ₱5,130 because this changes the platform's commi
 
 Individual work. Each member picks one function they wrote, writes three inputs and the output they predict for each, runs them, and explains any mismatch. The screen recording is unedited, has the member's own voice, lasts at most three minutes, and is made without AI assistance. Show the function, the three predictions and actual runs, then change one input or one line and explain the result. The captain needs an instructor-accessible recording link from each member for the submission.
 
+### Individual recording links
+
+[Open the group's Challenge 5 videos folder on Google Drive](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj).
+
+| Member | Linked recording | Evidence status |
+|---|---|---|
+| Fran (M1) | Not found in the supplied Drive folder | Upload/link still needed |
+| Cholo / Chonel (M2) | [CHONEL .mp4](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) | File present; content and access not yet verified |
+| Janelle (M3) | [GC2 Challenge 5 — Janelle Reonal — priceQuote.mov](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) | File present; content and access not yet verified |
+| Kaitlyn Silva (M4) | Not found in the supplied Drive folder | Upload/link still needed |
+| Kat / Kaithlyn (M5) | Not found in the supplied Drive folder | Upload/link still needed |
+| Kirsten Garcia (M6) | [GARCIA M6 Video Explanation.mov](https://drive.google.com/file/d/1LJxyMj9HbWRehO8hwoVBs4Eeh2n9MUKE/view?usp=drivesdk) | File present; content and access not yet verified |
+
+These links reflect the **three files listed in the provided Drive folder on November 15, 2026**. A file's presence does **not** verify that it is an unedited, voiced Challenge 5 recording under three minutes or that the instructor has access. Confirm those requirements and add any other individual recordings before submitting. The videos remain on Drive rather than being committed to GitHub.
+
+
 ## Stretch challenges
 
 | Stretch | Status | Shown on the deployed site | What is left |
