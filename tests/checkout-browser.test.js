@@ -3,12 +3,13 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 
-test('successful checkout stays locked while confirmation navigation is pending', async () => {
+test('checkout requires acceptance after a quote and stays locked through confirmation', async () => {
   const elements = new Map();
   const handlers = new Map();
   const sent = [];
   let finishRequest;
   let navigationStarted = false;
+  let quoteAvailable = false;
 
   const get = id => {
     if (!elements.has(id)) {
@@ -113,6 +114,11 @@ test('successful checkout stays locked while confirmation navigation is pending'
     },
 
     request: async path => {
+      if (path === '/api/slots/1') return { serviceName: 'Demo session' };
+      if (path.startsWith('/api/pricing/quote?')) {
+        if (!quoteAvailable) throw new Error('Quote unavailable');
+        return { unitPriceCentavos: 1000, totalPriceCentavos: 1000 };
+      }
       if (path === '/api/bookings') {
         sent.push(path);
 
@@ -140,18 +146,12 @@ test('successful checkout stays locked while confirmation navigation is pending'
     },
   };
 
-  runInNewContext(
+  const load = runInNewContext(
     source + `
       slotId = 1;
       quantity = 1;
       storageKey = 'test';
-      quote = {
-        unitPriceCentavos: 1000,
-        totalPriceCentavos: 1000
-      };
-      ack.disabled = false;
-      ack.checked = true;
-      button.disabled = false;
+      load;
     `,
     context
   );
@@ -161,6 +161,24 @@ test('successful checkout stays locked while confirmation navigation is pending'
   assert.equal(typeof submit, 'function');
 
   const event = { preventDefault() {} };
+
+  const failedQuote = load();
+  assert.equal(button.disabled, true);
+  assert.equal(ack.disabled, true);
+  assert.equal(ack.checked, false);
+  await failedQuote;
+  assert.equal(get('retry').disabled, false);
+
+  quoteAvailable = true;
+  await load();
+  assert.equal(ack.disabled, false);
+  assert.equal(ack.checked, false);
+  assert.equal(button.disabled, true);
+  await submit(event);
+  assert.equal(sent.length, 0);
+  ack.checked = true;
+  handlers.get('acceptPrice:change')();
+  assert.equal(button.disabled, false);
 
   const first = submit(event);
 

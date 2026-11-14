@@ -2,7 +2,7 @@
 
 **Status checked 13 November 2026 (PHT).** Home (#35, #68), Browse (#62, #63), Detail and Selection (#41), Checkout and Confirmation (#43), booking and receipt APIs (#42), and the Owner workspace (#29, #51) are merged.
 
-The live Render walkthrough on 12 November produced a Confirmation receipt and one matching Owner row. The separate receipt readback returned 200. See [the deployed evidence](challenges.md#challenge-2--trace-one-real-request). Browser Network capture and the outside-group phone test remain pending.
+The 14 November Render walkthrough followed all six customer screens plus Owner at 390 px. A Checkout double-click sent one POST (201), Confirmation fetched the same receipt (200), and Owner showed one matching row. See [deployed browser evidence](challenges.md#challenge-2--trace-one-real-request). The outside-group phone test remains pending.
 
 ### Fran-owned automated acceptance check
 

@@ -40,12 +40,12 @@ This checks the seven required page URLs, session list/detail APIs, a quantity-1
 
 Owner now displays an inventory-readiness warning above its metrics when no sessions are discoverable or when every available offer closes within 24 hours; it never changes database rows. This warning uses the last loaded Owner catalog, so refresh after other people book. For each checkpoint also run the dedicated `check:demo` availability monitor on the branch where it is installed. Initial sample sessions expire after two days. Create **new future demo offers through Owner** without reseeding historic rows and without representing real businesses as partners. This operational maintenance is not a teacher requirement, but an empty Browse violates CP1.
 
-## Real transactional proof (manual, only after teammate implementations merge)
+## Transaction and release evidence
 
 1. Use a new disposable sample customer and a currently available session; inspect Network while booking, ensuring all prices match the server quote.
 2. Verify one saved booking ID, GET /api/bookings/:id returns its original amount and quantity, GET /api/bookings and GET /api/metrics reflect that booking, and remaining seats drop by exactly the booked quantity.
 3. Repeat an identical retry key to verify one booking only; send an outdated total, invalid quantity, missing details, unknown ID, more-than-available quantity and empty search. Save deployed Postman response screenshots and actual status codes for Challenge 1.
-4. Restart the server without resetting PostgreSQL, then retrieve the same receipt. Test at phone width with someone outside the group. Record a real Network trace and an independently drawn data-flow diagram.
+4. Link the PostgreSQL-backed CI restart proof. Have someone outside the group complete the public booking flow on their own phone without guidance. Keep the separately hand-drawn request trace and the live browser request evidence together in Challenges.
 5. Capture the final baseline: Lighthouse mobile Performance/Accessibility/Best Practices, Network count/bytes, actual List API latency, and three honest weaknesses. Challenge 3 requires the team's own reasoning about 3 corrected AI/design issues; Challenge 4 requires the owner's one-place rule change/refactor. Individual Challenge 5 must be authored and recorded unaided.
 
 ## Do not conflate prototype, supporting research and final app
@@ -55,5 +55,9 @@ The private reference/demo and `/studios.html` are supporting artifacts. The gra
 ## Final checks on the group deployment
 
 - [Render course demo](https://slotdrop-gc2-group-zx8j.onrender.com/) serves the merged customer and Owner pages. Run the read-only readiness checks against the exact URL listed in the submission.
-- Confirm the Challenge 2 Network capture and hand-drawn diagram, independent phone walkthrough, and mobile baseline. Record the final release commit and confirm all individual recording links are viewable.
+- Review the [challenge evidence](challenges.md) and [measured public baseline](baseline.md). Attach the team’s hand-drawn trace and the outside-group phone walkthrough, then verify that all six individual recordings are accessible from the submission.
 - Verify the final PR reviews and CI before tagging `main` as `gc2-v1.0`. Verify protection settings and instructor access in GitHub. Late merges should be discussed with the instructor for individual window credit.
+
+## Checkpoint and individual evidence
+
+The first reviewed Browse page reached `main` through [PR #62](https://github.com/Frannaaa/slotdrop-gc2/pull/62) on November 12 PHT. Use the instructor’s actual checkpoint record for CP1 credit. The brief lists three individual Git windows, October 14–28, October 29–November 4 and November 5–9. Review each member’s actual authored merges, substantive review links and individual recording separately from the group’s technical score.

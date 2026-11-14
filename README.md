@@ -6,7 +6,7 @@ SlotDrop helps people find available seats in nearby leisure sessions. Studios s
 
 ## Deployed course demo
 
-[Open SlotDrop on Render](https://slotdrop-gc2-group-zx8j.onrender.com/). Start on Home and follow Browse, Detail, Selection, Checkout and Confirmation. The [Owner workspace](https://slotdrop-gc2-group-zx8j.onrender.com/owner.html) lists saved demo bookings and five metrics. Use fictional details and simulated payment. [Challenge evidence](docs/challenges.md) records the live walkthrough and remaining verification.
+[Open SlotDrop on Render](https://slotdrop-gc2-group-zx8j.onrender.com/). Start on Home and follow Browse, Detail, Selection, Checkout and Confirmation. The [Owner workspace](https://slotdrop-gc2-group-zx8j.onrender.com/owner.html) lists saved demo bookings and five metrics. Render deploys reviewed `main` to the course service in Singapore after checks pass. [Deployment history](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920) identifies the build used for the baseline. Use fictional details and simulated payment. [Challenge evidence](docs/challenges.md) records the live walkthrough and remaining verification.
 
 ## Run locally
 
@@ -33,7 +33,7 @@ Database tools and Docker are available from PR #27.
 3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
 4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
 5. Check `/api/health` and `/api/slots`. In production, health probes PostgreSQL *and* the required booking tables; local demo health is deliberately lightweight.
-6. Run Postman against the public URL. To verify persistence, save a fictional booking, restart the server and read the same receipt back.
+6. Run Postman against the public URL. [Production-container CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43354906742) verifies receipt readback across a PostgreSQL-backed server restart.
 
 .env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
 
@@ -64,9 +64,9 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 | dotenv | 18.0.9 | Local environment settings |
 | PGlite | 0.5.12, demo/tests only | Local PostgreSQL-compatible database |
 | GitHub Actions | Node 22 workflow | Repeatable checks for each PR |
-| Postman/Newman | v2.1 collection; Newman 6.2.1 | API checks |
+| Postman/Newman | v2.1 collection, Newman 6.2.1 in the deployed challenge run | API checks |
 
-package-lock.json pins dependencies. Add the actual public runtime/database versions after deployment.
+`package-lock.json` pins application dependencies. The deployed host is Render and the persistent database is Neon PostgreSQL. The versions above identify the verified CI stack.
 
 ## Changes since GC1
 
@@ -93,7 +93,7 @@ See the [GC2 submission gate](docs/gc2-submission-gate.md) and [two-page busines
 
 ## Released-seat discovery revision
 
-The main customer path is Explore sessions, with time/area/party size first, optional activity filters and a saved in-app booking. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.
+The main customer path is Home → Browse → Detail → Selection → Checkout → Confirmation. Browse supports search, category filters and pagination. Selection sets the party size. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.
 
 Studio research is available at `/studios.html` through `GET /api/activities`. It is separate from the database-backed booking inventory. See `docs/studio-discovery.md`.
 
