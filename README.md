@@ -91,6 +91,12 @@ Use the [Challenge 1 Postman collection](docs/SlotDrop-GC2-Challenge1.postman_co
 
 See the [GC2 submission gate](docs/gc2-submission-gate.md) and [two-page business summary](docs/SlotDrop_GC2_Summary.pdf). The extended submission deadline is **November 16, 2026 at 11:59 PM Philippine time**.
 
+### Individual Challenge 5 recordings
+
+[Group video folder on Google Drive](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj) · [Individual video links, roster and verification status](docs/challenges.md#individual-recording-links).
+
+Three recordings are linked so far (Cholo/Chonel, Janelle and Kirsten). Fran, Kaitlyn and Kat have no file in the supplied folder yet. These links are **not** a claim that all six recordings meet the assignment or that instructor access has been tested.
+
 ## Released-seat discovery revision
 
 The main customer path is Home → Browse → Detail → Selection → Checkout → Confirmation. Browse supports search, category filters and pagination. Selection sets the party size. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.
