@@ -37,7 +37,7 @@ Internal Nov 1 first PR and Nov 7 fully connected flow are team targets, not ins
 | 8 | [Stack versions and rationale](../README.md#stack) | README |
 | 9 | [AI assistance record](../AI-USAGE.md) | Repository root and matching PR disclosures |
 | 10 | [Run and environment setup](../README.md#run-locally), [roster and ownership](../README.md#team), [changes since GC1](../README.md#changes-since-gc1) | README |
-| 11 | Each member’s unedited, voiced Challenge 5 recording, at most three minutes | Six accessible links in the submission |
+| 11 | Each member’s unedited, voiced Challenge 5 recording, at most three minutes | [Drive folder](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj) and [per-member video links/status](challenges.md#individual-recording-links). Three files linked; remaining links and instructor access need verification |
 
 ## Not required in GC2
 
