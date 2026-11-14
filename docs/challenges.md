@@ -1,8 +1,8 @@
 # SlotDrop | Challenges and Evidence
 
-Evidence for the GC2 challenges (brief section 7). Results from the deployed site are kept apart from local and CI test runs. All sessions, seats, prices, payments and bookings are simulated, and test requests use fictional guest details.
+Evidence for brief section 7. Each public capture is dated and tied to the build that was live. All test bookings and studio offers are simulated, with fictional guest details.
 
-**Deployed site:** https://slotdrop-gc2-group-zx8j.onrender.com (Render service `slotdrop-gc2-group-zx8j`, branch `main`)
+**Public demo** · [SlotDrop on Render](https://slotdrop-gc2-group-zx8j.onrender.com/) · [Build observed on 15 November](https://github.com/Frannaaa/slotdrop-gc2/tree/93d931aff00363e09120c5d5c590b12b4aeeb897). [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) contains the practice offers, Closed sessions and Checkout recovery update.
 
 ## Evidence status
 
@@ -11,9 +11,9 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 | [1. Break your own API](#challenge-1--break-your-own-api) | **Complete** on the deployed API | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run | Rerun if the submission URL changes |
 | [2. Trace one real request](#challenge-2--trace-one-real-request) | **Live DevTools trace captured** | Booking POST 201, receipt GET 200 and the matching Owner row | Attach the group's hand-drawn diagram |
 | [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three corrections documented** | Deployed Postman rerun, Owner edit regression, and reviewed catalog rollover regression | |
-| [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **One setting and receipt persistence verified** | The shared fee calculation, a 10% to 12% restart check and [passing PostgreSQL CI for the release code](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43621012925) | |
-| [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
-| [Stretch challenges](#stretch-challenges) | **Evidence for all five** | Double-click, pagination, Checkout retry, Owner utilization and parallel loading | Verify the Render client-IP change after deploy |
+| [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **One setting and receipt persistence verified** | The shared fee calculation, a 10% to 12% restart check and [passing PostgreSQL CI on `20cdf3a`](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43625414744) | |
+| [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Six accessible recording links at submission |
+| [Stretch challenges](#stretch-challenges) | **Evidence for all five** | Double-click, pagination, Checkout retry, Owner utilization and parallel loading | Recheck the final build’s booking flow and Render client limits after deploy |
 
 ## Challenge 1 — Break your own API
 
@@ -123,7 +123,7 @@ Seats are not stored as a counter. Seats left = released seats − confirmed boo
 
 ### Hand-drawn trace
 
-Attach a photo of the group’s hand-drawn request path for booking `f6148274-8de0-4558-ada3-2a8b3dc68217`. Use the actual hops above, from Checkout’s submit handler through the row lock and saved receipt to the Confirmation fetch and render. [System architecture](system.md) is the separate repository diagram.
+Attach a photo of the group’s hand-drawn trace for booking `f6148274-8de0-4558-ada3-2a8b3dc68217`. Show Checkout submitting the JSON, the server locking and checking the session, the database saving the booking and the `201` response, then Confirmation fetching and rendering that receipt with `200`. Use the file and function names above. [System architecture](system.md)
 
 ## Challenge 3 — Overrule the AI
 
@@ -266,7 +266,7 @@ The requests were `GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quanti
 
 [Waiting state](evidence/stretch-deployed/checkout-429/waiting.jpg) · [Booking request and response record](evidence/stretch-deployed/checkout-429/network.json) · [Confirmation](evidence/stretch-deployed/checkout-429/confirmation.jpg) · [Owner](evidence/stretch-deployed/checkout-429/owner.jpg)
 
-**How it works.** The Checkout helper waits after a 429 and sends the same request once more. Receipt and Owner reads are outside the limit. The deployed capture proves retry behavior with a 30-POST limit per socket address in 60 seconds. [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) changes the Render key to the client address. Integration tests show two addresses behind the same proxy have separate counters. Live verification of that change follows deployment. See the [rate-limit implementation and verification](bonus-rate-limit.md).
+**How it works.** The Checkout helper waits after a 429 and sends the same request once more. Receipt and Owner reads are outside the limit. The release also keeps the pending request ID if a previous attempt has an uncertain outcome and a later retry is rate-limited. The browser regression covers this case. The deployed capture proves retry behavior with a 30-POST limit per socket address in 60 seconds. [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) changes the Render key to the client address. Integration tests show two addresses behind the same proxy have separate counters. Live verification of that change follows deployment. See the [rate-limit implementation and verification](bonus-rate-limit.md).
 
 ### The double click
 
@@ -314,7 +314,7 @@ PR #51 adds one line to the Owner screen, computed in the browser from two route
 | `GET /api/owner/catalog` | Each session's released seats, status, start time and booking deadline |
 | `GET /api/bookings` | Each saved booking's session, number of seats and status |
 
-`openReleaseUtilization()` in `public/js/owner-insights.js` keeps the sessions that can still be booked, adds up their released seats, adds up the confirmed seats booked in those same sessions, and shows:
+`openReleaseUtilization()` in `public/js/owner-insights.js` includes active, open offers that meet the scheduling rules, including undated practice offers on the release and sold-out offers. It adds up their released seats and the confirmed seats booked against the same offers. It displays this figure.
 
 > *N* of *M* released demo seats booked (*P*%) across *K* currently eligible sessions.
 

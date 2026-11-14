@@ -104,6 +104,7 @@ The row lock serializes competing bookings and Owner capacity edits for the **sa
 | Invalid input or unknown body field | `400` | Nothing saved |
 | Unknown slot or booking ID | `404` | Nothing saved or returned |
 | Sold-out/closed session, stale price or conflicting retry key | `409` | No new booking |
+| Booking rate exceeded | `429` | Checkout waits and retries the same request ID. |
 | Recognized database outage | `503` | No success receipt reported |
 
 The payment options are simulated and no card is charged. This architecture illustrates the Group 1 code path, not external supplier inventory synchronization.

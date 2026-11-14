@@ -3,6 +3,8 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 
+const receiptId = 'a1000000-0000-4000-8000-000000000001';
+
 test('429 checkout shows the wait message, retries the same booking, and opens its confirmation', async () => {
   const elements = new Map();
   const handlers = new Map();
@@ -85,7 +87,7 @@ test('429 checkout shows the wait message, retries the same booking, and opens i
         error.retryAfterSeconds = 4;
         throw error;
       }
-      return { id: 42 };
+      return { id: receiptId };
     },
     money: value => String(value),
     date: value => String(value),
@@ -110,7 +112,7 @@ test('429 checkout shows the wait message, retries the same booking, and opens i
   assert.equal(sent.length, 2);
   assert.equal(sent[0], sent[1], 'the retry must reuse the exact booking body');
   assert.equal(JSON.parse(sent[0]).requestId, '12345678-1234-1234-1234-123456789abc');
-  assert.equal(destination, '/confirmation.html?id=42');
+  assert.equal(destination, '/confirmation.html?id=' + receiptId);
 });
 
 test('checkout requires acceptance after a quote and stays locked through confirmation', async () => {
@@ -120,6 +122,7 @@ test('checkout requires acceptance after a quote and stays locked through confir
   let finishRequest;
   let navigationStarted = false;
   let quoteAvailable = false;
+  let bookingFailure;
 
   const get = id => {
     if (!elements.has(id)) {
@@ -223,22 +226,18 @@ test('checkout requires acceptance after a quote and stays locked through confir
       return context.request(path, options);
     },
 
-    request: async path => {
+    request: async (path, options) => {
       if (path === '/api/slots/1') return { serviceName: 'Demo session' };
       if (path.startsWith('/api/pricing/quote?')) {
         if (!quoteAvailable) throw new Error('Quote unavailable');
         return { unitPriceCentavos: 1000, totalPriceCentavos: 1000 };
       }
       if (path === '/api/bookings') {
-        sent.push(path);
-
-        if (sent.length === 1) {
-          return new Promise(resolve => {
-            finishRequest = () => resolve({ id: 42 });
-          });
-        }
-
-        return { id: 43 };
+        sent.push(options.body);
+        if (bookingFailure) throw bookingFailure;
+        return new Promise(resolve => {
+          finishRequest = resolve;
+        });
       }
 
       throw new Error('Unexpected request: ' + path);
@@ -295,20 +294,37 @@ test('checkout requires acceptance after a quote and stays locked through confir
   assert.equal(sent.length, 1);
   assert.equal(button.disabled, true);
 
-  // The server confirms the booking, but navigation is still pending.
-  finishRequest();
+  finishRequest({ id: 'unexpected-response' });
   await first;
+  assert.equal(navigationStarted, false);
+  assert.equal(button.textContent, 'Retry booking');
+  assert.equal(context.sessionStorage.stored, sent[0]);
+
+  bookingFailure = Object.assign(new Error('Rate limited'), { status: 429 });
+  await submit(event);
+  assert.equal(button.textContent, 'Retry booking');
+  assert.equal(context.sessionStorage.stored, sent[0]);
+  assert.equal(sent[1], sent[0]);
+
+  bookingFailure = undefined;
+  const retryBooking = submit(event);
+  assert.equal(sent[2], sent[0], 'the uncertain booking still uses the same body');
+
+  // The server confirms the booking, but navigation is still pending.
+  finishRequest({ id: receiptId });
+  await retryBooking;
 
   assert.equal(navigationStarted, true);
   assert.equal(button.disabled, true);
   assert.equal(ack.disabled, true);
+  assert.equal(context.sessionStorage.stored, null);
 
   // A second submission must not create another booking.
   await submit(event);
 
   assert.equal(
     sent.length,
-    1,
-    'a second booking must not be sent'
+    3,
+    'no further booking is sent after a valid receipt'
   );
 });

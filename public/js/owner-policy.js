@@ -88,7 +88,7 @@ export function demoInventoryStatus(slots, services, now = Date.now(), discovery
   });
   if (!available.length) {
     return {state: 'empty', count: 0,
-      message: 'No demo sessions are currently discoverable in Browse. Create a future simulated session within the discovery window, with an open booking deadline and available seats; do not reseed saved bookings.'};
+      message: 'No demo offers are bookable. Adjust practice capacity, resume a paused practice offer with seats left, or add a future dated offer.'};
   }
   if (available.every(slot => slot.bookingClosesAt !== null &&
       Date.parse(slot.bookingClosesAt) <= now + 24 * 3600000)) {

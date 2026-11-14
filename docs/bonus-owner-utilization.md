@@ -13,7 +13,7 @@
 percent = round(100 * confirmedSeatsOnEligibleSlots / capacityOfEligibleSlots)
 ```
 
-Eligibility checks active service, open/runs-as-scheduled session, future cutoff and start, and the server-provided discovery-hours window. Empty eligible inventory explicitly shows 'No eligible, open demo sessions' instead of a misleading 0% usage rate. Cancelled bookings, paused/inactive/expired and future-outside-window slots do not count.
+The calculation includes active, open, confirmed-to-run offers. Dated offers must still be inside their booking window, and undated practice offers qualify while sales are open. Sold-out offers stay in the calculation until they leave that set, so a fully booked release can count toward 100% utilization. Empty eligible inventory explicitly shows 'No eligible, open demo sessions' instead of a misleading 0% usage rate. Cancelled bookings, paused/inactive/expired and future-outside-window slots do not count.
 
 This is the **course-demo released allocation** only, **not** total studio occupancy or validated demand. The five required server-provided Owner KPI cards are unchanged.
 

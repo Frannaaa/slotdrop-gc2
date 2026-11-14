@@ -4,9 +4,11 @@ import { request, retryLimitedBooking, money, date, positive, pageParameters, no
 const form = document.querySelector("#checkout"),
   button = document.querySelector("#submit"),
   summary = document.querySelector("#summary"),
+  chosenSession = document.querySelector("#chosenSession"),
   status = document.querySelector("#status"),
   ack = document.querySelector("#acceptPrice"),
   retry = document.querySelector("#retry");
+const bookingIdPattern = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 
 let slotId,
   quantity,
@@ -46,19 +48,24 @@ function showQuote() {
     `I agree to the simulated booking total of ${money(quote.totalPriceCentavos)}.`;
 }
 
-async function load() {
-  if (busy || uncertain || navigating) return;
-
-  const current = ++generation;
+function resetQuote() {
   quote = null;
   button.disabled = true;
   ack.checked = false;
   ack.disabled = true;
-  retry.disabled = true;
   summary.textContent = "";
+  document.querySelector("#priceLabel").textContent = "I agree to the booking total.";
+}
+
+async function load() {
+  if (busy || uncertain || navigating) return;
+
+  const current = ++generation;
+  resetQuote();
+  retry.disabled = true;
 
   notice(status, "Checking session and price…");
-  notice(document.querySelector("#chosenSession"), "Loading session details…");
+  notice(chosenSession, "Loading session details…");
 
   try {
     const [slot, loaded] = await Promise.all([
@@ -70,10 +77,7 @@ async function load() {
 
     if (current !== generation) return;
 
-    notice(
-      document.querySelector("#chosenSession"),
-      slot.serviceName + " · " + date(slot.startsAt),
-    );
+    notice(chosenSession, slot.serviceName + " · " + date(slot.startsAt));
 
     quote = loaded;
     ack.disabled = false;
@@ -82,9 +86,8 @@ async function load() {
   } catch (error) {
     if (current !== generation) return;
 
-    quote = null;
+    notice(chosenSession, "");
     notice(status, error.message, true);
-    notice(document.querySelector("#chosenSession"), error.message, true);
   } finally {
     if (current === generation) retry.disabled = false;
   }
@@ -149,6 +152,9 @@ form.addEventListener("submit", async (event) => {
       },
     });
 
+    if (typeof receipt?.id !== "string" || !bookingIdPattern.test(receipt.id)) {
+      throw Object.assign(new Error("Invalid booking response."), { uncertain: true });
+    }
     clear();
 
     // Keep checkout locked while confirmation navigation is pending.
@@ -174,19 +180,21 @@ form.addEventListener("submit", async (event) => {
         "The price changed. Review and accept the new total before submitting again.",
         true,
       );
-    } else if (error.uncertain || error.status >= 500) {
+    } else if (error.uncertain || error.status >= 500 || (uncertain && error.status === 429)) {
       uncertain = true;
 
       notice(
         status,
-        "Could not confirm the result. Your details are locked so Retry booking sends the same request safely.",
+        error.status === 429
+          ? "Booking traffic is high. Wait a moment, then use Retry booking to check your original request."
+          : "Could not confirm the result. Your details are locked so Retry booking sends the same request safely.",
         true,
       );
     } else {
       clear();
       uncertain = false;
 
-      if (error.code === "SLOT_UNAVAILABLE") quote = null;
+      if (error.code === "SLOT_UNAVAILABLE") resetQuote();
 
       notice(status, error.message, true);
     }
@@ -196,7 +204,7 @@ form.addEventListener("submit", async (event) => {
     // Never unlock checkout after a successful booking.
     if (!navigating) {
       lockDetails(uncertain);
-      ack.disabled = uncertain;
+      ack.disabled = uncertain || !quote;
       retry.disabled = uncertain;
 
       button.textContent = uncertain
@@ -251,17 +259,10 @@ try {
 
     request("/api/slots/" + slotId)
       .then((slot) => {
-        notice(
-          document.querySelector("#chosenSession"),
-          slot.serviceName + " · " + date(slot.startsAt),
-        );
+        notice(chosenSession, slot.serviceName + " · " + date(slot.startsAt));
       })
       .catch((error) =>
-        notice(
-          document.querySelector("#chosenSession"),
-          error.message,
-          true,
-        ),
+        notice(chosenSession, error.message, true),
       );
   } else {
     clear();
@@ -273,11 +274,7 @@ try {
   ack.disabled = true;
   retry.disabled = true;
 
-  notice(
-    document.querySelector("#chosenSession"),
-    "No valid session selected.",
-    true,
-  );
+  notice(chosenSession, "");
 }
 
 function validPending(value) {
@@ -288,7 +285,7 @@ function validPending(value) {
     value.slotId === slotId &&
     value.quantity === quantity &&
     typeof value.requestId === "string" &&
-    /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value.requestId) &&
+    bookingIdPattern.test(value.requestId) &&
     typeof value.customerName === "string" &&
     value.customerName.trim().length >= 1 &&
     value.customerName.length <= 100 &&

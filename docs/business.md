@@ -31,7 +31,7 @@ The rates are what we’d measure in a pilot. GC2 records bookings and Owner met
 | Stage | Screen | What we put there and why | Endpoint | What we’d measure |
 |---|---|---|---|---|
 | Browse | Home | Up to three bookable offers give someone with a free afternoon a quick sense of what’s available. Practice offers are labeled. “Browse all sessions” opens the full list. | `GET /api/slots` | Home visits that open Browse or Detail ÷ Home visits |
-| Browse | Browse | A bookable card keeps the studio, time, cutoff, seats left and price together. Search takes studio or activity names. Buttons switch between the broad categories, and six cards per page keep the phone list short. | `GET /api/slots?q=…&category=…&page=…&limit=6` | Browse visits that open a bookable session’s Detail page ÷ Browse visits |
+| Browse | Browse | A bookable card keeps the studio, time, cutoff, seats left and price together so someone comparing offers on a phone can scan them at once. Search takes studio or activity names, category buttons narrow the list in one tap, and six cards per page keep the list short. | `GET /api/slots?q=…&category=…&page=…&limit=6` | Browse visits that open a bookable session’s Detail page ÷ Browse visits |
 | Select | Detail | A labelled list puts inclusions, preparation, location and the deadline where a customer can scan them before choosing seats. | `GET /api/slots/:id` | Detail visits that continue to Selection ÷ Detail visits |
 | Select | Selection | A number field lets the customer enter the group size directly. The server returns a new price as it changes, so a pair can see what the buddy rate does to the total. | `GET /api/slots/:id`, `GET /api/pricing/quote` | Selection visits that open Checkout ÷ Selection visits |
 | Confirm | Checkout | Labelled contact fields show validation errors. A dropdown offers the two simulated payment choices. The agreement checkbox sits with the quoted amount so the customer can see what they’re accepting. | `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings` | Confirmed saves ÷ unique submitted request IDs |
@@ -41,7 +41,7 @@ Owner sits beside the funnel. The release form changes future availability. The 
 
 ## 4.3 Business rules
 
-The 72-hour window and booking cutoffs apply to scheduled offers. Closed sessions keeps the latest 16 scheduled offers whose cutoffs have passed. Two practice offers show “Demo only · No booking cutoff” so the instructor can test price, seat limits and receipt persistence after the scheduled samples run out.
+The 72-hour window and booking cutoffs apply to scheduled offers. Closed sessions shows up to 16 recently expired offers. Two practice offers show “Demo only · No booking cutoff” so the instructor can test price, seat limits and receipt persistence after the scheduled samples run out. Each starts with 20 simulated seats. A practice offer remains bookable while its activity is active, sales are open and seats remain.
 
 | Rule, in the owner’s words | Where it’s enforced | What the customer sees |
 |---|---|---|
@@ -51,7 +51,7 @@ The 72-hour window and booking cutoffs apply to scheduled offers. Closed session
 | “Give the buddy rate to two or more people in the same booking.” | `priceQuote()` selects the tier. `createBooking()` saves it in `bookings.pricing_type`. | Selection displays “Buddy price applied” for a qualifying group. |
 | “Never book more seats than we’ve set aside.” | `createBooking()` locks the `slots` row, then calls `checkBookable()` before the insert. `editOffer()` guards against lowering capacity below sold seats. | A request for three when only two remain is refused with 409 and creates no booking. |
 | “Ask the customer again if their total changes.” | `bookingRequest()` rejects unsupported inputs. `createBooking()` recomputes the price with `priceQuote()` and compares it with `expectedTotalCentavos`. | Checkout shows a fresh quote after `409 PRICE_CHANGED` and asks for acceptance. |
-| “A retry should give the customer their original receipt.” | `bookings.request_id` is unique. `createBooking()` replays an identical request and rejects a conflicting reuse. | A matching retry returns the same reference. |
+| “A retry should give the customer their original receipt.” | `bookings.request_id` is unique. `createBooking()` replays an identical request and rejects a conflicting reuse. | Checkout keeps the original request if the save result is uncertain. A matching retry returns the same reference. |
 | “A price edit should leave earlier receipts alone.” | Booking rows store the accepted prices, fee and payout. `findReceipt()` reads those values by ID. | Confirmation keeps the original total. |
 | “We can pause new sales for a session with bookings.” | `editOffer()` changes the offer status and refuses cancellation if it has confirmed bookings. | The paused offer leaves Browse. Existing receipts stay available. |
 | “Take 10% out of the studio’s share.” | `COMMISSION_BASIS_POINTS` feeds `priceQuote()`. The accepted rate and amounts are saved with the booking. | The customer pays the quoted total. Owner can see the fee and payout separately. |

@@ -108,7 +108,7 @@ On one checked-out database client:
 
 Insufficient seats return 409 SLOT_UNAVAILABLE. A changed acknowledged amount returns 409 PRICE_CHANGED with a fresh quote (error.quote) before any insert. The frontend displays the new amount and asks again.
 
-An identical normalized retry returns its original receipt with 200, even after the session closes. Reusing the key with different details returns 409 REQUEST_KEY_CONFLICT. After a concurrent unique-key violation, roll back and compare the saved request rather than creating another booking. Keep the retry key for a network retry; use a new key for a deliberately changed request.
+An identical normalized retry returns its original receipt with 200, even after the session closes. Reusing the key with different details returns 409 REQUEST_KEY_CONFLICT. After a concurrent unique-key violation, roll back and compare the saved request rather than creating another booking. Checkout keeps the retry key when a network failure, malformed receipt response or server error leaves the save uncertain. If a later retry is rate-limited, the original key and request body stay available. Confirmation opens after Checkout receives a valid receipt UUID.
 
 ## Saved receipts and metrics
 
@@ -148,7 +148,7 @@ The owner workspace stops waiting after 15 seconds, including while reading a re
 
 The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
 
-GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. Sort uses the effective per-seat tier for the requested party; results still obey dates, provider cutoffs, confirmed-to-run state and remaining allocation. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
+GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. The bookable view sorts by the effective per-seat tier for the requested party and still filters on confirmed-to-run status and remaining allocation. Scheduled offers also obey the discovery window and booking cutoff. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
 
 Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes. Cards preview the stored standard/buddy tier. The server still computes the quote and save totals.
 

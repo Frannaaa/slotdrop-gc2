@@ -51,7 +51,7 @@ BIGINT IDs and totals must be converted to safe JSON integers. PostgreSQL's pg d
 
 ## Owner edits
 
-The API accepts price, capacity, cutoff and status edits. Start changes and cutoff edits for practice offers return 400. Cancelling a session with confirmed bookings or reducing capacity below confirmed seats returns 409. Reopening requires available seats and an active activity. Scheduled offers also require a future cutoff and a confirmed session.
+The API accepts price, capacity, cutoff and status edits. Start changes and cutoff edits for practice offers return 400. Cancelling a session with confirmed bookings or reducing capacity below confirmed seats returns 409. Reopening requires an active activity, confirmation that the session will run and at least one available seat. Scheduled offers also require a future booking cutoff.
 
 ## Seed and setup
 

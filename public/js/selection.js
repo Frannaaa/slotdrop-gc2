@@ -3,6 +3,7 @@ import { request, money, date, positive, pageParameters, notice } from "./custom
 const form = document.querySelector("#selection"),
 quantity = document.querySelector("#quantity"),
 summary = document.querySelector("#summary"),
+chosenSession = document.querySelector("#chosenSession"),
 status = document.querySelector("#status"),
 next = document.querySelector("#continue");
 
@@ -13,7 +14,7 @@ async function refresh() {
   next.disabled = true;
   summary.textContent = "";
   notice(status, "Checking price and seats...");
-  notice(document.querySelector("#chosenSession"), "Loading session details...");
+  notice(chosenSession, "");
   try {
     const count = positive(quantity.value, 100);
     const [slot, quote] = await Promise.all([
@@ -21,14 +22,13 @@ async function refresh() {
       request("/api/pricing/quote?" + new URLSearchParams({ slotId, quantity: count }))
     ]);
     if (current !== generation) return;
-    notice(document.querySelector("#chosenSession"), slot.serviceName + " " + date(slot.startsAt));
+    notice(chosenSession, slot.serviceName + " " + date(slot.startsAt));
     summary.textContent = `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
     notice(status, "");
     next.disabled = false;
   } catch (error) {
     if (current === generation) {
       notice(status, error.message, true);
-      notice(document.querySelector("#chosenSession"), error.message, true);
     }
   }
 }
@@ -52,5 +52,5 @@ try {
   notice(status, error.message, true);
   quantity.disabled = true;
   document.querySelector("#retry").disabled = true;
-  notice(document.querySelector("#chosenSession"), "No valid session selected.", true);
+  notice(chosenSession, "");
 }

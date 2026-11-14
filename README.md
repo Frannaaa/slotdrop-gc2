@@ -70,7 +70,7 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 
 ## Changes since GC1
 
-The build focuses on recurring leisure sessions and released seat allocations. Discovery covers the next 72 hours; each session has its own booking deadline. Studios control standard and optional buddy offers. The course commission is 10%.
+The build focuses on recurring leisure sessions and released seat allocations. Dated offers appear within 72 hours of their start and close at their own deadlines. Two undated practice offers keep the grading flow available while they have seats. Studios control standard and optional buddy offers. The course commission is 10%.
 
 Availability and buddy pricing are the two revenue features. The merged booking API enforces both availability and buddy pricing under a database transaction, with persisted receipt snapshots and stable request-ID retries. Paid add-ons, accounts, real payments, React and optimization are deferred.
 
@@ -103,7 +103,7 @@ Fran's additional reference-catalog work supplies eight activities at five real 
 
 ## Pre-checkpoint demo inventory check (read-only)
 
-Scheduled allocations close at their booking deadlines. Browse’s **Closed sessions** section shows the last 16 closed offers and labels each as “Booking closed” or “Event ended.” The two practice offers stay discoverable without a date cutoff while they have available seats. Owner can add practice capacity when needed. Startup preserves existing bookings and offer edits.
+Scheduled allocations close at their booking deadlines. Open **Closed sessions** in Browse to see up to 16 recently expired offers labeled “Booking closed” or “Event ended.” The two practice offers stay discoverable without a date cutoff while they have available seats. Owner can add practice capacity when needed. Startup preserves existing bookings and offer edits.
 
 Before each deployed demo/checkpoint, with the app running, run:
 
@@ -113,6 +113,6 @@ npm run check:demo -- https://YOUR-APP-HOST
 
 Or run `npm run check:demo` against local `http://localhost:3000`. The check fetches `GET /api/slots`, reports remaining bookable demo allocations, and returns a failure exit code if none remain. It **never** creates offers, shifts existing dates, reactivates sold-out seats, modifies receipts or touches the database.
 
-If inventory is absent or about to expire, open the **Owner course-demo screen** and create *new, future, explicitly simulated* allocations for active sample activities, with future cutoffs and the intended prices. Test Browse again. Do not rerun `db:init` on a populated database, overwrite historic bookings, silently reseed or claim real studio consent. Because the public demo has no owner login, use fictional test data only and do not expose real provider management as a production feature.
+If there are no bookable offers, open the **Owner course-demo screen** and adjust the practice allocation, resume a paused practice offer with seats left, or add a dated sample with a future cutoff. Then recheck Browse. Do not rerun `db:init` on a populated database, overwrite historic bookings, silently reseed or claim real studio consent. Because the public demo has no owner login, use fictional test data only and do not expose real provider management as a production feature.
 
 This check tests availability only. It does **not** prove that Detail, Selection, Checkout, Confirmation, PostgreSQL persistence or customer booking are integrated. Use the [transaction acceptance checklist](docs/transaction-flow-acceptance.md) for those checks.

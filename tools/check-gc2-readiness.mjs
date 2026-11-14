@@ -62,14 +62,16 @@ async function inspectReceiptReadback(base) {
 export async function inspectGC2(origin) {
   const base=new URL(origin);
   if(!['http:','https:'].includes(base.protocol)||base.username||base.password)throw Error('Provide an HTTP(S) URL without credentials.');
-  const results=[];
+  const results=[await inspect(base,'Database readiness endpoint','/api/health','json',value=>value?.status==='ok')];
   for(const [name,path] of requiredPages)results.push(await inspect(base,name,path,'html'));
   const {check:slots,data:inventory}=await inspectSlots(base);
   results.push(slots);
   if (slots.pass) {
     const available=inventory.filter(row=>row && row.remainingSeats>=1);
     results.push({name:'Sample inventory for public demo',pass:available.length>0,
-      detail:available.length+' discoverable sample sessions; if zero create new FUTURE offers through Owner without reseeding'});
+      detail:available.length
+        ? available.length+' discoverable demo offers'
+        : 'No bookable offers. Adjust practice capacity or add a future dated offer in Owner.'});
     const first=available[0];
     if(first && Number.isSafeInteger(first.id)) {
       results.push(await inspect(base,'Session detail API','/api/slots/'+first.id,'json',

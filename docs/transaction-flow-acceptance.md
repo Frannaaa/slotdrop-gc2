@@ -1,8 +1,8 @@
 # GC2 Criterion 1 — Transaction flow works (20 points)
 
-**Status checked 13 November 2026 (PHT).** Home (#35, #68), Browse (#62, #63), Detail and Selection (#41), Checkout and Confirmation (#43), booking and receipt APIs (#42), and the Owner workspace (#29, #51) are merged.
+**Status checked 15 November 2026 (PHT).** Home (#35, #68), Browse (#62, #63), Detail and Selection (#41), Checkout and Confirmation (#43), booking and receipt APIs (#42), and the Owner workspace (#29, #51) are merged.
 
-The 14 November Render walkthrough followed all six customer screens plus Owner at 390 px. A Checkout double-click sent one POST (201), Confirmation fetched the same receipt (200), and Owner showed one matching row. See [deployed browser evidence](challenges.md#challenge-2--trace-one-real-request). The outside-group phone test remains pending.
+On 14 November, a Checkout double-click at 390 px sent one POST (201), Confirmation fetched the same receipt (200), and Owner showed one matching row. The [15 November Chrome DevTools run](challenges.md#challenge-2--trace-one-real-request) captured the POST and GET directly. The outside-group phone test remains pending.
 
 ### Fran-owned automated acceptance check
 
@@ -42,7 +42,7 @@ The test fixture used a PGlite database and local `127.0.0.1` HTTP app. This ver
 ### Full-credit browser acceptance — actual evidence to collect
 
 - [x] Reviewed Browse, shared CSS and Checkout/Confirmation are merged. The deployed browser walkthrough reached Confirmation from Browse.
-- [ ] Final reviewed `main` deployed with persistent PostgreSQL and discoverable **future fictional** sessions. Record exact public origin, commit SHA, test timestamp and tested booking ID.
+- [ ] Final reviewed `main` deployed with persistent PostgreSQL and bookable fictional offers. Record exact public origin, commit SHA, test timestamp and tested booking ID.
 - [ ] **Outside-group tester** opens the deployed link on their phone and completes the six-screen booking flow without help. The team checks that the same booking appears in Owner.
 - [ ] Confirm the URL contains the saved receipt ID and refreshing Confirmation **GETs that receipt by ID** rather than relying on browser storage.
 - [x] The 14 November deployed capture shows the same booking ID in Confirmation and Owner after one browser POST from a double-click.

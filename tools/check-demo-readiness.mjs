@@ -32,7 +32,7 @@ async function main() {
   const report = assessSlots(await response.json());
   console.log(`SlotDrop demo readiness: ${report.bookableSessions} bookable sample sessions across ${report.businessCount} providers.`);
   if (!report.bookableSessions) {
-    console.error('NOT READY: no bookable demo sessions. Create new FUTURE sample offers through Owner; do not reseed or modify old receipts.');
+    console.error('NOT READY: no bookable demo offers. Adjust practice capacity or add a future dated offer in Owner.');
     process.exitCode = 1;
   } else {
     if (report.lastCutoff === null) console.log('Bookable practice inventory has no cutoff.');
