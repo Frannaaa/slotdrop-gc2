@@ -68,6 +68,7 @@ This records assistance on Fran's Group 1 work. Each teammate records their own 
 | 2026-11-13 | Fran / M1 | ChatGPT Codex | Cross-check release documentation against Canvas and merged code | Updated README, Browse descriptions, challenge references and submission checklist, and repaired AI table formatting | Checked against the original brief and merged source; teammate review pending |
 | 2026-11-14 | Fran / M1 | ChatGPT Codex | Restructure the GC2 business PDF around the brief | Reorganized existing business reasoning and seeded examples into a six-screen flow, two feature descriptions and revenue comparisons | Checked amounts against business.md, rendered both pages, and verified the two-page PDF guard |
 | 2026-11-14 | Fran / M1 | ChatGPT Codex | Clarify the GC1 and revenue links in the GC2 PDF | Added a sourced GC1 comparison and summarized the existing commission scenarios without changing their assumptions | Checked GC1 and instructor feedback, checked seeded arithmetic, and rendered both PDF pages |
+| 2026-11-14 | Fran / M1 | ChatGPT Codex | Measure the deployed Browse baseline | Ran mobile Lighthouse and captured first-load HTTP requests with Chromium cache disabled; added the observed results and evidence | Checked successful responses, transfer totals, mobile settings, and audit warnings |
 
 
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group business reasoning, challenge explanations, individual predictions and recordings remain the authors' own work.
