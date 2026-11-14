@@ -7,7 +7,7 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
 | GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | Does not check the database | Fran |
-| GET /api/slots | q, category, area, when, people, type, tag, sort, optional page, limit | 200 array, including [] | 400 bad filter | Fran |
+| GET /api/slots | q, category, area, when, people, type, tag, sort, optional page, limit, pagination | 200 array or opt-in pagination object | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 booked-capacity/cancellation/resumption conflict | Fran |
@@ -22,7 +22,7 @@ Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is
 
 ## Discovery and session responses
 
-Optional **pagination** (GC2 +1 bonus preparation, backend only): `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. Output remains a JSON array for compatibility. Requests **without** `page` or `limit` return the unpaginated eligible array as before. The List UI must actually use these parameters and demonstrate pagination on the deployed group site before claiming the bonus. Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
+Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. The default response is still a JSON array. Requests without pagination parameters return the full eligible array. Browse requests `pagination=metadata` alongside `page` and `limit` to receive `{ slots, hasNextPage }` in one response. Discovery also accepts `type`, `tag` and `sort` as documented by the active `listSlots()` validation; see [the submitted business case](business.md) for the funnel context.
 
 q is a case-insensitive literal substring of the provider or activity name. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
 

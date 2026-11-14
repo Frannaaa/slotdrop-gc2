@@ -1,5 +1,4 @@
-/* Browse page presentation. Scoped to avoid changing other pages or duplicating
-   the shared styling work in PR #60. Values follow the SlotDrop brand tokens. */
+/* Standalone Browse styles using the SlotDrop palette. */
 
 .browse-page {
   --browse-paper: var(--color-paper, #f5f2ea);
@@ -10,10 +9,12 @@
   --browse-white: var(--color-white, #fff);
   --browse-border: var(--color-border, rgba(32, 35, 30, .15));
   min-height: 100vh;
+  margin: 0;
   background: var(--browse-paper);
   color: var(--browse-ink);
   font-family: var(--font-body, "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 .browse-page *,
@@ -23,7 +24,20 @@
 .browse-page a { color: var(--browse-blue); text-underline-offset: .2em; }
 .browse-page a:hover { text-decoration-thickness: 2px; }
 .browse-page button,
-.browse-page input { font: inherit; }
+.browse-page input,
+.browse-page select { font: inherit; }
+
+.browse-page .skip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: .5rem 1rem;
+  color: var(--browse-paper);
+  background: var(--browse-ink);
+  transform: translateY(-120%);
+}
+.browse-page .skip:focus { transform: none; }
 
 .browse-page .site-header {
   width: min(100% - 3rem, 76rem);
@@ -85,8 +99,8 @@
 
 .browse-page .browse-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: .9rem;
   padding: clamp(1rem, 2.5vw, 1.5rem);
   margin: 0 0 1.25rem;
   background: var(--browse-white);
@@ -94,13 +108,15 @@
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(32, 35, 30, .04);
 }
+.browse-page .browse-field { display: grid; gap: .4rem; min-width: 0; }
 .browse-page .browse-controls label,
 .browse-page .browse-controls legend {
   color: var(--browse-ink);
   font-size: .9rem;
   font-weight: 700;
 }
-.browse-page .browse-controls input {
+.browse-page .browse-controls input,
+.browse-page .browse-controls select {
   display: block;
   width: 100%;
   min-height: 3rem;
@@ -111,8 +127,9 @@
   border-radius: 8px;
   outline-offset: 2px;
 }
-.browse-page .browse-controls input:focus { border-color: var(--browse-blue); outline: 2px solid rgba(48, 72, 219, .15); }
-.browse-page .browse-controls fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
+.browse-page .browse-controls input:focus,
+.browse-page .browse-controls select:focus { border-color: var(--browse-blue); outline: 2px solid rgba(48, 72, 219, .15); }
+.browse-page .browse-controls fieldset { grid-column: 1 / -1; min-width: 0; padding: 0; margin: 0; border: 0; }
 .browse-page .browse-controls legend { margin: 0 0 .65rem; }
 .browse-page .activity-types { display: flex; flex-wrap: wrap; gap: .55rem; }
 .browse-page .activity-types button {
@@ -133,9 +150,16 @@
   border-color: var(--browse-ink);
 }
 
+.browse-page .browse-result-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .65rem;
+  margin-bottom: .75rem;
+}
 .browse-page #status {
-  min-height: 0;
-  margin: 0 0 .8rem;
+  min-height: 3rem;
+  margin: 0;
   padding: .75rem 1rem;
   color: #55534d;
   background: rgba(32, 35, 30, .045);
@@ -144,7 +168,7 @@
 }
 .browse-page #status:empty { display: none; }
 .browse-page #status.error { color: #9d2424; background: #fff0ef; border: 1px solid #e8b7b3; }
-.browse-page #retry { margin: 0 0 1.1rem; }
+.browse-page #retry { margin: 0; min-height: 3rem; }
 .browse-page .button {
   display: inline-flex;
   min-height: 2.7rem;
@@ -164,6 +188,20 @@
 .browse-page .button:hover { color: #fff; background: #2437b0; transform: translateY(-1px); }
 .browse-page .button.secondary { color: var(--browse-ink); background: transparent; border-color: var(--browse-border); }
 .browse-page .button.secondary:hover { color: var(--browse-ink); background: #fff; border-color: var(--browse-ink); }
+.browse-page .button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.browse-page .pagination {
+  justify-content: center;
+  gap: .85rem;
+  margin: 1.75rem 0 0;
+}
+.browse-page .pagination:empty { display: none; }
+.browse-page .pagination-label {
+  min-width: 7rem;
+  font-size: .9rem;
+  font-weight: 700;
+  text-align: center;
+}
 
 .browse-page .activity-grid {
   display: grid;
@@ -247,10 +285,31 @@
   .browse-page .activity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 600px) {
-  .browse-page .site-header { width: min(100% - 2rem, 76rem); align-items: flex-start; flex-direction: column; gap: .7rem; }
-  .browse-page nav { gap: .5rem 1rem; }
-  .browse-page main { width: min(100% - 2rem, 76rem); padding: 2.5rem 0 3rem; }
-  .browse-page .activity-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
-  .browse-page .card-art { min-height: 6rem; }
+  body.browse-page > .site-header {
+    width: calc(100% - 2rem);
+    padding: .5rem 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .25rem;
+  }
+  body.browse-page .site-header nav { gap: 0 .85rem; }
+  .browse-page .site-header nav a { display: inline-flex; align-items: center; min-height: 44px; }
+  .browse-page main { width: calc(100% - 2rem); padding: 1.5rem 0 2rem; }
+  .browse-page .browse-hero { margin-bottom: 1.1rem; }
+  .browse-page h1 { font-size: clamp(1.9rem, 8vw, 2.5rem); margin-bottom: .4rem; }
+  .browse-page .browse-hero > p:last-child { margin: 0; font-size: .94rem; }
+  .browse-page .browse-controls { grid-template-columns: minmax(0, 1fr); gap: .7rem; padding: .75rem; margin-bottom: .75rem; }
+  .browse-page .browse-controls input,
+  .browse-page .browse-controls select { min-width: 0; min-height: 44px; padding: .45rem .65rem; font-size: 1rem; }
+  .browse-page .browse-controls legend { margin-bottom: .3rem; }
+  .browse-page .activity-types button { min-height: 44px; padding: .35rem .75rem; }
+  .browse-page #status { padding: .65rem .7rem; }
+  .browse-page .activity-grid { grid-template-columns: minmax(0, 1fr); gap: .85rem; }
+  .browse-page #results[aria-busy="true"] { min-height: 24rem; }
+  .browse-page .card-art { min-height: 2.5rem; padding: .45rem .9rem; font-size: .85rem; }
+  .browse-page .card-body { padding: .9rem; gap: .55rem; }
+  .browse-page .button { min-height: 44px; }
+  .browse-page .pagination { gap: .45rem; }
+  .browse-page .pagination-label { min-width: 0; }
   .browse-page footer { padding: 1.25rem 1rem; }
 }

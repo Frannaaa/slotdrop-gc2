@@ -26,7 +26,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   }
 
   const elements = new Map(
-    ['#results', '#status', '#search', '#pagination', '#retry'].map(key => [key, new Element()])
+    ['#results', '#status', '#search', '#sort', '#pagination', '#retry'].map(key => [key, new Element()])
   );
   const categories = ['all', 'creative', 'active'].map(category => {
     const button = new Element();
@@ -37,6 +37,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     id:i+1, serviceName:'Pottery '+(i+1), providerName:'Demo Studio',
     category:i%2===0?'creative':'active',
   }));
+  elements.get('#sort').value = 'soonest';
   const sent = [];
   const source = (await readFile(new URL('../public/js/browse.js', import.meta.url), 'utf8'))
     .replace(/^import .*?;\r?\n/m, '');
@@ -48,6 +49,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     const params = url.searchParams;
     assert.ok(params.has('page'), 'API pagination must be used on every Browse request');
     assert.ok(params.has('limit'), 'a bounded API limit must be used');
+    assert.equal(params.get('pagination'), 'metadata');
     const page = Number(params.get('page')), limit = Number(params.get('limit'));
     assert.equal(limit, 6);
     assert.ok(Number.isSafeInteger(page) && page > 0);
@@ -55,7 +57,8 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
       (!params.has('category') || slot.category === params.get('category')) &&
       (!params.has('q') || slot.serviceName.toLowerCase().includes(params.get('q').toLowerCase()))
     );
-    return match.slice((page-1)*limit, page*limit);
+    if (params.get('sort') === 'price-high') match.reverse();
+    return { slots: match.slice((page-1)*limit, page*limit), hasNextPage: match.length > page*limit };
   };
 
   runInNewContext(source, {
@@ -79,6 +82,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
 
   await flush();
   assert.deepEqual(shownIds(), [1,2,3,4,5,6]);
+  assert.equal(sent.length, 1, 'first page and pagination controls share one response');
   assert.equal(pageButton('Next').disabled, false);
   assert.equal(pageButton('Previous').disabled, true);
   pageButton('Next').handlers.click();
@@ -108,5 +112,20 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   assert.deepEqual(shownIds(), [2,4,6,8,10,12]);
   assert.ok(sent.some(path => path.includes('category=active') && path.includes('limit=6')));
   assert.equal(pagination.children.length, 0, 'exactly one full page has no phantom next button');
+  const requestsBeforeSort = sent.length;
+  elements.get('#sort').value = 'price-high';
+  categories[0].handlers.click();
+  await flush();
+  assert.deepEqual(shownIds(), [13,12,11,10,9,8], 'sort applies to the first page');
+  assert.equal(sent.length, requestsBeforeSort + 1, 'filtered pages also make one request');
+  assert.equal(pageButton('Next').disabled, false);
+  pageButton('Next').handlers.click();
+  await flush();
+  assert.deepEqual(shownIds(), [7,6,5,4,3,2]);
+  elements.get('#sort').value = 'soonest';
+  elements.get('#sort').handlers.change();
+  await flush();
+  assert.deepEqual(shownIds(), [1,2,3,4,5,6], 'changing the sort resets to the first page');
+  assert.ok(sent.some(path => path.includes('sort=price-high')));
   assert.ok(sent.every(path => path !== '/api/slots'), 'never fetch the unpaginated list');
 });

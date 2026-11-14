@@ -5,6 +5,7 @@ import { request, card, notice } from "./customer-common.js";
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const search = document.querySelector("#search");
+const sort = document.querySelector("#sort");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
@@ -21,9 +22,11 @@ function pageUrl(page) {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(ITEMS_PER_PAGE),
+    pagination: "metadata",
   });
   const query = search.value.trim();
   if (query) params.set("q", query);
+  if (sort.value !== "soonest") params.set("sort", sort.value);
   if (category !== "all") params.set("category", category);
   return "/api/slots?" + params;
 }
@@ -72,6 +75,7 @@ function render() {
 
 async function load(page = 1) {
   const current = ++generation;
+  results.setAttribute("aria-busy", "true");
   results.replaceChildren();
   pagination.replaceChildren();
   retry.disabled = true;
@@ -79,31 +83,23 @@ async function load(page = 1) {
 
   try {
     // Filters and LIMIT/OFFSET are handled by GET /api/slots on the server.
-    const items = await request(pageUrl(page));
+    const { slots: items, hasNextPage: more } = await request(pageUrl(page));
     if (current !== generation) return;
-    if (!Array.isArray(items)) throw new Error("The sessions response was not a list.");
+    if (!Array.isArray(items) || typeof more !== "boolean") throw new Error("Invalid sessions response.");
     if (items.length === 0 && page > 1) {
       // Inventory may change between clicks. Don't strand the customer on an empty page.
       return load(page - 1);
     }
 
-    let more = false;
-    if (items.length === ITEMS_PER_PAGE) {
-      // The API returns an array, not total-count metadata. A small lookahead
-      // prevents a fake Next button when the last page has exactly six items.
-      const nextItems = await request(pageUrl(page + 1));
-      if (current !== generation) return;
-      if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
-      more = nextItems.length > 0;
-    }
-
     currentPage = page;
     slots = items;
     hasNextPage = more;
+    results.setAttribute("aria-busy", "false");
     render();
   } catch (error) {
     if (current !== generation) return;
     slots = [];
+    results.setAttribute("aria-busy", "false");
     hasNextPage = false;
     notice(status, error.message || "Could not load sessions. Please try again.", true);
   } finally {
@@ -115,6 +111,7 @@ function resetSearchPage() {
   clearTimeout(searchTimer);
   // Invalidate any older in-flight responses immediately.
   generation++;
+  results.setAttribute("aria-busy", "true");
   results.replaceChildren();
   pagination.replaceChildren();
   notice(status, "Searching sessions…");
@@ -122,6 +119,10 @@ function resetSearchPage() {
 }
 
 search.addEventListener("input", resetSearchPage);
+sort.addEventListener("change", () => {
+  clearTimeout(searchTimer);
+  load(1);
+});
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     clearTimeout(searchTimer);
