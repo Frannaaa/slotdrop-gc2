@@ -74,6 +74,7 @@ function render() {
 
 async function load(page = 1) {
   const current = ++generation;
+  results.setAttribute("aria-busy", "true");
   results.replaceChildren();
   pagination.replaceChildren();
   retry.disabled = true;
@@ -88,6 +89,12 @@ async function load(page = 1) {
       // Inventory may change between clicks. Don't strand the customer on an empty page.
       return load(page - 1);
     }
+
+    currentPage = page;
+    slots = items;
+    hasNextPage = false;
+    results.setAttribute("aria-busy", "false");
+    render();
 
     let more = false;
     if (items.length === ITEMS_PER_PAGE) {
@@ -104,13 +111,12 @@ async function load(page = 1) {
       if (current !== generation) return;
     }
 
-    currentPage = page;
-    slots = items;
     hasNextPage = more;
-    render();
+    renderPagination();
   } catch (error) {
     if (current !== generation) return;
     slots = [];
+    results.setAttribute("aria-busy", "false");
     hasNextPage = false;
     notice(status, error.message || "Could not load sessions. Please try again.", true);
   } finally {
@@ -122,6 +128,7 @@ function resetSearchPage() {
   clearTimeout(searchTimer);
   // Invalidate any older in-flight responses immediately.
   generation++;
+  results.setAttribute("aria-busy", "true");
   results.replaceChildren();
   pagination.replaceChildren();
   notice(status, "Searching sessions…");
