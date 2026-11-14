@@ -1,16 +1,31 @@
 // Group assignment: Kaitlyn. See docs/ownership-and-execution.md.
 import { request, money, date, escapeHtml, pageParameters, notice } from "./customer-common.js";
 const content = document.querySelector("#receipt"),
-  status = document.querySelector("#status");
+  status = document.querySelector("#status"),
+  retry = document.querySelector("#retry"),
+  browse = document.querySelector("#browse");
 let generation = 0;
 async function load() {
   const current = ++generation;
   content.replaceChildren();
+  retry.hidden = true;
+  browse.hidden = true;
   notice(status, "Loading your saved booking…");
+
+  let id;
   try {
-    const id = pageParameters(location.search, ["id"]).get("id");
+    id = pageParameters(location.search, ["id"]).get("id");
     if (!id || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id))
-      throw new Error("Open a valid booking confirmation link.");
+      throw new Error("Invalid booking reference.");
+  } catch {
+    if (current === generation) {
+      notice(status, "This booking link is missing or invalid. Browse sessions to find your booking.", true);
+      browse.hidden = false;
+    }
+    return;
+  }
+
+  try {
     const booking = await request("/api/bookings/" + id);
     if (current !== generation) return;
     const cancelled = booking.status === "cancelled";
@@ -20,8 +35,16 @@ async function load() {
       cancelled ? "This saved booking is cancelled and is not an active reservation. Payments in this course demo are simulated." : "Demo booking saved in SlotDrop. This does not reserve a real studio place or charge a payment.",
     );
   } catch (error) {
-    if (current === generation) notice(status, error.message, true);
+    if (current !== generation) return;
+
+    if (error.status === 400 || error.status === 404) {
+      notice(status, "No booking was found for this reference. Check the link or browse sessions.", true);
+      browse.hidden = false;
+    } else {
+      notice(status, "Your booking receipt could not be loaded right now. Try again shortly.", true);
+      retry.hidden = false;
+    }
   }
 }
-document.querySelector("#retry").addEventListener("click", load);
+retry.addEventListener("click", load);
 load();
