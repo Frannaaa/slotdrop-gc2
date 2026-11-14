@@ -1,6 +1,6 @@
 # GC2 submission gate — teacher brief, not production scope
 
-This checklist follows the Canvas **GC 2: MVP Build** assignment. The saved Canvas header lists November 16 at 11:59 PM, while the embedded brief lists November 9 at 11:59 PM as the final milestone. Confirm the distinction with the instructor. The Git windows are listed separately in the brief.
+This checklist follows the Canvas **GC 2: MVP Build** assignment. The extended submission deadline is **November 16, 2026 at 11:59 PM Philippine time**.
 
 ## Mandatory milestones
 
@@ -8,7 +8,7 @@ This checklist follows the Canvas **GC 2: MVP Build** assignment. The saved Canv
 |---|---|---|
 | Oct 28 CP0 | Repo, reviewed route/schema contracts and business draft | Fran + all |
 | Nov 4 CP1 | **Deployed Browse** gets *database* sessions through **our own JSON API**; list shows results | Kirsten + Fran deploy |
-| Final milestone (Nov 9 in embedded brief) | All 6 customer screens; real persisted simulated booking; Owner booking list + 5 metrics; documentation, challenges and submissions | All |
+| Nov 16, 11:59 PM PHT | All 6 customer screens; real persisted simulated booking; Owner booking list + 5 metrics; documentation, challenges and submissions | All |
 
 Internal Nov 1 first PR and Nov 7 fully connected flow are team targets, not instructor deadlines.
 
@@ -56,8 +56,8 @@ The private reference/demo and `/studios.html` are supporting artifacts. The gra
 
 - [Render course demo](https://slotdrop-gc2-group-zx8j.onrender.com/) serves the merged customer and Owner pages. Run the read-only readiness checks against the exact URL listed in the submission.
 - Review the [challenge evidence](challenges.md) and [measured public baseline](baseline.md). Attach the team’s hand-drawn trace and the outside-group phone walkthrough, then verify that all six individual recordings are accessible from the submission.
-- Verify the final PR reviews and CI before tagging `main` as `gc2-v1.0`. Verify protection settings and instructor access in GitHub. Late merges should be discussed with the instructor for individual window credit.
+- Verify the final PR reviews and CI before tagging `main` as `gc2-v1.0`. Verify protection settings and instructor access in GitHub.
 
 ## Checkpoint and individual evidence
 
-The first reviewed Browse page reached `main` through [PR #62](https://github.com/Frannaaa/slotdrop-gc2/pull/62) on November 12 PHT. Use the instructor’s actual checkpoint record for CP1 credit. The brief lists three individual Git windows, October 14–28, October 29–November 4 and November 5–9. Review each member’s actual authored merges, substantive review links and individual recording separately from the group’s technical score.
+Record each member’s authored merges, substantive reviews and individual recording. [PR #62](https://github.com/Frannaaa/slotdrop-gc2/pull/62) records the Browse integration.

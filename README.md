@@ -89,7 +89,7 @@ Use the [Challenge 1 Postman collection](docs/SlotDrop-GC2-Challenge1.postman_co
 
 ## Submission checklist
 
-See the [GC2 submission gate](docs/gc2-submission-gate.md) and [two-page business summary](docs/SlotDrop_GC2_Summary.pdf). The saved Canvas assignment shows November 16 at 11:59 PM, while the embedded brief lists November 9 as the final milestone. Confirm with the instructor how that difference affects the submission and individual Git windows.
+See the [GC2 submission gate](docs/gc2-submission-gate.md) and [two-page business summary](docs/SlotDrop_GC2_Summary.pdf). The extended submission deadline is **November 16, 2026 at 11:59 PM Philippine time**.
 
 ## Released-seat discovery revision
 

@@ -10,7 +10,7 @@ Evidence for the GC2 challenges (brief section 7). Results from the deployed sit
 |---|---|---|---|
 | [1. Break your own API](#challenge-1--break-your-own-api) | **Complete** on the deployed API | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run | Rerun if the submission URL changes |
 | [2. Trace one real request](#challenge-2--trace-one-real-request) | **Public booking and browser requests captured** | One Checkout POST 201, Confirmation GET 200 and the matching Owner row | Attach the group’s hand-drawn diagram |
-| [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Two clear corrections and one readiness example** | Fran’s cases and Janelle’s source cross-check | Confirm that the health scaffold was considered for production, or replace it with a team-verified AI correction |
+| [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three corrections documented** | Deployed Postman rerun, Owner edit regression, and reviewed catalog rollover regression | |
 | [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | [Passing main CI at `8bdcfcb`](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43354906742). Update if the final release commit changes. |
 | [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
 | [Stretch challenges](#stretch-challenges) | **See individual evidence below** | Timings, double-click result, Browse pagination and Owner utilization | Deployed Checkout 429 wait/retry remains unverified |
@@ -110,13 +110,13 @@ Attach a photo of the group’s hand-drawn request path for booking `7d4843e1-a8
 
 ## Challenge 3 — Overrule the AI
 
-These three cases came from Fran’s implementation work. Janelle cross-checked the Challenge 3 and 4 file references and commission calculations against the code on November 11. Each case links the original work, the check that exposed a problem or limitation, and the correction. The Checkout walkthrough also reproduced a preselected price agreement and a disabled quote refresh. Those changes first appeared alongside Kaitlyn’s Gemini disclosure in [commit cabe9fa](https://github.com/Frannaaa/slotdrop-gc2/commit/cabe9faa449e228c1b005393ea1468f8bc3b676d). The commit only establishes that the code and disclosure were submitted together. Kaitlyn can confirm whether this is a stronger third case and what assistance was involved.
+Fran documented the Postman and Owner cases. The catalog case follows Janelle’s AI disclosure, Kirsten’s review, and the regression tests in the merged follow-up.
 
-| | What the AI gave us | How we noticed | What we did instead |
+| Case | What the AI-assisted version did | How the team caught it | What changed |
 |---|---|---|---|
-| **A** | Claude: a Postman setup script with a hidden `pm.sendRequest` | The first deployed run failed 1 of 15 assertions | Two visible setup requests; the rerun passed 16 of 16 |
-| **B** | ChatGPT: a health route that answers "ok" without touching the database | The route had no database call, so tests with an unreachable database and with missing tables had to return 503 | Production health checks the three tables it needs, and answers 503 without them |
-| **C** | Codex: an Owner edit that sent every field, changed or not | A test in which an older form overwrote a newer pause, seat count and deadline | Send only the fields that were edited |
+| **A. Postman** | A hidden Claude-assisted setup request read the collection’s default host | The first deployed run failed its setup assertion | Two visible setup requests use the active host. The deployed rerun passed 16/16 |
+| **B. Owner edits** | The Codex-assisted editor sent every field in each PATCH | An older form could overwrite a newer pause, capacity and cutoff | The editor sends only the fields the owner changed |
+| **C. Catalog rollover** | The Claude-assisted startup rule counted later starts as available inventory | Kirsten flagged that a session can start later even after bookings close | Startup counts sessions customers can still book. The regressions cover passed cutoffs, pauses and sold-out sessions |
 
 ### A. Claude-assisted Postman setup sent a quote request to localhost
 
@@ -136,23 +136,7 @@ This appears in the [original AI-co-authored implementation, commit 5bb731a](htt
 
 **What changed and why.** We split setup into two normal, visible requests, `00a GET /api/slots?people=2` and `00b GET /api/pricing/quote?slotId=…&quantity=2`, each using the same active `{{baseUrl}}` as the rest of the collection. We also checked the collection for hidden `pm.sendRequest` calls and tested on a different local port. The [correction commit 60b0bb2](https://github.com/Frannaaa/slotdrop-gc2/commit/60b0bb29876ae45d0b30b45e525364d0798c6446) shows the before/after, and [deployed rerun 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) passed **16/16 assertions**. We now use visible setup requests so the test output makes it clear which host supplied the quote.
 
-### B. ChatGPT's early health-check scaffold was not enough for production
-
-**What AI gave us.** In Fran’s **October 27, 2026 ChatGPT discussion**, the assistant proposed this minimal Express health route as part of the starter backend:
-
-```js
-app.get('/api/health', (req, res) =>
-  res.status(200).json({ status: 'ok' })
-);
-```
-
-The assistant explicitly warned that this HTTP-only check **did not yet prove the database worked**. A later starter implementation returned `{status: 'ok', app: 'SlotDrop'}`, still without checking PostgreSQL. The [historical health.js source at commit 0193e98](https://github.com/Frannaaa/slotdrop-gc2/blob/0193e9810f838030dc126b57ed9466111d39c617/server/routes/health.js) preserves the same design. It was appropriate for checking a CP0 Express scaffold, but not for declaring our persisted booking service ready.
-
-**How we verified it.** The endpoint had no database operation, so a running Node server could return **200 OK** even when booking data was inaccessible. This is a **demonstrated test scenario**, not a claim that a real production outage occurred. In [tests/health.test.js](../tests/health.test.js), the production route is exercised with both an unreachable database and a reachable database missing required tables. Those cases must return **503**, and the outage response must not reveal SQL errors or credentials. [Test commit a9f1168](https://github.com/Frannaaa/slotdrop-gc2/commit/a9f1168e7dcd37f6df4891f8ea005ccd1ca1a771) shows the initial failure-path cases; [PR #45](https://github.com/Frannaaa/slotdrop-gc2/pull/45) includes the subsequent table-readiness fix.
-
-**What changed and why.** We kept the simple health behavior for local demo mode but made production health query PostgreSQL for the required `slots`, `services` and `bookings` tables. A failed check now returns `503 {status:'unavailable', app:'SlotDrop'}` without exposing internal error details. The [current production health route](../server/routes/health.js) contains this logic. The production check tests whether the service can reach the tables it needs to serve bookings. The scaffold addressed local HTTP liveness and its limitation was explicit. The later decision was to keep that behavior locally and require database readiness for deployment. This example depends on the team confirming that the starter behavior was considered for production.
-
-### C. Codex's original Owner editor sent fields the user had not changed
+### B. Codex's original Owner editor sent fields the user had not changed
 
 **What AI gave us.** The [original Owner dashboard implementation, commit 6e06dde](https://github.com/Frannaaa/slotdrop-gc2/commit/6e06dde742fcecd028bf4d41f6fdee57633c3899), explicitly states in its then-existing `AI-USAGE.md` that **Codex implemented the Owner workspace**. That commit's `public/js/owner.js` builds the following full-field payload before every edit:
 
@@ -176,7 +160,13 @@ The code was valid syntactically, but the edit request included capacity, status
 
 **What changed and why.** The corrected [`changedOfferFields()` helper](../public/js/owner-policy.js) compares the edit against the original loaded snapshot and submits only changed fields. The [Owner save handler](../public/js/owner.js) uses it before PATCH. The regression verifies the price becomes **₱1,610** while the new pause, capacity **8** and updated deadline remain intact. The fix is [commit f3dcfa6](https://github.com/Frannaaa/slotdrop-gc2/commit/f3dcfa69f6ec0c1614b6ff84fe4c698bf2757828). The [AI-assistance record saved with that commit](https://github.com/Frannaaa/slotdrop-gc2/blob/f3dcfa69f6ec0c1614b6ff84fe4c698bf2757828/AI-USAGE.md), dated October 28, describes this Owner-edit correction as ChatGPT/Codex-assisted and records the reproduced overwrite and the HTTP checks. Sending only changed fields preserves unrelated updates made while an older form is open. This correction does not solve two people changing the *same* field simultaneously, which would require version checks.
 
-**Evidence summary:** The original Postman code and Claude co-authorship are preserved in commit `5bb731a`; the October 27 ChatGPT starter suggestion is supported by the contemporaneous discussion and original `health.js` implementation; the original Codex Owner code and its assistance credit are both preserved in commit `6e06dde`. Each correction has a regression test or a deployed rerun behind it. Every code excerpt, status and result above comes from the linked commits, runs and tests.
+### C. The catalog counted future sessions after booking had closed
+
+**What the AI-assisted version did.** Janelle’s [PR #59 disclosure](https://github.com/Frannaaa/slotdrop-gc2/pull/59) records that Claude drafted the rollover fix and tests. The [merged implementation](https://github.com/Frannaaa/slotdrop-gc2/blob/285ce61ea8cd399194fc038b3b4a96ec305a54d3/server/repositories/reference-catalog.js) treated any session with `starts_at > NOW()` as a reason to skip replenishment for its activity.
+
+**How the team caught it.** Kirsten’s review prompted [PR #71](https://github.com/Frannaaa/slotdrop-gc2/pull/71). The regression puts two sessions 30 and 40 minutes in the future, with both booking cutoffs already past. Browse has zero bookable seats for that activity. We reran that same regression against #59. It returned **0** where the test expected **2**. The regression passed on the merged #71 code, along with the other eight catalog tests.
+
+**What changed.** Janelle replaced the start-time check with a future booking cutoff. After Fran’s review, the count also required open status, confirmation that the session would run, and seats left. The [regressions](../tests/reference-catalog.test.js) confirm that startup adds two bookable sample sessions once, including when existing sessions are paused or sold out. Kirsten reviewed the code and tests before approving #71. The [AI assistance record](../AI-USAGE.md) documents Janelle’s before-and-after checks.
 
 ## Challenge 4 — The owner changes a rule
 
@@ -278,7 +268,7 @@ The 429 arrived on attempt 26 because the Challenge 1 job in the same run had al
 
 | Layer | Protection | Evidence |
 |---|---|---|
-| The page | Checkout disables Submit while saving. A `navigating` flag keeps it disabled until Confirmation loads (`checkout.js:153` in PR #43, [commit 980dab5](https://github.com/Frannaaa/slotdrop-gc2/commit/980dab57523bc7f86f0f20e487d68ab3233eb21d)). | `tests/checkout-browser.test.js`: "successful checkout stays locked while confirmation navigation is pending". [Kirsten's review on 11 November](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5859831151) confirmed the guard. |
+| The page | Checkout disables Submit while saving. A `navigating` flag keeps it disabled until Confirmation loads (`checkout.js:153` in PR #43, [commit 980dab5](https://github.com/Frannaaa/slotdrop-gc2/commit/980dab57523bc7f86f0f20e487d68ab3233eb21d)). | `tests/checkout-browser.test.js` covers the lock during Confirmation navigation. [Kirsten's review on 11 November](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5859831151) confirmed the guard. |
 | The same booking sent twice | Each booking carries one `requestId`. `createBooking()` returns the saved receipt with 200 for an identical retry, and 409 when a key is reused with different details. | `tests/bookings.test.js`: "an identical retry returns the same booking with 200, even after the session closes" and "concurrent identical retries create exactly one booking" |
 | Two customers, last seats | `SELECT … FOR UPDATE` locks the session row (`server/services/bookings.js:99`), so the second booking sees the seats already taken. One gets 201 and the other 409. | `tests/bookings.test.js`: "concurrent bookings for the last seats never oversell". `tests/postgres-locking.test.js` shows the same row lock holding back an Owner seat edit on PostgreSQL in CI. |
 

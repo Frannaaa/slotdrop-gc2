@@ -1,6 +1,6 @@
 # Optional +1 stretch: booking HTTP 429 + safe client wait/retry
 
-**Status:** Fran-owned backend/shared-helper support in a PR, not yet merged, and **not yet wired by Kaitlyn's assigned Checkout page**. This is **not a claimed bonus point**.
+**Status:** the limiter and shared helper are merged through [PR #56](https://github.com/Frannaaa/slotdrop-gc2/pull/56). [PR #43](https://github.com/Frannaaa/slotdrop-gc2/pull/43) wired the helper into Checkout.
 
 ## Backend contract — Group 1 server
 
@@ -17,16 +17,10 @@ Caveats: This is a classroom-grade **single-process** limiter, not a multi-host 
 
 `public/js/customer-common.js` exports **`retryLimitedBooking(path, options, {maxRetries,onWait})`**. It waits only for explicit 429, resends the **same pre-serialized POST body and requestId**, and retries at most once by default. It never automatically retries 400, 409, a timeout, or an uncertain network error. The caller must keep the UI disabled during wait and report progress.
 
-### Kaitlyn-owned integration still needed in PR #43
+## Verification
 
-- Import the helper in Checkout, construct the request body **once**, retaining the same requestId through an uncertain save.
-- Use `retryLimitedBooking('/api/bookings', {method:'POST',body:JSON.stringify(payload)}, {onWait(seconds){ /* show wait text, keep Submit disabled */ }})` for accepted submission.
-- Keep Submit disabled after **successful** save until Confirmation navigation. The existing post-success re-enable bug in #43 remains a separate issue.
-- Show a clear terminal error after one 429 retry fails. Do not silently reissue a booking with a new requestId.
-- Independently verify keyboard/mouse repeat submissions, wait text, 429/Retry-After and one saved receipt/Owner row.
+- The public API returned 429 with `Retry-After: 30` and resumed normal responses after the window.
+- The disposable local browser run showed the Checkout waiting state, sent the same body and request ID after about five seconds, received 201 and displayed one saved receipt.
+- The deployed Checkout wait and whether visitors receive separate counters behind Render’s proxy remain unverified.
 
-### Tests and public evidence
-
-`tests/booking-rate-limit.test.js` exercises valid/error requests, per-IP 429, spoofed `X-Forwarded-For`, unthrottled Owner reads, reset after a fake 10-second clock, exact-idempotent retry, and browser helper wait without sleeping. Actual latest-head CI results must be inspected before claiming pass.
-
-To earn +1, on the **official deployed Group 1 URL** attach a screenshot of the real Network/Postman 429 + Retry-After, the browser waiting/retry, the subsequent success and proof of **one** saved booking. The isolated CI test and private reference app do **not** fulfill this evidence gate.
+See the [request records and screenshots](challenges.md#too-many-requests).

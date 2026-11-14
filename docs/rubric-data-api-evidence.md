@@ -1,16 +1,16 @@
 # GC2 Rubric 2 — Data and API correctness (20 points) + M1 Git gate
 
-**Captain source audit:** November 8, 2026 (Asia/Manila). This report is evidence for the reviewed **PR #45 branch**, **not** a claim that #45 is merged, the complete group frontend is live, or a production restart has occurred on the official deployed group server.
+**Captain source audit:** November 8, 2026 (Asia/Manila). This report preserves the original PR #45 test run. The [public booking trace](challenges.md#challenge-2--trace-one-real-request) and [PR #72 CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43584032537) add current browser and PostgreSQL evidence.
 
 ## Rubric: what has been observed
 
 | Exemplary condition | Real code/tests | Outcome |
 |---|---|---|
-| Real DB behind team's own routes | `server/app.js` routes → services → `server/repositories/database.js`, SQL schema and five tables. `TEST_DATABASE_URL` in CI runs tests with PostgreSQL 16; production Docker+Postgres test uses `DATABASE_URL`. | **Passed in CI**, not yet verified on official deployed URL |
+| Real DB behind team's own routes | `server/app.js` routes → services → `server/repositories/database.js`, SQL schema and five tables. `TEST_DATABASE_URL` in CI runs tests with PostgreSQL 16; production Docker+Postgres test uses `DATABASE_URL`. | **Passed in CI and exercised in the public browser booking** |
 | Each route returns correct status codes | `tests/rubric-data-api.test.js` checks 23 GET/list/quote/unknown/invalid/fallback route cases, plus POST/PATCH validation and status paths. Existing dedicated `tests/*.test.js` cover additional owner, provider, pricing and booking cases. | **Passed; no wrong status found in tested cases**. This is not proof of all theoretical inputs |
 | Server validates and recomputes totals | `server/services/pricing.js` and `server/services/bookings.js` share authoritative pricing; reject browser-supplied price fields (400) and mismatched acknowledged amount (409 PRICE_CHANGED); verify standard/buddy, per-seat fee and total snapshots. | **Passed with real PostgreSQL CI** |
 | Stock/slots change exactly once | POST /api/bookings locks session row, checks free seats, saves booking and recomputes remaining seats from confirmed bookings; identical retry returns same receipt 200. | **Passed**: 4 → 2 for two seats, sold-out returns 409; one-seat smoke 4 → 3 |
-| Confirmation reads by ID | `GET /api/bookings/:id` loads saved DB receipt by UUID (200), malformed ID (400), missing ID (404). `public/js/confirmation.js` in teammate PR #43 calls this API by URL ID. | **Backend passed**; **teammate Confirmation frontend not yet merged on main** |
+| Confirmation reads by ID | `GET /api/bookings/:id` loads saved DB receipt by UUID (200), malformed ID (400), missing ID (404). The merged `public/js/confirmation.js` calls this API by URL ID. | **Passed in CI and the public browser trace** |
 | Survives restart | `tools/check-release.mjs` creates API offer, quotes/saves a real SQL booking in a production Docker container backed by PostgreSQL 16; restarts that container and checks same receipt, replay, seat count, Owner metrics. | **Passed in disposable production-container CI**; official hosted service restart remains unverified |
 
 ### Verified CI run (implementation commit)
@@ -47,15 +47,8 @@ All statuses above are exercised in the specialized rubric test or existing test
 - **Two substantive reviews:** Fran's actual commented [approval of Janelle's quote PR #40](https://github.com/Frannaaa/slotdrop-gc2/pull/40) and [approval of Janelle's booking PR #42](https://github.com/Frannaaa/slotdrop-gc2/pull/42), both with described testing and concrete integration findings.
 - **Two historical merged-work windows:** October 14–28 — #22 merged October 28. October 29–November 4 — #27/#28 merged October 30, #29/#34 merged November 2, #39 merged November 3. **No newly merged window 3 is required for Fran** to meet the 2-of-3 minimum.
 - **Group protected-main:** no direct push was performed during this audit; previous #45 merge was blocked by the required eligible approval. GitHub's branch-protection rule must remain intact.
-- **Main tag:** `gc2-v1.0` is intentionally **not created** while official group flow, reviewed merges and public validation are incomplete.
+- **Main tag:** Apply `gc2-v1.0` to the reviewed release commit.
 
-## Actual remaining acceptance checks (not claimed)
+## Release verification
 
-- [ ] Eligible teammate with **write permission** independently reviews the new current head of PR #45 and approves, then the captain merges it with protected-main rules intact.
-- [ ] After Checkout/Confirmation PR #43 is reviewed and merged, confirm the **deployed** Confirmation page loads the same PostgreSQL saved receipt by URL ID on refresh.
-- [ ] On the **official public Group 1 deployment** (not the private reference-only Render app), run read-only `npm run check:gc2 -- https://GROUP-HOST` and explicitly consent to one fictional POST smoke only after confirming ownership of the group service. Record actual host, date, deployed SHA, status/body screenshots and saved booking ID.
-- [ ] Restart the real group web service **without resetting PostgreSQL** and read the exact same booking ID, price and seats; record actual result. Do not rerun `db:init` on populated data.
-- [ ] Before tagging main, verify that public route/schema documentation exactly matches final code, including any teammate changes; any unverified release/build claims stay marked pending.
-- [ ] Maintain genuine per-member authorship/reviews on protected main and audit committed credentials if any suspicious content appears; the file-name scan alone cannot rule out all leaked secrets.
-
-**Assessment:** Code/data correctness is strongly supported by repeatable green CI; **Exemplary-level public submission evidence is still incomplete** until the official deployment and teammate Confirmation integration are tested.
+The public booking and receipt readback are documented in [Challenges](challenges.md#challenge-2--trace-one-real-request). Production-container restart evidence uses a disposable PostgreSQL database. The final host, tag and outside-group phone walkthrough are tracked in the [submission checklist](gc2-submission-gate.md).
