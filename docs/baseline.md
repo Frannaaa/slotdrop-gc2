@@ -1,16 +1,28 @@
 # Deployed List baseline
 
-Not yet measured. Use the public customer List screen, with the browser cache disabled.
+Measured on 14 November 2026 at 5:16 PM Philippine time on the [deployed Browse page](https://slotdrop-gc2-group-zx8j.onrender.com/browse.html). Render’s [deployment record](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920) confirms that commit `8bdcfcb` was live from 13 November at 10:52 AM PHT.
 
-| Measure | Result | Evidence |
-|---|---|---|
-| URL and deployed commit | Pending | Public URL and commit |
-| Lighthouse mobile Performance | Not measured | Lighthouse report |
-| Lighthouse mobile Accessibility | Not measured | Lighthouse report |
-| Lighthouse mobile Best Practices | Not measured | Lighthouse report |
-| First-load request count | Not measured | Network capture |
-| First-load transfer size | Not measured | Network capture |
-| List-route response time | Not measured | Network or Postman capture |
-| Three known weaknesses, in the team's own words | Pending team review | Brief notes |
+| Measure | Result |
+|---|---:|
+| Lighthouse mobile Performance | 89/100 |
+| Lighthouse mobile Accessibility | 100/100 |
+| Lighthouse mobile Best Practices | 100/100 |
+| First-load requests, cache disabled | 9 |
+| First-load transfer size, cache disabled | 17,057 bytes (16.66 KiB) |
+| List API response time, `GET /api/slots?page=1&limit=6` | 259 ms in the Lighthouse Network trace, HTTP 200 |
 
-Record the date, device/emulation settings and test conditions. Local owner-page results do not replace this baseline.
+[Measurement evidence](evidence/browse-baseline-2026-11-14.json) includes the three scores, emulation settings, and individual request timings and sizes.
+
+## How we measured it
+
+- **Lighthouse 13.6.0**, using its default mobile simulated throttling and 412 × 823 CSS-pixel emulation. Lighthouse reported no runtime errors or warnings. The List API timing is rounded from the observed request start to response completion in its Network trace.
+- **Chromium 153.0.8010.0**, separate first-load Network capture with the cache explicitly disabled. Totals include the page, its assets and both List API requests. Transfer sizes come from Chromium's Network events and include the encoded bytes it recorded.
+- The document request took about 8.55 seconds in the separate Network capture. The previous day's curl sample had a median List API time to first byte of 6.59 seconds. Those runs used different clients and conditions. The 259 ms is one API request in the Lighthouse trace. The 8.55 s is an HTML document request in a separate capture. The measurements do not isolate the cause of the slow page load.
+
+Use this dated public measurement as the comparison point. The separate [PR #77](https://github.com/Frannaaa/slotdrop-gc2/pull/77) comparison used local Chromium with DevTools throttling. If that change ships in the GC2 release, append a second public measurement using the settings above.
+
+## Three weaknesses to check in the Final Project
+
+1. Browse makes a second List API request on a full page just to see whether Next should appear. That adds a round trip before the current results render.
+2. First load can be slow. The document took about 8.55 seconds in this capture, and Lighthouse reported an 11.2-second Speed Index.
+3. The layout shifts as the page settles. Mobile Lighthouse reported a cumulative layout shift of 0.086. Reserving room for the results may help.

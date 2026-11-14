@@ -1,0 +1,211 @@
+{
+  "lighthouse": {
+    "requestedUrl": "https://slotdrop-gc2-group-zx8j.onrender.com/browse.html",
+    "finalDisplayedUrl": "https://slotdrop-gc2-group-zx8j.onrender.com/browse.html",
+    "fetchTime": "2026-11-14T09:16:14.931Z",
+    "lighthouseVersion": "13.6.0",
+    "runtimeError": null,
+    "runWarnings": [],
+    "configSettings": {
+      "formFactor": "mobile",
+      "throttlingMethod": "simulate",
+      "screenEmulation": {
+        "mobile": true,
+        "width": 412,
+        "height": 823,
+        "deviceScaleFactor": 1.75,
+        "disabled": false
+      },
+      "throttling": {
+        "rttMs": 150,
+        "throughputKbps": 1638.4,
+        "requestLatencyMs": 562.5,
+        "downloadThroughputKbps": 1474.5600000000002,
+        "uploadThroughputKbps": 675,
+        "cpuSlowdownMultiplier": 4
+      },
+      "disableStorageReset": false
+    },
+    "scores": {
+      "performance": 89,
+      "accessibility": 100,
+      "best-practices": 100
+    },
+    "metrics": {
+      "first-contentful-paint": {
+        "numericValue": 1008.3300000000002,
+        "numericUnit": "millisecond",
+        "displayValue": "1.0 s"
+      },
+      "largest-contentful-paint": {
+        "numericValue": 1008.3300000000002,
+        "numericUnit": "millisecond",
+        "displayValue": "1.0 s"
+      },
+      "speed-index": {
+        "numericValue": 11164.04802218356,
+        "numericUnit": "millisecond",
+        "displayValue": "11.2 s"
+      },
+      "total-blocking-time": {
+        "numericValue": 35.5,
+        "numericUnit": "millisecond",
+        "displayValue": "40 ms"
+      },
+      "cumulative-layout-shift": {
+        "numericValue": 0.08629333836661987,
+        "numericUnit": "unitless",
+        "displayValue": "0.086"
+      }
+    },
+    "networkRequests": [
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/browse.html",
+        "statusCode": 200,
+        "transferSize": 1247,
+        "cache": "none",
+        "networkRequestTime": 1.4290000000037253,
+        "networkEndTime": 6969.066999999806
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/css/style.css",
+        "statusCode": 200,
+        "transferSize": 3834,
+        "cache": "none",
+        "networkRequestTime": 7004.032000000123,
+        "networkEndTime": 7264.208000000101
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/css/browse.css",
+        "statusCode": 200,
+        "transferSize": 2463,
+        "cache": "none",
+        "networkRequestTime": 7004.262000000104,
+        "networkEndTime": 7307.898000000045
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/css/pagination.css",
+        "statusCode": 200,
+        "transferSize": 346,
+        "cache": "none",
+        "networkRequestTime": 7004.384000000078,
+        "networkEndTime": 7307.177000000142
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/js/browse.js",
+        "statusCode": 200,
+        "transferSize": 1785,
+        "cache": "none",
+        "networkRequestTime": 7004.505000000354,
+        "networkEndTime": 7696.3610000000335
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/js/customer-common.js",
+        "statusCode": 200,
+        "transferSize": 3483,
+        "cache": "none",
+        "networkRequestTime": 7699.514000000432,
+        "networkEndTime": 7961.689000000246
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/js/business-config.js",
+        "statusCode": 200,
+        "transferSize": 204,
+        "cache": "none",
+        "networkRequestTime": 7963.723999999929,
+        "networkEndTime": 8225.391999999993
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/slots?page=1&limit=6",
+        "statusCode": 200,
+        "transferSize": 1960,
+        "cache": "none",
+        "networkRequestTime": 8229.004999999888,
+        "networkEndTime": 8487.604999999981
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/slots?page=2&limit=6",
+        "statusCode": 200,
+        "transferSize": 1706,
+        "cache": "none",
+        "networkRequestTime": 8490.122999999672,
+        "networkEndTime": 8750.93200000003
+      }
+    ]
+  },
+  "cacheDisabledNetwork": {
+    "url": "https://slotdrop-gc2-group-zx8j.onrender.com/browse.html",
+    "date": "2026-11-14T09:16:13.240Z",
+    "chromium": "153.0.8010.0",
+    "viewport": "412 × 823 CSS px",
+    "status": 200,
+    "requests": 9,
+    "bytes": 17057,
+    "records": [
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/browse.html",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 1247,
+        "durationMs": 8550
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/css/style.css",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 3816,
+        "durationMs": 305
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/css/browse.css",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 2482,
+        "durationMs": 259
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/css/pagination.css",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 347,
+        "durationMs": 301
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/js/browse.js",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 1785,
+        "durationMs": 299
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/js/customer-common.js",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 3483,
+        "durationMs": 262
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/js/business-config.js",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 204,
+        "durationMs": 245
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/slots?page=1&limit=6",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 1965,
+        "durationMs": 292
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/slots?page=2&limit=6",
+        "method": "GET",
+        "status": 200,
+        "transferBytes": 1728,
+        "durationMs": 261
+      }
+    ],
+    "cacheDisabled": true
+  }
+}

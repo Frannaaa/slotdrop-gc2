@@ -198,6 +198,7 @@
   font-weight: 700;
 }
 .browse-page .card-art.active { background: linear-gradient(135deg, #e3e9b5 0%, #dcfa63 100%); }
+.browse-page .card-photo { border-radius: 0; }
 .browse-page .card-body { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: .75rem; padding: 1.2rem; }
 .browse-page .card-body > * { margin: 0; }
 .browse-page .card-body .eyebrow { font-size: .68rem; letter-spacing: .12em; }

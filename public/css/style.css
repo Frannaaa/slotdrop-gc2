@@ -206,6 +206,35 @@ label {
   gap: var(--space-sm);
 }
 
+.card-photo {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-clay);
+}
+
+.card-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.card-photo figcaption {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+}
+
+.activity-card .card-photo a {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--color-ink);
+  color: var(--color-white);
+  font-size: 0.72rem;
+}
+
 /* Buddy Tier Badge */
 .badge-buddy {
   background-color: var(--color-lime);
@@ -227,41 +256,6 @@ label {
   border-radius: 12px;
   display: inline-block;
 }
-
-/* hello there! these are your classes and ids:
-
-CSS VARIABLES:
---color-paper
---color-ink
---color-blue
---color-lime
---color-clay 
---font-heading
---font-body 
-
-BUTTONS: 
-.button
-.text-button
-.activity-types 
-
-FORM INPUTS: 
-input[type="text"]
-input[type="number"]
-select
-
-GRIDS AND CARDS:
-.activity-grid 
-.card
-
-BADGES:
-.badge-buddy (this is lime)
-.badge-editorial (this is clay)
-
-SEPARATE IDS:
-#status 
-#status.error
-
-pls enjoy i love you all mwah mwah mwah */
 
 /* Captain integration fix: preserve the native hidden attribute even when a
    shared class (including .button) sets display explicitly. */

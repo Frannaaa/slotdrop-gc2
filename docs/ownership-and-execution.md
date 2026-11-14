@@ -1,5 +1,7 @@
 # Who owns what and how to hand it over
 
+Historical planning notes. See the [current submission checklist](gc2-submission-gate.md) for release status and dates.
+
 Updated 4 November 2026. This is the shared group repository. The private reference is a guide; it does not replace anyone's implementation, testing or review.
 
 | Member | Code and issues | Handoff |
@@ -31,7 +33,7 @@ Database/session #27, offers #28, helper #36, pricing #40, Owner #29, discovery 
 | Nov 1, internal target | Everyone has a first working code PR submitted. |
 | Nov 4, course checkpoint | Deployed Browse loads database sessions through the group's own API. |
 | Nov 7, internal target | Connected Home → Browse → Detail → Selection → Checkout → Confirmation, with the saved booking visible in Owner. |
-| Nov 9, 11:59 PM Philippine time | Final submission, reviewed main tag, two-page business PDF, diagrams/routes/schema, Postman, challenges/baseline and individual recordings. |
+| Extended Canvas deadline | Final submission, reviewed main tag, two-page business PDF, diagrams/routes/schema, Postman, challenges/baseline and individual recordings. |
 
 The three-PR/two-review individual gate and grading windows still apply. Do not count this reference or another member's code as your contribution.
 
@@ -54,7 +56,7 @@ This is a **catalog change, not a claim of new partners**. The existing fictiona
 - **Janelle — quote/booking/receipt (#14–16/#20–21):** the quote and booked seats come from the same slot record under lock, not from /api/activities or published website prices. Return consistent expected-total conflicts and stable-key retries. Public Owner booking lists must omit customer contact data.
 - **Fran — integration (#29/#34/#32/#39):** own reference data, provider-application safety, migrations, integration checks and deployment. The studio application remains pending; its authorization checkbox is not proof of ownership and it never publishes a business page. Review approvals and the latest CI before merging dependent PRs.
 
-Current review order: Home #35 is already merged; Kaitlyn reviews Detail/Selection #41; Kat reviews Checkout/Confirmation #43 and business #37; Janelle reviews cleanup #45. Recheck page branches against current main before integration; preserve their assigned implementations. Fran handles reviewed merges and deployment. CSS/Browse publication remains the November 4 checkpoint blocker. Internal targets: October 30 styling/layouts; November 1 first code PRs; November 4 deployed API-backed Browse; November 7 complete connected flow; November 9, 11:59 PM PHT final submission.
+Current review order: Home #35 is already merged; Kaitlyn reviews Detail/Selection #41; Kat reviews Checkout/Confirmation #43 and business #37; Janelle reviews cleanup #45. Recheck page branches against current main before integration; preserve their assigned implementations. Fran handles reviewed merges and deployment. CSS/Browse publication remains the November 4 checkpoint blocker. Internal targets: October 30 styling/layouts; November 1 first code PRs; November 4 deployed API-backed Browse; November 7 complete connected flow; final submission on the extended Canvas deadline.
 
 ## November 4 shared styling handoff
 
@@ -73,7 +75,7 @@ Both decide whether the evidence supports the launch premise. Proposed interview
 
 Before a real pilot, require a willing provider, one dated confirmed-to-run session, an agreed dedicated allocation, verified price/inclusions/deadline and a positive provider contribution after marginal costs. These are proposed go/no-go checks, not completed results. If the evidence fails, change the offer or supplier scope; do not convert unknowns into favorable claims.
 
-Course handoff: Oct 30 shared styling/layout and business review; Nov 1 first working code PR target; Nov 4 deployed database-backed Browse checkpoint; Nov 7 internal connected-flow target; Nov 9 final submission at 11:59 PM Philippine time. Oct 30, Nov 1 and Nov 7 are internal targets. Nov 4 and Nov 9 are course checkpoints.
+Course handoff: Oct 30 shared styling/layout and business review; Nov 1 first working code PR target; Nov 4 deployed database-backed Browse checkpoint; Nov 7 internal connected-flow target; final submission on the extended Canvas deadline. Oct 30, Nov 1 and Nov 7 are internal targets. Nov 4 is the course checkpoint.
 
 Submit substantive docs/business.md plus the required concise business-summary PDF; this research Doc and the brand book serve different purposes. Documentation-only PRs do not count as a member’s three code PRs. Preserve specific real reviews and merges across the grading windows. Kat’s completed research and the group’s reasoning still need their authors’ confirmation; no interview, profitability or submission approval is implied.
 

@@ -2,20 +2,17 @@
 // A fresh sample seed expires; never silently recreate offers or reset receipts.
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DISCOVERY_HOURS } from '../public/js/business-config.js';
+import { withinBookingWindow } from '../public/js/business-config.js';
 
 export function assessSlots(slots, now = Date.now()) {
   if (!Array.isArray(slots)) throw new Error('Expected an array from GET /api/slots.');
   const usable = slots.filter(slot =>
     slot && slot.serviceActive === true && slot.status === 'open' &&
     slot.runsAsScheduled === true && Number(slot.remainingSeats) >= 1 &&
-    Number.isFinite(Date.parse(slot.startsAt)) &&
-    Date.parse(slot.startsAt) > now &&
-    Date.parse(slot.startsAt) < now + DISCOVERY_HOURS * 3600000 &&
-    Number.isFinite(Date.parse(slot.bookingClosesAt)) &&
-    Date.parse(slot.bookingClosesAt) > now
+    withinBookingWindow(slot, now)
   );
-  const lastCutoff = usable.length ? Math.max(...usable.map(slot => Date.parse(slot.bookingClosesAt))) : null;
+  const lastCutoff = usable.length && !usable.some(slot => slot.bookingClosesAt === null)
+    ? Math.max(...usable.map(slot => Date.parse(slot.bookingClosesAt))) : null;
   return {
     bookableSessions: usable.length,
     businessCount: new Set(usable.map(slot => slot.providerId)).size,
@@ -38,7 +35,8 @@ async function main() {
     console.error('NOT READY: no bookable demo sessions. Create new FUTURE sample offers through Owner; do not reseed or modify old receipts.');
     process.exitCode = 1;
   } else {
-    console.log(`Latest demo booking cutoff: ${new Date(report.lastCutoff).toLocaleString('en-PH', {timeZone:'Asia/Manila', dateStyle:'medium', timeStyle:'short'})} PHT.`);
+    if (report.lastCutoff === null) console.log('Bookable practice inventory has no cutoff.');
+    else console.log(`Latest demo booking cutoff: ${new Date(report.lastCutoff).toLocaleString('en-PH', {timeZone:'Asia/Manila', dateStyle:'medium', timeStyle:'short'})} PHT.`);
     if (report.lessThanOneDayLeft) console.warn('WARNING: every currently bookable session closes within 24 hours. Prepare NEW sample offers for the next demo.');
   }
 }

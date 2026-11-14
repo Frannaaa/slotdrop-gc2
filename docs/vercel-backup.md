@@ -45,7 +45,7 @@ Run `npm run check:gc2 -- https://YOUR-VERCEL-URL` after the full frontend merge
 
 ## Diagnosing failures
 
-- **404 on `/browse.html` or `/checkout.html`:** these teammate pages are not yet in the deployed commit; merge and redeploy the approved UI PRs. It is *not* a Neon connection problem.
+- **404 on `/browse.html` or `/checkout.html`:** check the deployed commit and static routing. The group’s reviewed Browse and Checkout pages are already in `main`.
 - **404 on `/api/slots`:** check that `index.js` and `vercel.json` are in the *deployed* Git commit, Framework Preset = Express, Root Directory = repo root, and that no custom rewrite is overwriting the original API path.
 - **503 on `/api/health`:** inspect Vercel Function logs, ensure `DATABASE_URL` is configured for the right environment with the correct Neon DB/pooler host, and check Neon connectivity/schema. Do **not** reset a populated database. Vercel startup errors intentionally hide credentials.
 - **500 / `FUNCTION_INVOCATION_FAILED`:** inspect Functions logs for missing SQL/JSON bundle files, Node runtime errors, or startup timeouts. The function bundle includes `db/**` and `public/data/**` in `vercel.json`.

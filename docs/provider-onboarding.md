@@ -29,7 +29,7 @@ An authorization checkbox records an attestation; it is not proof. A new applica
 
 Current reference activities: Laro mug/wheel, Bumi mug/free-form, AMT handbuilding/wheel, Sip & Gogh Century Mall painting, Tahanan exploratory wheel. Core Pilates remains research-only because its exact timetable and class duration have not been verified. A published weekly pattern is not a confirmed seat. Sample standard offers are 90% of the published reference price; enabled buddy offers are 95% of that standard rate. These are classroom model values, not studio-approved discounts. All sample allocated capacities and booking lead times are invented for the simulation and labelled accordingly.
 
-Existing synthetic provider names and their receipts are never changed into real-company transactions. Known old fixture services are retired from new customer discovery; historical records remain. Startup creates first allocations once and never shifts dates or replenishes sold seats. Create new future offers through Owner when samples expire.
+Known old fixtures are retired from discovery and kept for receipt history. Startup can add fresh scheduled allocations and two undated practice offers. Each offer keeps its own seat allocation and existing bookings. See the [workshop photo sources](workshop-photos.md) for the card images.
 
 ## Verification
 

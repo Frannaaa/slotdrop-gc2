@@ -1,0 +1,25 @@
+{
+  "method": "GET",
+  "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/bookings/84bba718-430e-4dca-9676-9764a36bf018",
+  "status": 200,
+  "capture": "Separate HTTP receipt readback after the browser booking",
+  "response": {
+    "id": "84bba718-430e-4dca-9676-9764a36bf018",
+    "slotId": 18,
+    "quantity": 1,
+    "paymentMethod": "pay_on_site",
+    "status": "confirmed",
+    "serviceName": "Mug-making + painting",
+    "providerName": "Laro Ceramics",
+    "sessionStartsAt": "2026-11-13T02:00:00.000Z",
+    "originalUnitPriceCentavos": 300000,
+    "offerUnitPriceCentavos": 270000,
+    "unitPriceCentavos": 270000,
+    "pricingType": "standard",
+    "commissionBasisPoints": 1000,
+    "totalPriceCentavos": 270000,
+    "platformFeeCentavos": 27000,
+    "providerPayoutCentavos": 243000,
+    "createdAt": "2026-11-12T13:41:02.376Z"
+  }
+}

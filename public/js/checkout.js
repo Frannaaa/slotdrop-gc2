@@ -51,10 +51,10 @@ async function load() {
 
   const current = ++generation;
   quote = null;
-  button.disabled = false;
-  ack.checked = true;
+  button.disabled = true;
+  ack.checked = false;
   ack.disabled = true;
-  retry.disabled=true;
+  retry.disabled = true;
   summary.textContent = "";
 
   notice(status, "Checking session and price…");
@@ -85,6 +85,8 @@ async function load() {
     quote = null;
     notice(status, error.message, true);
     notice(document.querySelector("#chosenSession"), error.message, true);
+  } finally {
+    if (current === generation) retry.disabled = false;
   }
 }
 

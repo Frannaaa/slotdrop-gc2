@@ -1,222 +1,322 @@
-# SlotDrop | Challenges and test evidence [case 1](evidence/challenge1-deployed/01-zero-quantity.jpg) | [case 2](evidence/challenge1-deployed/02-fake-total.jpg) | [case 3](evidence/challenge1-deployed/03-more-seats-than-available.jpg) | [case 4](evidence/challenge1-deployed/04-unknown-session.jpg) | [case 5](evidence/challenge1-deployed/05-missing-customer-name.jpg) | [case 6](evidence/challenge1-deployed/06-search-no-matches.jpg) |
+# SlotDrop | Challenges and Evidence
 
-This record separates repeatable test results from the evidence required on the final deployed group application. Actual request/response captures and group-authored explanations are retained with dates, while earlier integration notes are kept in [historical handoffs](ownership-and-execution.md).
+Evidence for the GC2 challenges (brief section 7). Results from the deployed site are kept apart from local and CI test runs. All sessions, seats, prices, payments and bookings are simulated, and test requests use fictional guest details.
 
-**Latest automated verification (November 8):** [PR #37 GitHub Actions run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) passed **104 of 104 tests**, including the exported six-case Postman request contract and response assertions. This proves the tested code in CI, **not** that the six cases have been captured in Postman against the public Render URL. Challenge 1 deployed screenshots, Challenge 2 Network/hand-drawn evidence, Challenge 3 group-authored provenance, Challenge 4 group interpretation and all Challenge 5 individual recordings remain separate requirements.
+**Deployed site:** https://slotdrop-gc2-group-zx8j.onrender.com (Render service `slotdrop-gc2-group-zx8j`, branch `main`)
 
-## Earlier Owner/API checks (October 27–28)
+## Evidence status
 
-These results cover Fran's owner build. They do not complete the deployed customer-booking challenges.
+| Challenge | Status | Evidence here | Still needed |
+|---|---|---|---|
+| [1. Break your own API](#challenge-1--break-your-own-api) | **Complete** on the deployed API | Six Postman Desktop case screenshots, setup captures and a separate deployed Newman run | Rerun if the submission URL changes |
+| [2. Trace one real request](#challenge-2--trace-one-real-request) | **Public booking and browser requests captured** | One Checkout POST 201, Confirmation GET 200 and the matching Owner row | Attach the group’s hand-drawn diagram |
+| [3. Overrule the AI](#challenge-3--overrule-the-ai) | **Three corrections documented** | Deployed Postman rerun, Owner edit regression, and reviewed catalog rollover regression | |
+| [4. The owner changes a rule](#challenge-4--the-owner-changes-a-rule) | **Explanation and local verification recorded** | One setting, the fee calculation, and a 10% to 12% restart check | [Passing main CI at `8bdcfcb`](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43354906742). Update if the final release commit changes. |
+| [5. Predict, then run](#challenge-5--predict-then-run) | **Individual** | | Each member's predictions and recording |
+| [Stretch challenges](#stretch-challenges) | **Evidence for all five** | Double-click, pagination, Checkout retry, Owner utilization and parallel loading | Verify the Render client-IP change after deploy |
 
-| Check | Result | Record |
-|---|---|---|
-| Node 22 + PostgreSQL 16 | 20 tests passed; no failures or skips | [CI, commit 35ebe839](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40556533287) |
-| Local syntax and tests | Passed; 19 tests passed, one PostgreSQL-only test skipped | Local PGlite run, October 28 |
-| SQL constraints and seed | Eight scenario groups passed | tools/check-sql.mjs |
-| Production container | Build, database initialization and restart persistence passed | Same CI run |
-| Postman, October 27 | 21 requests and 26 assertions passed | [Recorded local run](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/evidence/fran-api-local.json) |
-| Postman, October 28 | 21 requests and 27 assertions passed; serviceId override used activity 4 and its 30-minute cutoff | [Repository review record](https://github.com/Frannaaa/slotdrop-gc2/blob/g1/m1-owner-workspace/docs/evidence/repository-review-2026-10-28.json) |
-| Owner browser checks | Phone/desktop layout, save, pause, unchanged form and outage recovery passed | Disposable fictional database, October 28 |
+## Challenge 1 — Break your own API
 
-The restart test creates a session through the API and inserts a fictional receipt fixture directly. Both survive the Node-container restart; owner seats and metrics still match. It does not test the unimplemented customer booking endpoint.
+**Result: all six cases answered as expected on the deployed API.**
 
-The [Postman collection](SlotDrop-Fran.postman_collection.json) covers the implemented APIs. The recorded October 27 result belongs to that version of the collection.
+| | |
+|---|---|
+| **Collection** | [SlotDrop-GC2-Challenge1.postman_collection.json](SlotDrop-GC2-Challenge1.postman_collection.json) |
+| **Target** | The deployed site above, commit `96d4a31` |
+| **When** | 8 November 2026, 07:45 UTC |
+| **Run** | [GitHub Actions run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586), Newman 6.2.1, 16 of 16 assertions passed |
 
-## 1. Break the deployed booking API
+### The six requests
 
-**Deployed result: all six cases answered as expected.** The [Challenge 1 collection](SlotDrop-GC2-Challenge1.postman_collection.json) ran with Newman 6.2.1 from GitHub Actions against the official deployment, `https://slotdrop-gc2-group-zx8j.onrender.com` (Render service `slotdrop-gc2-group-zx8j`, deployed commit `96d4a31`), on 2026-11-08 at 07:45 UTC. [Run 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) shows every request body, status and response in its job summary; 16/16 assertions passed.
+| # | Request sent | Expected | Status and response we got | Newman time | Newman screenshot | Postman Desktop |
+|---|---|---|---|---:|---|---|
+| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms | [case 1](evidence/challenge1-deployed/01-zero-quantity.jpg) | [Case 1](evidence/challenge1-postman/01-zero-quantity.png) |
+| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server's total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms | [case 2](evidence/challenge1-deployed/02-fake-total.jpg) | [Case 2](evidence/challenge1-postman/02-client-total.png) |
+| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms | [case 3](evidence/challenge1-deployed/03-more-seats-than-available.jpg) | [Case 3](evidence/challenge1-postman/03-over-capacity.png) |
+| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms | [case 4](evidence/challenge1-deployed/04-unknown-session.jpg) | [Case 4](evidence/challenge1-postman/04-unknown-session.png) |
+| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms | [case 5](evidence/challenge1-deployed/05-missing-customer-name.jpg) | [Case 5](evidence/challenge1-postman/05-missing-name.png) |
+| 6 | `GET /api/slots?q=zzzz-no-match` | 200 with an empty list | **200** `[]` | 246 ms | [case 6](evidence/challenge1-deployed/06-search-no-matches.jpg) | [Case 6](evidence/challenge1-postman/06-empty-search.png) |
 
-Requests 00a and 00b are read-only setup. 00a picked session 1 (Laro Ceramics, Mug-making + painting, 4 of 4 seats left) and 00b fetched the server's two-seat buddy quote, ₱5,130.00 (`513000` centavos). None of the requests creates a booking: `GET /api/metrics` showed `bookingCount: 0` and `GET /api/bookings` returned `[]` in the same run.
+More screenshots from the Newman run: [the four read endpoints](evidence/challenge1-deployed/00-endpoints.jpg) and [the setup quote](evidence/challenge1-deployed/00-setup-session-and-quote.jpg).
 
-| # | Request sent to the deployed API | Expected | Actual status and response | Time | Screenshot |
-|---|---|---|---|---:|---|
-| 1 | `POST /api/bookings` with `"quantity": 0` | 400 | **400** `INVALID_INPUT` "quantity is outside the allowed range." | 241 ms |
-| 2 | `POST /api/bookings` with an extra `"total": 1` | 400, or saved with the server total | **400** `INVALID_INPUT` "Unsupported field: total" | 254 ms |
-| 3 | `POST /api/bookings` for 5 seats when 4 are left | 409 | **409** `SLOT_UNAVAILABLE` "Only 4 seats are left for this session." | 257 ms |
-| 4 | `POST /api/bookings` with `"slotId": 100016` (no such session) | 404 | **404** `SLOT_NOT_FOUND` "Session not found." | 254 ms |
-| 5 | `POST /api/bookings` without `customerName` | 400 | **400** `INVALID_INPUT` "Provide customerName." | 245 ms |
-| 6 | `GET /api/slots?q=zzzz-no-match` | 200 and an empty list | **200** `[]` | 246 ms |
+### How the requests were built
 
-Screenshots of the same run: [the four read endpoints](evidence/challenge1-deployed/00-endpoints.jpg) and [the setup quote](evidence/challenge1-deployed/00-setup-session-and-quote.jpg). They were captured from the run's GitHub job summary, which shows the request body, status line, response JSON and assertions for each case. Long one-line responses for cases 1 and 3 are cut off at the right edge of the picture; the full text is in the table above and in the run.
+- Two read-only setup requests run first. **00a** picked session 1 (Laro Ceramics, mug-making + painting, 4 of 4 seats left). **00b** fetched the server's price for two seats: ₱5,130.00 (`513000` centavos).
+- Each POST sent a new `requestId`, fictional guest details (`GC2 QA`, `qa@example.com`), `paymentMethod: "mock_card"` and the server's `expectedTotalCentavos`. Only the field named in the table was changed.
+- No booking was created. In the same run, `GET /api/metrics` showed `bookingCount: 0` and `GET /api/bookings` returned `[]`.
 
-Every POST also carried a fresh `requestId`, fictional guest details (`GC2 QA`, `qa@example.com`), `paymentMethod: "mock_card"` and the server's `expectedTotalCentavos`; only the listed field changed.
+### Note on case 2
 
-Case 2: the server rejects any field it does not expect, so a browser cannot even send its own total. A *different* case, a stale `expectedTotalCentavos`, returns `409 PRICE_CHANGED` with a fresh quote; that is the "ask again when the price changes" rule, not this test.
+The server rejects any field it does not expect, so the browser cannot send its own total at all. A different situation, an out-of-date `expectedTotalCentavos`, returns `409 PRICE_CHANGED` with a fresh quote. That is the "ask again when the price changes" rule, not this test.
 
-**First-attempt failure, found and fixed.** The [first deployed run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436) passed all six cases but failed 1 of 15 assertions: the setup request fetched its quote from `localhost`, the collection's default URL, instead of the deployment, because it read `baseUrl` from the collection variables rather than the value supplied for the run. The six cases still answered correctly because their failure conditions do not depend on the total, but they sent a stale `expectedTotalCentavos` of `304000`. The earlier local run had missed this because both URLs were `localhost:3000`. The fix split the setup into two visible requests (00a session, 00b quote) and added a test that the collection contains no hidden `pm.sendRequest` calls; it was rechecked locally on a different port before the passing deployed rerun.
+### What failed the first time, and what we changed
 
-**How this was run.** The laptop used for this work could not open the Render URL (its connection stalled during the TLS handshake, and Render's logs showed no incoming requests), while GitHub's network reached it normally. [.github/workflows/deployed-challenge1.yml](../.github/workflows/deployed-challenge1.yml) therefore wakes the service, records the four read endpoints and runs the collection. The run's `challenge1-deployed-evidence` artifact holds the full Newman JSON. To rerun it in the Postman app, import the collection, set `baseUrl` to the URL above and run the folder in order.
+| | |
+|---|---|
+| **What happened** | The [first deployed run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436) failed 1 of 15 assertions. The six cases answered correctly, but the setup request fetched its quote from `localhost` instead of the deployed site. |
+| **Why** | The setup script read `baseUrl` from the collection's saved variables, not from the value given for the run. So the six cases sent an out-of-date `expectedTotalCentavos` of `304000`. They still passed because none of them depends on the total. |
+| **Why we missed it locally** | In the local run, both addresses were `localhost:3000`, so the mistake had no effect. |
+| **What we changed** | Split the setup into two visible requests (00a session, 00b quote), and added a test that the collection has no hidden `pm.sendRequest` calls. We rechecked on a different local port, then reran on the deployed site and passed 16 of 16. |
 
-## 2. Trace a real request
+### How this was run
 
-**Status:** cannot be recorded on the live site yet. Browse (#60, #62, #63, #64) and Checkout/Confirmation (#43) are not merged, so the deployed site has no Checkout page to place an order from. Merged together locally on top of `main`, all six customer pages are present and the test suite passes apart from the three Windows line-ending tests fixed by #58.
+**Postman Desktop, 10 November.** We ran all six cases against the Render URL above. All 12 case assertions passed. The case screenshots show the request and response, with the host represented by `{{baseUrl}}`. The [health check](evidence/challenge1-postman/health.png) shows the full deployed URL. The [session setup](evidence/challenge1-postman/00a-session-setup.png), [quote setup](evidence/challenge1-postman/00b-quote-setup.png) and [inventory capture](evidence/challenge1-postman/inventory.png) show the session and quote used for the run.
 
-When they are deployed, record one fictional booking with DevTools → Network open: the `POST /api/bookings` request (method, URL, request body, status 201, response) and the `GET /api/bookings/:id` that Confirmation sends. Save the screenshots in `docs/evidence/challenge2/` and add the booking ID here. Seeded sessions start on 9 November and do not renew, so merge #59 or add a future session on the Owner screen first.
+**Newman on GitHub Actions, 8 November.** The laptop could not reach Render during that earlier attempt. The [deployed workflow](../.github/workflows/deployed-challenge1.yml) reached the service from GitHub and produced the job-summary screenshots. The complete responses are in the workflow's `challenge1-deployed-evidence` artifact.
 
-**Every hop, by file and function** (line numbers on `main` 96d4a31 and Kaitlyn's #43 branch):
+To repeat the Desktop run, import the collection, set `baseUrl` to the submitted deployment URL, and run the folder in order.
+
+## Challenge 2 — Trace one real request
+
+**Public browser run, 14 November at 6:07 PM PHT.** Chromium at 390 × 844 followed Home → Browse → Detail → Selection → Checkout → Confirmation, then opened Owner. One Checkout double-click sent **one booking POST**, saved one fictional standard seat for **₱2,700**, and produced reference `7d4843e1-a85a-4b6c-bc4e-f0ef4017909d`. Confirmation and exactly one Owner row show that reference. The browser reported no Console errors during this run.
+
+| Browser step | Method and URL | Request | Result |
+|---|---|---|---|
+| Checkout | `POST /api/bookings` | Slot 34, quantity 1, fictional contact fields, simulated on-site payment, accepted total `270000` centavos and a generated request ID | **201** with the saved receipt. Fee ₱270. |
+| Confirmation | `GET /api/bookings/7d4843e1-a85a-4b6c-bc4e-f0ef4017909d` | Booking ID in the URL | **200**, with the same receipt JSON as the POST |
+| Owner | `GET /api/bookings`, `GET /api/owner/catalog`, `GET /api/metrics` | Read-only | One matching row. The browser also requested both source routes for utilization. |
+
+[Browser Network capture with full URLs, request body and both responses](evidence/challenge2-final/browser-network.json) · [Confirmation](evidence/challenge2-final/confirmation.jpg) · [Owner row](evidence/challenge2-final/owner.jpg)
+
+The browser hook forwarded the actual Checkout POST to Render and recorded the response before returning it to Checkout, so navigation could not discard the response body. The Confirmation GET was observed during normal browser navigation. [Render deployment record](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920) identifies `8bdcfcb` as the deployed build. This run used automatic phone-width emulation.
+
+**Earlier live booking, 12 November at 21:41 PHT.** One double-click on Checkout using fictional details produced a saved one-seat booking for ₱2,700. The reference `84bba718-430e-4dca-9676-9764a36bf018` appears in [Confirmation](evidence/challenge2/confirmation.jpg) and in one [Owner booking row](evidence/challenge2/owner-booking.jpg). A separate read-only `GET /api/bookings/:id` returned HTTP 200 and the same saved receipt. [HTTP receipt record](evidence/challenge2/receipt-get.json). The Checkout POST request/response and Confirmation GET were not recorded in a browser Network panel during this run.
+
+**Persistence check, 14 November.** The 12 November receipt still returned HTTP 200 after the [13 November Render deployment](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920). Its JSON matched the archived [12 November response](evidence/challenge2/receipt-get.json) field for field.
+
+### Every hop, by file and function
+
+Line numbers below refer to the traced [deployment commit `8bdcfcb`](https://github.com/Frannaaa/slotdrop-gc2/tree/8bdcfcbd3e24b58e70bdac48effb017146112fcb).
 
 | Hop | File and function | What happens |
 |---|---|---|
-| Button handler | `public/js/checkout.js:74`, the form's `submit` listener | Stops if busy, unacknowledged or invalid; builds `{requestId, slotId, quantity, customerName, customerEmail, paymentMethod, expectedTotalCentavos}` with a new `crypto.randomUUID()`; disables the button |
-| Request | `public/js/checkout.js:101` → `request()` in `public/js/customer-common.js:46` | `fetch` with JSON headers and a 15 s timeout; non-2xx becomes an error carrying the API's `code` |
-| Route | `server/app.js:28` `bookingRateLimiter`, then `server/app.js:29` `bookingRouter`; `server/routes/bookings.js:7` | The limiter allows 30 POSTs per minute; the route calls `createBooking(db, req.body, clock)` |
-| Validation | `bookingRequest()` in `server/services/bookings.js:39`, using `object()` and `integer()` from `server/lib/validation.js` | Rejects unknown fields (such as `total`), checks each field's type and range → 400 `INVALID_INPUT` |
-| Database statements | `createBooking()` in `server/services/bookings.js:91`, one transaction | Looks up the `requestId` (a retry returns the saved receipt) → `SELECT id FROM slots WHERE id=$1 FOR UPDATE` (line 99) locks the session → re-reads it (line 104) → `checkBookable()` in `server/services/pricing.js:8` rejects closed or full sessions (409) → `priceQuote()` (`pricing.js:22`, called at line 109) recomputes the price, tier and commission → compares with `expectedTotalCentavos` (409 `PRICE_CHANGED` if different) → `INSERT INTO bookings …` (line 114) → re-reads the receipt (line 121) → `COMMIT` |
-| Response | `server/routes/bookings.js:9`, shaped by `receiptResponse()` (`bookings.js:56`) | 201 with the saved receipt (200 for an identical retry) |
-| What renders | `public/js/checkout.js:106` goes to `/confirmation.html?id=…`; `load()` in `public/js/confirmation.js:6` calls `GET /api/bookings/:id` (line 14) → `server/routes/bookings.js:11` → `findReceipt()` (`bookings.js:134`) | Confirmation shows the reference, seats, price per person, saved total and payment choice read back from PostgreSQL |
+| **Button handler** | `public/js/checkout.js:95`, the form's `submit` listener | Stops if the form is busy, already navigating, not accepted, or invalid. Builds `{requestId, slotId, quantity, customerName, customerEmail, paymentMethod, expectedTotalCentavos}` with a new `crypto.randomUUID()` (line 110) and disables the button. |
+| **Request** | `checkout.js:139` → `retryLimitedBooking()` in `public/js/customer-common.js:87` → `request()` at line 46 | `fetch` with JSON headers and a 15-second timeout. A 429 is retried once with the same body. Any other failure becomes an error carrying the API's `code`. |
+| **Route** | `server/app.js:28` `bookingRateLimiter`, then `server/app.js:29` `bookingRouter`; `server/routes/bookings.js:7` | The limiter allows 30 booking POSTs a minute. The route calls `createBooking(db, req.body, clock)`. |
+| **Validation** | `bookingRequest()` in `server/services/bookings.js:39` | Rejects unknown fields such as `total`, and checks each field's type and range. Failure → 400 `INVALID_INPUT`. |
+| **Database statements** | `createBooking()` in `server/services/bookings.js:91`, one transaction | 1. Looks up the `requestId`; a retry gets the saved receipt back. 2. `SELECT id FROM slots WHERE id=$1 FOR UPDATE` (line 99) locks the session. 3. Reads the session again (line 104). 4. `checkBookable()` (`server/services/pricing.js:8`, called at line 107) refuses a closed or full session with 409. 5. `priceQuote()` (`pricing.js:22`, called at line 109) recomputes the price, tier and commission. 6. Compares with `expectedTotalCentavos`; a difference → 409 `PRICE_CHANGED` (line 111). 7. `INSERT INTO bookings …` (line 114). 8. Reads the receipt back (line 121) and commits. |
+| **Response** | `server/routes/bookings.js:9`, shaped by `receiptResponse()` (`bookings.js:56`) | 201 with the saved receipt, or 200 for an identical retry. |
+| **What renders** | `checkout.js:153` sets `navigating`, which keeps Submit disabled, and line 159 goes to `/confirmation.html?id=…`. `load()` in `public/js/confirmation.js:6` calls `GET /api/bookings/:id` (line 14) → `server/routes/bookings.js:11` → `findReceipt()` (`bookings.js:134`) | Confirmation (line 17) shows the booking reference, seats, price per person, saved total and payment choice, read back from PostgreSQL. |
 
-Seats are never stored as a counter: remaining seats are capacity minus the confirmed bookings, so saving the row is what makes the seat unavailable.
+An independent check follows the trip: `load()` in `public/js/owner.js` reads `GET /api/bookings` and `GET /api/metrics`, so the Owner screen shows the saved booking and the five numbers without relying on the customer's page.
 
-**Still needed from the group:** the Network screenshots from the live site and the hand-drawn diagram (a photo is fine).
+Seats are not stored as a counter. Seats left = released seats − confirmed bookings, so saving the booking row is what makes the seats unavailable.
 
-## 3. Debugging record
+### Why the request is built this way
 
-| Problem | How it was found | Fix and coverage |
+**Why the order matters.** Showing a quote does not reserve a seat. Booking locks the session row and rechecks the seats and the agreed total inside the same database transaction. Otherwise two customers could both be told the last seat is free. The booking ID and the saved prices stay in PostgreSQL, so refreshing Confirmation reads the saved result even if the offer is edited later. The public receipt leaves out private contact details and the request key.
+
+### Hand-drawn trace
+
+Attach a photo of the group’s hand-drawn request path for booking `7d4843e1-a85a-4b6c-bc4e-f0ef4017909d`. Use the actual hops above, from Checkout’s submit handler through the row lock and saved receipt to the Confirmation fetch and render. [System architecture](system.md) is the separate repository diagram.
+
+## Challenge 3 — Overrule the AI
+
+Fran documented the Postman and Owner cases. The catalog case follows Janelle’s AI disclosure, Kirsten’s review, and the regression tests in the merged follow-up.
+
+| Case | What the AI-assisted version did | How the team caught it | What changed |
+|---|---|---|---|
+| **A. Postman** | A hidden Claude-assisted setup request read the collection’s default host | The first deployed run failed its setup assertion | Two visible setup requests use the active host. The deployed rerun passed 16/16 |
+| **B. Owner edits** | The Codex-assisted editor sent every field in each PATCH | An older form could overwrite a newer pause, capacity and cutoff | The editor sends only the fields the owner changed |
+| **C. Catalog rollover** | The Claude-assisted startup rule counted later starts as available inventory | Kirsten flagged that a session can start later even after bookings close | Startup counts sessions customers can still book. The regressions cover passed cutoffs, pauses and sold-out sessions |
+
+### A. Claude-assisted Postman setup sent a quote request to localhost
+
+**What AI gave us.** The Claude-co-authored collection combined session selection and a hidden pricing request inside a Postman test script:
+
+```js
+pm.sendRequest(
+  pm.collectionVariables.get("baseUrl") +
+    "/api/pricing/quote?slotId=" + slot.id + "&quantity=2",
+  (error, response) => { /* store expectedTotalCentavos */ }
+);
+```
+
+This appears in the [original AI-co-authored implementation, commit 5bb731a](https://github.com/Frannaaa/slotdrop-gc2/commit/5bb731a3979dbd91bc799639d9ca747a82f51de9), whose message includes `Co-Authored-By: Claude Opus 5.5`. It looked convenient because one setup request populated all six cases, but it read the collection's default `baseUrl` (`http://localhost:3000`) instead of the deployed run's environment URL.
+
+**How we verified it.** In the [first official deployed Newman run 42459905436](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436), the six negative cases returned their expected statuses but the setup failed one assertion: **14/15 passed**. The total stayed at **304000 centavos** instead of the deployed session quote of **513000 centavos**. Local testing had not exposed the bug because the default host was also localhost.
+
+**What changed and why.** We split setup into two normal, visible requests, `00a GET /api/slots?people=2` and `00b GET /api/pricing/quote?slotId=…&quantity=2`, each using the same active `{{baseUrl}}` as the rest of the collection. We also checked the collection for hidden `pm.sendRequest` calls and tested on a different local port. The [correction commit 60b0bb2](https://github.com/Frannaaa/slotdrop-gc2/commit/60b0bb29876ae45d0b30b45e525364d0798c6446) shows the before/after, and [deployed rerun 42460049586](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42460049586) passed **16/16 assertions**. We now use visible setup requests so the test output makes it clear which host supplied the quote.
+
+### B. Codex's original Owner editor sent fields the user had not changed
+
+**What AI gave us.** The [original Owner dashboard implementation, commit 6e06dde](https://github.com/Frannaaa/slotdrop-gc2/commit/6e06dde742fcecd028bf4d41f6fdee57633c3899), explicitly states in its then-existing `AI-USAGE.md` that **Codex implemented the Owner workspace**. That commit's `public/js/owner.js` builds the following full-field payload before every edit:
+
+```js
+const body = {
+  capacity: Number(field('capacity').value),
+  offerPriceCentavos: cents(field('offerPriceCentavos').value),
+  buddyPriceCentavos: cents(field('buddyPriceCentavos').value, true),
+  bookingClosesAt: new Date($('cutoff').value + '+08:00').toISOString()
+};
+if (editing) body.status = field('status').value;
+await api(editing ? '/api/slots/' + editing : '/api/slots', {
+  method: editing ? 'PATCH' : 'POST',
+  body: JSON.stringify(body)
+});
+```
+
+The code was valid syntactically, but the edit request included capacity, status and booking deadline even when the owner only changed the price.
+
+**How we verified it.** In the reproducible [tests/owner-edit.test.js](../tests/owner-edit.test.js) scenario, a newer edit first pauses a session, changes capacity to **8**, and moves the deadline forward **15 minutes**. An older form then changes only the price to **161000 centavos (₱1,610)**. The original all-fields PATCH could overwrite those newer values with the older tab's stale data.
+
+**What changed and why.** The corrected [`changedOfferFields()` helper](../public/js/owner-policy.js) compares the edit against the original loaded snapshot and submits only changed fields. The [Owner save handler](../public/js/owner.js) uses it before PATCH. The regression verifies the price becomes **₱1,610** while the new pause, capacity **8** and updated deadline remain intact. The fix is [commit f3dcfa6](https://github.com/Frannaaa/slotdrop-gc2/commit/f3dcfa69f6ec0c1614b6ff84fe4c698bf2757828). The [AI-assistance record saved with that commit](https://github.com/Frannaaa/slotdrop-gc2/blob/f3dcfa69f6ec0c1614b6ff84fe4c698bf2757828/AI-USAGE.md), dated October 28, describes this Owner-edit correction as ChatGPT/Codex-assisted and records the reproduced overwrite and the HTTP checks. Sending only changed fields preserves unrelated updates made while an older form is open. This correction does not solve two people changing the *same* field simultaneously, which would require version checks.
+
+### C. The catalog counted future sessions after booking had closed
+
+**What the AI-assisted version did.** Janelle’s [PR #59 disclosure](https://github.com/Frannaaa/slotdrop-gc2/pull/59) records that Claude drafted the rollover fix and tests. The [merged implementation](https://github.com/Frannaaa/slotdrop-gc2/blob/285ce61ea8cd399194fc038b3b4a96ec305a54d3/server/repositories/reference-catalog.js) treated any session with `starts_at > NOW()` as a reason to skip replenishment for its activity.
+
+**How the team caught it.** Kirsten’s review prompted [PR #71](https://github.com/Frannaaa/slotdrop-gc2/pull/71). The regression puts two sessions 30 and 40 minutes in the future, with both booking cutoffs already past. Browse has zero bookable seats for that activity. We reran that same regression against #59. It returned **0** where the test expected **2**. The regression passed on the merged #71 code, along with the other eight catalog tests.
+
+**What changed.** Janelle replaced the start-time check with a future booking cutoff. After Fran’s review, the count also required open status, confirmation that the session would run, and seats left. The [regressions](../tests/reference-catalog.test.js) confirm that startup adds two bookable sample sessions once, including when existing sessions are paused or sold out. Kirsten reviewed the code and tests before approving #71. The [AI assistance record](../AI-USAGE.md) documents Janelle’s before-and-after checks.
+
+## Challenge 4 — The owner changes a rule
+
+**The rule:** “Change the commission from 10%.” **Answer: one line.** The rate remains 10% on the deployed site. Line numbers in this section refer to the release candidate.
+
+### Every place the commission appears
+
+| File and line | What it does | Edit it to change the rate? |
 |---|---|---|
-| Saving another field rounded an unchanged booking deadline | Review of datetime-local serialization | Preserve the original timestamp; tests/owner-policy.test.js |
-| A cancelled session reopened after its cutoff; a create request used the time from before a lock wait | HTTP requests returned 200 and 201 instead of 409 and 400 | Check all reopening prerequisites and sample time after the lock; tests/offers.test.js |
-| An old price form undid a later pause, capacity and deadline change | Reproduced the full-field PATCH overwrite | Send only edited fields; tests/owner-edit.test.js |
-| Invalid URL encodings, unsupported JSON encodings and database outages all returned 500 | Three failing regression cases | Return safe 400, 415 and 503 errors; HTTP and database-failure tests |
+| `server/config/business.js:1` | `COMMISSION_BASIS_POINTS = 1000` | **Yes. This is the only edit.** |
+| `server/services/pricing.js:23` and `:25` | `priceQuote()` computes the booking fee from the shared per-seat calculation | No |
+| `server/services/bookings.js:109` and `:120` | Passes the rate to `priceQuote()` and saves it with the booking | No |
+| `server/repositories/owner.js:3` and `:8` | Sends the rate to the Owner screen | No |
+| `public/js/business-config.js:10` | `commissionPerSeat()` rounds the fee in centavos | No |
+| `public/js/owner.js:89` | Previews studio earnings with the shared fee function and the rate from the API | No |
+| `db/schema.sql:78` | Checks that each saved fee matches its saved rate | No |
 
-### Challenge 3 — three moments, to be written by the group
+`tests/challenge4-rate.test.js` (merged in PR #37) checks that only the config file defines the rate, and that the quote, the saved booking and the Owner screen all use it.
 
-Facts from the repository you can choose from (pick three, or use your own):
+### Why the answer is one place
 
-- **Line-ending fix was incomplete.** #58's first version normalized only `tests/owner-clock.test.js`. After merging `main`, `tests/owner-toggle.test.js` (from #45) still failed on Windows with the same pattern. Fixed by normalizing it too and adding it to the Windows CI job.
-- **Challenge 1 setup sent its quote to localhost.** The first deployed run ([42459905436](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42459905436)) failed 1 of 15 assertions because request 00 read `baseUrl` from collection variables. The local run had passed because both URLs were localhost. Fixed by splitting 00 into visible 00a/00b requests.
-- **Health said "ok" without a database.** An earlier health route returned 200 even when PostgreSQL or its tables were missing, so Render would mark a broken service live. Changed to return 503 in production until the tables exist (`server/routes/health.js`, `tests/deployment-bootstrap.test.js`).
-- The four rows in the table above (rounded deadlines, stale PATCH overwrite, reopened cancelled session, 500s for bad encodings).
+- **One rate.** The business rate comes from one server constant. Quotes, saved bookings and the Owner screen read `COMMISSION_BASIS_POINTS`. None of them keeps its own 10%.
+- **Shared fee calculation.** [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) moves the server calculation and the Owner estimate to the same `commissionPerSeat()` function. The SQL constraint independently checks the saved fee using the rate on that receipt. A rate change leaves the constraint valid because it reads the saved rate.
+- **Old bookings keep their old rate.** Each receipt saves the rate, fee and payout it was made with. Changing the active rate does not rewrite existing bookings.
 
-For each one you choose, write in your own words:
+### What 12% would change
 
-1. **What the AI gave us:**
-2. **How we noticed** (test, error, review comment):
-3. **What we did instead, and why:**
+An example buddy booking of two seats at ₱2,565 each:
 
-## 4. Change an owner rule
+| Rate | Fee per seat | SlotDrop's fee | Studio receives | Customer pays |
+|---|---:|---:|---:|---:|
+| 10% (now) | ₱256.50 | ₱513.00 | ₱4,617.00 | ₱5,130.00 |
+| 12% (example) | ₱307.80 | ₱615.60 | ₱4,514.40 | ₱5,130.00 |
 
-Current commission inventory, rechecked November 8 on `main` (`96d4a31`) without changing the rate:
+The customer's total stays at ₱5,130 because this changes the platform's commission, not the session price. This is a calculation from the code's formula, not a measured revenue result.
 
-| File/line | Role | Edit to change the active rate? |
-|---|---|---|
-| server/config/business.js:1 | COMMISSION_BASIS_POINTS = 1000 | Yes |
-| server/repositories/owner.js:3 and :8 | Import and return the setting | No |
-| public/js/owner.js:87 | Preview provider proceeds using the rate from the API | No |
+### How we checked it without changing the deployed rate
 
-The **rate** lives in one place. The **fee formula** (price × rate ÷ 10,000, rounded per seat) appears three times: server/services/pricing.js:25 computes it for quotes and bookings, public/js/owner.js:87 repeats it only to preview a studio's earnings before an offer is saved, and db/schema.sql:78 checks it as a constraint on every saved receipt. Changing the rate edits none of them. Changing the *rounding rule* would mean editing all three; the owner preview could later read the fee from the quote API to remove the browser copy.
+**One-line change, 10 November.** `node --test tests/challenge4-rate.test.js` passed at **1,000 basis points**, and passed again in a disposable copy after changing only `COMMISSION_BASIS_POINTS` to **1,200**. Both runs exercised the Owner catalog, the server quote and a saved receipt, and each checked that a later offer-price edit left the existing receipt unchanged. The two runs used separate databases. [Test source](../tests/challenge4-rate.test.js) · [Tested code baseline](https://github.com/Frannaaa/slotdrop-gc2/commit/e994ffddb1ba9635e19091eab30436b80d299489)
 
-**Why, in the group's words** (to fill in): why is the rate in one place but the fee formula in three? Should the owner preview read the fee from the server instead, and what would that cost?
+**Same database across a restart, 10 November.** A follow-up used a disposable on-disk PGlite database and the same application code. At 10%, a fictional ₱1,600 booking saved with HTTP 201, a ₱160 fee and a ₱1,440 payout. After stopping the server, changing only the rate to 12% and reopening the same database, the old receipt returned HTTP 200 and matched its original JSON exactly. A new booking at the same customer price saved with HTTP 201, a ₱192 fee and a ₱1,408 payout, and the server quote and Owner catalog agreed with the new rate. This verifies the receipt behavior locally. The deployed commission is still 10%.
 
-Saved receipt rates are historical. SQL checks each saved rate and its arithmetic; it does not set the active commission. Test fixtures and worked examples use fixed rates for specific cases. The current booking service reads the shared commission setting. `tests/challenge4-rate.test.js` checks the active value in the quote, stored receipt and Owner catalog.
+## Challenge 5 — Predict, then run
 
-## 5. Predict, then run
+Individual work. Each member picks one function they wrote, writes three inputs and the output they predict for each, runs them, and explains any mismatch. The screen recording is unedited, has the member's own voice, lasts at most three minutes, and is made without AI assistance. Show the function, the three predictions and actual runs, then change one input or one line and explain the result.
 
-Pending individual work. Each member writes three predictions before running a chosen function, records the actual outputs and explains mismatches. The unedited voice recording must be at most three minutes and made without assistance.
+## Stretch challenges
 
-## Stretch challenges — deployed evidence
+| Stretch | Status | Shown on the deployed site | What is left |
+|---|---|---|---|
+| [Sequential or parallel](#sequential-or-parallel) | **Complete** | Load time before and after | |
+| [Too many requests](#too-many-requests) | **Verified on deployed Checkout** | 429 → 59-second wait → identical POST → one saved receipt | Client-address change in #72 has a separate regression test |
+| [The double click](#the-double-click) | **Verified on live double-click** | One browser POST, one confirmed receipt and one Owner row | |
+| [Pagination](#pagination) | **Demonstrated on deployed Browse** | Previous and Next switched between sessions 1–6 and 7–8 | |
+| [Join and compute](#join-and-compute) | **Verified on the deployed Owner page** | 0 of 32 to 1 of 32 booked seats, with both source requests observed in the later walkthrough | |
 
-All measured against https://slotdrop-gc2-group-zx8j.onrender.com (commit `96d4a31`) from GitHub Actions on 2026-11-08 at 08:36–08:38 UTC, [run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799). None of these requests creates a booking; `GET /api/metrics` still showed `bookingCount: 0` afterwards.
+**Evidence index.** The [Checkout capture](evidence/stretch-deployed/checkout-429/network.json) records the live 429 and retry. The [14 November read-only browser record](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) records Browse page changes, overlapping Selection requests and both Owner inputs. The earlier sequential/parallel benchmark came from [CI run 42462032799, attempt 3](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799) on 8 November, targeting `96d4a31`.
 
-### Sequential or parallel — complete
+### Sequential or parallel
 
-Selection loads the session and the quote with `Promise.all` (`public/js/selection.js:19`). The two requests do not depend on each other: both need only `slotId` and `quantity` from the URL.
+Selection loads the session and the price quote together with `Promise.all` (`public/js/selection.js:19`). Neither request needs the other: both use only the `slotId` and `quantity` from the address.
 
-| Mode | Median | Fastest | Slowest |
+| How the two requests are sent | Median | Fastest | Slowest |
 |---|---:|---:|---:|
-| Sequential (before) | 398.0 ms | 385.6 ms | 730.8 ms |
-| Parallel (after, current code) | 200.2 ms | 194.3 ms | 535.5 ms |
+| One after the other (before) | 398.0 ms | 385.6 ms | 730.8 ms |
+| Together (after, the current code) | 200.2 ms | 194.3 ms | 535.5 ms |
 
-`GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quantity=2`, 15 alternating trials after 3 warm-ups. Parallel halved the wait, because each request costs roughly one round trip to Singapore and the two now overlap. These times are measured from a GitHub server, not a phone browser. [Screenshot](evidence/stretch-deployed/sequential-vs-parallel.jpg).
+The requests were `GET /api/slots/1` and `GET /api/pricing/quote?slotId=1&quantity=2`, 15 alternating trials after 3 warm-ups. Sending them together halved the wait, because each costs about one round trip to Singapore and the two now overlap. The benchmark ran from GitHub. The [14 November browser readback](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) also confirmed that the two public Selection requests started 0.3 ms apart and overlapped. [Benchmark screenshot](evidence/stretch-deployed/sequential-vs-parallel.jpg).
 
-### Too many requests — server side complete, front end still open
+### Too many requests
 
-| Step | Result |
+**Public Checkout run, 14 November at 6:29 PM PHT.** A 390 px Chromium window opened Checkout on [Render commit `8bdcfcb`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920). Thirty invalid POSTs from the same browser filled the 60-second window with 400 responses and created no bookings.
+
+| Step | What the browser saw |
 |---|---|
-| Refused `POST /api/bookings` (quantity 0) | 25 × **400** |
-| Next POST | **429** `RATE_LIMITED`, `Retry-After: 30`, `retryAfterSeconds: 30` |
-| Same request after waiting 31 s | **400** again: the limit had reset |
+| Submit one fictional booking | `POST /api/bookings` returned **429 `RATE_LIMITED`** with **`Retry-After: 59`** |
+| Wait | Checkout displayed the 59-second message and kept Submit disabled |
+| Retry | After **59,003 ms**, the browser sent the identical body and request ID. The server returned **201** and saved one ₱2,880 booking |
+| Confirm | Receipt `26ccfbce-9a9d-49f6-b3c1-35674477ebf5` read back with **200**. Owner showed one matching row. Available seats fell from **3 to 2** |
 
-The 429 came on attempt 26, not 31, because the Challenge 1 job in the same run had already sent 5 POSTs that minute: the limit is 30 booking POSTs per minute per client address (`server/middleware/booking-rate-limit.js`). [Screenshot](evidence/stretch-deployed/too-many-requests-429.jpg).
+[Waiting state](evidence/stretch-deployed/checkout-429/waiting.jpg) · [Booking request and response record](evidence/stretch-deployed/checkout-429/network.json) · [Confirmation](evidence/stretch-deployed/checkout-429/confirmation.jpg) · [Owner](evidence/stretch-deployed/checkout-429/owner.jpg)
 
-Still open: the brief also asks the front end to wait and retry. `retryLimitedBooking()` exists in `public/js/customer-common.js:87`, but Kaitlyn's Checkout (#43) does not call it yet. Known limitation: on Render every request reaches Node from Render's proxy, so the "per client" key is most likely shared by all visitors.
+**How it works.** The limiter counts 30 POSTs per address in each 60-second window. The Checkout helper waits only for an explicit 429 and sends the same request once more. Receipt and Owner reads are outside the limit. The live capture used the limiter keyed by socket address. PR #72 adds Render’s client address handling and tests that two addresses behind the same proxy have separate counters. See the [rate-limit implementation and verification](bonus-rate-limit.md).
 
-### Double click — server side shown in tests, browser still open
+### The double click
 
-The server is safe: an identical retry (same `requestId`) returns the first receipt with 200, and the row lock in `createBooking()` lets only one of two simultaneous last-seat bookings succeed (201 and 409, `tests/postgres-locking.test.js`, `tests/bookings.test.js`). Not run on the live site because it would create bookings. Checkout (#43) disables the button while saving; showing a real double click needs the merged Checkout page.
+**What could go wrong.** One customer sends the same booking twice, or two customers ask for the last seats at the same moment.
 
-### Pagination — not earned yet
+**What we found.** A [source audit of Checkout on 7 November](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5813793124) found a gap. After a booking was saved, the page re-enabled Submit before the browser had moved to Confirmation. A second click in that moment would have carried a new `requestId`, and the server would have saved it as a second booking. [Kat's review on 8 November](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5817789602) asked for the fix and a regression test.
 
-The API side is ready in #49 (`?page=&limit=`, not yet merged). Browse (#62) loads the whole list, and #63 adds a React `pagination.js` at the repository root that no page loads and that does not call `?page=`. Browse needs to request `/api/slots?page=…&limit=…` and show page controls.
+**How it was made safe.**
 
-### Join and compute — not earned yet
+| Layer | Protection | Evidence |
+|---|---|---|
+| The page | Checkout disables Submit while saving. A `navigating` flag keeps it disabled until Confirmation loads (`checkout.js:153` in PR #43, [commit 980dab5](https://github.com/Frannaaa/slotdrop-gc2/commit/980dab57523bc7f86f0f20e487d68ab3233eb21d)). | `tests/checkout-browser.test.js` covers the lock during Confirmation navigation. [Kirsten's review on 11 November](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5859831151) confirmed the guard. |
+| The same booking sent twice | Each booking carries one `requestId`. `createBooking()` returns the saved receipt with 200 for an identical retry, and 409 when a key is reused with different details. | `tests/bookings.test.js`: "an identical retry returns the same booking with 200, even after the session closes" and "concurrent identical retries create exactly one booking" |
+| Two customers, last seats | `SELECT … FOR UPDATE` locks the session row (`server/services/bookings.js:99`), so the second booking sees the seats already taken. One gets 201 and the other 409. | `tests/bookings.test.js`: "concurrent bookings for the last seats never oversell". `tests/postgres-locking.test.js` shows the same row lock holding back an Owner seat edit on PostgreSQL in CI. |
 
-#51 joins `GET /api/owner/catalog` with `GET /api/bookings` to show open-seat utilization on the Owner screen. It needs a review and merge before it is on the live site.
+**Live result, 12 November.** A browser double-click on Confirm simulated booking led to [one confirmation](evidence/challenge2/confirmation.jpg) and [one matching saved row](evidence/challenge2/owner-booking.jpg). The [14 November browser run](#challenge-2--trace-one-real-request) established that the double-click sent exactly one booking POST.
 
-## Further checks
+### Pagination
 
-- The owner layout follows the October 28 brand book: paper/ink/blue/lime, local fonts and 48-pixel action buttons. It stayed within the page at 320, 390, 768 and 1280-pixel viewport settings.
-- Simulating a database outage disabled saving; Refresh restored data and controls. A later buddy-rate edit preserved the original receipt and metrics.
-- The repository review found failing checks on the earlier data/offer branches: syntax scanning assumed public/js existed, and CI tried to run the later owner restart script. Syntax scanning now starts at public/, and Docker/restart steps run only when their files exist.
-- GC1 text/page references were checked against the original proposal and feedback on October 28. Provider interviews, public booking challenges, the deployed baseline and group phone test remain open.
+**The route.** `GET /api/slots` accepts `?page=` and `?limit=` on `main` (PR #49). Paging is applied after the filters and the sort.
 
-## October 28 follow-up fixes
+**On the deployed API, 12 November.** The deployed catalog had 8 bookable sessions.
 
-- Detail responses now include serviceActive, so a direct session link can explain an inactive activity. Discovery continues to exclude it.
-- Null characters in q and area now return 400 INVALID_INPUT before SQL. Both new HTTP cases failed before the correction.
-- Owner sales labels and Resume buttons update every second while the tab is visible and immediately when it becomes visible again. Existing cards, keyboard focus and unsaved deadlines are retained.
-- The remaining awkward headings and cutoff hint were shortened. The original GC1 text/page references were checked against the proposal and feedback.
+| Request | Status | Sessions returned (by id) |
+|---|---|---|
+| `GET /api/slots` | 200 | 18, 20, 22, 24, 26, 28, 30, 32 |
+| `GET /api/slots?page=1&limit=3` | 200 | 18, 20, 22 |
+| `GET /api/slots?page=2&limit=3` | 200 | 24, 26, 28 |
+| `GET /api/slots?page=3&limit=3` | 200 | 30, 32 |
+| `GET /api/slots?page=4&limit=3` | 200 | none (`[]`) |
+| `GET /api/slots?category=creative&page=1&limit=2` | 200 | 18, 20 |
+| `GET /api/slots?page=0&limit=3` | 400 | `INVALID_INPUT` "page is outside the allowed range." |
+| `GET /api/slots?page=1&limit=1000` | 400 | `INVALID_INPUT` "limit is outside the allowed range." |
 
-Local checks after these fixes:
+The three pages together return each session once, in the same order as the full list. A page past the end is an empty list with 200, not an error.
 
-| Branch / PR | Tests passed | Skipped | Syntax | SQL groups |
-|---|---:|---:|---|---:|
-| Setup / #22 | 5 | 0 | Passed | 8 |
-| Session data / #27 | 10 | 0 | Passed | 8 |
-| Offer controls / #28 | 14 | 1 | Passed | 8 |
-| Owner workspace / #29 | 22 | 1 | Passed | 8 |
+**Live result, 12 November.** After PR #63 merged, [Browse page 1](evidence/challenge2/browse-page-1.jpg) showed sessions 1–6. Next displayed [page 2](evidence/challenge2/browse-page-2.jpg), sessions 7–8. Previous returned to page 1. The [14 November browser capture](evidence/challenge2-final/browser-network.json) also records the page 2 and return-to-page 1 requests. A [separate read-only rerun](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) verified that the six page-one IDs returned unchanged after Previous and had no overlap with the five page-two IDs.
 
-The skipped case requires real PostgreSQL. These local runs used Node 24.22.1 and PGlite; the new commit's PostgreSQL/container results must come from its CI run. The clock regression exercises the page script with a controlled clock and lightweight DOM fixture; it is not a new full browser walkthrough. Customer booking integration and public deployment remain open.
+### Join and compute
 
-## Timeout and adversarial checks
+PR #51 adds one line to the Owner screen, computed in the browser from two routes the page already loads.
 
-Normalized timestamps must stay within UTC years 0001-9999. A date crossing into year 10000 previously returned 500 in the PGlite demo; it now returns 400 before SQL. Boundary and ordinary timezone conversions are covered by tests/http.test.js.
+| Route | What it contributes |
+|---|---|
+| `GET /api/owner/catalog` | Each session's released seats, status, start time and booking deadline |
+| `GET /api/bookings` | Each saved booking's session, number of seats and status |
 
-Local checks for this branch: syntax passed, 29 tests passed, 1 PostgreSQL-only tests skipped, and all eight SQL groups passed (Node 24.22.1/PGlite).
+`openReleaseUtilization()` in `public/js/owner-insights.js` keeps the sessions that can still be booked, adds up their released seats, adds up the confirmed seats booked in those same sessions, and shows:
 
-Tests also send invalid/oversized edits, including compressed payloads, and verify unchanged inventory and receipts. Six simultaneous duplicate creates produce one new session; conflicting capacity, cancellation and price edits preserve confirmed seats and receipt amounts. Real PostgreSQL execution is left to this commit's CI run.
+> *N* of *M* released demo seats booked (*P*%) across *K* currently eligible sessions.
 
-Workspace requests now abort after 15 seconds, including response-body reads. Refresh and editing recover after failure without clearing drafts. A timed-out save is never automatically retried: it may have completed, so the owner is asked to refresh and check first. Controlled-time tests cover stalled reads/bodies/writes, timer cleanup and recovery. This is not a new full browser walkthrough.
+P = round(100 × N ÷ M). Neither route returns this figure alone. With no eligible session the page says so and does not show 0%. If bookings exceed the released seats it shows no percentage.
 
-## November 7 integration check
+`tests/owner-insights.test.js` covers a 3-of-10-seat example, cancelled bookings, paused and out-of-window sessions, empty inventory, and the over-capacity case Kirsten asked for in review. [Kirsten approved the PR on 12 November](https://github.com/Frannaaa/slotdrop-gc2/pull/51#pullrequestreview-5869740111).
 
-Tested a disposable local build assembled from Fran's #45, Kat's #41 and Kaitlyn's #43. The six available page routes responded successfully. Browse returned 404. Syntax, 95 tests and eight SQL scenario groups passed. One PostgreSQL-only test was skipped in the local PGlite run.
+**Live result, 12 November.** Across eight eligible sessions, Owner showed [0 of 32 seats booked (0%)](evidence/challenge2/owner-utilization-before.jpg) before the booking and [1 of 32 seats booked (3%)](evidence/challenge2/owner-utilization-after.jpg) after it. This is utilization of released fictional seats. The [14 November browser run](evidence/challenge2-final/browser-network.json) observed both source requests while opening Owner. The [read-only browser record](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) includes a separate recalculation from the two fetched responses: 6 ÷ 48 rounded to the 13% shown in Owner.
 
-The running app returned a quote for two seats, saved a booking with HTTP 201 and returned the same receipt with HTTP 200 on an identical retry. Availability fell by two seats, Owner listed the booking once, and the saved receipt was readable after restarting the local server.
+## Earlier test records
 
-This run covers HTTP and persistence. Browser interaction, deployed challenge screenshots, the phone test and the Browse baseline are still pending. Checkout still needs to prevent a second submission during navigation to Confirmation.
+<details>
+<summary>Archived local booking payload and response</summary>
 
-## November 8 local challenge evidence
+This is from a local run on 7 November, **not** the deployed capture. A second local run on 11 November, with Chrome DevTools open on a local build of all six screens, showed the booking POST return 201 and the receipt GET return 200 for booking `ae9ed892-67c7-4603-9244-17f186f637bc`, with the same reference on Confirmation and Owner (recorded in the submission checklist in PR #47). `POST /api/bookings` returned 201, and `GET /api/bookings/917d1fa9-9a71-4a2f-873e-78c6ea4b8c9e` returned the same receipt with 200. The names and prices are from the older fictional test data.
 
-These requests ran against the assembled local Express app using the disposable PGlite test fixture. The official deployment, Postman screenshots, browser Network recording and hand-drawn diagram remain pending.
-
-### 1. Six API cases
-
-Import [the Challenge 1 Postman collection](SlotDrop-GC2-Challenge1.postman_collection.json). Set `baseUrl` to the official group URL and run the collection in order. Request 00 reads that deployment's sessions and quote and fills the slot, quantity, unknown-ID and total variables, so nothing needs editing by hand. Then run all six requests and capture the request, status and response in Postman. The collection requests and assertions were verified with the local HTTP harness.
-
-The POST cases used the same valid fictional booking body except for the listed change and a fresh request ID. The fixture's session 1 had four seats. No code change was needed after this run.
-
-| Request | Expected | Actual response |
-|---|---:|---|
-| POST /api/bookings with quantity 0 | 400 | 400 INVALID_INPUT, quantity outside allowed range |
-| POST /api/bookings with an additional total of 1 | 400 or saved server total | 400 INVALID_INPUT, unsupported field total |
-| POST /api/bookings for five seats | 409 | 409 SLOT_UNAVAILABLE, four seats left |
-| POST /api/bookings with slotId 999 | 404 | 404 SLOT_NOT_FOUND |
-| POST /api/bookings without customerName | 400 | 400 INVALID_INPUT, provide customerName |
-| GET /api/slots?q=zzzz-no-match | 200 and empty list | 200, [] |
-
-### 2. Booking request and code path
-
-A local HTTP POST to /api/bookings returned 201. The persisted receipt read back with 200 at GET /api/bookings/917d1fa9-9a71-4a2f-873e-78c6ea4b8c9e. This is a local request plus a source trace of the browser path for the eventual deployed walkthrough.
+Request body:
 
 ```json
 {
@@ -229,6 +329,8 @@ A local HTTP POST to /api/bookings returned 201. The persisted receipt read back
   "requestId": "2e7012ac-0510-49e6-ba6b-9174d7d8c5f3"
 }
 ```
+
+Response (201):
 
 ```json
 {
@@ -252,64 +354,82 @@ A local HTTP POST to /api/bookings returned 201. The persisted receipt read back
 }
 ```
 
-1. public/js/checkout.js:74 handles submit and builds the payload. At line 101 it calls request() in public/js/customer-common.js:46.
-2. server/app.js:28 applies bookingRateLimiter and server/app.js:29 mounts bookingRouter. server/routes/bookings.js:7 calls createBooking with the JSON body.
-3. server/services/bookings.js:39 validates with bookingRequest. createBooking at line 91 checks the request key, locks the slot with SELECT FOR UPDATE at line 99, and calls priceQuote at line 109 to recompute the price and enforce availability. The INSERT at line 114 saves the receipt snapshot within the transaction.
-4. receiptResponse in server/services/bookings.js:56 shapes the saved receipt and the route returns JSON. Checkout navigates with its ID at line 106.
-5. public/js/confirmation.js:6 runs load(), GETs the receipt at line 14 via server/routes/bookings.js:11 and findReceipt in server/services/bookings.js:134, then renders the saved quantities and prices at line 17.
+</details>
 
-### 3. Group review prompts
+These are older local and CI runs, kept for the record. They are **not** evidence from the deployed site.
 
-The existing debugging table gives the group concrete cases to discuss: rounded deadlines, stale edits overwriting newer values and infrastructure failures returning generic errors. For each chosen case, the group should confirm which AI output it actually used, explain the failure or review that exposed it, and describe the decision to replace it. The local tests establish the observed behavior and correction.
+<details>
+<summary>Run log, 27 October to 12 November</summary>
 
-### 4. Verified single edit for the commission rate
+| Date | What was checked | Result | Record |
+|---|---|---|---|
+| 27 Oct | Owner and session collection in Postman, local | 21 requests, 26 assertions passed | [fran-api-local.json](evidence/fran-api-local.json) |
+| 28 Oct | Same collection, using activity 4 and its 30-minute deadline | 21 requests, 27 assertions passed | [repository-review-2026-10-28.json](evidence/repository-review-2026-10-28.json) |
+| 28 Oct | Node 22 + PostgreSQL 16 in CI; production container build, database setup and restart | 20 tests passed | [CI run 40556533287](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40556533287) |
+| 28 Oct | Local syntax and tests (PGlite) | 19 passed, 1 PostgreSQL-only test skipped | Local run |
+| 28 Oct | SQL constraints and seed | 8 scenario groups passed | `tools/check-sql.mjs` |
+| 28 Oct | Owner screen in the browser: phone and desktop layout, save, pause, unchanged form, outage recovery | Passed | Disposable fictional database |
+| 7 Nov | Local build of #45, #41 and #43 together | 95 tests and 8 SQL groups passed, 1 skipped. Browse returned 404. | See "7 November integration check" below |
+| 8 Nov | Selection timing in CI (PR #53) | Median 5.47 ms one after the other, 4.59 ms together, 7 rounds | [CI run 42394996195](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42394996195) |
+| 8 Nov | Challenge tests in CI (PR #37) | 86 tests passed | [CI run 42428732562](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42428732562) |
+| 8 Nov | Booking limiter in CI (PR #56) | 85 of 85 tests passed | [CI run 42429460881](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42429460881) |
+| 8 Nov | Challenge 1 collection with Newman 6.2.3, local, commit `b1cf5c0` | 6 requests, 12 assertions passed | [challenge1-newman-local-2026-11-08.json](evidence/challenge1-newman-local-2026-11-08.json) |
+| 8 Nov | Owner collection, pagination (#49) and limiter (#56) with Newman, local | 21 requests / 28 assertions; 4 / 6; 7 / 12, all passed | [owner-and-bonus-newman-local-2026-11-08.json](evidence/owner-and-bonus-newman-local-2026-11-08.json) |
+| 8 Nov | Full suite in CI (PR #37) | 104 of 104 tests passed | [CI run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) |
+| 12 Nov | Deployed site after Browse was merged: health, Browse page, Owner page and paged list, read-only | `/api/health` 200; Browse showed "8 sessions found." with a clean Console; `/checkout.html` 404; `bookingCount` 0 | [Pagination](#pagination) |
 
-For a new active commission rate, edit server/config/business.js:1 only. No rate was changed during this check. server/services/pricing.js:22 defaults to that value. server/services/bookings.js:109 and :120 use it to calculate and persist new bookings. server/repositories/owner.js:8 exposes the setting and public/js/owner.js:87 uses the API value for its preview. Existing receipts keep the rate saved at booking time.
+The [Owner and session Postman collection](SlotDrop-Fran.postman_collection.json) covers the Owner and session APIs.
 
-### Stretch evidence
+</details>
 
-- Double click / last seats. An identical retry returned 200 with the same receipt ID. With exactly two seats remaining, two simultaneous two-seat bookings with distinct keys returned 201 and 409. This demonstrates the API race case. The separate Checkout navigation window still needs its UI fix.
-- Sequential or parallel. The Owner screen uses Promise.all at public/js/owner.js:400. A local HTTP harness measured two independent requests used there, GET /api/metrics and GET /api/bookings. After warmup, 15 alternating trials per mode gave a 8.37 ms sequential median and a 7.21 ms parallel median. This measures the two requests through response JSON on local loopback, not deployed browser render time.
-- Pagination, 429 with frontend wait/retry, and two-route computed value remain open.
+<details>
+<summary>27–28 October: Owner and API checks</summary>
 
-Challenge 5 is each member's own prediction, experiment and unedited recording.
+- The restart test creates a session through the API and inserts a fictional receipt directly. Both survive a restart of the Node container, and the Owner seats and numbers still match. At that time the customer booking route did not exist yet.
+- The Owner layout follows the 28 October brand book: paper, ink, blue and lime colors, local fonts and 48-pixel action buttons. It stayed within the page at 320, 390, 768 and 1280 pixels wide.
+- Simulating a database outage disabled saving. Refresh restored the data and controls. A later buddy-price edit left the original receipt and numbers unchanged.
+- The repository review found failing checks on the earlier data and offer branches: the syntax scan assumed `public/js` existed, and CI tried to run a restart script from a later branch. The scan now starts at `public/`, and the Docker and restart steps run only when their files exist.
+- GC1 quotes and page references were checked against the original proposal and feedback.
 
+**Follow-up fixes on 28 October**
 
-## November 8 — independently reproducible Fran-owned checks
+- Detail responses now include `serviceActive`, so a direct link can explain an inactive activity. Discovery still hides it.
+- Null characters in `q` and `area` now return 400 `INVALID_INPUT` before any SQL runs. Both new tests failed before the fix.
+- Owner sales labels and Resume buttons update every second while the tab is visible, and at once when it becomes visible again. Existing cards, keyboard focus and unsaved deadlines are kept.
 
-[**GitHub Actions run 42428732562**](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42428732562) for PR #37: **86 tests passed, zero failed** on the checked-out branch in CI, including three new specifically named rubric checks. This establishes test behavior in a disposable test environment; **it does not claim Postman screenshots, browser Network captures, a hand-drawn diagram, or completion of the deployed group challenges**.
+| Branch / PR | Tests passed | Skipped | Syntax | SQL groups |
+|---|---:|---:|---|---:|
+| Setup / #22 | 5 | 0 | Passed | 8 |
+| Session data / #27 | 10 | 0 | Passed | 8 |
+| Offer controls / #28 | 14 | 1 | Passed | 8 |
+| Owner workspace / #29 | 22 | 1 | Passed | 8 |
 
-| Criterion and repeatable code | Observed / proved in isolated CI | Still requires true group evidence |
-| --- | --- | --- |
-| Challenge 1 — `tests/challenge1-postman.test.js` and exported `docs/SlotDrop-GC2-Challenge1.postman_collection.json` | Actually sent the **six exact exported Postman collection requests** through the Express HTTP test fixture; verified 400, 400, 409, 404, 400, 200/[] plus error bodies; rejected calls left zero saved bookings and four available seats | Import/run the collection **in Postman against the actual public Group 1 deployment**, attach request/status/body screenshots and actual deployed commit/date. These CI requests did not run inside Postman |
-| Challenge 2 — source trace and `tools/check-transaction-smoke.mjs` in PR #45 | Local API POST saved a booking and GET read it by ID; source code identifies browser `customer-common.request()` → Express booking route → `createBooking()` → PostgreSQL row lock, SQL insert and receipt → Confirmation's GET | Capture one real **deployed browser** Network request/response and the group's **hand-drawn** front-end→server→DB trace; then compare it to source. Do not label a code-derived diagram as a member's hand drawing |
-| Challenge 3 — observed defect candidates from `tests/owner-policy.test.js`, `tests/owner-edit.test.js`, `tests/database-failures.test.js` | Actual regressions cover truncated untouched booking deadlines, stale PATCH overwriting later Owner edits, and DB outage classification as safe 503 rather than exposing 500 internals | Each responsible group member confirms whether AI-assisted output was involved and **personally** writes: original expectation, observed failure, diagnosis, fix and real before/after evidence. Code tests do not establish AI provenance or substitute for the student's reasoning |
-| Challenge 4 — `tests/challenge4-rate.test.js` and `server/config/business.js` | Checked **one active source** for `COMMISSION_BASIS_POINTS`; server quote/save and Owner catalog use it; confirmed receipt snapshots are unchanged by later offer price edits. **No commission rate was changed** | Group verifies and explains all read/write sites, hypothetical fee impact and why past receipts do not reprice; include a real cited PR/CI, not a claim that a rule-change migration was performed |
+The skipped test needs real PostgreSQL. These local runs used Node 24.22.1 and PGlite. The clock test runs the page script with a controlled clock and a lightweight page fixture; it is not a full browser walkthrough.
 
-### Actual code path for Challenge 2 (source-derived, not a Network screenshot)
+</details>
 
-1. Kaitlyn's **unmerged** Checkout `public/js/checkout.js` builds a request with `slotId`, `quantity`, fictional guest details, `expectedTotalCentavos` and stable `requestId`, then calls `request()` in `public/js/customer-common.js`.
-2. The group's merged Express `server/app.js` mounts `bookingRouter()`. `server/routes/bookings.js` calls `createBooking()` from `server/services/bookings.js`.
-3. `bookingRequest()` rejects unknown or malformed fields. `createBooking()` checks the retry key, locks the session row with `SELECT ... FOR UPDATE`, rechecks eligibility and confirmed seats, and calls shared `priceQuote()` to recompute the amount/fee.
-4. The SQL `INSERT INTO bookings ... RETURNING id` persists snapshot price/tier/commission/quantity. The server returns JSON with HTTP **201** for a new booking or **200** for the same accepted retry. There is no five-minute seat hold.
-5. Confirmation `public/js/confirmation.js` (also **unmerged** PR #43) reads `GET /api/bookings/:id`, which uses `findReceipt()` to retrieve the saved PostgreSQL row. Owner fetches `GET /api/bookings` and `GET /api/metrics`.
+<details>
+<summary>Timeout and adversarial checks</summary>
 
-### Optional bonus status — no unearned points claimed
+- Timestamps must stay within years 0001–9999 (UTC). A date crossing into year 10000 used to return 500 in the PGlite demo; it now returns 400 before any SQL runs. Boundary and timezone conversions are covered by `tests/http.test.js`.
+- Tests send invalid and oversized edits, including compressed bodies, and confirm that seats and receipts are unchanged.
+- Six identical create requests sent at once produce one new session. Conflicting seat, cancellation and price edits keep confirmed seats and receipt amounts intact.
+- Owner requests stop after 15 seconds, including while reading a response. Refresh and editing recover after a failure without clearing drafts.
+- A save that timed out is never retried automatically, because it may have completed. The owner is asked to refresh and check first.
+- Local result for that branch: syntax passed, 29 tests passed, 1 PostgreSQL-only test skipped, all 8 SQL groups passed (Node 24.22.1, PGlite).
 
-- **Double-click/last-seat:** existing booking locking/idempotent retry tests pass in CI; browser Checkout #43 still has a post-success second-submission window that the page author must fix and demonstrate. Local backend proof ≠ full +1.
-- **Pagination:** Fran-owned opt-in bounded `page`/`limit` API + PostgreSQL tests in [PR #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49), passing CI. Kirsten's actual Browse must consume it on the official deployment.
-- **HTTP 429 with safe wait/retry:** Fran-owned [PR #56](https://github.com/Frannaaa/slotdrop-gc2/pull/56) now implements a booking-only HTTP 429/Retry-After server middleware and shared same-requestId browser wait/retry helper; [isolated CI run 42429460881](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42429460881) passed **85/85** tests. **Kaitlyn's actual Checkout still does not call that helper**; it needs a valid current-head review, public 429/UI retry/one-receipt screenshots and merge before +1.
-- **Join and compute:** Fran-owned [PR #51](https://github.com/Frannaaa/slotdrop-gc2/pull/51) implements Owner released-seat utilization joining catalog and saved bookings, with passing unit tests. Must be validly reviewed/merged and demonstrated publicly.
-- **Sequential vs parallel:** [PR #53](https://github.com/Frannaaa/slotdrop-gc2/pull/53) uses real Selection detail/quote GETs. [Local CI run 42394996195](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42394996195) measured median **5.47ms sequential vs 4.59ms parallel** across seven alternating rounds after warm-up, an observed **0.88ms difference**. Public Browser Network trace and group interpretation are missing; no guaranteed speedup is claimed.
+</details>
 
-**Evidence provenance:** All generated sessions, seat limits, rates, payments and bookings are fictional. No real business partnership, demand or studio consent is implied. The four challenges require group-authored interpretation; maintain original failure/correction chronology without fabricating screenshots or an earlier checkpoint.
+<details>
+<summary>7 November integration check</summary>
 
-### Newman replay and deployed screenshot checklist
+A disposable local build combined Fran's #45, Kat's #41 and Kaitlyn's #43.
 
-Newman 6.2.3 ran the exported collection against the local disposable PGlite fixture at commit `b1cf5c0`. All 6 requests and 12 assertions passed. [The run record](evidence/challenge1-newman-local-2026-11-08.json) contains each actual request body, status, response body and assertion result.
+- The six page routes available at the time responded. Browse returned 404.
+- Syntax, 95 tests and 8 SQL groups passed. One PostgreSQL-only test was skipped.
+- The app returned a quote for two seats, saved a booking with 201, and returned the same receipt with 200 on an identical retry.
+- Seats left fell by two, the Owner screen listed the booking once, and the receipt was still readable after restarting the local server.
 
-For the submitted Challenge 1 evidence, run the collection again in Postman against the official group URL. Request 00 sets the slot variables from that deployment's inventory. If it reports no session with two seats, create a future simulated offer on the Owner screen first; do not reseed. Record the deployed commit and date. None of the seven requests creates a booking. Capture six screenshots showing the method and URL, request Body (or search Params), HTTP status, and response JSON. Use fictional guest details. Save the screenshots under `docs/evidence/` and link each case from the table above. Keep this local Newman record labelled as local evidence.
+This covered the API and saved data, not the pages in a browser.
 
-### Additional Newman runs
-
-[Local Newman evidence](evidence/owner-and-bonus-newman-local-2026-11-08.json) records three independent runs on disposable PGlite databases. The exported Owner and session collection passed 21 requests and 28 assertions. Pagination on #49 passed 4 requests and 6 assertions, including distinct pages and invalid bounds. The booking limiter on #56 passed 7 requests and 12 assertions. It returned 429 with Retry-After, then accepted the same request after the test clock advanced. Replaying it returned the original receipt and Owner listed one booking. This covers the server API. Browse pagination, Checkout wait/retry and screenshot evidence still need the deployed group flow.
+</details>

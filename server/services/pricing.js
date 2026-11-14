@@ -1,15 +1,13 @@
 // Group assignment: Janelle (M3). Quote rules from docs/routes.md.
-import { COMMISSION_BASIS_POINTS, DISCOVERY_HOURS, MAX_SEATS } from '../config/business.js';
+import { COMMISSION_BASIS_POINTS, MAX_SEATS } from '../config/business.js';
 import { ApiError, integer, invalid } from '../lib/validation.js';
 import { findSlot } from '../repositories/slots.js';
+import { commissionPerSeat, discountPercent, partyPrice, withinBookingWindow } from '../../public/js/business-config.js';
 
-// Same rules as discovery: only open, confirmed, active sessions inside the
-// 72-hour window with a future cutoff and enough released seats can be priced.
+// Same rules as discovery, including undated practice offers.
 export function checkBookable(slot, quantity, now) {
-  const start = Date.parse(slot.startsAt);
   const bookable = slot.serviceActive && slot.status === 'open' && slot.runsAsScheduled
-    && Date.parse(slot.bookingClosesAt) > now.getTime()
-    && start > now.getTime() && start < now.getTime() + DISCOVERY_HOURS * 3600000;
+    && withinBookingWindow(slot, now.getTime());
   if (!bookable) throw new ApiError(409, 'SLOT_UNAVAILABLE', 'This session is no longer open for booking.');
   if (slot.remainingSeats < quantity) {
     const left = Math.max(slot.remainingSeats, 0);
@@ -20,11 +18,8 @@ export function checkBookable(slot, quantity, now) {
 // Pure calculation, reused later by POST /api/bookings so quote and save always agree.
 // All amounts are integer centavos. The server picks the tier; the client never sends a price.
 export function priceQuote(slot, quantity, now, commissionBasisPoints = COMMISSION_BASIS_POINTS) {
-  const buddy = quantity >= 2 && slot.buddyPriceCentavos !== null;
-  const unitPrice = buddy ? slot.buddyPriceCentavos : slot.offerPriceCentavos;
-  const unitFee = Math.round(unitPrice * commissionBasisPoints / 10000);
-  const total = unitPrice * quantity;
-  const platformFee = unitFee * quantity;
+  const { buddy, unit: unitPrice, total } = partyPrice(slot, quantity);
+  const platformFee = commissionPerSeat(unitPrice, commissionBasisPoints) * quantity;
   return {
     slotId: slot.id,
     quantity,
@@ -36,7 +31,7 @@ export function priceQuote(slot, quantity, now, commissionBasisPoints = COMMISSI
     totalPriceCentavos: total,
     platformFeeCentavos: platformFee,
     providerPayoutCentavos: total - platformFee,
-    discountPercent: Math.round((slot.originalPriceCentavos - unitPrice) * 10000 / slot.originalPriceCentavos) / 100,
+    discountPercent: discountPercent(slot.originalPriceCentavos, unitPrice),
     quotedAt: now.toISOString()
   };
 }

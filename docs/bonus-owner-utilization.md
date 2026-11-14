@@ -1,6 +1,6 @@
 # Optional bonus: Join and compute (+1) — Owner released-seat utilization
 
-**Status:** implementation candidate on Fran-owned Owner branch; public evidence and peer approval **pending**.
+**Status:** merged through [PR #51](https://github.com/Frannaaa/slotdrop-gc2/pull/51), with a deployed before-and-after capture.
 
 ## The two real JSON routes
 
@@ -21,10 +21,6 @@ This is the **course-demo released allocation** only, **not** total studio occup
 
 `tests/owner-insights.test.js` exercises a 3/10-seat example, cancellation and exclusion rules, empty inventory, and bad booking quantities. Do **not** describe these synthetic unit-test values as a real deployed booking.
 
-## Public evidence to collect (required to claim bonus)
+## Public evidence
 
-- [ ] PR merged after real teammate review and checks.
-- [ ] Record the actual deployed URL, commit and test time.
-- [ ] Capture Owner Network entries for **both** `GET /api/owner/catalog` and `GET /api/bookings`; show the relevant input rows and visible computed utilization.
-- [ ] Verify a freshly saved fictional booking changes the visible percentage after Refresh, and note actual before/after quantities. Do not fabricate measurements.
-- [ ] Copy actual outcome and screenshot/evidence link into `docs/challenges.md` with group review before final tag.
+Owner displayed 0 of 32 released seats booked before the fictional booking and 1 of 32 afterward. A later browser capture recorded both source requests while opening Owner. See [Challenges](challenges.md#join-and-compute) for the screenshots, request record and conditions.

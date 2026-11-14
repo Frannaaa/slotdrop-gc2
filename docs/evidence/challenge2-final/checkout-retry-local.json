@@ -1,0 +1,44 @@
+{
+  "capturedAt": "2026-11-14T10:09:41.607Z",
+  "test": "Disposable local app via actual Checkout, one booking attempt per socket peer and five-second window",
+  "setupStatus": 400,
+  "requests": [
+    {
+      "at": 1794650976484,
+      "body": {
+        "requestId": "38e6a83e-6865-4c51-b1d3-00302aa96b57",
+        "slotId": 1,
+        "quantity": 1,
+        "customerName": "GC2 Retry Test",
+        "customerEmail": "gc2-retry@example.com",
+        "paymentMethod": "pay_on_site",
+        "expectedTotalCentavos": 160000
+      }
+    },
+    {
+      "at": 1794650981515,
+      "body": {
+        "requestId": "38e6a83e-6865-4c51-b1d3-00302aa96b57",
+        "slotId": 1,
+        "quantity": 1,
+        "customerName": "GC2 Retry Test",
+        "customerEmail": "gc2-retry@example.com",
+        "paymentMethod": "pay_on_site",
+        "expectedTotalCentavos": 160000
+      }
+    }
+  ],
+  "results": [
+    {
+      "status": 429,
+      "retryAfter": "5"
+    },
+    {
+      "status": 201,
+      "retryAfter": null
+    }
+  ],
+  "waitMs": 5031,
+  "bookingId": "8deafd9a-f057-4ad8-9b93-c8a827b7dc73",
+  "savedBookings": 1
+}

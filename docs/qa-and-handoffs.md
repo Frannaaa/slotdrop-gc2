@@ -1,5 +1,7 @@
 # Group 1: checks and handoffs
 
+Historical planning notes. See the [current submission checklist](gc2-submission-gate.md) for release status and dates.
+
 The complete private reference is on `g1/m1-complete-build` in `Frannaaa/reference-only-slotdrop`. The official group repository is `Frannaaa/slotdrop-gc2`. Each owner builds and submits their own assigned implementation there through reviewed PRs.
 
 ## Work order
@@ -9,7 +11,7 @@ The complete private reference is on `g1/m1-complete-build` in `Frannaaa/referen
 3. Janelle supplies pricing quote. Kat connects Selection and hands `slotId` plus `quantity` to Kaitlyn.
 4. Janelle supplies booking and receipt. Kaitlyn connects Checkout and Confirmation. Fran verifies the saved booking, remaining seats and Owner figures, then deploys the approved group build.
 
-Keep the existing targets: Oct 30 shared styles/layouts; Nov 1 first working code PR; Nov 3 proposed session/Browse handoff; Nov 4 course CP1 and proposed quote handoff; Nov 6 proposed booking/receipt handoff; Nov 7 connected flow; Nov 8 fixes/evidence; Nov 9 at 11:59 PM Philippine time final submission. Proposed/internal dates are not extra course deadlines.
+Keep the existing targets: Oct 30 shared styles/layouts; Nov 1 first working code PR; Nov 3 proposed session/Browse handoff; Nov 4 course CP1 and proposed quote handoff; Nov 6 proposed booking/receipt handoff; Nov 7 connected flow; Nov 8 fixes/evidence; final submission on the extended Canvas deadline. Proposed/internal dates are not extra course deadlines.
 
 ## Owner-specific checks
 

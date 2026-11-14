@@ -6,7 +6,7 @@ import {retryLimitedBooking} from '../public/js/customer-common.js';
 
 test('POST-only per-socket limiter emits 429/Retry-After and recovers without double booking',async()=>{
  let current=1000;
- const f=await fixture({bookingRateLimit:{max:2,windowMs:10000,now:()=>current}});
+ const f=await fixture({bookingRateLimit:{max:2,windowMs:10000,now:()=>current,useRenderForwardedIp:false}});
  const submit=body=>fetch(f.base+'/api/bookings',{
    method:'POST',headers:{'Content-Type':'application/json'},
    body:JSON.stringify(body),
@@ -43,6 +43,28 @@ test('POST-only per-socket limiter emits 429/Retry-After and recovers without do
   assert.equal(owner.filter(row=>row.id===saved.id).length,1);
   assert.equal((await (await fetch(f.base+'/api/slots/1')).json()).remainingSeats,3);
  }finally{await f.close();}
+});
+
+test('Render booking limits separate ingress client addresses with a socket fallback', async () => {
+  const f = await fixture({ bookingRateLimit: { max: 1, useRenderForwardedIp: true } });
+  const submit = forwarded => fetch(f.base + '/api/bookings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(forwarded ? { 'X-Forwarded-For': forwarded } : {}),
+    },
+    body: '{}',
+  });
+  try {
+    assert.equal((await submit('192.0.2.10, 10.0.0.1')).status, 400);
+    assert.equal((await submit('192.0.2.10, 10.0.0.2')).status, 429);
+    assert.equal((await submit('192.0.2.11, 10.0.0.1')).status, 400);
+    assert.equal((await submit('192.0.2.11, 10.0.0.1')).status, 429);
+    assert.equal((await submit()).status, 400);
+    assert.equal((await submit('invalid, 192.0.2.11')).status, 429);
+  } finally {
+    await f.close();
+  }
 });
 
 test('browser helper waits once on 429 and resends identical body but never retries uncertain errors',async()=>{

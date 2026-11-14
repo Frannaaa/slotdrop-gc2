@@ -59,7 +59,7 @@ export function receiptResponse(row) {
     id: row.id, slotId: number('slot_id'), quantity: number('quantity'),
     paymentMethod: row.payment_method, status: row.status,
     serviceName: row.service_name, providerName: row.provider_name,
-    sessionStartsAt: new Date(row.session_starts_at).toISOString(),
+    sessionStartsAt: row.session_starts_at === null ? null : new Date(row.session_starts_at).toISOString(),
     originalUnitPriceCentavos: number('original_unit_price_centavos'), offerUnitPriceCentavos: number('offer_unit_price_centavos'),
     unitPriceCentavos: number('unit_price_centavos'), pricingType: row.pricing_type,
     commissionBasisPoints: number('commission_basis_points'), totalPriceCentavos: number('total_price_centavos'),

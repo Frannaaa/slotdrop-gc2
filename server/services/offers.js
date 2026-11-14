@@ -63,14 +63,19 @@ export async function editOffer(db, id, body, clock = () => new Date()) {
     const status = body.status === undefined ? slot.status : body.status;
     if (!['open','paused','cancelled'].includes(status)) invalid('Invalid session status.');
     if (status === 'cancelled' && sold > 0) throw new ApiError(409, 'BOOKINGS_EXIST', 'Cannot cancel a session with confirmed bookings.');
-    const cutoff = body.bookingClosesAt === undefined ? new Date(slot.booking_closes_at) : timestamp(body.bookingClosesAt, 'bookingClosesAt');
-    if (cutoff >= new Date(slot.starts_at)) invalid('Booking cutoff must precede the session start.');
+    const start = slot.starts_at === null ? null : new Date(slot.starts_at);
+    if (start === null && body.bookingClosesAt !== undefined) invalid('Practice bookings have no cutoff.');
+    const cutoff = body.bookingClosesAt === undefined ? slot.booking_closes_at : timestamp(body.bookingClosesAt, 'bookingClosesAt');
+    if (start !== null && new Date(cutoff) >= start) invalid('Booking cutoff must precede the session start.');
     const now = clock();
-    if (new Date(slot.starts_at) <= now) {
+    if (start !== null && start <= now) {
       throw new ApiError(409, 'SESSION_STARTED', 'This session has started. Its offer can no longer be edited.');
     }
-    if (slot.status !== 'open' && status === 'open' && (cutoff <= now || new Date(slot.starts_at) <= now || sold >= capacity || !slot.service_active || !slot.runs_as_scheduled)) {
-      throw new ApiError(409, 'SESSION_NOT_BOOKABLE', 'Set a future booking deadline and ensure the activity has available seats before resuming sales.');
+    const closed = cutoff !== null && new Date(cutoff) <= now;
+    if (slot.status !== 'open' && status === 'open' && (closed || sold >= capacity || !slot.service_active || !slot.runs_as_scheduled)) {
+      throw new ApiError(409, 'SESSION_NOT_BOOKABLE', start === null
+        ? 'The activity must be active and have available seats before resuming sales.'
+        : 'Set a future booking deadline and ensure the activity has available seats before resuming sales.');
     }
     await client.query('UPDATE slots SET offer_price_centavos=$2,buddy_price_centavos=$3,capacity=$4,status=$5,booking_closes_at=$6 WHERE id=$1', [id,offer,buddy,capacity,status,cutoff]);
     return findSlot(client, id);

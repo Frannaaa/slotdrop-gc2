@@ -7,6 +7,22 @@ export const studioReferences = new Map(
   referenceCatalog.offerings.map(item => [item.key, item])
 );
 
+function samplePrices(item, index) {
+  const offer = Math.round(item.publishedPriceCentavos * 0.9);
+  const buddy = index % 3 === 2 ? null : Math.round(offer * 0.95);
+  return [item.publishedPriceCentavos, offer, buddy];
+}
+
+async function ensurePracticeSession(client, item, prices) {
+  await client.query(
+    `INSERT INTO slots (service_id, capacity, original_price_centavos, offer_price_centavos, buddy_price_centavos)
+     SELECT s.id, 20, $2, $3, $4 FROM services s WHERE s.reference_key = $1 AND s.active
+       AND NOT EXISTS (SELECT 1 FROM slots sl WHERE sl.service_id = s.id AND sl.starts_at IS NULL)
+     ON CONFLICT (service_id) WHERE starts_at IS NULL DO NOTHING`,
+    [item.key, ...prices],
+  );
+}
+
 // Add only missing references. Never alter saved booking dates, prices or receipts.
 export async function ensureReferenceCatalog(db) {
   return db.transaction(async client => {
@@ -44,7 +60,7 @@ export async function ensureReferenceCatalog(db) {
              COUNT(sl.id) FILTER (WHERE sl.booking_closes_at > NOW() AND sl.status = 'open' AND sl.runs_as_scheduled
                AND sl.capacity > COALESCE((SELECT SUM(b.quantity) FROM bookings b
                  WHERE b.slot_id = sl.id AND b.status = 'confirmed'), 0))::int AS upcoming
-           FROM services s LEFT JOIN slots sl ON sl.service_id = s.id
+           FROM services s LEFT JOIN slots sl ON sl.service_id = s.id AND sl.starts_at IS NOT NULL
            WHERE s.reference_key = $1 AND s.active
            GROUP BY s.id`,
           [item.key]
@@ -52,8 +68,7 @@ export async function ensureReferenceCatalog(db) {
         if (!state || state.total === 0 || state.upcoming > 0) continue;
         serviceId = state.id;
       }
-      const price = Math.round(item.publishedPriceCentavos * 0.9);
-      const buddy = index % 3 === 2 ? null : Math.round(price * 0.95);
+      const prices = samplePrices(item, index);
       await client.query(
         `WITH base AS (
            SELECT (date_trunc('day',NOW() AT TIME ZONE 'Asia/Manila')+INTERVAL '1 day')
@@ -66,8 +81,14 @@ export async function ensureReferenceCatalog(db) {
          FROM base CROSS JOIN (VALUES(0),(24)) AS days(offset_day)
          ON CONFLICT(service_id,starts_at) DO NOTHING`,
         [serviceId, 10 + index, bookingLeadMinutes,
-          item.publishedPriceCentavos, price, buddy]
+          ...prices]
       );
+    }
+
+    for (const [index, item] of referenceCatalog.offerings.entries()) {
+      if (item.key === 'laro-mug' || item.key === 'bumi-mug') {
+        await ensurePracticeSession(client, item, samplePrices(item, index));
+      }
     }
 
     // Retire only the four historical fictional fixture activities.

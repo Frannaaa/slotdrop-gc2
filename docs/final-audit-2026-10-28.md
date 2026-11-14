@@ -1,5 +1,7 @@
 # October 28 checkpoint and Fran code audit
 
+Historical planning notes. See the [current submission checklist](gc2-submission-gate.md) for release status and dates.
+
 Checked against the full GC2 brief supplied October 28, 2026. This report concerns the shared repository; the private reference build has a separate release checklist.
 
 ## CP0
@@ -26,4 +28,4 @@ Syntax checks passed on all four refs. The PostgreSQL-only skip is a local envir
 
 PRs #27–#29 have passing CI and are ready for review; they remain unmerged. Janelle must run and review them; merge data, then offers, then owner, retargeting each next PR to main. New changes require a fresh review of the changed code. The private implementation and automated review do not supply that approval.
 
-Keep separate the later requirements: CP1 deployed DB-backed Browse by November 4, full reviewed release by November 9 at 11:59 PM Philippine time, three real code PR merges, two specific reviews and work merged in two grading windows. Group evidence and individual recordings are still required.
+Keep separate the later requirements: CP1 deployed DB-backed Browse by November 4, full reviewed release by the extended Canvas deadline, three real code PR merges, two specific reviews and work merged in two grading windows. Group evidence and individual recordings are still required.
