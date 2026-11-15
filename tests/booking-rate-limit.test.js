@@ -6,7 +6,7 @@ import {retryLimitedBooking} from '../public/js/customer-common.js';
 
 test('POST-only per-socket limiter emits 429/Retry-After and recovers without double booking',async()=>{
  let current=1000;
- const f=await fixture({bookingRateLimit:{max:2,windowMs:10000,now:()=>current}});
+ const f=await fixture({bookingRateLimit:{max:2,windowMs:10000,now:()=>current,useRenderClientIp:false}});
  const submit=body=>fetch(f.base+'/api/bookings',{
    method:'POST',headers:{'Content-Type':'application/json'},
    body:JSON.stringify(body),
@@ -19,7 +19,7 @@ test('POST-only per-socket limiter emits 429/Retry-After and recovers without do
  try{
   for(let i=0;i<2;i++)assert.equal((await submit({})).status,400);
   const blocked=await fetch(f.base+'/api/bookings',{
-    method:'POST',headers:{'Content-Type':'application/json','X-Forwarded-For':'1.2.3.4'},
+    method:'POST',headers:{'Content-Type':'application/json','X-Forwarded-For':'1.2.3.4','CF-Connecting-IP':'203.0.113.99'},
     body:JSON.stringify(body),
   });
   assert.equal(blocked.status,429);
@@ -43,6 +43,64 @@ test('POST-only per-socket limiter emits 429/Retry-After and recovers without do
   assert.equal(owner.filter(row=>row.id===saved.id).length,1);
   assert.equal((await (await fetch(f.base+'/api/slots/1')).json()).remainingSeats,3);
  }finally{await f.close();}
+});
+
+test('Render uses Cloudflare client IP, not caller-spoofed X-Forwarded-For', async () => {
+  // Simulate headers after Render's trusted Cloudflare ingress.
+  const f = await fixture({ bookingRateLimit: { max: 1, useRenderClientIp: true } });
+  const submit = (cloudflareIp, forgedXff, trueClientIp) => fetch(f.base + '/api/bookings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cloudflareIp ? { 'CF-Connecting-IP': cloudflareIp } : {}),
+      ...(forgedXff ? { 'X-Forwarded-For': forgedXff } : {}),
+      ...(trueClientIp ? { 'True-Client-IP': trueClientIp } : {}),
+    },
+    body: '{}',
+  });
+  try {
+    assert.equal((await submit('192.0.2.10', '1.1.1.1, 10.0.0.1')).status, 400);
+    assert.equal((await submit('192.0.2.10', '2.2.2.2, 10.0.0.2')).status, 429,
+      'Rotating an arbitrary first XFF address must not reset the limit');
+    assert.equal((await submit('192.0.2.10', '3.3.3.3', '203.0.113.88')).status, 429,
+      'A fake True-Client-IP must not bypass the limit');
+    assert.equal((await submit('192.0.2.11', '1.1.1.1')).status, 400,
+      'A different trusted Cloudflare client should have its own counter');
+    assert.equal((await submit('192.0.2.11', '4.4.4.4')).status, 429);
+    assert.equal((await submit()).status, 400,
+      'Missing trusted client IP falls back to the socket address');
+    assert.equal((await submit('not-an-ip', '5.5.5.5')).status, 429,
+      'Invalid trusted client IP cannot create an unbounded new counter');
+    assert.equal((await submit('not-an-ip', '6.6.6.6')).status, 429);
+  } finally {
+    await f.close();
+  }
+});
+
+test('Vercel uses its overwritten client IP instead of an arbitrary forwarded value', async () => {
+  // Simulate headers after Vercel's ingress, not direct client-supplied values.
+  const f = await fixture({ bookingRateLimit: {
+    max: 1, useRenderClientIp: false, useVercelClientIp: true,
+  } });
+  const submit = (vercelIp, forwarded) => fetch(f.base + '/api/bookings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(vercelIp ? { 'X-Vercel-Forwarded-For': vercelIp } : {}),
+      ...(forwarded ? { 'X-Forwarded-For': forwarded } : {}),
+    },
+    body: '{}',
+  });
+  try {
+    assert.equal((await submit('198.51.100.21', '1.2.3.4')).status, 400);
+    assert.equal((await submit('198.51.100.21', '5.6.7.8')).status, 429);
+    assert.equal((await submit('198.51.100.22', '1.2.3.4')).status, 400);
+    assert.equal((await submit('198.51.100.22', '6.7.8.9')).status, 429);
+    assert.equal((await submit()).status, 400);
+    assert.equal((await submit('not-an-ip', '1.2.3.4')).status, 429);
+  } finally {
+    await f.close();
+  }
 });
 
 test('browser helper waits once on 429 and resends identical body but never retries uncertain errors',async()=>{

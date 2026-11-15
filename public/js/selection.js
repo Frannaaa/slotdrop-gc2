@@ -1,9 +1,11 @@
-
-import { request, money, date, positive, pageParameters, notice } from "./customer-common.js";
+import {
+  request, money, date, positive, pageParameters, notice, hasBookingTotal,
+} from "./customer-common.js";
 
 const form = document.querySelector("#selection"),
 quantity = document.querySelector("#quantity"),
 summary = document.querySelector("#summary"),
+chosenSession = document.querySelector("#chosenSession"),
 status = document.querySelector("#status"),
 next = document.querySelector("#continue"),
 chosenSession = document.querySelector("#chosenSession");
@@ -16,64 +18,25 @@ async function refresh() {
   summary.textContent = "";
   notice(status, "");
   notice(status, "Checking price and seats...");
-  notice(chosenSession, "Loading session details...");
-
-  let count;
-
   try {
-    count = positive(quantity.value, 100);
-  } catch (error) {
-    if (current === generation) notice(status, error.message, true);
-    return;
-  }
-
-  const sessionRequest = request("/api/slots/" + slotId)
-    .then(slot => {
-      if (current === generation) {
+    const count = positive(quantity.value, 100);
+    const sessionRequest = request("/api/slots/" + slotId).then(slot => {
+      if (current === generation)
         notice(chosenSession, slot.serviceName + " " + date(slot.startsAt));
-      }
-      return { ok: true };
-    })
-    .catch(error => {
-      if (current === generation) {
-        notice(chosenSession, error.message, true);
-      }
-      return { ok: false, error };
     });
-
-  const quoteRequest = request(
-    "/api/pricing/quote?" +
-    new URLSearchParams({ slotId, quantity: count })
-  )
-    .then(quote => {
-      if (current === generation) {
-        summary.textContent =
-          `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
-      }
-      return { ok: true };
-    })
-    .catch(error => {
-      if (current === generation) {
-        notice(status, error.message, true);
-      }
-      return { ok: false, error };
-    });
-
-  const [sessionResult, quoteResult] = await Promise.all([
-    sessionRequest,
-    quoteRequest
-  ]);
-
-  if (current !== generation) return;
-
-  if (sessionResult.ok && quoteResult.ok) {
+    const [, quote] = await Promise.all([
+      sessionRequest,
+      request("/api/pricing/quote?" + new URLSearchParams({ slotId, quantity: count }))
+    ]);
+    if (current !== generation) return;
+    if (!hasBookingTotal(quote) || quote.slotId !== slotId || quote.quantity !== count)
+      throw new Error("Could not verify the booking price. Refresh quote to try again.");
+    summary.textContent = `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
     notice(status, "");
     next.disabled = false;
-  } else {
-    if (!quoteResult.ok) {
-      notice(status, quoteResult.error.message, true);
-    } else if (!sessionResult.ok) {
-      notice(status, sessionResult.error.message, true);
+  } catch (error) {
+    if (current === generation) {
+      notice(status, error.message, true);
     }
     next.disabled = true;
   }
@@ -98,5 +61,5 @@ try {
   notice(status, error.message, true);
   quantity.disabled = true;
   document.querySelector("#retry").disabled = true;
-  notice(chosenSession, "No valid session selected.", true);
+  notice(chosenSession, "");
 }

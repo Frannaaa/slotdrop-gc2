@@ -1,11 +1,13 @@
-// Group assignment: Fran. See docs/ownership-and-execution.md.
-import { DISCOVERY_HOURS } from "./business-config.js";
+// Group assignment: Fran. See README.md#team.
+import { withinBookingWindow, partyPrice as previewPrice } from "./business-config.js";
+
+export { previewPrice };
 export const money = (value) =>
   new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(
     value / 100,
   );
 export const date = (value) =>
-  new Intl.DateTimeFormat("en-PH", {
+  value === null ? "Practice booking" : new Intl.DateTimeFormat("en-PH", {
     timeZone: "Asia/Manila",
     dateStyle: "medium",
     timeStyle: "short",
@@ -43,6 +45,30 @@ export function pageParameters(search, allowed) {
   }
   return params;
 }
+
+export function isBookingId(value) {
+  return typeof value === "string"
+    && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value);
+}
+
+export function hasBookingTotal(value) {
+  return Number.isSafeInteger(value?.slotId) && value.slotId > 0
+    && Number.isSafeInteger(value.quantity) && value.quantity > 0
+    && ["standard", "buddy"].includes(value.pricingType)
+    && Number.isSafeInteger(value.unitPriceCentavos) && value.unitPriceCentavos > 0
+    && Number.isSafeInteger(value.totalPriceCentavos)
+    && value.totalPriceCentavos === value.unitPriceCentavos * value.quantity;
+}
+
+export function isBookingReceipt(value) {
+  return isBookingId(value?.id) && hasBookingTotal(value)
+    && ["confirmed", "cancelled"].includes(value.status)
+    && ["mock_card", "pay_on_site"].includes(value.paymentMethod)
+    && typeof value.serviceName === "string" && typeof value.providerName === "string"
+    && (value.sessionStartsAt === null || (typeof value.sessionStartsAt === "string"
+      && Number.isFinite(Date.parse(value.sessionStartsAt))));
+}
+
 export async function request(path, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
@@ -81,9 +107,8 @@ export async function request(path, options = {}) {
     clearTimeout(timeout);
   }
 }
-// Optional Fran-owned helper for Kaitlyn's Checkout handoff.
-// It retries only explicit HTTP 429, never a network-uncertain save, 409, or 400.
-// The SAME already serialized body/requestId is sent again; caller must lock UI during wait.
+// Retry only HTTP 429 and keep the original serialized body and request ID.
+// Checkout keeps the form locked while it waits.
 export async function retryLimitedBooking(path, options, {
   maxRetries = 1,
   onWait = () => {},
@@ -107,22 +132,20 @@ export async function retryLimitedBooking(path, options, {
 }
 
 export function available(slot, quantity = 1) {
-  const now = Date.now(),
-    start = Date.parse(slot.startsAt);
   return (
     slot.serviceActive &&
     slot.status === "open" &&
     slot.runsAsScheduled &&
     slot.remainingSeats >= quantity &&
-    Date.parse(slot.bookingClosesAt) > now &&
-    start > now &&
-    start < now + DISCOVERY_HOURS * 3600000
+    withinBookingWindow(slot, Date.now())
   );
 }
-export function previewPrice(slot, quantity = 1) {
-  const buddy = quantity >= 2 && slot.buddyPriceCentavos !== null;
-  const unit = buddy ? slot.buddyPriceCentavos : slot.offerPriceCentavos;
-  return { buddy, unit, total: unit * quantity };
+export function closedSessionLabel(slot, now = Date.now()) {
+  if (slot.startsAt === null) return "";
+  const end = Date.parse(slot.startsAt) + slot.durationMinutes * 60000;
+  if (end <= now) return "Event ended";
+  if (Date.parse(slot.bookingClosesAt) <= now) return "Booking closed";
+  return "";
 }
 export const activityLabel = (type) =>
   ({
@@ -143,7 +166,7 @@ export const comparisonLabel = (slot) =>
   !slot.studioReference
     ? "Regular price"
     : slot.originalPriceCentavos === slot.studioReference.publishedPriceCentavos
-      ? "Published reference price"
+      ? "Reference price"
       : "Demo base price";
 // Use the same source-link rules on cards and studio profiles.
 export function safeHttpsUrl(value) {
@@ -162,25 +185,46 @@ export function studioEvidence(slot) {
   const source = safeHttpsUrl(reference.sourceUrl);
   if (!source) return "";
   const priceSource = safeHttpsUrl(reference.priceSourceUrl);
-  return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Sample session, seats, cutoff and offers. This demo does not reserve a place with the studio.</p>`;
+  return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Seats and prices are simulated. Booking here does not reserve a place with the studio.</p>`;
 }
-export function card(slot, quantity = 1) {
+const cardDateFormat = new Intl.DateTimeFormat("en-PH", {
+  timeZone: "Asia/Manila",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+export function card(slot, quantity = 1, { closed = false } = {}) {
   const selectedQuantity =
     Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 100
       ? quantity
       : 1;
-  const price = previewPrice(slot, selectedQuantity);
-  const traits = [
-    slot.beginnerFriendly ? "Beginner-friendly" : "",
-    ...(slot.inclusions || []).map(inclusionLabel),
-  ].filter(Boolean);
+  const price = closed ? null : previewPrice(slot, selectedQuantity);
+  const practice = slot.startsAt === null;
+  const photo = slot.studioReference?.photo;
+  const photoPage = safeHttpsUrl(photo?.page);
+  const photoKey = slot.studioReference?.key;
+  const hasPhoto = photoPage && typeof photoKey === "string"
+    && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
+    && typeof photo.credit === "string";
+  const sessionDate = practice ? "Practice booking" : cardDateFormat.format(new Date(slot.startsAt));
+  const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
+  let bookingNote = "";
+  if (closed) {
+    bookingNote = closedSessionLabel(slot) || "Booking closed";
+  } else if (practice) {
+    bookingNote = "No booking cutoff";
+  } else if (Number.isFinite(Date.parse(slot.bookingClosesAt))) {
+    bookingNote = `Book by ${cardDateFormat.format(new Date(slot.bookingClosesAt))}`;
+  }
   return /* HTML */ `<article class="activity-card card">
-    <div
-      class="card-art ${slot.category === "active" ? "active" : ""}"
-      aria-hidden="true"
-    >
-      ${escapeHtml(activityLabel(slot.activityType))}
-    </div>
+    ${hasPhoto
+      ? `<figure class="card-photo">
+          <img src="/images/workshops/${photoKey}.webp" alt="${escapeHtml(photo.alt)}" width="720" height="405" loading="lazy" decoding="async">
+          <figcaption><a href="${escapeHtml(photoPage)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml("Photo source: " + photo.credit)}">Photo source ↗</a></figcaption>
+        </figure>`
+      : ""}
     <div class="card-body">
       <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
       <h2>${escapeHtml(slot.serviceName || slot.title || "Untitled Session")}</h2>
@@ -190,38 +234,23 @@ export function card(slot, quantity = 1) {
           : escapeHtml(slot.providerName)}
       </p>
       <p class="session-time">
-        <strong>${date(slot.startsAt)}</strong>
-        <br />${slot.durationMinutes} minutes · ${slot.remainingSeats} seats
-        left
+        <strong>${sessionDate}</strong>
+        <br />${slot.durationMinutes} min${closed ? "" : ` · ${seats}`}
       </p>
-      <p class="session-cutoff">Book before ${date(slot.bookingClosesAt)}</p>
-      <div class="session-traits">
-        ${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}
-      </div>
-      <div class="party-price">
+      ${bookingNote ? `<p class="session-cutoff${closed ? " closed" : ""}">${bookingNote}</p>` : ""}
+      ${price ? `<div class="party-price">
         <strong>${money(price.total)}</strong>
-        <span
-          >total for ${selectedQuantity}
-          ${selectedQuantity === 1 ? "person" : "people"}</span
-        >
+        <span>${selectedQuantity === 1 ? "per person" : `total for ${selectedQuantity} people`}</span>
       </div>
-      <p>
-        ${money(price.unit)} /
-        person${price.buddy ? " · Buddy price applied" : ""}<br />
-        <small
-          >${comparisonLabel(slot)} ${money(slot.originalPriceCentavos)} /
-          person</small
-        >${slot.buddyPriceCentavos !== null && !price.buddy
-          ? `<br>
-    <span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`
-          : ""}
-      </p>
-      ${studioEvidence(slot)}
-      <p class="reference">Price preview. Rechecked before saving.</p>
+      ${price.buddy
+          ? `<p class="buddy">Buddy price applied</p>`
+          : slot.buddyPriceCentavos != null
+            ? `<p class="buddy">${money(slot.buddyPriceCentavos)} each for 2+ people</p>`
+            : ""}` : ""}
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
-        >View session ↗</a
+        >${closed ? "View details" : "View workshop"}</a
       >
     </div>
   </article>`;

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
 import { fixture } from './helpers.js';
 import { dateRange } from '../server/services/discovery.js';
@@ -29,6 +30,56 @@ test('discovery respects filters, released capacity, cutoffs and known unavailab
 test('Manila date boundaries retain the current weekend on Sundays', () => {
   assert.deepEqual(dateRange('today', new Date('2026-10-27T18:00:00Z')).map(date=>date.toISOString()), ['2026-10-27T16:00:00.000Z','2026-10-28T16:00:00.000Z']);
   assert.deepEqual(dateRange('weekend', new Date('2026-11-01T03:00:00Z')).map(date=>date.toISOString()), ['2026-10-30T16:00:00.000Z','2026-11-01T16:00:00.000Z']);
+});
+
+test('closed sessions remain discoverable and cannot be quoted or booked', async () => {
+  const f = await fixture({ realCatalog: true });
+  const ago = hours => new Date(f.now.getTime() - hours * 3600000);
+  const get = path => fetch(f.base + path);
+  try {
+    const { rows } = await f.database.query(
+      `SELECT sl.id FROM slots sl JOIN services s ON s.id=sl.service_id
+       WHERE s.reference_key IS NOT NULL AND sl.starts_at IS NOT NULL
+       ORDER BY sl.id LIMIT 3`
+    );
+    const [old, closed, paused] = rows.map(row => Number(row.id));
+    await f.database.query('UPDATE slots SET starts_at=$1, booking_closes_at=$2 WHERE id=$3',
+      [ago(72), ago(75), old]);
+    await f.database.query('UPDATE slots SET starts_at=$1, booking_closes_at=$2 WHERE id=$3',
+      [ago(-1), ago(1), closed]);
+    await f.database.query("UPDATE slots SET starts_at=$1, booking_closes_at=$2, status='paused' WHERE id=$3",
+      [ago(2), ago(6), paused]);
+
+    const openList = await (await get('/api/slots')).json();
+    assert.ok(openList.some(slot => slot.startsAt === null), 'practice offers are still returned');
+    assert.ok(openList.every(slot => ![old, closed, paused].includes(slot.id)));
+    const history = await get('/api/slots?view=closed');
+    assert.equal(history.status, 200);
+    assert.deepEqual((await history.json()).map(slot => slot.id), [closed, old]);
+    assert.deepEqual((await (await get('/api/slots?view=closed&page=2&limit=1')).json()).map(slot => slot.id), [old]);
+    assert.equal((await get('/api/slots?view=unknown')).status, 400);
+    assert.equal((await get('/api/slots/' + old)).status, 200);
+    const quote = await get('/api/pricing/quote?slotId=' + old + '&quantity=1');
+    assert.equal(quote.status, 409);
+    assert.equal((await quote.json()).error.code, 'SLOT_UNAVAILABLE');
+
+    const save = await fetch(f.base + '/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requestId: randomUUID(),
+        slotId: closed,
+        quantity: 1,
+        customerName: 'Closed Session Test',
+        customerEmail: 'closed@example.com',
+        paymentMethod: 'mock_card',
+        expectedTotalCentavos: 270000,
+      }),
+    });
+    assert.equal(save.status, 409);
+    assert.equal((await save.json()).error.code, 'SLOT_UNAVAILABLE');
+    assert.deepEqual(await (await get('/api/bookings')).json(), []);
+  } finally { await f.close(); }
 });
 
 test('detail exposes inactive activity state for direct session links', async () => {

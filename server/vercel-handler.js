@@ -2,10 +2,8 @@
 // The Vercel root Express entry point imports this helper. Startup checks run once
 // per warm instance, and a failed startup can be safely retried on another request.
 import { createApp } from './app.js';
-import { migrateDatabase } from './repositories/migrations.js';
-import { ensureReferenceCatalog } from './repositories/reference-catalog.js';
+import { bootstrapDatabase, upgradeDatabase } from './repositories/migrations.js';
 import { errorCode } from './lib/lifecycle.js';
-import { bootstrapDatabase } from '../tools/db-bootstrap.mjs';
 
 export function createHandler(db) {
   const app = createApp({ db });
@@ -13,8 +11,7 @@ export function createHandler(db) {
   function prepare() {
     ready ??= (async () => {
       await bootstrapDatabase(db);
-      await migrateDatabase(db);
-      await ensureReferenceCatalog(db);
+      await upgradeDatabase(db);
     })().catch(error => {
       ready = undefined; // Let the next request try again.
       throw error;

@@ -1,12 +1,14 @@
-// Group assignment: Cholo. See docs/ownership-and-execution.md.
+// Group assignment: Cholo. See README.md#team.
 import { request, card, notice } from "./customer-common.js";
 
 const results = document.querySelector("#featured"),
-  status = document.querySelector("#status");
+  status = document.querySelector("#status"),
+  retry = document.querySelector("#retry");
 let generation = 0;
 
 async function load() {
   const current = ++generation;
+  retry.hidden = true;
   notice(status, "Loading activities…");
   results.replaceChildren();
   try {
@@ -18,7 +20,10 @@ async function load() {
       slots.length ? "" : "No sessions available right now. Check back soon.",
     );
   } catch (error) {
-    if (current === generation) notice(status, error.message, true);
+    if (current === generation) {
+      notice(status, error.message, true);
+      retry.hidden = false;
+    }
   }
 }
 

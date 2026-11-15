@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import app from '../server/app.js';
-import { card, previewPrice, request, positive, available, safeHttpsUrl, studioEvidence } from '../public/js/customer-common.js';
+import { card, previewPrice, request, positive, available, closedSessionLabel, safeHttpsUrl, studioEvidence } from '../public/js/customer-common.js';
 import { DISCOVERY_HOURS } from '../public/js/business-config.js';
 
 // Session response before #34's additive metadata: Home must also work with #27.
@@ -67,10 +67,33 @@ test('cards accept the session API before additive attributes and escape studio 
   assert.match(html, /Mug &lt;script&gt;bad\(\)&lt;\/script&gt;/);
   assert.match(html, /Studio &amp; friends/);
   assert.match(html, /detail\.html\?slotId=1&quantity=1/);
-  assert.match(card(slot, 2), /detail\.html\?slotId=1&quantity=2/);
+  assert.match(html, /Book by Nov 1, 12:00\s+PM/);
+  assert.match(html, /<strong>₱1,600\.00<\/strong>\s*<span>per person<\/span>/);
+  assert.match(html, /₱1,520\.00 each for 2\+ people/);
+  assert.doesNotMatch(html, /card-art|card-compare|session-traits/);
+  assert.match(card({ ...slot, remainingSeats: 1 }), /1 seat left/);
+  const forTwo = card(slot, 2);
+  assert.match(forTwo, /detail\.html\?slotId=1&quantity=2/);
+  assert.match(forTwo, /<strong>₱3,040\.00<\/strong>\s*<span>total for 2 people<\/span>/);
+  assert.match(forTwo, /Buddy price applied/);
   assert.deepEqual(previewPrice(slot, 1), {buddy:false, unit:160000, total:160000});
   assert.deepEqual(previewPrice(slot, 2), {buddy:true, unit:152000, total:304000});
   assert.deepEqual(previewPrice({...slot, buddyPriceCentavos:null}, 2), {buddy:false, unit:160000, total:320000});
+});
+
+test('closed cards label the cutoff and event end separately and omit the price and seats', t => {
+  const when = time => Date.parse('2026-11-01T' + time + ':00Z');
+  assert.equal(closedSessionLabel(slot, when('03:59')), '');
+  assert.equal(closedSessionLabel(slot, when('04:00')), 'Booking closed');
+  assert.equal(closedSessionLabel(slot, when('08:59')), 'Booking closed');
+  assert.equal(closedSessionLabel(slot, when('09:00')), 'Event ended');
+  assert.equal(closedSessionLabel({ ...slot, startsAt: null, bookingClosesAt: null }, when('09:00')), '');
+  t.mock.method(Date, 'now', () => when('09:00'));
+  const html = card(slot, 1, { closed: true });
+  assert.match(html, /Event ended/);
+  assert.match(html, /detail\.html\?slotId=1&quantity=1/);
+  assert.match(html, /View details/);
+  assert.doesNotMatch(html, /Book by|seat(s)? left|party-price/);
 });
 
 test('studio reference cards and profiles share safe HTTPS source-link validation', () => {
@@ -102,4 +125,18 @@ test('card title falls back from serviceName to title to Untitled Session', () =
   assert.match(card({ ...slot, serviceName: 'Wheel Pottery' }), /<h2>Wheel Pottery<\/h2>/);
   assert.match(card({ ...slot, serviceName: undefined, title: 'Legacy Title' }), /<h2>Legacy Title<\/h2>/);
   assert.match(card({ ...slot, serviceName: '', title: '' }), /<h2>Untitled Session<\/h2>/);
+});
+
+test('practice cards show the cutoff exception and render a credited local workshop photo', () => {
+  const practice = { ...slot, startsAt: null, bookingClosesAt: null,
+    studioReference: { key: 'laro-mug', sourceUrl: 'https://example.com/source', checkedAt: '2026-11-04',
+      photo: { alt: 'Pottery & painting', credit: 'Example Studio', page: 'https://example.com/workshop' } } };
+  const html = card(practice);
+  assert.match(html, /Practice booking/);
+  assert.match(html, /No booking cutoff/);
+  assert.match(html, /src="\/images\/workshops\/laro-mug\.webp" alt="Pottery &amp; painting"/);
+  assert.match(html, /aria-label="Photo source: Example Studio"/);
+  assert.doesNotMatch(html, /Real studio reference|1970|Book by/);
+  const unsafe = { ...practice, studioReference: { ...practice.studioReference, key: '../../elsewhere' } };
+  assert.doesNotMatch(card(unsafe), /<img/);
 });

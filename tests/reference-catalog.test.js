@@ -16,7 +16,9 @@ test('real studio demo installation is additive and preserves legacy receipts an
   assert.deepEqual((await f.db.query('SELECT * FROM bookings')).rows,receipts);
   assert.deepEqual((await f.db.query('SELECT * FROM slots WHERE id<=8 ORDER BY id')).rows,originalSlots);
   const rows=await(await fetch(f.base+'/api/slots')).json();
-  assert.equal(rows.length,16);assert.ok(rows.every(r=>r.studioReference?.bookingIsSimulated));
+  assert.equal(rows.filter(row=>row.startsAt!==null).length,16);
+  assert.equal(rows.filter(row=>row.startsAt===null).length,2);
+  assert.ok(rows.every(r=>r.studioReference?.bookingIsSimulated));
   assert.ok(rows.every(r=>!r.providerName.startsWith('Demo ')));
   assert.equal(new Set(rows.map(r=>r.providerName)).size,5);
   assert.ok(rows.every(r=>r.originalPriceCentavos===r.studioReference.publishedPriceCentavos));
@@ -40,16 +42,82 @@ test('fresh seed stores the sourced catalog and 16 sample sessions in the databa
  }finally{await f.close();}
 });
 
-test('startup does not silently recreate deliberately cleared reference inventory',async()=>{
+test('practice offers stay bookable after scheduled dates pass and keep their saved seat limits', async () => {
+ let now;
+ const f=await fixture({clock:()=>now});
+ now=f.now;
+ try {
+  // Restore the previous column requirements to test the upgrade on existing rows.
+  await f.db.query('ALTER TABLE slots ALTER COLUMN starts_at SET NOT NULL, ALTER COLUMN booking_closes_at SET NOT NULL');
+  await f.db.query('ALTER TABLE bookings ALTER COLUMN session_starts_at SET NOT NULL');
+  const before=(await f.db.query('SELECT * FROM slots ORDER BY id')).rows;
+  await migrateDatabase(f.db);
+  await migrateDatabase(f.db);
+  assert.deepEqual((await f.db.query('SELECT * FROM slots ORDER BY id')).rows,before);
+  await Promise.all([ensureReferenceCatalog(f.db),ensureReferenceCatalog(f.db)]);
+
+  const get=path=>fetch(f.base+path);
+  const send=(path,method,body)=>fetch(f.base+path,{
+   method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body),
+  });
+  const response=await get('/api/slots?page=1&limit=6');
+  assert.equal(response.status,200);
+  const firstPage=await response.json();
+  const scheduled=firstPage.find(row=>row.startsAt!==null);
+  assert.ok(scheduled);
+  assert.equal(firstPage.filter(row=>row.startsAt===null).length,2);
+  now=new Date(f.now.getTime()+60*24*3600000);
+  const practice=await (await get('/api/slots?page=1&limit=6')).json();
+  assert.equal(practice.length,2);
+  assert.ok(practice.every(slot=>slot.startsAt===null && slot.bookingClosesAt===null));
+  const [slot]=practice;
+  await assert.rejects(
+   f.db.query('UPDATE slots SET booking_closes_at=NOW() WHERE id=$1',[slot.id]),
+   error=>error.code==='23514',
+  );
+
+  assert.deepEqual(await (await get('/api/slots?when=today')).json(),[]);
+  assert.equal((await get('/api/pricing/quote?slotId='+scheduled.id+'&quantity=1')).status,409);
+  assert.equal((await send('/api/slots/'+slot.id,'PATCH',{capacity:2})).status,200);
+  assert.equal((await send('/api/slots/'+slot.id,'PATCH',{bookingClosesAt:now.toISOString()})).status,400);
+  assert.equal((await send('/api/slots/'+slot.id,'PATCH',{status:'paused'})).status,200);
+  const quotePath='/api/pricing/quote?slotId='+slot.id+'&quantity=2';
+  assert.equal((await get(quotePath)).status,409);
+  assert.equal((await send('/api/slots/'+slot.id,'PATCH',{status:'open'})).status,200);
+
+  const quoteResponse=await get(quotePath);
+  assert.equal(quoteResponse.status,200);
+  const quote=await quoteResponse.json();
+  const payload={requestId:crypto.randomUUID(),slotId:slot.id,quantity:2,
+   customerName:'Practice Guest',customerEmail:'practice@example.com',paymentMethod:'mock_card',
+   expectedTotalCentavos:quote.totalPriceCentavos};
+  const confirmation=await send('/api/bookings','POST',payload);
+  assert.equal(confirmation.status,201);
+  const receipt=await confirmation.json();
+  assert.equal(receipt.sessionStartsAt,null);
+  assert.deepEqual(await (await get('/api/bookings/'+receipt.id)).json(),receipt);
+  assert.equal((await (await get('/api/bookings')).json()).find(row=>row.id===receipt.id).sessionStartsAt,null);
+  assert.equal((await send('/api/bookings','POST',payload)).status,200);
+  assert.equal((await send('/api/bookings','POST',{...payload,requestId:crypto.randomUUID()})).status,409);
+
+  await ensureReferenceCatalog(f.db);
+  const soldOut=await (await get('/api/slots/'+slot.id)).json();
+  assert.equal(soldOut.remainingSeats,0);
+  assert.equal(soldOut.capacity,2);
+  assert.deepEqual(await (await get('/api/bookings/'+receipt.id)).json(),receipt);
+ } finally { await f.close(); }
+});
+
+test('startup does not silently recreate deliberately cleared scheduled inventory',async()=>{
  const f=await fixture();
  try{
   await ensureReferenceCatalog(f.db);
   const key=referenceCatalog.offerings[0].key;
   const {rows:[service]}=await f.db.query('SELECT id FROM services WHERE reference_key=$1',[key]);
   assert.ok(service);
-  const count=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1',[service.id])).rows[0].n);
+  const count=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND starts_at IS NOT NULL',[service.id])).rows[0].n);
   assert.equal(await count(),2);
-  await f.db.query('DELETE FROM slots WHERE service_id=$1',[service.id]);
+  await f.db.query('DELETE FROM slots WHERE service_id=$1 AND starts_at IS NOT NULL',[service.id]);
   assert.equal(await count(),0);
   await ensureReferenceCatalog(f.db);
   await ensureReferenceCatalog(f.db);
@@ -145,8 +213,8 @@ test('sessions that start later but are past their booking cutoff do not block t
   const key=referenceCatalog.offerings[2].key;
   const {rows:[service]}=await f.db.query('SELECT id FROM services WHERE reference_key=$1',[key]);
   // Every session still starts in the future, but customers can no longer book any of them.
-  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '30 minutes',booking_closes_at=NOW()-INTERVAL '1 minute' WHERE id=(SELECT MIN(id) FROM slots WHERE service_id=$1)",[service.id]);
-  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '40 minutes',booking_closes_at=NOW()-INTERVAL '2 minutes' WHERE id=(SELECT MAX(id) FROM slots WHERE service_id=$1)",[service.id]);
+  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '30 minutes',booking_closes_at=NOW()-INTERVAL '1 minute' WHERE id=(SELECT MIN(id) FROM slots WHERE service_id=$1 AND starts_at IS NOT NULL)",[service.id]);
+  await f.db.query("UPDATE slots SET starts_at=NOW()+INTERVAL '40 minutes',booking_closes_at=NOW()-INTERVAL '2 minutes' WHERE id=(SELECT MAX(id) FROM slots WHERE service_id=$1 AND starts_at IS NOT NULL)",[service.id]);
   const bookable=async()=>Number((await f.db.query('SELECT COUNT(*) AS n FROM slots WHERE service_id=$1 AND booking_closes_at>NOW()',[service.id])).rows[0].n);
   assert.equal(await bookable(),0);
   await ensureReferenceCatalog(f.db);

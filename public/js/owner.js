@@ -8,6 +8,7 @@ import {
   preferredServiceId,
   demoInventoryStatus,
   openReleaseUtilization,
+  commissionPerSeat,
 } from "./owner-policy.js";
 import { api } from "./api.js";
 const $ = (id) => document.getElementById(id);
@@ -39,6 +40,7 @@ let loaded = false;
 let editingCutoff = null;
 let editingSnapshot = null;
 let salesViews = [];
+let savedBookings = [];
 function element(tag, text, className) {
   const item = document.createElement(tag);
   if (text !== undefined) item.textContent = text;
@@ -85,7 +87,7 @@ function preview() {
     const standard = cents(field("offerPriceCentavos").value),
       buddy = cents(field("buddyPriceCentavos").value, true);
     const net = (price) =>
-      price - Math.round((price * catalog.commissionBasisPoints) / 10000);
+      price - commissionPerSeat(price, catalog.commissionBasisPoints);
     $("net-preview").textContent =
       `Estimated earnings after the ${catalog.commissionBasisPoints / 100}% fee: ${money(net(standard))} per seat.` +
       (buddy === null
@@ -126,10 +128,11 @@ function reset() {
   // form.reset() can reselect a retired fixture after the catalog migration.
   $("service").value = preferredServiceId(catalog.services, $("service").value);
   $("editor-title").textContent = "Create a session";
-  $("save").textContent = "Save demo session offer";
+  $("save").textContent = "Save session offer";
   $("status-field").hidden = true;
   for (const name of ["serviceId", "startsAt", "originalPriceCentavos"])
     field(name).disabled = false;
+  $("cutoff").disabled = false;
   field("runsAsScheduled").disabled = false;
   $("starts").value = localTime(new Date(Date.now() + 24 * 3600000));
   defaultCutoff();
@@ -148,8 +151,10 @@ function edit(slot) {
   $("save").textContent = "Save session changes";
   $("status-field").hidden = false;
   $("service").value = String(slot.serviceId);
-  $("starts").value = localTime(slot.startsAt);
-  $("cutoff").value = localTime(slot.bookingClosesAt);
+  const practice = slot.startsAt === null;
+  $("starts").value = practice ? "" : localTime(slot.startsAt);
+  $("cutoff").value = practice ? "" : localTime(slot.bookingClosesAt);
+  $("cutoff").disabled = practice;
   field("capacity").value = slot.capacity;
   field("originalPriceCentavos").value = (
     slot.originalPriceCentavos / 100
@@ -170,11 +175,12 @@ function edit(slot) {
     "runsAsScheduled",
   ])
     field(name).disabled = true;
-  $("cutoff-hint").textContent =
-    "This deadline belongs to this session. An elapsed deadline closes new bookings.";
+  $("cutoff-hint").textContent = practice
+    ? "Practice booking · No booking cutoff."
+    : "This deadline belongs to this session. An elapsed deadline closes new bookings.";
   preview();
   $("editor-title").scrollIntoView({ behavior: "smooth", block: "start" });
-  $("cutoff").focus({ preventScroll: true });
+  (practice ? field("offerPriceCentavos") : $("cutoff")).focus({ preventScroll: true });
   setBusy(false);
 }
 function renderMetrics(metrics) {
@@ -217,15 +223,16 @@ function renderMetrics(metrics) {
     $("metrics").append(card);
   }
 }
-function renderOpenUtilization(bookings) {
-  const value = openReleaseUtilization(catalog, bookings);
-  let message = "No eligible, open demo sessions are in the current discovery window.";
+function renderOpenUtilization(now) {
+  const value = openReleaseUtilization(catalog, savedBookings, now);
+  let message = "No eligible, open demo sessions.";
   if (value.inconsistent) {
     message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
   } else if (value.utilizationPercent !== null) {
-    message = `${value.confirmedSeats} of ${value.releasedSeats} released demo seats booked (${value.utilizationPercent}%) across ${value.eligibleSessions} currently eligible sessions.`;
+    message = `${value.confirmedSeats} of ${value.releasedSeats} released seats booked · ${value.utilizationPercent}% across ${value.eligibleSessions} eligible ${value.eligibleSessions === 1 ? "session" : "sessions"}.`;
   }
-  $("open-utilization").textContent = message;
+  const utilization = $("open-utilization");
+  if (utilization.textContent !== message) utilization.textContent = message;
 }
 function refreshDemoReadiness(now = Date.now()) {
   const info = demoInventoryStatus(
@@ -235,13 +242,16 @@ function refreshDemoReadiness(now = Date.now()) {
     catalog.discoveryHours,
   );
   const warning = $("inventory-warning");
-  if (warning.textContent !== info.message) warning.textContent = info.message;
+  // A healthy catalog needs no warning banner. Keep actionable alerts visible.
+  const alert = info.state === "ready" ? "" : info.message;
+  if (warning.textContent !== alert) warning.textContent = alert;
   warning.dataset.state = info.state;
 }
 function refreshSalesStates() {
   if (!loaded) return;
   const now = Date.now();
   refreshDemoReadiness(now);
+  renderOpenUtilization(now);
   for (const { slot, tag, help, toggle, editButton } of salesViews) {
     const state = salesState(slot, now, catalog.discoveryHours);
     tag.textContent = state.label;
@@ -278,8 +288,8 @@ function renderSessions() {
     card.append(
       heading,
       element("p", slot.providerName + " · " + slot.area),
-      element("p", time(slot.startsAt)),
-      element("p", "Bookings close " + time(slot.bookingClosesAt)),
+      element("p", slot.startsAt === null ? "Practice booking" : time(slot.startsAt)),
+      element("p", slot.bookingClosesAt === null ? "No booking cutoff" : "Bookings close " + time(slot.bookingClosesAt)),
     );
     card.append(
       element(
@@ -388,7 +398,7 @@ function renderBookings(rows) {
     const tr = element("tr");
     for (const value of [
       row.id + " · " + row.serviceName,
-      time(row.sessionStartsAt),
+      row.sessionStartsAt === null ? "Practice booking" : time(row.sessionStartsAt),
       String(row.quantity),
       row.pricingType + " · " + money(row.unitPriceCentavos),
       money(row.totalPriceCentavos),
@@ -415,6 +425,7 @@ async function load() {
       api("/api/bookings"),
     ]);
     catalog = next;
+    savedBookings = bookings;
     const selected = $("service").value;
     $("service").replaceChildren();
     for (const service of catalog.services) {
@@ -432,10 +443,8 @@ async function load() {
       editing,
     );
     renderMetrics(metrics);
-    renderOpenUtilization(bookings);
     renderSessions();
     renderBookings(bookings);
-    refreshDemoReadiness();
     // Keep an existing unsaved deadline when refreshing the Owner catalog.
     // On first load the deadline is blank and must use the active activity default.
     if (!$("cutoff").value) defaultCutoff();
@@ -465,8 +474,10 @@ form.addEventListener("submit", async (event) => {
       capacity: Number(field("capacity").value),
       offerPriceCentavos: cents(field("offerPriceCentavos").value),
       buddyPriceCentavos: cents(field("buddyPriceCentavos").value, true),
-      bookingClosesAt: cutoffRequestValue($("cutoff").value, editingCutoff),
     };
+    if (editingSnapshot?.startsAt !== null) {
+      body.bookingClosesAt = cutoffRequestValue($("cutoff").value, editingCutoff);
+    }
     if (editing) {
       body.status = field("status").value;
       body = changedOfferFields(body, editingSnapshot);
