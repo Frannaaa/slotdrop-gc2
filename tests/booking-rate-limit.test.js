@@ -77,6 +77,32 @@ test('Render uses Cloudflare client IP, not caller-spoofed X-Forwarded-For', asy
   }
 });
 
+test('Vercel uses its overwritten client IP instead of an arbitrary forwarded value', async () => {
+  // Simulate headers after Vercel's ingress, not direct client-supplied values.
+  const f = await fixture({ bookingRateLimit: {
+    max: 1, useRenderClientIp: false, useVercelClientIp: true,
+  } });
+  const submit = (vercelIp, forwarded) => fetch(f.base + '/api/bookings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(vercelIp ? { 'X-Vercel-Forwarded-For': vercelIp } : {}),
+      ...(forwarded ? { 'X-Forwarded-For': forwarded } : {}),
+    },
+    body: '{}',
+  });
+  try {
+    assert.equal((await submit('198.51.100.21', '1.2.3.4')).status, 400);
+    assert.equal((await submit('198.51.100.21', '5.6.7.8')).status, 429);
+    assert.equal((await submit('198.51.100.22', '1.2.3.4')).status, 400);
+    assert.equal((await submit('198.51.100.22', '6.7.8.9')).status, 429);
+    assert.equal((await submit()).status, 400);
+    assert.equal((await submit('not-an-ip', '1.2.3.4')).status, 429);
+  } finally {
+    await f.close();
+  }
+});
+
 test('browser helper waits once on 429 and resends identical body but never retries uncertain errors',async()=>{
  const previous=globalThis.fetch;
  const sent=[], waits=[], messages=[];
