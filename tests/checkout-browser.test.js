@@ -385,7 +385,7 @@ test('checkout verifies the quote and preserves one request through confirmation
   );
 });
 
-test('Selection waits for a quote for the current number of seats', async () => {
+test('Selection shows the session and waits for a verified quote for the current size', async () => {
   const elements = new Map();
   const get = selector => {
     if (!elements.has(selector)) {
@@ -401,16 +401,32 @@ test('Selection waits for a quote for the current number of seats', async () => 
     return elements.get(selector);
   };
   let quote = sampleQuote;
+  let quoteFailure = new Error('Quote temporarily unavailable');
+  let loadSession;
+  const session = new Promise(resolve => { loadSession = resolve; });
   const source = (await readFile(new URL('../public/js/selection.js', import.meta.url), 'utf8'))
     .replace(/^import\s*\{[^}]*\}\s*from "\.\/customer-common\.js";\r?\n/m, '');
   runInNewContext(source, {
     ...common, URLSearchParams,
     document: { querySelector: get },
     location: { search: '?slotId=1&quantity=2' },
-    request: async url => url.startsWith('/api/pricing/quote') ? quote
-      : { serviceName: 'Demo pottery', startsAt: null },
+    request: async url => {
+      if (!url.startsWith('/api/pricing/quote')) return session;
+      if (quoteFailure) throw quoteFailure;
+      return quote;
+    },
   });
   await new Promise(resolve => setImmediate(resolve));
+  assert.equal(get('#continue').disabled, true);
+  assert.equal(get('#status').textContent, 'Quote temporarily unavailable');
+  loadSession({ serviceName: 'Demo pottery', startsAt: null });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(get('#chosenSession').textContent, /Demo pottery/);
+  assert.equal(get('#continue').disabled, true);
+  assert.equal(get('#summary').textContent, '');
+
+  quoteFailure = null;
+  await get('#retry').callbacks.click();
   assert.equal(get('#continue').disabled, true);
   assert.match(get('#status').textContent, /could not verify/i);
   quote = { ...sampleQuote, quantity: 2, totalPriceCentavos: 2000 };

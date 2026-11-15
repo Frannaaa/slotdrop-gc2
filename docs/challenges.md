@@ -118,7 +118,7 @@ The live demo uses 10%.
 
 ## Challenge 5. Predict, then run
 
-Each member picks one function they wrote and writes down what it will return for **three inputs** before running it. The recording shows the results and explains any differences, then changes one input or line and explains the new result. Use your own voice in one unedited recording of at most **three minutes**, made without AI assistance.
+Each member picks one function they wrote and writes down what it will return for **three inputs** before running it. The recording shows the results and explains any differences, then changes one input or line and explains the new result. Use your own voice in one unedited recording of at most **three minutes**.
 
 [Group video folder](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj)
 
