@@ -48,8 +48,8 @@ function renderDetail(slot,id,quantity){
         ${slot.beginnerFriendly?`<span aria-hidden="true">·</span><span>Beginner-friendly</span>`:""}</div>
     </div>
     <div class="detail-shell">
+      <figure class="detail-image">${photoMarkup}${credit}</figure>
       <div class="detail-primary">
-        <figure class="detail-image">${photoMarkup}${credit}</figure>
         ${inclusions}
         <section class="detail-section">
           <h2>About this workshop</h2>
