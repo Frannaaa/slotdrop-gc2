@@ -1,0 +1,40 @@
+name: Verify SlotDrop live release
+on:
+  push:
+    branches: ['qa/gc2-live-3ef579d']
+permissions:
+  contents: read
+concurrency: slotdrop-gc2-live-evidence-3ef579d
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Live read-only readiness checks
+        id: preflight
+        run: node tools/check-live-evidence.mjs preflight
+      - name: Install browser and measurement tools
+        id: browser-tools
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1 lighthouse@13.6.0
+          npx --no-install playwright install --with-deps chromium
+      - name: Cache-disabled mobile Browse and archive
+        run: node tools/check-live-evidence.mjs browser
+      - name: Lighthouse mobile Browse
+        if: ${{ !cancelled() && steps.browser-tools.outcome == 'success' }}
+        run: node tools/check-live-evidence.mjs lighthouse
+      - name: Checkout retry, live receipt and matching Owner row
+        if: ${{ !cancelled() && steps.browser-tools.outcome == 'success' && steps.preflight.outcome == 'success' }}
+        run: node tools/check-live-evidence.mjs booking
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slotdrop-live-release-evidence
+          path: live-evidence/
+          retention-days: 90
