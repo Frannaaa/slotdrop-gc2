@@ -45,6 +45,30 @@ export function pageParameters(search, allowed) {
   }
   return params;
 }
+
+export function isBookingId(value) {
+  return typeof value === "string"
+    && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value);
+}
+
+export function hasBookingTotal(value) {
+  return Number.isSafeInteger(value?.slotId) && value.slotId > 0
+    && Number.isSafeInteger(value.quantity) && value.quantity > 0
+    && ["standard", "buddy"].includes(value.pricingType)
+    && Number.isSafeInteger(value.unitPriceCentavos) && value.unitPriceCentavos > 0
+    && Number.isSafeInteger(value.totalPriceCentavos)
+    && value.totalPriceCentavos === value.unitPriceCentavos * value.quantity;
+}
+
+export function isBookingReceipt(value) {
+  return isBookingId(value?.id) && hasBookingTotal(value)
+    && ["confirmed", "cancelled"].includes(value.status)
+    && ["mock_card", "pay_on_site"].includes(value.paymentMethod)
+    && typeof value.serviceName === "string" && typeof value.providerName === "string"
+    && (value.sessionStartsAt === null || (typeof value.sessionStartsAt === "string"
+      && Number.isFinite(Date.parse(value.sessionStartsAt))));
+}
+
 export async function request(path, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);

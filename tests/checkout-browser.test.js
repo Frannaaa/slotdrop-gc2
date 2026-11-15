@@ -2,8 +2,17 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
+import * as common from '../public/js/customer-common.js';
 
 const receiptId = 'a1000000-0000-4000-8000-000000000001';
+const sampleQuote = {
+  slotId: 1, quantity: 1, pricingType: 'standard',
+  unitPriceCentavos: 1000, totalPriceCentavos: 1000,
+};
+const sampleReceipt = {
+  ...sampleQuote, id: receiptId, status: 'confirmed', paymentMethod: 'mock_card',
+  serviceName: 'Demo session', providerName: 'Demo studio', sessionStartsAt: null,
+};
 
 test('429 checkout shows the wait message, retries the same booking, and opens its confirmation', async () => {
   const elements = new Map();
@@ -47,10 +56,11 @@ test('429 checkout shows the wait message, retries the same booking, and opens i
     new URL('../public/js/checkout.js', import.meta.url),
     'utf8'
   ))
-    .replace(/^import[^\n]*\r?\n/m, '')
+    .replace(/^import\s*\{[^}]*\}\s*from "\.\/customer-common\.js";\r?\n/m, '')
     .replace(/\ntry\s*\{\s*const params = pageParameters[\s\S]*$/, '');
 
   const context = {
+    ...common,
     document: { querySelector: selector => get(selector.replace('#', '')) },
     FormData: class {
       get(name) { return get(name).value; }
@@ -87,7 +97,7 @@ test('429 checkout shows the wait message, retries the same booking, and opens i
         error.retryAfterSeconds = 4;
         throw error;
       }
-      return { id: receiptId };
+      return sampleReceipt;
     },
     money: value => String(value),
     date: value => String(value),
@@ -115,14 +125,15 @@ test('429 checkout shows the wait message, retries the same booking, and opens i
   assert.equal(destination, '/confirmation.html?id=' + receiptId);
 });
 
-test('checkout requires acceptance after a quote and stays locked through confirmation', async () => {
+test('checkout verifies the quote and preserves one request through confirmation failures', async () => {
   const elements = new Map();
   const handlers = new Map();
   const sent = [];
   let finishRequest;
   let navigationStarted = false;
-  let quoteAvailable = false;
+  let quoteReply;
   let bookingFailure;
+  let navigationFails = false;
 
   const get = id => {
     if (!elements.has(id)) {
@@ -170,13 +181,14 @@ test('checkout requires acceptance after a quote and stays locked through confir
     new URL('../public/js/checkout.js', import.meta.url),
     'utf8'
   ))
-    .replace(/^import[^\n]*\r?\n/m, '')
+    .replace(/^import\s*\{[^}]*\}\s*from "\.\/customer-common\.js";\r?\n/m, '')
     .replace(
       /\ntry\s*\{\s*const params = pageParameters[\s\S]*$/,
       ''
     );
 
   const context = {
+    ...common,
     document: {
       querySelector(selector) {
         return get(selector.replace('#', ''));
@@ -212,6 +224,7 @@ test('checkout requires acceptance after a quote and stays locked through confir
     location: {
       search: '?slotId=1&quantity=1',
       assign() {
+        if (navigationFails) throw new Error('Navigation was interrupted');
         navigationStarted = true;
       },
     },
@@ -222,15 +235,14 @@ test('checkout requires acceptance after a quote and stays locked through confir
       assert.equal(options.method, 'POST');
       const body = JSON.parse(options.body);
       assert.equal(body.requestId, '12345678-1234-1234-1234-123456789abc');
-      assert.equal(body.expectedTotalCentavos, 1000);
       return context.request(path, options);
     },
 
     request: async (path, options) => {
       if (path === '/api/slots/1') return { serviceName: 'Demo session' };
       if (path.startsWith('/api/pricing/quote?')) {
-        if (!quoteAvailable) throw new Error('Quote unavailable');
-        return { unitPriceCentavos: 1000, totalPriceCentavos: 1000 };
+        if (!quoteReply) throw new Error('Quote unavailable');
+        return quoteReply;
       }
       if (path === '/api/bookings') {
         sent.push(options.body);
@@ -278,7 +290,12 @@ test('checkout requires acceptance after a quote and stays locked through confir
   await failedQuote;
   assert.equal(get('retry').disabled, false);
 
-  quoteAvailable = true;
+  quoteReply = { ...sampleQuote, slotId: 2 };
+  await load();
+  assert.equal(ack.disabled, true, 'a quote for the wrong session cannot be accepted');
+  assert.equal(get('retry').disabled, false);
+
+  quoteReply = sampleQuote;
   await load();
   assert.equal(ack.disabled, false);
   assert.equal(ack.checked, false);
@@ -289,29 +306,68 @@ test('checkout requires acceptance after a quote and stays locked through confir
   handlers.get('acceptPrice:change')();
   assert.equal(button.disabled, false);
 
+  bookingFailure = Object.assign(new Error('Price changed'), {
+    status: 409, code: 'PRICE_CHANGED',
+    quote: { ...sampleQuote, unitPriceCentavos: 1100, totalPriceCentavos: 1100 },
+  });
+  await submit(event);
+  assert.equal(get('summary').textContent, '1 × 1100 = 1100');
+  assert.equal(ack.checked, false);
+  assert.equal(button.disabled, true);
+  await submit(event);
+  assert.equal(sent.length, 1, 'the new total needs fresh acceptance');
+
+  ack.checked = true;
+  handlers.get('acceptPrice:change')();
+  bookingFailure = Object.assign(new Error('Price changed'), {
+    status: 409, code: 'PRICE_CHANGED', quote: { ...sampleQuote, quantity: 2 },
+  });
+  await submit(event);
+  assert.equal(JSON.parse(sent.at(-1)).expectedTotalCentavos, 1100);
+  assert.equal(ack.disabled, true);
+  assert.equal(get('summary').textContent, '');
+  assert.match(get('status').textContent, /Refresh quote/);
+  sent.length = 0;
+
+  bookingFailure = undefined;
+  await load();
+  ack.checked = true;
+  handlers.get('acceptPrice:change')();
   const first = submit(event);
 
   assert.equal(sent.length, 1);
+  assert.equal(JSON.parse(sent[0]).expectedTotalCentavos, 1000);
   assert.equal(button.disabled, true);
 
-  finishRequest({ id: 'unexpected-response' });
+  finishRequest({ ...sampleReceipt, slotId: 2 });
   await first;
   assert.equal(navigationStarted, false);
   assert.equal(button.textContent, 'Retry booking');
   assert.equal(context.sessionStorage.stored, sent[0]);
 
-  bookingFailure = Object.assign(new Error('Rate limited'), { status: 429 });
-  await submit(event);
-  assert.equal(button.textContent, 'Retry booking');
-  assert.equal(context.sessionStorage.stored, sent[0]);
-  assert.equal(sent[1], sent[0]);
+  for (const status of [429, 403]) {
+    bookingFailure = Object.assign(new Error('Temporary gateway response'), { status });
+    await submit(event);
+    assert.equal(button.textContent, 'Retry booking');
+    assert.equal(context.sessionStorage.stored, sent[0]);
+    assert.equal(sent.at(-1), sent[0]);
+  }
 
   bookingFailure = undefined;
+  navigationFails = true;
+  const interrupted = submit(event);
+  finishRequest(sampleReceipt);
+  await interrupted;
+  assert.equal(navigationStarted, false);
+  assert.equal(button.textContent, 'Retry booking');
+  assert.equal(context.sessionStorage.stored, sent[0]);
+
+  navigationFails = false;
   const retryBooking = submit(event);
-  assert.equal(sent[2], sent[0], 'the uncertain booking still uses the same body');
+  assert.ok(sent.every(body => body === sent[0]), 'every retry sends the same booking body');
 
   // The server confirms the booking, but navigation is still pending.
-  finishRequest({ id: receiptId });
+  finishRequest(sampleReceipt);
   await retryBooking;
 
   assert.equal(navigationStarted, true);
@@ -324,7 +380,41 @@ test('checkout requires acceptance after a quote and stays locked through confir
 
   assert.equal(
     sent.length,
-    3,
+    5,
     'no further booking is sent after a valid receipt'
   );
+});
+
+test('Selection waits for a quote for the current number of seats', async () => {
+  const elements = new Map();
+  const get = selector => {
+    if (!elements.has(selector)) {
+      let value = '';
+      elements.set(selector, {
+        get value() { return value; },
+        set value(next) { value = String(next); },
+        disabled: true, textContent: '', callbacks: {},
+        setAttribute() {},
+        addEventListener(type, callback) { this.callbacks[type] = callback; },
+      });
+    }
+    return elements.get(selector);
+  };
+  let quote = sampleQuote;
+  const source = (await readFile(new URL('../public/js/selection.js', import.meta.url), 'utf8'))
+    .replace(/^import\s*\{[^}]*\}\s*from "\.\/customer-common\.js";\r?\n/m, '');
+  runInNewContext(source, {
+    ...common, URLSearchParams,
+    document: { querySelector: get },
+    location: { search: '?slotId=1&quantity=2' },
+    request: async url => url.startsWith('/api/pricing/quote') ? quote
+      : { serviceName: 'Demo pottery', startsAt: null },
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(get('#continue').disabled, true);
+  assert.match(get('#status').textContent, /could not verify/i);
+  quote = { ...sampleQuote, quantity: 2, totalPriceCentavos: 2000 };
+  await get('#retry').callbacks.click();
+  assert.equal(get('#continue').disabled, false);
+  assert.match(get('#summary').textContent, /2 x/);
 });

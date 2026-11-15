@@ -1,5 +1,8 @@
 // Group assignment: Kaitlyn. See README.md#team.
-import { request, retryLimitedBooking, money, date, positive, pageParameters, notice } from "./customer-common.js";
+import {
+  request, retryLimitedBooking, money, date, positive, pageParameters, notice,
+  hasBookingTotal, isBookingId, isBookingReceipt,
+} from "./customer-common.js";
 
 const form = document.querySelector("#checkout"),
   button = document.querySelector("#submit"),
@@ -8,8 +11,6 @@ const form = document.querySelector("#checkout"),
   status = document.querySelector("#status"),
   ack = document.querySelector("#acceptPrice"),
   retry = document.querySelector("#retry");
-const bookingIdPattern = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
-
 let slotId,
   quantity,
   quote,
@@ -57,6 +58,16 @@ function resetQuote() {
   document.querySelector("#priceLabel").textContent = "I agree to the booking total.";
 }
 
+function matchesQuote(value) {
+  return hasBookingTotal(value) && value.slotId === slotId && value.quantity === quantity;
+}
+
+function bookingRejected(error) {
+  return (error.status === 400 && error.code === "INVALID_INPUT")
+    || (error.status === 404 && error.code === "SLOT_NOT_FOUND")
+    || (error.status === 409 && ["SLOT_UNAVAILABLE", "REQUEST_KEY_CONFLICT"].includes(error.code));
+}
+
 async function load() {
   if (busy || uncertain || navigating) return;
 
@@ -76,12 +87,14 @@ async function load() {
     ]);
 
     if (current !== generation) return;
+    if (!matchesQuote(loaded))
+      throw new Error("Could not verify the booking price. Refresh quote to try again.");
 
     notice(chosenSession, slot.serviceName + " · " + date(slot.startsAt));
 
     quote = loaded;
-    ack.disabled = false;
     showQuote();
+    ack.disabled = false;
     notice(status, "Review the total and enter fictional details.");
   } catch (error) {
     if (current !== generation) return;
@@ -152,35 +165,36 @@ form.addEventListener("submit", async (event) => {
       },
     });
 
-    if (typeof receipt?.id !== "string" || !bookingIdPattern.test(receipt.id)) {
-      throw Object.assign(new Error("Invalid booking response."), { uncertain: true });
+    if (!isBookingReceipt(receipt)
+      || receipt.slotId !== slotId
+      || receipt.quantity !== quantity
+      || receipt.totalPriceCentavos !== pending.expectedTotalCentavos
+      || receipt.paymentMethod !== pending.paymentMethod) {
+      throw new Error("Invalid booking response.");
     }
-    clear();
 
-    // Keep checkout locked while confirmation navigation is pending.
+    // Keep the retry request until confirmation navigation starts.
+    location.assign("/confirmation.html?id=" + encodeURIComponent(receipt.id));
     navigating = true;
-    lockDetails(true);
-    ack.disabled = true;
-    retry.disabled = true;
-    button.disabled = true;
-
-    location.assign(
-      "/confirmation.html?id=" + encodeURIComponent(receipt.id),
-    );
+    clear();
   } catch (error) {
-    if (error.code === "PRICE_CHANGED") {
+    if (error.status === 409 && error.code === "PRICE_CHANGED") {
       clear();
-      quote = error.quote;
-      showQuote();
-      ack.checked = false;
       uncertain = false;
-
-      notice(
-        status,
-        "The price changed. Review and accept the new total before submitting again.",
-        true,
-      );
-    } else if (error.uncertain || error.status >= 500 || (uncertain && error.status === 429)) {
+      resetQuote();
+      if (matchesQuote(error.quote)) {
+        quote = error.quote;
+        showQuote();
+        notice(status, "The price changed. Review and accept the new total before submitting again.", true);
+      } else {
+        notice(status, "The price changed. Refresh quote to see the current total.", true);
+      }
+    } else if (bookingRejected(error) || (!uncertain && error.status === 429 && error.code === "RATE_LIMITED")) {
+      clear();
+      uncertain = false;
+      if (["SLOT_UNAVAILABLE", "SLOT_NOT_FOUND"].includes(error.code)) resetQuote();
+      notice(status, error.message, true);
+    } else {
       uncertain = true;
 
       notice(
@@ -190,13 +204,6 @@ form.addEventListener("submit", async (event) => {
           : "Could not confirm the result. Your details are locked so Retry booking sends the same request safely.",
         true,
       );
-    } else {
-      clear();
-      uncertain = false;
-
-      if (error.code === "SLOT_UNAVAILABLE") resetQuote();
-
-      notice(status, error.message, true);
     }
   } finally {
     busy = false;
@@ -284,8 +291,7 @@ function validPending(value) {
     !Array.isArray(value) &&
     value.slotId === slotId &&
     value.quantity === quantity &&
-    typeof value.requestId === "string" &&
-    bookingIdPattern.test(value.requestId) &&
+    isBookingId(value.requestId) &&
     typeof value.customerName === "string" &&
     value.customerName.trim().length >= 1 &&
     value.customerName.length <= 100 &&

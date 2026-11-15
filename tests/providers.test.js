@@ -10,7 +10,9 @@ test('studio application is persisted once, stays pending and never publishes co
  try{
   const provider=(await(await fetch(f.base+'/api/slots')).json())[0].providerId;
   const before=(await f.db.query('SELECT * FROM providers ORDER BY id')).rows;
-  const input={...sample(),providerId:provider};
+  const website = 'https://example.com/' + '\u00e9'.repeat(338);
+  assert.equal(new URL(website).href.length, 2048);
+  const input={...sample(),providerId:provider,website};
   const responses=await Promise.all([send(input),send(input)]);
   assert.deepEqual(responses.map(r=>r.status).sort(),[200,201]);
   const [saved,retried]=await Promise.all(responses.map(r=>r.json()));
@@ -18,6 +20,7 @@ test('studio application is persisted once, stays pending and never publishes co
   assert.equal((await f.db.query('SELECT COUNT(*)::int AS n FROM provider_applications')).rows[0].n,1);
   const record=(await f.db.query('SELECT * FROM provider_applications WHERE id=$1',[saved.id])).rows[0];
   assert.equal(record.contact_email,input.contactEmail);assert.equal(record.authorized,true);
+  assert.equal(record.website, new URL(website).href);
   await migrateDatabase(f.db);await migrateDatabase(f.db);
   assert.deepEqual(await(await fetch(f.base+'/api/provider-applications/'+saved.id)).json(),saved);
   assert.equal((await send({...input,contactEmail:'different@example.com'})).status,409);
@@ -37,6 +40,11 @@ test('studio applications reject malformed fields, unsupported claims and invali
   const valid=sample();
   for(const change of [{requestId:'bad'},{authorized:false},{demoAcknowledged:false},{activityTypes:[]},{activityTypes:['pottery','pottery']},{activityTypes:['arbitrary']},{representativeRole:'visitor'},{website:'http://example.com'},{website:'https://user:secret@example.com'},{contactEmail:'invalid'},{contactEmail:'x\u0000@example.com'},{businessName:' '.repeat(8)},{businessName:'x'.repeat(121)},{status:'approved'},{providerId:'1 or 1=1'}])assert.equal((await send({...valid,...change})).status,400,JSON.stringify(change));
   assert.equal((await send({...valid,providerId:1})).status,404);
+  const website = 'https://example.com/' + '\u00e9'.repeat(350);
+  assert.ok(website.length < 2048 && new URL(website).href.length > 2048);
+  const longWebsite = await send({...valid, website});
+  assert.equal(longWebsite.status, 400);
+  assert.equal((await longWebsite.json()).error.code, 'INVALID_INPUT');
   assert.equal((await send({...valid,providerId:99999})).status,404);
   for(const path of ['/api/providers/1','/api/providers/99999','/api/provider-applications/'+randomUUID()])assert.equal((await fetch(f.base+path)).status,404,path);
   for(const path of ['/api/providers/no','/api/provider-applications/no'])assert.equal((await fetch(f.base+path)).status,400,path);

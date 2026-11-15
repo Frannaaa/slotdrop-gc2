@@ -106,9 +106,9 @@ On one checked-out database client:
 5. Compare expectedTotalCentavos before inserting.
 6. Insert receipt snapshots, commit and release the client.
 
-Insufficient seats return 409 SLOT_UNAVAILABLE. A changed acknowledged amount returns 409 PRICE_CHANGED with a fresh quote (error.quote) before any insert. The frontend displays the new amount and asks again.
+Insufficient seats return 409 SLOT_UNAVAILABLE. A changed acknowledged amount returns 409 PRICE_CHANGED with a fresh quote (error.quote) before any insert. Checkout checks that the quote matches the session and quantity before asking for fresh acceptance. If the quote is unreadable or mismatched, the customer can refresh it.
 
-An identical normalized retry returns its original receipt with 200, even after the session closes. Reusing the key with different details returns 409 REQUEST_KEY_CONFLICT. After a concurrent unique-key violation, roll back and compare the saved request rather than creating another booking. Checkout keeps the retry key when a network failure, malformed receipt response or server error leaves the save uncertain. If a later retry is rate-limited, the original key and request body stay available. Confirmation opens after Checkout receives a valid receipt UUID.
+An identical normalized retry returns its original receipt with 200, even after the session closes. Reusing the key with different details returns 409 REQUEST_KEY_CONFLICT. After a concurrent unique-key violation, roll back and compare the saved request rather than creating another booking. Checkout keeps the original request ID and body if a temporary failure or an invalid receipt leaves the save uncertain. It starts confirmation navigation once the receipt matches the requested session, seats, total and payment choice. Confirmation validates the receipt against the ID in the link and offers Reload for unreadable responses.
 
 ## Saved receipts and metrics
 
@@ -148,4 +148,4 @@ The owner workspace stops waiting after 15 seconds, including while reading a re
 
 The [published studio catalog](../public/data/studio-research.json) is served by `GET /api/activities`. A profile combines that provider’s published details with its eligible demo offers via `GET /api/providers/:id`.
 
-`POST /api/provider-applications` takes `requestId`, optional `providerId`, `businessName`, `website`, `city`, `area`, `activityTypes`, `contactName`, `contactEmail`, `representativeRole`, `authorized` and `demoAcknowledged`. The server validates the public HTTPS URL, contact fields, supported activity types, representative role and the two confirmations. It saves a pending application and reuses its result for the same request and payload. The public readback exposes `id`, `status` and `createdAt`. [Application service](../server/services/providers.js) · [API tests](../tests/providers.test.js)
+`POST /api/provider-applications` takes `requestId`, optional `providerId`, `businessName`, `website`, `city`, `area`, `activityTypes`, `contactName`, `contactEmail`, `representativeRole`, `authorized` and `demoAcknowledged`. The server validates the public HTTPS URL, contact fields, supported activity types, representative role and the two confirmations. The serialized URL must fit the 2,048-character database limit. It saves a pending application and reuses its result for the same request and payload. The public readback exposes `id`, `status` and `createdAt`. [Application service](../server/services/providers.js) · [API tests](../tests/providers.test.js)

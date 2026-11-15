@@ -1,4 +1,6 @@
-import { request, money, date, positive, pageParameters, notice } from "./customer-common.js";
+import {
+  request, money, date, positive, pageParameters, notice, hasBookingTotal,
+} from "./customer-common.js";
 
 const form = document.querySelector("#selection"),
 quantity = document.querySelector("#quantity"),
@@ -22,6 +24,8 @@ async function refresh() {
       request("/api/pricing/quote?" + new URLSearchParams({ slotId, quantity: count }))
     ]);
     if (current !== generation) return;
+    if (!hasBookingTotal(quote) || quote.slotId !== slotId || quote.quantity !== count)
+      throw new Error("Could not verify the booking price. Refresh quote to try again.");
     notice(chosenSession, slot.serviceName + " " + date(slot.startsAt));
     summary.textContent = `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
     notice(status, "");
