@@ -84,6 +84,8 @@ This records Group 1’s AI assistance. Each teammate records their own uses and
 | 2026-11-15 | Fran / M1 | ChatGPT Codex | Align the submission docs with the Structure and documentation rubric | Put required files in the README index, moved supporting and historical docs, updated the API and schema contracts, and shared the buddy-tier threshold with discovery sorting. | Checked the repository links, lockfile versions, source mappings and existing pricing, browse and Owner regressions. |
 | 2026-11-15 | Fran / M1 | ChatGPT Codex | Review the whole repository for stale or duplicate project docs | Removed superseded handoffs, drafts and duplicate technical notes from the current tree. Folded the workshop credits into the existing business appendix and the applicable behavior into the route contract. | Audited the retained files and relative links against the release tree and reran the repository checks. |
 
+| 2026-11-15 | Fran / M1 | ChatGPT GPT-6 | Address Janelle's review of spoofable booking rate-limit client addresses | Replaced caller-controlled `X-Forwarded-For` with trusted Render Cloudflare / Vercel ingress headers, retained socket fallback and added focused regression tests on PR #72 | Checked the changed middleware against Render/Vercel header documentation; CI on the current PR head and final deployed 429 behavior must be verified separately. |
+
 ## Disclosures linked from merged PRs
 
 These entries summarize what the PR authors already reported. Dates identify the work and are linked to the source disclosures.
