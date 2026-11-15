@@ -40,6 +40,7 @@ let loaded = false;
 let editingCutoff = null;
 let editingSnapshot = null;
 let salesViews = [];
+let savedBookings = [];
 function element(tag, text, className) {
   const item = document.createElement(tag);
   if (text !== undefined) item.textContent = text;
@@ -222,15 +223,16 @@ function renderMetrics(metrics) {
     $("metrics").append(card);
   }
 }
-function renderOpenUtilization(bookings) {
-  const value = openReleaseUtilization(catalog, bookings);
+function renderOpenUtilization(now) {
+  const value = openReleaseUtilization(catalog, savedBookings, now);
   let message = "No eligible, open demo sessions.";
   if (value.inconsistent) {
     message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
   } else if (value.utilizationPercent !== null) {
     message = `${value.confirmedSeats} of ${value.releasedSeats} released demo seats booked (${value.utilizationPercent}%) across ${value.eligibleSessions} currently eligible sessions.`;
   }
-  $("open-utilization").textContent = message;
+  const utilization = $("open-utilization");
+  if (utilization.textContent !== message) utilization.textContent = message;
 }
 function refreshDemoReadiness(now = Date.now()) {
   const info = demoInventoryStatus(
@@ -247,6 +249,7 @@ function refreshSalesStates() {
   if (!loaded) return;
   const now = Date.now();
   refreshDemoReadiness(now);
+  renderOpenUtilization(now);
   for (const { slot, tag, help, toggle, editButton } of salesViews) {
     const state = salesState(slot, now, catalog.discoveryHours);
     tag.textContent = state.label;
@@ -420,6 +423,7 @@ async function load() {
       api("/api/bookings"),
     ]);
     catalog = next;
+    savedBookings = bookings;
     const selected = $("service").value;
     $("service").replaceChildren();
     for (const service of catalog.services) {
@@ -437,10 +441,8 @@ async function load() {
       editing,
     );
     renderMetrics(metrics);
-    renderOpenUtilization(bookings);
     renderSessions();
     renderBookings(bookings);
-    refreshDemoReadiness();
     // Keep an existing unsaved deadline when refreshing the Owner catalog.
     // On first load the deadline is blank and must use the active activity default.
     if (!$("cutoff").value) defaultCutoff();
