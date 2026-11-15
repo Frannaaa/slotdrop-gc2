@@ -24,7 +24,7 @@ Requests and responses use JSON with camelCase fields. The [schema](schema.md) l
 
 Database-backed APIs return `503 DATABASE_UNAVAILABLE` for recognized database failures. Unexpected server failures return `500 INTERNAL_ERROR`.
 
-The [booking limiter](../server/middleware/booking-rate-limit.js) counts up to 30 POST attempts per IP in 60 seconds, including invalid requests. Render uses its ingress client address and falls back to the connected socket when that address is missing or invalid. Local and alternate hosts use the connected socket. Counters live in memory. A `429 RATE_LIMITED` response gives `Retry-After` and `error.retryAfterSeconds`, both in seconds. Checkout waits and automatically retries the same body and request ID once. Receipt and Owner reads remain available. [Deployed retry evidence](challenges.md#too-many-requests)
+The [booking limiter](../server/middleware/booking-rate-limit.js) counts up to 30 POST attempts per IP in 60 seconds, including invalid requests. Render and Vercel use the client address provided by their respective ingress. When that address is missing or invalid, and when running locally, the limiter uses the connected socket. Counters live in memory. A `429 RATE_LIMITED` response gives `Retry-After` and `error.retryAfterSeconds`, both in seconds. Checkout waits and automatically retries the same body and request ID once. Receipt and Owner reads remain available. [Deployed retry evidence](challenges.md#too-many-requests)
 
 ## Discovery and session responses
 
@@ -32,7 +32,7 @@ Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optio
 
 - `q` searches provider and activity names, primary type, technique and inclusions by case-insensitive literal substring. Blank text is ignored. `area` matches the area name case-insensitively. Both fields accept up to 100 characters and reject null characters.
 - `category` accepts `creative` or `active`. `type` accepts `pottery`, `painting`, `pilates`, `dance` or `other`. `tag` accepts `beginner`, `handbuilding`, `wheel-throwing`, `painting-included` or `materials-included`.
-- `people` is 1–100. `sort` accepts `soonest`, `price-low` or `price-high`. Price order uses the applicable per-seat tier for the party. Browse exposes search, category and pagination. Invalid, duplicate or unsupported filters return 400.
+- `people` is 1–100. `sort` accepts `soonest`, `price-low` or `price-high`. Price order uses the applicable per-seat tier for the party. Browse exposes search, activity type, date, group size, sort and pagination. Invalid, duplicate or unsupported filters return 400.
 
 `when` accepts `today`, `tomorrow` or `weekend` in Asia/Manila. On Sunday, the weekend includes the preceding Saturday. Date filters return dated offers, and the bookable view applies the 72-hour window. A search with no matches returns `200 []`.
 
