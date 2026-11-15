@@ -57,7 +57,7 @@ test('studio profile limits its SQL discovery lookup to the requested provider',
   const {rows:[provider]}=await f.db.query("SELECT id FROM providers WHERE reference_key IS NOT NULL ORDER BY id LIMIT 1");
   const originalQuery=f.db.query.bind(f.db),discoveryQueries=[];
   f.db.query=async(sql,params)=>{
-   if(typeof sql==='string'&&sql.includes('FROM slots sl JOIN services s')){
+   if(typeof sql==='string'&&/\bFROM\s+slots\s+sl\s+JOIN\s+services\s+s\b/i.test(sql)){
     discoveryQueries.push({sql,params});
    }
    return originalQuery(sql,params);
