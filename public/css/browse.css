@@ -271,3 +271,79 @@
   .browse-page .card-art { min-height: 6rem; }
   .browse-page footer { padding: 1.25rem 1rem; }
 }
+
+
+/* Discovery controls follow the real API filters, not decorative categories. */
+.browse-page .browse-controls {
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+  gap: 1.1rem;
+}
+.browse-page .browse-controls > label { display: grid; gap: .45rem; }
+.browse-page .browse-controls input {
+  border-radius: 10px;
+  min-height: 48px;
+  font-size: 1rem;
+}
+.browse-page .browse-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .85rem;
+}
+.browse-page .browse-filter-row label {
+  display: grid;
+  gap: .4rem;
+  min-width: 0;
+}
+.browse-page .browse-filter-row select {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: .7rem 2rem .7rem .8rem;
+  color: var(--browse-ink);
+  background: #fff;
+  border: 1px solid rgba(32,35,30,.24);
+  border-radius: 9px;
+  font-size: .94rem;
+  cursor: pointer;
+}
+.browse-page .browse-filter-row select:focus-visible {
+  outline: 3px solid var(--browse-blue);
+  outline-offset: 2px;
+}
+.browse-page .activity-types { gap: .6rem; }
+.browse-page .activity-types button {
+  min-height: 42px;
+  padding: .52rem 1rem;
+  background: #f8f8f4;
+  border: 1px solid #dadbd2;
+  color: #3b4139;
+}
+.browse-page .activity-types button[aria-pressed="true"] {
+  color: #fff;
+  background: #20231e;
+  border-color: #20231e;
+}
+.browse-page #status:not(.error) {
+  padding: .2rem 0;
+  margin: .4rem 0 .75rem;
+  background: none;
+  color: #666d61;
+}
+.browse-page #retry {
+  min-height: 38px;
+  margin-bottom: 1rem;
+  padding: .45rem .8rem;
+  font-size: .82rem;
+}
+.browse-page .activity-card .card-photo { min-height: 0; }
+.browse-page .activity-card .card-photo img { object-fit: cover; }
+.browse-page .activity-card .party-price { margin-top: auto; }
+@media (max-width: 700px) {
+  .browse-page .browse-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .browse-page .browse-filter-row label:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 430px) {
+  .browse-page .browse-filter-row { grid-template-columns: 1fr; }
+  .browse-page .browse-filter-row label:last-child { grid-column: auto; }
+  .browse-page .activity-types button { padding: .5rem .85rem; }
+}
