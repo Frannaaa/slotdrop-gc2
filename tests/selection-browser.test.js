@@ -39,7 +39,7 @@ test("Selection keeps session details visible when quote fails and allows retry"
     new URL("../public/js/selection.js", import.meta.url),
     "utf8"
   ))
-    .replace(/^import[^\n]*\r?\n/m, "")
+    .replace(/^import[\s\S]*?from\s+["'][^"']+["'];?\s*/m, "")
     .replace(/\ntry\s*\{\s*const params = pageParameters[\s\S]*$/, "");
 
   let quoteCalls = 0;
@@ -71,6 +71,8 @@ test("Selection keeps session details visible when quote fails and allows retry"
         }
 
         return {
+          slotId: 1,
+          quantity: 1,
           unitPriceCentavos: 1500,
           totalPriceCentavos: 1500,
           pricingType: "standard"
@@ -83,6 +85,7 @@ test("Selection keeps session details visible when quote fails and allows retry"
     date: () => "DATE",
     positive: value => Number(value),
     pageParameters: search => new URLSearchParams(search),
+    hasBookingTotal: quote => Number.isInteger(quote?.unitPriceCentavos) && Number.isInteger(quote?.totalPriceCentavos),
     notice(element, message) {
       element.textContent = message;
     }
@@ -100,14 +103,14 @@ test("Selection keeps session details visible when quote fails and allows retry"
   const summary = getElement("summary");
   const next = getElement("continue");
 
-  assert.match(chosenSession.textContent, /Demo Session DATE/);
+  assert.match(chosenSession.textContent, /Demo Session.*DATE/);
   assert.equal(status.textContent, "Quote temporarily unavailable");
   assert.equal(summary.textContent, "");
   assert.equal(next.disabled, true);
 
   await handlers.get("retry:click")();
 
-  assert.match(chosenSession.textContent, /Demo Session DATE/);
+  assert.match(chosenSession.textContent, /Demo Session.*DATE/);
   assert.equal(status.textContent, "");
   assert.equal(summary.textContent, "1 x ₱1500 = ₱1500");
   assert.equal(next.disabled, false);
