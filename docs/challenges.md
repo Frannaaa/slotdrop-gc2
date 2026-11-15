@@ -56,7 +56,7 @@ The table follows the code in the [build we traced on 15 November](https://githu
 
 The slot lock matters most when two customers ask for the last seat. Each save checks availability while it holds the lock. The receipt keeps the accepted price on the booking row so Confirmation can load it again by ID.
 
-**Our hand-drawn request trace:** [Open the four scanned pages](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk). Pages 1–2 follow Checkout through the booking transaction and 201 response; page 3 follows Confirmation's separate receipt GET; page 4 shows the Owner dashboard reading the saved booking. This is the same slot **38**, quantity **1** example captured in DevTools above. The handwritten SQL is abbreviated; the actual receipt query uses `WHERE b.id = $1`, with `$1` set to the saved booking ID.
+**Our hand-drawn request trace:** [Open the four scanned pages](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk). Pages 1–2 follow Checkout through the booking transaction and 201 response; page 3 follows Confirmation's separate receipt GET; page 4 shows the Owner dashboard reading the saved booking. This is the same slot **38**, quantity **1** example captured in DevTools above.
 
 The [system diagram](system.md) covers the full app.
 
