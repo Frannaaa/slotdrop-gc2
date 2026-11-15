@@ -41,12 +41,12 @@ The last column is what we’d measure in a pilot. GC2 records bookings and Owne
 
 | Stage | Screen | What we put there and why | Endpoint | What we’d measure |
 |---|---|---|---|---|
-| Browse | Home | Shows up to three bookable offers and links to the full list. Practice offers have their own label. | `GET /api/slots` | Home visits that open Browse or Detail ÷ Home visits |
-| Browse | Browse | Compare the studio, time, deadline, seats left and price on one card. Search by studio or activity, filter by category and see six offers at a time. | `GET /api/slots?q=…&category=…&page=…&limit=6` | Browse visits that open a bookable session’s Detail page ÷ Browse visits |
-| Select | Detail | Check what’s included, what to prepare, where to go and when booking closes. | `GET /api/slots/:id` | Detail visits that continue to Selection ÷ Detail visits |
-| Select | Selection | Enter the group size and see the server’s quote for that many seats, including the buddy price when it applies. | `GET /api/slots/:id`, `GET /api/pricing/quote` | Selection visits that open Checkout ÷ Selection visits |
-| Confirm | Checkout | Enter fictional contact details, choose simulated payment and accept the total before submitting. | `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings` | Confirmed saves ÷ unique submitted request IDs |
-| Save | Confirmation | See the saved seat count, price, payment choice and reference. Refreshing the page fetches the same record Owner can find. | `GET /api/bookings/:id` | Saved bookings and average booking value |
+| Browse | Home | Up to three bookable offers give someone with a free afternoon a quick sense of what’s available. Practice offers are labeled. “Browse all sessions” opens the full list. | `GET /api/slots` | Home visits that open Browse or Detail ÷ Home visits |
+| Browse | Browse | A bookable card keeps the studio, time, cutoff, seats left and price together so someone comparing offers on a phone can scan them at once. Search takes studio or activity names, category buttons narrow the list in one tap, and six cards per page keep the list short. | `GET /api/slots?q=…&category=…&page=…&limit=6` | Browse visits that open a bookable session’s Detail page ÷ Browse visits |
+| Select | Detail | A labelled list puts inclusions, preparation, location and the deadline where a customer can scan them before choosing seats. | `GET /api/slots/:id` | Detail visits that continue to Selection ÷ Detail visits |
+| Select | Selection | A number field lets the customer enter the group size directly. The server returns a new price as it changes, so a pair can see what the buddy rate does to the total. | `GET /api/slots/:id`, `GET /api/pricing/quote` | Selection visits that open Checkout ÷ Selection visits |
+| Confirm | Checkout | Labelled contact fields show which entry needs fixing. A dropdown keeps the two simulated payment options in one place. The checkbox sits next to the quote so the customer can see the exact amount they’re accepting. | `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings` | Confirmed saves ÷ unique submitted request IDs |
+| Save | Confirmation | The page fetches the saved booking by its reference. Refreshing it shows the accepted seat count, price and payment choice again. The reference also lets Owner find the same booking. | `GET /api/bookings/:id` | Saved bookings and average booking value |
 
 The studio uses Owner to edit offers and check sales. The bookings table and five metrics come from `GET /api/bookings` and `GET /api/metrics`.
 

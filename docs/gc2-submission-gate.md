@@ -21,7 +21,7 @@
 - [ ] Get one teammate's substantive review on [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72). After approval and passing checks, merge and confirm Render is serving reviewed `main`.
 - [ ] Run the readiness check on that deployment, then test a practice booking, the receipt reload and matching Owner row. Verify that expired offers are viewable under Closed sessions and that the workshop images load. Remeasure the [mobile Browse baseline](baseline.md) and verify the release's Checkout retry behavior.
 - [ ] Have someone outside the group finish a booking on their own phone without help. Record the device, tested build, receipt reference and matching Owner row.
-- [x] [Hand-drawn four-page booking trace](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk) uploaded and linked from [Challenge 2](challenges.md#challenge-2--trace-one-real-request). Confirm instructor playback/view access when packaging final submission.
+- [x] [Four-page hand-drawn trace](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk) linked from [Challenge 2](challenges.md#challenge-2-trace-one-real-request). The PDF can be opened by anyone with the link.
 - [ ] Collect all six recordings and verify playback and instructor access. Each member checks their own recording and [Git contribution evidence](../CONTRIBUTING.md#required-contribution-record).
 - [ ] Tag `gc2-v1.0` on the tested commit. Submit the repo link, public URL, PDF and six recording links through the course submission channel.
 

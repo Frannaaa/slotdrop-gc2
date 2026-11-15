@@ -51,12 +51,12 @@ The table follows the code in the [build we traced on 15 November](https://githu
 | **Validation** | `bookingRequest()` in `server/services/bookings.js` | Checked the fields, types, payment choice and quantity |
 | Save | `createBooking()` in `server/services/bookings.js` and `transaction()` in `server/repositories/database.js` | Checked the request ID, locked the slot with `SELECT … FOR UPDATE`, checked seats and cutoff, recalculated the total, then inserted and committed the booking |
 | POST response | Booking route and `receiptResponse()` | Returned **201** with the saved receipt. An identical replay returns **200** with the same receipt. |
-| **Confirmation GET** | `public/js/confirmation.js` → booking GET route → `findReceipt()` in `server/services/bookings.js` | Fetched the saved record by ID and displayed the reference, quantity, total and payment choice |
+| **Confirmation GET and render** | `load()` in `public/js/confirmation.js` → booking GET route → `findReceipt()` in `server/services/bookings.js` | `load()` sends the GET by ID, then renders the saved reference, seat count, total and payment choice. |
 | **Owner readback** | `public/js/owner.js` → `server/routes/owner.js` → `listBookings()` in `server/repositories/owner.js` | Read the saved booking independently from the database |
 
 The slot lock matters most when two customers ask for the last seat. Each save checks availability while it holds the lock. The receipt keeps the accepted price on the booking row so Confirmation can load it again by ID.
 
-**Our hand-drawn request trace:** [Open the four scanned pages](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk). Pages 1–2 follow Checkout through the booking transaction and 201 response; page 3 follows Confirmation's separate receipt GET; page 4 shows the Owner dashboard reading the saved booking. This is the same slot **38**, quantity **1** example captured in DevTools above.
+[Our four-page hand-drawn trace](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk) follows the same booking for slot **38**, quantity **1**. Pages 1 and 2 trace the Checkout POST through the PostgreSQL transaction and `201` response. Page 3 follows the separate receipt GET. Page 4 shows Owner reading the saved booking.
 
 The [system diagram](system.md) covers the full app.
 
@@ -118,7 +118,7 @@ The live demo uses 10%.
 
 ## Challenge 5. Predict, then run
 
-Each member picks a function they worked on and predicts the output for **three inputs** before running it. The recording shows the results and explains any differences. It also includes an input or code change and an explanation of what changed. The brief asks for the member’s own voice and an unedited video of at most **three minutes**, without AI assistance during the recording.
+Each member picks one function they wrote and writes down what it will return for **three inputs** before running it. The recording shows the results and explains any differences, then changes one input or line and explains the new result. Use your own voice in one unedited recording of at most **three minutes**, made without AI assistance.
 
 [Group video folder](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj)
 
