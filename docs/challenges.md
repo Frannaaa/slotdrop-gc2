@@ -126,7 +126,7 @@ Each member picks one function they wrote and writes down what it will return fo
 
 | Member | Video |
 |---|---|
-| Fran (M1) | Pending upload |
+| Fran (M1) | [Fran's `openReleaseUtilization` recording (2:58)](https://drive.google.com/file/d/1GFZk8pZMc15Siq2pIOhDi_KqcupARUIT/view?usp=drivesdk) |
 | Cholo / Chonel (M2) | [Chonel's recording](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) |
 | Janelle (M3) | [Janelle's `priceQuote` recording](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) |
 | Kaitlyn (M4) | Pending upload |
