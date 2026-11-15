@@ -129,7 +129,7 @@ Each member picks one function they wrote and writes down what it will return fo
 | Fran (M1) | Pending upload |
 | Cholo / Chonel (M2) | [Chonel's recording](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) |
 | Janelle (M3) | [Janelle's `priceQuote` recording](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) |
-| Kaitlyn (M4) | Pending upload |
+| Kaitlyn (M4) | [Kaitlyn's recording](https://drive.google.com/file/d/1jPN4CTLE5_KpL4tUCRJR3l0DEeh7YxNu/view?usp=drivesdk) |
 | Kat / Kaithlyn (M5) | Pending upload |
 | Kirsten (M6) | [Kirsten's recording](https://drive.google.com/file/d/1LJxyMj9HbWRehO8hwoVBs4Eeh2n9MUKE/view?usp=drivesdk) |
 
