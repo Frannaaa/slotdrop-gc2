@@ -5,7 +5,8 @@ export function bookingRateLimiter({
   max = 30,
   windowMs = 60000,
   now = () => Date.now(),
-  useRenderForwardedIp = process.env.RENDER === 'true',
+  // Only Render's Cloudflare ingress may supply this trusted header.
+  useRenderClientIp = process.env.RENDER === 'true',
 } = {}) {
   if(!Number.isSafeInteger(max)||max<1||!Number.isSafeInteger(windowMs)||windowMs<1000
     ||typeof now!=='function') throw new Error('Invalid rate-limit configuration');
@@ -14,12 +15,17 @@ export function bookingRateLimiter({
     // Do not impede receipt reads, Owner lists or other API routes.
     if(req.method!=='POST'||req.path!=='/') return next();
     const stamp=now();
-    // Render's public ingress sets the first forwarded address to the client.
-    // Direct deployments use the socket and ignore forwarded headers.
-    const forwarded = useRenderForwardedIp
-      ? req.get('x-forwarded-for')?.split(',', 1)[0].trim()
+    // X-Forwarded-For is append-only at Render ingress. Its leftmost value
+    // may be chosen by the caller, so never use it to identify rate-limit clients.
+    // Render's Cloudflare ingress sets CF-Connecting-IP. Trust that header ONLY
+    // in the Render deployment, which must remain behind Cloudflare; direct
+    // deployments ignore all forwarding headers and use the socket address.
+    const cloudflareIp = useRenderClientIp
+      ? req.get('cf-connecting-ip')?.trim()
       : undefined;
-    const key = forwarded && isIP(forwarded) ? forwarded : req.socket.remoteAddress || 'unknown';
+    const key = cloudflareIp && isIP(cloudflareIp)
+      ? cloudflareIp
+      : req.socket.remoteAddress || 'unknown';
     let record=requests.get(key);
     if(!record||stamp>=record.resetAt){
       record={count:0,resetAt:stamp+windowMs};
