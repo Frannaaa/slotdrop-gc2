@@ -226,7 +226,7 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
       ${closed
         ? `<p class="session-cutoff closed">${closedSessionLabel(slot) || "Booking closed"}</p>`
         : `<p class="session-cutoff">${practice
-          ? "Demo exception: This offer stays bookable for grading; regular offers appear within 72 hours of the session and close at their booking cutoff."
+          ? "Demo exception: Kept open for grading; regular offers appear within 72 hours of the session and close at their booking cutoff."
           : "Bookings close " + date(slot.bookingClosesAt)}</p>`}
       <div class="session-traits">
         ${traits.slice(0, 2).map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}${traits.length > 2 ? `<span>+${traits.length - 2} more</span>` : ""}
