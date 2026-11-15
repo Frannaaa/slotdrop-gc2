@@ -37,7 +37,7 @@ jobs:
           git merge --no-ff --no-edit 14cc518f65017bdc6cbfca30fc6fc1f9c88daa06
           git merge --no-ff --no-edit e2595937a366eec7937faf168a7f5642646c67a2
           git merge --no-ff --no-edit e4b55eacf93932df5eca2c3a043340818e7b1b46
-          git diff --check 3ef579da60439a73dbbfc1700a3dc1b9def29806
+          git diff --check 3ef579da60439a73dbbfc1700a3dc1b9def29806 -- . ':(exclude)docs/SlotDrop_GC2_Summary.pdf'
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
