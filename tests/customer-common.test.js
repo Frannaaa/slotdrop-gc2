@@ -123,7 +123,7 @@ test('practice cards show the cutoff exception and render a credited local works
     studioReference: { key: 'laro-mug', sourceUrl: 'https://example.com/source', checkedAt: '2026-11-04',
       photo: { alt: 'Pottery & painting', credit: 'Example Studio', page: 'https://example.com/workshop' } } };
   const html = card(practice);
-  assert.match(html, /Demo only · No booking cutoff/);
+  assert.match(html, /Demo exception: Kept open for grading/);
   assert.match(html, /src="\/images\/workshops\/laro-mug\.webp" alt="Pottery &amp; painting"/);
   assert.match(html, /aria-label="Photo source: Example Studio"/);
   assert.doesNotMatch(html, /Real studio reference|1970|Book before/);
