@@ -5,6 +5,9 @@ import { request, card, notice } from "./customer-common.js";
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const search = document.querySelector("#search");
+const when = document.querySelector("#when");
+const people = document.querySelector("#people");
+const sort = document.querySelector("#sort");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
 const closedSessions = document.querySelector("#closed-sessions");
@@ -31,6 +34,9 @@ function pageUrl(page) {
   const query = search.value.trim();
   if (query) params.set("q", query);
   if (category !== "all") params.set("category", category);
+  if (when?.value) params.set("when", when.value);
+  if (sort?.value && sort.value !== "soonest") params.set("sort", sort.value);
+  if (people?.value && people.value !== "1") params.set("people", people.value);
   return "/api/slots?" + params;
 }
 
@@ -64,7 +70,8 @@ function renderPagination() {
 }
 
 function render() {
-  results.innerHTML = slots.map((slot) => card(slot)).join("");
+  const groupSize = Number(people?.value || 1);
+  results.innerHTML = slots.map((slot) => card(slot, groupSize)).join("");
   renderPagination();
   if (!slots.length) {
     notice(status, search.value.trim() || category !== "all"
@@ -153,6 +160,12 @@ function resetSearchPage() {
 }
 
 search.addEventListener("input", resetSearchPage);
+for (const control of [when, people, sort]) {
+  control?.addEventListener("change", () => {
+    clearTimeout(searchTimer);
+    load(1);
+  });
+}
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     clearTimeout(searchTimer);
