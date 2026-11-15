@@ -14,10 +14,10 @@ const closedSessions = document.querySelector("#closed-sessions");
 const closedResults = document.querySelector("#closed-results");
 const closedStatus = document.querySelector("#closed-status");
 const closedRetry = document.querySelector("#closed-retry");
-const categoryButtons = [...document.querySelectorAll("[data-category]")];
+const activityButtons = [...document.querySelectorAll("[data-activity]")];
 
 const ITEMS_PER_PAGE = 6;
-let category = "all";
+let activity = "all";
 let currentPage = 1;
 let requestedPage = 1;
 let slots = [];
@@ -33,7 +33,7 @@ function pageUrl(page) {
   });
   const query = search.value.trim();
   if (query) params.set("q", query);
-  if (category !== "all") params.set("category", category);
+  if (activity !== "all") params.set("type", activity);
   if (when?.value) params.set("when", when.value);
   if (sort?.value && sort.value !== "soonest") params.set("sort", sort.value);
   if (people?.value && people.value !== "1") params.set("people", people.value);
@@ -74,7 +74,7 @@ function render() {
   results.innerHTML = slots.map((slot) => card(slot, groupSize)).join("");
   renderPagination();
   if (!slots.length) {
-    notice(status, search.value.trim() || category !== "all"
+    notice(status, search.value.trim() || activity !== "all"
       ? "No sessions match those filters. Try another search or category."
       : "No sessions are available right now. Check back soon.");
     return;
@@ -166,11 +166,11 @@ for (const control of [when, people, sort]) {
     load(1);
   });
 }
-categoryButtons.forEach((button) => {
+activityButtons.forEach((button) => {
   button.addEventListener("click", () => {
     clearTimeout(searchTimer);
-    category = button.dataset.category;
-    categoryButtons.forEach((item) => {
+    activity = button.dataset.activity;
+    activityButtons.forEach((item) => {
       item.setAttribute("aria-pressed", String(item === button));
     });
     load(1);
