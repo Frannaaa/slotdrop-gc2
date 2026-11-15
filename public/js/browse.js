@@ -89,6 +89,7 @@ async function load(page = 1) {
   results.replaceChildren();
   pagination.replaceChildren();
   retry.disabled = true;
+  retry.hidden = true;
   notice(status, "Loading sessions…");
 
   try {
@@ -117,7 +118,8 @@ async function load(page = 1) {
       renderPagination();
     } catch {
       if (current === generation) {
-        notice(status, "Could not check for more pages. Refresh sessions to try again.");
+        notice(status, "Could not check for more pages. Refresh results to try again.");
+        retry.hidden = false;
       }
     }
   } catch (error) {
@@ -125,6 +127,7 @@ async function load(page = 1) {
     slots = [];
     hasNextPage = false;
     notice(status, error.message || "Could not load sessions. Please try again.", true);
+    retry.hidden = false;
   } finally {
     if (current === generation) retry.disabled = false;
   }
