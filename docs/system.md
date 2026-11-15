@@ -31,7 +31,7 @@ The pages in [public/](../public/) fetch JSON. [Express routes](../server/routes
 
 | Hop | Code location | Behavior |
 |---|---|---|
-| 1. Browse | Home and Browse interface → `GET /api/slots` | Requests eligible sessions. Browse sends search text, category and pagination to the list API |
+| 1. Browse | Home and Browse interface → `GET /api/slots` | Requests eligible sessions. Browse sends search text, activity type, date/group-size filters and pagination to the list API |
 | 2. Discover | `server/routes/slots.js` → `listSlots()` in `server/services/discovery.js` → `searchSlots()` in `server/repositories/slots.js` | The service validates filters. The repository applies them and uses the same confirmed-seat count for filtering and rendering. Scheduled sessions follow the 72-hour window and cutoff. |
 | 3. Choose | `public/js/detail.js` and `public/js/selection.js` | Fetches detail and quantity-aware quote; displays the selected session and party price |
 | 4. Quote | `server/routes/pricing.js` → `server/services/pricing.js` | Validates session and quantity; selects standard or buddy tier stored in DB, never browser money |
