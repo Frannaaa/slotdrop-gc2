@@ -128,7 +128,7 @@ function reset() {
   // form.reset() can reselect a retired fixture after the catalog migration.
   $("service").value = preferredServiceId(catalog.services, $("service").value);
   $("editor-title").textContent = "Create a session";
-  $("save").textContent = "Save demo session offer";
+  $("save").textContent = "Save session offer";
   $("status-field").hidden = true;
   for (const name of ["serviceId", "startsAt", "originalPriceCentavos"])
     field(name).disabled = false;
@@ -229,7 +229,7 @@ function renderOpenUtilization(now) {
   if (value.inconsistent) {
     message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
   } else if (value.utilizationPercent !== null) {
-    message = `${value.confirmedSeats} of ${value.releasedSeats} released demo seats booked (${value.utilizationPercent}%) across ${value.eligibleSessions} currently eligible sessions.`;
+    message = `${value.utilizationPercent}% of released seats booked (${value.confirmedSeats} of ${value.releasedSeats} seats across ${value.eligibleSessions} sessions).`;
   }
   const utilization = $("open-utilization");
   if (utilization.textContent !== message) utilization.textContent = message;
@@ -242,7 +242,9 @@ function refreshDemoReadiness(now = Date.now()) {
     catalog.discoveryHours,
   );
   const warning = $("inventory-warning");
-  if (warning.textContent !== info.message) warning.textContent = info.message;
+  // A healthy catalog needs no warning banner. Keep actionable alerts visible.
+  const alert = info.state === "ready" ? "" : info.message;
+  if (warning.textContent !== alert) warning.textContent = alert;
   warning.dataset.state = info.state;
 }
 function refreshSalesStates() {
