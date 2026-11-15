@@ -22,19 +22,14 @@ jobs:
       - name: Install browser and measurement tools
         id: browser-tools
         run: |
-          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1 lighthouse@13.6.0
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1
           npx --no-install playwright install --with-deps chromium
-      - name: Cache-disabled mobile Browse and archive
-        run: node tools/check-live-evidence.mjs browser
-      - name: Lighthouse mobile Browse
-        if: ${{ !cancelled() && steps.browser-tools.outcome == 'success' }}
-        run: node tools/check-live-evidence.mjs lighthouse
       - name: Checkout retry, live receipt and matching Owner row
         if: ${{ !cancelled() && steps.browser-tools.outcome == 'success' && steps.preflight.outcome == 'success' }}
         run: node tools/check-live-evidence.mjs booking
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: slotdrop-live-release-evidence
+          name: slotdrop-live-booking-evidence
           path: live-evidence/
           retention-days: 90

@@ -193,6 +193,7 @@ async function verifyBooking(chromium) {
   assert.ok(slot, 'A bookable undated practice slot is required');
   const browser = await chromium.launch();
   const attempts = [];
+  let savedBooking;
   const waitSeconds = 5;
   try {
     const context = await browser.newContext(phone);
@@ -218,7 +219,12 @@ async function verifyBooking(chromium) {
         });
       }
       if (attempts.length !== 2 || body !== attempts[0].body) return route.abort('aborted');
-      return route.continue();
+      const response = await route.fetch({ maxRetries: 0, maxRedirects: 0 });
+      savedBooking = { status: response.status(), receipt: await response.json() };
+      console.log('SLOTDROP_POST ' + JSON.stringify({
+        http: savedBooking.status, receiptId: savedBooking.receipt.id,
+      }));
+      return route.fulfill({ response });
     });
 
     await page.goto(browseUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
@@ -253,7 +259,8 @@ async function verifyBooking(chromium) {
     const savedResponse = await liveResponse;
     assert.ok([200, 201].includes(savedResponse.status()), 'Live booking status: ' + savedResponse.status());
     assert.deepEqual(responses, [429, savedResponse.status()]);
-    const receipt = await savedResponse.json();
+    assert.equal(savedBooking.status, savedResponse.status());
+    const receipt = savedBooking.receipt;
     assert.equal(receipt.status, 'confirmed');
     assert.equal(receipt.slotId, slot.id);
     assert.equal(receipt.quantity, 1);
