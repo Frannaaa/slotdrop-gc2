@@ -156,6 +156,8 @@ The retry returned **201** for one **₱2,880** booking and seats went from **3 
 
 The traced Render build counted requests by socket address. PR #72 uses the client address on Render. The [integration tests](../tests/booking-rate-limit.test.js) cover clients behind the same proxy.
 
+On the reviewed Render release, the browser received a simulated `429` with a 5-second wait. Checkout stayed locked, then sent the identical request after 5,008 ms. Render returned `200` for the existing practice booking. Confirmation reloaded receipt `1267ec9f-e9a4-4395-9c84-0f8f4f74c69b` and Owner showed the same ₱2,700.00 total and one matching row. [Release verification](evidence/live-release-3ef579d.json) · [Checkout, receipt and Owner screenshots](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727564732/artifacts/14167311156)
+
 ### The double click
 
 [Kat’s review on #43](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5817789602) caught Submit turning back on between Save and Confirmation. We lock the form through navigation and cover that path in the [browser test](../tests/checkout-browser.test.js).

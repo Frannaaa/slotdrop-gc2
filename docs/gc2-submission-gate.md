@@ -18,8 +18,8 @@
 
 ## Before submission
 
-- [ ] Get one teammate's substantive review on [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72). After approval and passing checks, merge and confirm Render is serving reviewed `main`.
-- [ ] Run the readiness check on that deployment, then test a practice booking, the receipt reload and matching Owner row. Verify that expired offers are viewable under Closed sessions and that the workshop images load. Remeasure the [mobile Browse baseline](baseline.md) and verify the release's Checkout retry behavior.
+- [x] [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) was reviewed and merged. Render confirmed [commit `3ef579d`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbsrohu7bikc73fdfbl0) live after the main checks passed.
+- [x] [Live release verification](evidence/live-release-3ef579d.json) passed all 16 readiness checks. The practice receipt still loaded after a refresh and matched one Owner row. Confirmed the Checkout wait and identical replay using a simulated first `429`. Checked workshop images and Closed sessions, and refreshed the [mobile Browse baseline](baseline.md#reviewed-release-measurement). [Browser evidence](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727564732/artifacts/14167311156)
 - [ ] Verify the deployed POST-only booking limiter still returns `429` and `Retry-After` when `X-Forwarded-For` is varied. The regression tests use Render's `CF-Connecting-IP` and Vercel's `X-Vercel-Forwarded-For` as trusted ingress values; the limiter remains per-instance, not a shared multi-server rate limit.
 - [ ] Have someone outside the group finish a booking on their own phone without help. Record the device, tested build, receipt reference and matching Owner row.
 - [x] [Four-page hand-drawn trace](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk) linked from [Challenge 2](challenges.md#challenge-2-trace-one-real-request). The PDF can be opened by anyone with the link.
