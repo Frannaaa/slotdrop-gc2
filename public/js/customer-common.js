@@ -226,10 +226,10 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
       ${closed
         ? `<p class="session-cutoff closed">${closedSessionLabel(slot) || "Booking closed"}</p>`
         : `<p class="session-cutoff">${practice
-          ? "Demo only · No booking cutoff"
-          : "Book before " + date(slot.bookingClosesAt)}</p>`}
+          ? "Demo exception: This offer stays bookable for grading; regular offers appear within 72 hours of the session and close at their booking cutoff."
+          : "Bookings close " + date(slot.bookingClosesAt)}</p>`}
       <div class="session-traits">
-        ${traits.map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}
+        ${traits.slice(0, 2).map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}${traits.length > 2 ? `<span>+${traits.length - 2} more</span>` : ""}
       </div>
       ${price ? `<div class="party-price">
         <strong>${money(price.total)}</strong>
@@ -238,17 +238,10 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
           ${selectedQuantity === 1 ? "person" : "people"}</span
         >
       </div>
-      <p>
-        ${money(price.unit)} /
-        person${price.buddy ? " · Buddy price applied" : ""}<br />
-        <small
-          >${comparisonLabel(slot)} ${money(slot.originalPriceCentavos)} /
-          person</small
-        >${slot.buddyPriceCentavos !== null && !price.buddy
-          ? `<br>
-    <span class="buddy">${money(slot.buddyPriceCentavos)} each when 2+ book together</span>`
-          : ""}
-      </p>` : ""}
+      <p class="card-compare">${comparisonLabel(slot)}: ${money(slot.originalPriceCentavos)} / person</p>
+      ${slot.buddyPriceCentavos !== null && !price.buddy
+          ? `<p class="buddy">Bring a friend · ${money(slot.buddyPriceCentavos)} each for 2+</p>`
+          : price.buddy ? `<p class="buddy">Buddy price applied</p>` : ""}` : ""}
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
