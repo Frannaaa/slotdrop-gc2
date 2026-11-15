@@ -7,8 +7,7 @@ quantity = document.querySelector("#quantity"),
 summary = document.querySelector("#summary"),
 chosenSession = document.querySelector("#chosenSession"),
 status = document.querySelector("#status"),
-next = document.querySelector("#continue"),
-chosenSession = document.querySelector("#chosenSession");
+next = document.querySelector("#continue");
 
 let slotId, generation = 0;
 
