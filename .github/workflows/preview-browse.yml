@@ -1,11 +1,11 @@
-name: SlotDrop Browse preview
+name: SlotDrop release-candidate checks
 on:
   push:
     branches: ['qa/gc2-browse-final-preview']
 permissions:
   contents: read
 jobs:
-  preview:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     services:
@@ -21,46 +21,54 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/slotdrop_test
-      PORT: 3100
-      NODE_ENV: production
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           persist-credentials: false
+      - name: Combine the six current pull requests in this runner
+        run: |
+          git config user.name "SlotDrop QA"
+          git config user.email "slotdrop-qa@example.invalid"
+          git checkout --detach 3ef579da60439a73dbbfc1700a3dc1b9def29806
+          git merge --no-ff --no-edit 4355039aeda36c1a5e1d9a5a1b44f2002133c1a7
+          git merge --no-ff --no-edit e7081969dc41211a90c1feeadcc9d73b8cbf9aab
+          git merge --no-ff --no-edit 122cf5412bb9ea414666bccc5ccb42d1f22087d2
+          git merge --no-ff --no-edit 14cc518f65017bdc6cbfca30fc6fc1f9c88daa06
+          git merge --no-ff --no-edit e2595937a366eec7937faf168a7f5642646c67a2
+          git merge --no-ff --no-edit e4b55eacf93932df5eca2c3a043340818e7b1b46
+          git diff --check 3ef579da60439a73dbbfc1700a3dc1b9def29806
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
+          cache: npm
       - run: npm ci
-      - name: Prepare disposable Browse data
+      - run: npm run check
+      - name: Audit reachable Git history for prohibited tracked filenames
+        run: node tools/audit-git-paths.mjs
+      - name: Scan historical source blobs for high-confidence secret signatures
+        run: node tools/audit-git-signatures.mjs
+      - run: npm run check:sql
+      - name: API tests
+        run: npm test
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
+      - name: Fran transaction smoke (disposable DB; save receipt and check Owner)
+        run: node tools/check-transaction-smoke.mjs
+      - name: Build and initialize production image
+        if: ${{ hashFiles('Dockerfile') != '' }}
         run: |
-          node tools/db-bootstrap.mjs
-          node --input-type=module <<'NODE'
-          import pg from 'pg';
-          const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
-          await client.connect();
-          try {
-            await client.query(`UPDATE slots SET starts_at=NOW()-INTERVAL '1 day',
-              booking_closes_at=NOW()-INTERVAL '25 hours'
-              WHERE id=(SELECT id FROM slots WHERE starts_at IS NOT NULL AND status='open' ORDER BY id LIMIT 1)`);
-          } finally { await client.end(); }
-          NODE
-      - name: Install browser audit tools
+          docker build -t slotdrop-ci .
+          docker run --rm --network host -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci node tools/db-init.mjs
+      - name: Verify persistence across production-container restart
+        if: ${{ hashFiles('tools/check-release.mjs') != '' }}
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
         run: |
-          npm install --include=dev --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1 lighthouse@13.6.0
-          npx --no-install playwright install --with-deps chromium
-      - name: Check mobile and desktop Browse
-        run: |
-          npm start > "$RUNNER_TEMP/slotdrop-preview.log" 2>&1 &
-          for attempt in $(seq 1 15); do
-            if curl -fsS --max-time 5 http://127.0.0.1:3100/api/health >/dev/null; then break; fi
-            sleep 1
-          done
-          node tools/preview-browse.mjs
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: slotdrop-browse-preview
-          path: browse-preview/
-          retention-days: 30
+          docker run -d --name slotdrop-ci --network host -e PORT=3100 -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci
+          node tools/check-release.mjs before
+          docker restart slotdrop-ci
+          node tools/check-release.mjs after
+      - name: Stop production test container
+        if: ${{ always() && hashFiles('tools/check-release.mjs') != '' }}
+        run: docker rm -f slotdrop-ci || true
