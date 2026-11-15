@@ -196,6 +196,18 @@ label {
   margin-top: var(--space-md);
 }
 
+#featured {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  #featured { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  #featured { grid-template-columns: minmax(0, 1fr); }
+}
+
 .card {
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
@@ -394,12 +406,6 @@ body:not(.owner-page) .total { font-size: 1.2rem; font-weight: 700; }
   #receipt dd + dt { margin-top: .5rem; }
 }
 
-body:not(.owner-page) .how-strip {
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  background: var(--color-lime);
-  border-radius: var(--radius-lg);
-}
-body:not(.owner-page) .how-strip > * + * { margin-top: .8rem; }
 body:not(.owner-page) .reference { font-size: .82rem; }
 body:not(.owner-page) .button {
   min-height: 44px;
@@ -433,11 +439,7 @@ body:not(.owner-page) .hero h1 {
 body:not(.owner-page) .hero > p:not(.eyebrow) {
   color: #555b52;
 }
-body:not(.owner-page) .section-heading h2,
-body:not(.owner-page) .how-strip h2 {
-  color: var(--color-ink);
-}
-body:not(.owner-page) .how-strip {
+body:not(.owner-page) .section-heading h2 {
   color: var(--color-ink);
 }
 @media (max-width: 440px) {
@@ -589,18 +591,6 @@ body:not(.owner-page) .activity-card .card-photo figcaption a {
   text-decoration: none;
   border-radius: 6px;
 }
-body:not(.owner-page) .activity-card .card-art {
-  min-height: 170px;
-  display: flex;
-  align-items: flex-end;
-  padding: 1.3rem;
-  background: linear-gradient(135deg, #e8ded3, #d8aaa0);
-  color: #453e38;
-  font-family: var(--font-heading);
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-body:not(.owner-page) .activity-card .card-art.active { background: linear-gradient(135deg,#e3ecd3,#c9d9ad); }
 body:not(.owner-page) .activity-card .card-body {
   display: flex;
   flex: 1 1 auto;
@@ -655,15 +645,6 @@ body:not(.owner-page) .activity-card .session-cutoff.closed {
   background: #f5eae1;
   font-weight: 700;
 }
-body:not(.owner-page) .activity-card .session-traits { display: flex; flex-wrap: wrap; gap: .35rem; }
-body:not(.owner-page) .activity-card .session-traits span {
-  padding: .28rem .5rem;
-  color: #495146;
-  background: #f2f3ed;
-  border-radius: 999px;
-  font-size: .7rem;
-  font-weight: 600;
-}
 body:not(.owner-page) .activity-card .party-price {
   display: flex;
   gap: .3rem .55rem;
@@ -680,7 +661,6 @@ body:not(.owner-page) .activity-card .party-price strong {
   letter-spacing: -.04em;
 }
 body:not(.owner-page) .activity-card .party-price span { color: #60665d; font-size: .79rem; }
-body:not(.owner-page) .activity-card .card-compare { color: #76786f; font-size: .77rem; }
 body:not(.owner-page) .activity-card .buddy {
   align-self: flex-start;
   padding: .32rem .58rem;
@@ -708,12 +688,6 @@ body:not(.owner-page) .activity-card .button.secondary {
   text-decoration: none;
 }
 body:not(.owner-page) .activity-card .button.secondary:hover { color: #fff; background: #2437b0; border-color: #2437b0; }
-body:not(.owner-page) .how-strip {
-  background: #eaf1dc;
-  border: 1px solid #d1dfb7;
-  border-radius: 16px;
-}
-body:not(.owner-page) .how-strip h2 { font-size: clamp(1.35rem,2.5vw,1.8rem); }
 #status:empty { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {

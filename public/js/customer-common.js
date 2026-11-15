@@ -187,6 +187,14 @@ export function studioEvidence(slot) {
   const priceSource = safeHttpsUrl(reference.priceSourceUrl);
   return `<p class="reference">Real studio reference · <a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Published details ↗</a>${priceSource ? ` · <a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Price source ↗</a>` : ""} · checked ${escapeHtml(reference.checkedAt)}</p><p class="reference">Seats and prices are simulated. Booking here does not reserve a place with the studio.</p>`;
 }
+const cardDateFormat = new Intl.DateTimeFormat("en-PH", {
+  timeZone: "Asia/Manila",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 export function card(slot, quantity = 1, { closed = false } = {}) {
   const selectedQuantity =
     Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 100
@@ -200,17 +208,23 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
   const hasPhoto = photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
-  const traits = [
-    slot.beginnerFriendly ? "Beginner-friendly" : "",
-    ...(slot.inclusions || []).map(inclusionLabel),
-  ].filter(Boolean);
+  const sessionDate = practice ? "Practice booking" : cardDateFormat.format(new Date(slot.startsAt));
+  const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
+  let bookingNote = "";
+  if (closed) {
+    bookingNote = closedSessionLabel(slot) || "Booking closed";
+  } else if (practice) {
+    bookingNote = "No booking cutoff";
+  } else if (Number.isFinite(Date.parse(slot.bookingClosesAt))) {
+    bookingNote = `Book by ${cardDateFormat.format(new Date(slot.bookingClosesAt))}`;
+  }
   return /* HTML */ `<article class="activity-card card">
     ${hasPhoto
       ? `<figure class="card-photo">
           <img src="/images/workshops/${photoKey}.webp" alt="${escapeHtml(photo.alt)}" width="720" height="405" loading="lazy" decoding="async">
           <figcaption><a href="${escapeHtml(photoPage)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml("Photo source: " + photo.credit)}">Photo source ↗</a></figcaption>
         </figure>`
-      : `<div class="card-art ${slot.category === "active" ? "active" : ""}" aria-hidden="true">${escapeHtml(activityLabel(slot.activityType))}</div>`}
+      : ""}
     <div class="card-body">
       <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
       <h2>${escapeHtml(slot.serviceName || slot.title || "Untitled Session")}</h2>
@@ -220,32 +234,23 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
           : escapeHtml(slot.providerName)}
       </p>
       <p class="session-time">
-        <strong>${date(slot.startsAt)}</strong>
-        <br />${slot.durationMinutes} minutes${closed ? "" : ` · ${slot.remainingSeats} seats left`}
+        <strong>${sessionDate}</strong>
+        <br />${slot.durationMinutes} min${closed ? "" : ` · ${seats}`}
       </p>
-      ${closed
-        ? `<p class="session-cutoff closed">${closedSessionLabel(slot) || "Booking closed"}</p>`
-        : practice
-          ? `<p class="session-cutoff">Demo exception: Kept open for grading; regular offers appear within 72 hours of the session and close at their booking cutoff.</p>`
-          : ""}
-      <div class="session-traits">
-        ${traits.slice(0, 2).map((trait) => `<span>${escapeHtml(trait)}</span>`).join("")}${traits.length > 2 ? `<span>+${traits.length - 2} more</span>` : ""}
-      </div>
+      ${bookingNote ? `<p class="session-cutoff${closed ? " closed" : ""}">${bookingNote}</p>` : ""}
       ${price ? `<div class="party-price">
         <strong>${money(price.total)}</strong>
-        <span
-          >total for ${selectedQuantity}
-          ${selectedQuantity === 1 ? "person" : "people"}</span
-        >
+        <span>${selectedQuantity === 1 ? "per person" : `total for ${selectedQuantity} people`}</span>
       </div>
-      <p class="card-compare">${comparisonLabel(slot)}: ${money(slot.originalPriceCentavos)} / person</p>
-      ${slot.buddyPriceCentavos !== null && !price.buddy
-          ? `<p class="buddy">Bring a friend · ${money(slot.buddyPriceCentavos)} each for 2+</p>`
-          : price.buddy ? `<p class="buddy">Buddy price applied</p>` : ""}` : ""}
+      ${price.buddy
+          ? `<p class="buddy">Buddy price applied</p>`
+          : slot.buddyPriceCentavos != null
+            ? `<p class="buddy">${money(slot.buddyPriceCentavos)} each for 2+ people</p>`
+            : ""}` : ""}
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
-        >View workshop ↗</a
+        >${closed ? "View details" : "View workshop"}</a
       >
     </div>
   </article>`;
