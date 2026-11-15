@@ -600,6 +600,13 @@ body:not(.owner-page) .activity-card .card-body {
   padding: 1.25rem 1.35rem 1.35rem;
 }
 body:not(.owner-page) .activity-card .card-body > * { margin: 0; }
+body:not(.owner-page) .activity-card .card-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .3rem .5rem;
+}
 body:not(.owner-page) .activity-card .eyebrow {
   color: #677060;
   font-size: .69rem;
@@ -637,13 +644,17 @@ body:not(.owner-page) .activity-card .session-cutoff {
   font-size: .78rem;
   line-height: 1.45;
 }
-body:not(.owner-page) .activity-card .session-cutoff.closed {
-  width: fit-content;
-  padding: .25rem .55rem;
-  border-radius: 5rem;
+body:not(.owner-page) .activity-card .session-label {
+  padding: .22rem .5rem;
+  border-radius: 999px;
   color: #5e4c40;
   background: #f5eae1;
+  font-size: .72rem;
   font-weight: 700;
+}
+body:not(.owner-page) .activity-card .session-label.practice {
+  color: #25338b;
+  background: #eef0ff;
 }
 body:not(.owner-page) .activity-card .party-price {
   display: flex;
@@ -688,6 +699,16 @@ body:not(.owner-page) .activity-card .button.secondary {
   text-decoration: none;
 }
 body:not(.owner-page) .activity-card .button.secondary:hover { color: #fff; background: #2437b0; border-color: #2437b0; }
+body:not(.owner-page) .activity-card.closed-card .button.secondary {
+  margin-top: auto;
+  color: #4e5048;
+  background: #fff;
+  border-color: #d5d6ce;
+}
+body:not(.owner-page) .activity-card.closed-card .button.secondary:hover {
+  background: #f4f4ef;
+  border-color: #96988e;
+}
 #status:empty { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {

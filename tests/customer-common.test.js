@@ -88,9 +88,13 @@ test('closed cards label the cutoff and event end separately and omit the price 
   assert.equal(closedSessionLabel(slot, when('08:59')), 'Booking closed');
   assert.equal(closedSessionLabel(slot, when('09:00')), 'Event ended');
   assert.equal(closedSessionLabel({ ...slot, startsAt: null, bookingClosesAt: null }, when('09:00')), '');
-  t.mock.method(Date, 'now', () => when('09:00'));
+  let now = when('08:59');
+  t.mock.method(Date, 'now', () => now);
+  assert.match(card(slot, 1, { closed: true }), /<span class="session-label">Booking closed<\/span>/);
+  now = when('09:00');
   const html = card(slot, 1, { closed: true });
-  assert.match(html, /Event ended/);
+  assert.match(html, /activity-card card closed-card/);
+  assert.match(html, /<span class="session-label">Event ended<\/span>/);
   assert.match(html, /detail\.html\?slotId=1&quantity=1/);
   assert.match(html, /View details/);
   assert.doesNotMatch(html, /Book by|seat(s)? left|party-price/);
@@ -132,8 +136,13 @@ test('practice cards show the cutoff exception and render a credited local works
     studioReference: { key: 'laro-mug', sourceUrl: 'https://example.com/source', checkedAt: '2026-11-04',
       photo: { alt: 'Pottery & painting', credit: 'Example Studio', page: 'https://example.com/workshop' } } };
   const html = card(practice);
-  assert.match(html, /Practice booking/);
-  assert.match(html, /No booking cutoff/);
+  assert.match(html, /<span class="session-label practice">Practice version<\/span>/);
+  assert.match(html, /Same workshop, no booking cutoff\./);
+  assert.match(html, /Try practice booking/);
+  const scheduled = card({ ...practice, startsAt: slot.startsAt, bookingClosesAt: slot.bookingClosesAt });
+  assert.match(scheduled, /View workshop/);
+  assert.match(scheduled, /Book by Nov 1/);
+  assert.doesNotMatch(scheduled, /Practice version|Try practice booking/);
   assert.match(html, /src="\/images\/workshops\/laro-mug\.webp" alt="Pottery &amp; painting"/);
   assert.match(html, /aria-label="Photo source: Example Studio"/);
   assert.doesNotMatch(html, /Real studio reference|1970|Book by/);

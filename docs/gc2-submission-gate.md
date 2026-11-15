@@ -18,7 +18,7 @@
 
 ## Before submission
 
-- [ ] Get one teammate's substantive review on [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72). After approval and passing checks, merge and confirm Render is serving reviewed `main`.
+- [x] [PR #72](https://github.com/Frannaaa/slotdrop-gc2/pull/72) was reviewed and merged. Render confirmed [commit `3ef579d`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbsrohu7bikc73fdfbl0) live after the main checks passed.
 - [ ] Run the readiness check on that deployment, then test a practice booking, the receipt reload and matching Owner row. Verify that expired offers are viewable under Closed sessions and that the workshop images load. Remeasure the [mobile Browse baseline](baseline.md) and verify the release's Checkout retry behavior.
 - [ ] Verify the deployed POST-only booking limiter still returns `429` and `Retry-After` when `X-Forwarded-For` is varied. The regression tests use Render's `CF-Connecting-IP` and Vercel's `X-Vercel-Forwarded-For` as trusted ingress values; the limiter remains per-instance, not a shared multi-server rate limit.
 - [ ] Have someone outside the group finish a booking on their own phone without help. Record the device, tested build, receipt reference and matching Owner row.

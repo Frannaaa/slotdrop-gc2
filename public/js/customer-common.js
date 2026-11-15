@@ -208,17 +208,19 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
   const hasPhoto = photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
-  const sessionDate = practice ? "Practice booking" : cardDateFormat.format(new Date(slot.startsAt));
+  const sessionDate = practice ? "" : cardDateFormat.format(new Date(slot.startsAt));
+  const sessionLabel = closed
+    ? closedSessionLabel(slot) || "Booking closed"
+    : practice ? "Practice version" : "";
+  const actionLabel = closed ? "View details" : practice ? "Try practice booking" : "View workshop";
   const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
   let bookingNote = "";
-  if (closed) {
-    bookingNote = closedSessionLabel(slot) || "Booking closed";
-  } else if (practice) {
-    bookingNote = "No booking cutoff";
-  } else if (Number.isFinite(Date.parse(slot.bookingClosesAt))) {
+  if (!closed && practice) {
+    bookingNote = "Same workshop, no booking cutoff.";
+  } else if (!closed && Number.isFinite(Date.parse(slot.bookingClosesAt))) {
     bookingNote = `Book by ${cardDateFormat.format(new Date(slot.bookingClosesAt))}`;
   }
-  return /* HTML */ `<article class="activity-card card">
+  return /* HTML */ `<article class="activity-card card${closed ? " closed-card" : ""}">
     ${hasPhoto
       ? `<figure class="card-photo">
           <img src="/images/workshops/${photoKey}.webp" alt="${escapeHtml(photo.alt)}" width="720" height="405" loading="lazy" decoding="async">
@@ -226,7 +228,10 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
         </figure>`
       : ""}
     <div class="card-body">
-      <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
+      <p class="card-context">
+        <span class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</span>
+        ${sessionLabel ? `<span class="session-label${closed ? "" : " practice"}">${sessionLabel}</span>` : ""}
+      </p>
       <h2>${escapeHtml(slot.serviceName || slot.title || "Untitled Session")}</h2>
       <p class="provider-name">
         ${slot.studioReference
@@ -234,10 +239,10 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
           : escapeHtml(slot.providerName)}
       </p>
       <p class="session-time">
-        <strong>${sessionDate}</strong>
-        <br />${slot.durationMinutes} min${closed ? "" : ` · ${seats}`}
+        ${sessionDate ? `<strong>${sessionDate}</strong><br />` : ""}
+        ${slot.durationMinutes} min${closed ? "" : ` · ${seats}`}
       </p>
-      ${bookingNote ? `<p class="session-cutoff${closed ? " closed" : ""}">${bookingNote}</p>` : ""}
+      ${bookingNote ? `<p class="session-cutoff">${bookingNote}</p>` : ""}
       ${price ? `<div class="party-price">
         <strong>${money(price.total)}</strong>
         <span>${selectedQuantity === 1 ? "per person" : `total for ${selectedQuantity} people`}</span>
@@ -250,7 +255,7 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
-        >${closed ? "View details" : "View workshop"}</a
+        >${actionLabel}</a
       >
     </div>
   </article>`;
