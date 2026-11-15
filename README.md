@@ -10,6 +10,8 @@ SlotDrop helps people near Katipunan find and book released workshop seats. Stud
 
 Start at Home and follow Browse, Detail, Selection, Checkout and Confirmation. Use fictional guest details. The Owner workspace shows the saved booking and five metrics. Render may take a moment to start after it has been idle.
 
+For grading after the scheduled dates pass, choose a practice session to complete a booking. Open **Closed sessions** at the bottom of Browse to look up dated sessions whose booking cutoff has passed.
+
 ## GC2 submission
 
 | What to open | Files |

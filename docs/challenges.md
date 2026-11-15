@@ -126,14 +126,12 @@ Each member picks one function they wrote and writes down what it will return fo
 
 | Member | Video |
 |---|---|
-| Fran (M1) | Pending upload |
+| Fran (M1) | [Fran's recording](https://drive.google.com/file/d/1KTSKMzq5AE3XBpkbri-EG_aSafvdQr0s/view?usp=drivesdk) |
 | Cholo / Chonel (M2) | [Chonel's recording](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) |
 | Janelle (M3) | [Janelle's `priceQuote` recording](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) |
 | Kaitlyn (M4) | Pending upload |
 | Kat / Kaithlyn (M5) | Pending upload |
 | Kirsten (M6) | [Kirsten's recording](https://drive.google.com/file/d/1LJxyMj9HbWRehO8hwoVBs4Eeh2n9MUKE/view?usp=drivesdk) |
-
-Three recordings were in the folder when we checked on **15 November**.
 
 ## Stretch challenges
 
