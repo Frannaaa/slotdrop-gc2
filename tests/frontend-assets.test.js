@@ -48,16 +48,17 @@ test('served HTML scripts, stylesheets and relative JS imports resolve to real f
 });
 
 
+
 test('the site favicon is shipped and linked from each HTML page', async () => {
   const favicon = resolve(publicRoot, 'favicon.svg');
   assert.equal(await existsWithinPublic(favicon), true, 'Missing browser favicon');
   const icon = await readFile(favicon, 'utf8');
-  assert.match(icon, /<svg\\b/);
+  assert.ok(icon.includes('<svg '), 'Invalid SVG favicon');
   const missing = [];
   for (const filename of await walk(publicRoot)) {
     if (!filename.endsWith('.html')) continue;
     const html = await readFile(filename, 'utf8');
-    if (!/<link\\b[^>]*rel=["']icon["'][^>]*href=["']\\/favicon\\.svg["']/i.test(html))
+    if (!html.includes('rel="icon" type="image/svg+xml" href="/favicon.svg"'))
       missing.push(filename.slice(publicRoot.length));
   }
   assert.deepEqual(missing, [], 'HTML pages without a favicon link');
