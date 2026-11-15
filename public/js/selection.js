@@ -1,8 +1,11 @@
-import { request, money, date, positive, pageParameters, notice } from "./customer-common.js";
+import {
+  request, money, date, positive, pageParameters, notice, hasBookingTotal,
+} from "./customer-common.js";
 
 const form = document.querySelector("#selection"),
 quantity = document.querySelector("#quantity"),
 summary = document.querySelector("#summary"),
+chosenSession = document.querySelector("#chosenSession"),
 status = document.querySelector("#status"),
 next = document.querySelector("#continue");
 
@@ -13,22 +16,25 @@ async function refresh() {
   next.disabled = true;
   summary.textContent = "";
   notice(status, "Checking price and seats...");
-  notice(document.querySelector("#chosenSession"), "Loading session details...");
   try {
     const count = positive(quantity.value, 100);
-    const [slot, quote] = await Promise.all([
-      request("/api/slots/" + slotId),
+    const sessionRequest = request("/api/slots/" + slotId).then(slot => {
+      if (current === generation)
+        notice(chosenSession, slot.serviceName + " " + date(slot.startsAt));
+    });
+    const [, quote] = await Promise.all([
+      sessionRequest,
       request("/api/pricing/quote?" + new URLSearchParams({ slotId, quantity: count }))
     ]);
     if (current !== generation) return;
-    notice(document.querySelector("#chosenSession"), slot.serviceName + " " + date(slot.startsAt));
+    if (!hasBookingTotal(quote) || quote.slotId !== slotId || quote.quantity !== count)
+      throw new Error("Could not verify the booking price. Refresh quote to try again.");
     summary.textContent = `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
     notice(status, "");
     next.disabled = false;
   } catch (error) {
     if (current === generation) {
       notice(status, error.message, true);
-      notice(document.querySelector("#chosenSession"), error.message, true);
     }
   }
 }
@@ -52,5 +58,5 @@ try {
   notice(status, error.message, true);
   quantity.disabled = true;
   document.querySelector("#retry").disabled = true;
-  notice(document.querySelector("#chosenSession"), "No valid session selected.", true);
+  notice(chosenSession, "");
 }
