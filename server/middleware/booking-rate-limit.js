@@ -5,7 +5,7 @@ export function bookingRateLimiter({
   max = 30,
   windowMs = 60000,
   now = () => Date.now(),
-  // Only Render's Cloudflare ingress may supply this trusted header.
+  // Enable a trusted client-IP header only on its matching deployment.
   useRenderClientIp = process.env.RENDER === 'true',
   useVercelClientIp = process.env.VERCEL === '1',
 } = {}) {
