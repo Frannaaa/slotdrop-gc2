@@ -25,24 +25,50 @@
       <section class="browse-hero">
         <p class="eyebrow">Find your next plan</p>
         <h1>Browse sessions</h1>
-        <p>Explore available activities and find a session that fits your plans.</p>
+        <p>Find a nearby workshop that fits your schedule and budget. Compare dates, prices and available seats.</p>
       </section>
 
       <section aria-label="Search and filter sessions">
         <div class="browse-controls">
-          <label for="search">Search by activity or studio</label>
-          <input id="search" name="search" type="search" maxlength="100" placeholder="Try pottery, dance, or a studio name" />
+          <label for="search">Search activities or studios
+            <input id="search" name="search" type="search" maxlength="100" placeholder="Try pottery, painting or a studio" />
+          </label>
+          <div class="browse-filter-row">
+            <label for="when">When
+              <select id="when" name="when">
+                <option value="">Any upcoming date</option>
+                <option value="today">Today</option>
+                <option value="tomorrow">Tomorrow</option>
+                <option value="weekend">This weekend</option>
+              </select>
+            </label>
+            <label for="people">People
+              <select id="people" name="people">
+                <option value="1">1 person</option>
+                <option value="2">2 people</option>
+                <option value="3">3 people</option>
+                <option value="4">4 people</option>
+              </select>
+            </label>
+            <label for="sort">Sort by
+              <select id="sort" name="sort">
+                <option value="soonest">Soonest first</option>
+                <option value="price-low">Lowest price</option>
+                <option value="price-high">Highest price</option>
+              </select>
+            </label>
+          </div>
           <fieldset>
-            <legend>Activity category</legend>
-            <div class="activity-types">
-              <button class="text-button" type="button" data-category="all" aria-pressed="true">All</button>
-              <button class="text-button" type="button" data-category="creative" aria-pressed="false">Creative</button>
-              <button class="text-button" type="button" data-category="active" aria-pressed="false">Active</button>
+            <legend>Browse by activity</legend>
+            <div class="activity-types" aria-label="Activity category">
+              <button type="button" data-category="all" aria-pressed="true">All activities</button>
+              <button type="button" data-category="creative" aria-pressed="false">Arts &amp; crafts</button>
+              <button type="button" data-category="active" aria-pressed="false">Movement</button>
             </div>
           </fieldset>
         </div>
         <p id="status" role="status" aria-live="polite">Loading sessions…</p>
-        <button id="retry" class="button secondary" type="button">Refresh sessions</button>
+        <button id="retry" class="button secondary" type="button">Refresh results</button>
         <div id="results" class="activity-grid" aria-label="Available sessions"></div>
         <nav id="pagination" class="pagination" aria-label="Session pages"></nav>
       </section>
