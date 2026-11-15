@@ -1,0 +1,66 @@
+name: SlotDrop Browse preview
+on:
+  push:
+    branches: ['qa/gc2-browse-final-preview']
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: slotdrop_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/slotdrop_test
+      PORT: 3100
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Prepare disposable Browse data
+        run: |
+          node tools/db-bootstrap.mjs
+          node --input-type=module <<'NODE'
+          import pg from 'pg';
+          const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+          await client.connect();
+          try {
+            await client.query(`UPDATE slots SET starts_at=NOW()-INTERVAL '1 day',
+              booking_closes_at=NOW()-INTERVAL '25 hours'
+              WHERE id=(SELECT id FROM slots WHERE starts_at IS NOT NULL AND status='open' ORDER BY id LIMIT 1)`);
+          } finally { await client.end(); }
+          NODE
+      - name: Install browser audit tools
+        run: |
+          npm install --include=dev --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1 lighthouse@13.6.0
+          npx --no-install playwright install --with-deps chromium
+      - name: Check mobile and desktop Browse
+        run: |
+          npm start > "$RUNNER_TEMP/slotdrop-preview.log" 2>&1 &
+          for attempt in $(seq 1 15); do
+            if curl -fsS --max-time 5 http://127.0.0.1:3100/api/health >/dev/null; then break; fi
+            sleep 1
+          done
+          node tools/preview-browse.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slotdrop-browse-preview
+          path: browse-preview/
+          retention-days: 30
