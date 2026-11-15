@@ -24,7 +24,7 @@ Requests and responses use JSON with camelCase fields. The [schema](schema.md) l
 
 Database-backed APIs return `503 DATABASE_UNAVAILABLE` for recognized database failures. Unexpected server failures return `500 INTERNAL_ERROR`.
 
-Booking POSTs have a 30-attempt, 60-second limit per client IP. Render uses the address supplied by its public ingress. Other environments use the connected peer. See the [rate-limit contract and evidence](reference/bonus-rate-limit.md).
+The [booking limiter](../server/middleware/booking-rate-limit.js) counts up to 30 POST attempts per IP in 60 seconds, including invalid requests. Render uses its ingress client address and falls back to the connected socket when that address is missing or invalid. Local and alternate hosts use the connected socket. Counters live in memory. A `429 RATE_LIMITED` response gives `Retry-After` and `error.retryAfterSeconds`, both in seconds. Checkout waits and automatically retries the same body and request ID once. Receipt and Owner reads remain available. [Deployed retry evidence](challenges.md#too-many-requests)
 
 ## Discovery and session responses
 
@@ -34,7 +34,7 @@ Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optio
 - `category` accepts `creative` or `active`. `type` accepts `pottery`, `painting`, `pilates`, `dance` or `other`. `tag` accepts `beginner`, `handbuilding`, `wheel-throwing`, `painting-included` or `materials-included`.
 - `people` is 1–100. `sort` accepts `soonest`, `price-low` or `price-high`. Price order uses the applicable per-seat tier for the party. Browse exposes search, category and pagination. Invalid, duplicate or unsupported filters return 400.
 
-when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
+`when` accepts `today`, `tomorrow` or `weekend` in Asia/Manila. On Sunday, the weekend includes the preceding Saturday. Date filters return dated offers, and the bookable view applies the 72-hour window. A search with no matches returns `200 []`.
 
 The bookable list requires an active activity, an open offer, a session confirmed to run and enough seats for the requested group. Dated offers require a future start less than 72 hours away and a future booking cutoff. Two startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
 
@@ -52,7 +52,7 @@ discountPercent, status, serviceActive, recurrenceNote, runsAsScheduled, default
 
 Prices are per seat. discountPercent describes the standard offer versus the regular price. A null buddyPriceCentavos disables buddy pricing. A known unavailable session still returns 200 detail; the customer must not be allowed to book it. serviceActive identifies inactive activities, including when a session is opened through a direct link.
 
-Practice offers have `startsAt: null` and `bookingClosesAt: null`. Their receipts have `sessionStartsAt: null`. The optional `studioReference.photo` contains alt text, credit and a link to the listing. Card images are served locally using the reference key. See [photo sources](reference/workshop-photos.md).
+Practice offers have `startsAt: null` and `bookingClosesAt: null`. Their receipts have `sessionStartsAt: null`. The optional `studioReference.photo` contains alt text, credit and a link to the listing. Card images are served locally using the reference key. See [photo credits](reference/business-research-appendix.md#workshop-photo-credits).
 
 The owner catalog includes paused and expired inventory. Its services include id, providerId, providerName, name, active and defaultBookingCutoffMinutes. Its discoveryHours value comes from the server configuration so the owner page can distinguish future inventory from offers already in discovery.
 
@@ -134,8 +134,8 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 |---|---|---|
 | Home | / | Cholo |
 | Browse | /browse.html | Kirsten |
-| Detail | /detail.html?slotId=1 | Kat |
-| Selection | /selection.html?slotId=1 | Kaithlyn |
+| Detail | /detail.html?slotId=1 | Kat (Kaithlyn) |
+| Selection | /selection.html?slotId=1 | Kat (Kaithlyn) |
 | Booking form | /checkout.html?slotId=1&quantity=2 | Kaitlyn |
 | Confirmation | /confirmation.html?id=UUID | Kaitlyn |
 | Owner workspace | /owner.html | Fran |
@@ -146,4 +146,6 @@ The owner workspace stops waiting after 15 seconds, including while reading a re
 
 ## Studio research and applications
 
-The published studio catalog comes from `GET /api/activities`. The studio profile adds eligible demo offers via `GET /api/providers/:id`. An application stays pending and the public readback exposes its ID, status and creation time. See [studio catalog](reference/studio-discovery.md) and [provider onboarding](reference/provider-onboarding.md).
+The [published studio catalog](../public/data/studio-research.json) is served by `GET /api/activities`. A profile combines that provider’s published details with its eligible demo offers via `GET /api/providers/:id`.
+
+`POST /api/provider-applications` takes `requestId`, optional `providerId`, `businessName`, `website`, `city`, `area`, `activityTypes`, `contactName`, `contactEmail`, `representativeRole`, `authorized` and `demoAcknowledged`. The server validates the public HTTPS URL, contact fields, supported activity types, representative role and the two confirmations. It saves a pending application and reuses its result for the same request and payload. The public readback exposes `id`, `status` and `createdAt`. [Application service](../server/services/providers.js) · [API tests](../tests/providers.test.js)

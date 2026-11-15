@@ -21,6 +21,8 @@ Start at Home and follow Browse, Detail, Selection, Checkout and Confirmation. U
 | Measured Browse baseline | [Mobile Lighthouse, requests, transfer size and API time](docs/baseline.md) |
 | Release and collaboration | [Submission checklist](docs/gc2-submission-gate.md) · [AI disclosure](AI-USAGE.md) |
 
+The app is organized into [browser pages](public/), [Express routes and services](server/), [database schema and migrations](db/), [tests](tests/) and [release checks](tools/).
+
 ## Run locally
 
 Use Node 22 or later.
@@ -73,4 +75,4 @@ The broader last-minute appointment concept became a workshop booking MVP for GC
 
 The two revenue features are released-seat availability and buddy prices. The server checks seats and the accepted price before saving. SlotDrop models a 10% commission, and Confirmation reads the saved receipt by ID. The course demo defers accounts, real payments and paid placements.
 
-The [business case](docs/business.md) links the studio research and pilot assumptions. [Technical reference](docs/reference/README.md) covers photo sources, additional test notes and the backup deployment. [Historical handoffs](docs/archive/README.md) document the earlier work.
+The [business research appendix](docs/reference/business-research-appendix.md) contains the studio sources, workshop photo credits and pilot assumptions.

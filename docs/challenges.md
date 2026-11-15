@@ -2,7 +2,7 @@
 
 For these challenges, we tested what actually happens when someone books a workshop through SlotDrop. The workshops and payments are for the course demo, but the requests go through our Express API and the bookings are saved in PostgreSQL.
 
-Our deployed tests used [the Render demo](https://slotdrop-gc2-group-zx8j.onrender.com/) and fictional customer details. We've linked the screenshots, test runs and code changes alongside each answer. Older local runs are in the [test archive](archive/challenges-test-archive.md).
+Our deployed tests used [the Render demo](https://slotdrop-gc2-group-zx8j.onrender.com/) and fictional customer details. We've linked the screenshots, test runs and code changes alongside each answer.
 
 ## Challenge 1 — Break your own API
 
@@ -150,7 +150,7 @@ We deliberately sent **30 invalid booking POSTs** from one browser in a minute. 
 
 The retried POST returned **201**, creating **one ₱2,880 booking**; [Confirmation](evidence/stretch-deployed/checkout-429/confirmation.jpg) and [Owner](evidence/stretch-deployed/checkout-429/owner.jpg) both showed `26ccfbce-9a9d-49f6-b3c1-35674477ebf5`, and seats fell from **3 to 2**. Here's the [Network record](evidence/stretch-deployed/checkout-429/network.json) and [waiting-screen screenshot](evidence/stretch-deployed/checkout-429/waiting.jpg).
 
-The captured Render build counted requests by socket address. PR #72 updates this to use the client address; [integration tests](reference/bonus-rate-limit.md) cover clients behind the same proxy, while that newer behavior still needs a check on the final deployed host.
+The captured Render build counted requests by socket address. PR #72 updates this to use the client address; [integration tests](../tests/booking-rate-limit.test.js) cover clients behind the same proxy, while that newer behavior still needs a check on the final deployed host.
 
 ### The double click
 
@@ -175,5 +175,3 @@ Owner fetches **released-seat inventory** from `GET /api/owner/catalog` and **co
 On the deployed site, the metric changed from [**0/32 seats (0%)**](evidence/challenge2/owner-utilization-before.jpg) to [**1/32 (3%)**](evidence/challenge2/owner-utilization-after.jpg) after a booking. A separate [14 November response capture](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) checked the displayed **6/48 = 13%**. The [unit tests](../tests/owner-insights.test.js) cover cancelled bookings, paused or expired sessions and invalid totals.
 
 ---
-
-The supporting screenshots and runs are linked above. We kept the [older local and CI tests](archive/challenges-test-archive.md) separately, since they are useful history but not a substitute for the public-site results.

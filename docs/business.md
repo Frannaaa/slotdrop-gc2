@@ -4,8 +4,6 @@
 
 We’d start with one pottery studio and a small release of seats it expects to go unsold. The [four-week pilot plan](#pilot-and-risks) explains how we’d check that. Studio details and published prices come from [public research](#studio-research). The course demo uses simulated dates, seat releases, offers, bookings and payments.
 
-The [post-feedback revision of GC1](archive/gc1-post-feedback-revision.md) documents the instructor's strategic feedback, the originally missing monetization/features/tech-stack sections, updated competitor categories and the proposed partner validation plan. It is a **later working draft**, not a replacement for the original assessed GC1 proposal. The original proposal and instructor feedback are retained as separate course source files; the GC2 submission brief requires quotations and traceability, but does not explicitly request that feedback PDF as an additional public attachment.
-
 ## 4.1 GC1 traceability
 
 The quotes below come from our GC1 proposal and the instructor’s feedback.
@@ -36,8 +34,6 @@ The quotes below come from our GC1 proposal and the instructor’s feedback.
 | Ghost slots, discount-resistant studios and deal-only customers | Server capacity checks, Owner pause/resume and prices; proposed ring-fenced inventory, minimum net payout and cannibalization test | The latter three safeguards are **pilot arrangements**, not implemented integrations or proven results |
 | Commission, platform features and stack missing | Modeled **10% studio-paid commission**, persisted quotes and receipts, clear built/deferred features and stack in README | Real supplier unit costs, acquisition costs and agreed commercial terms |
 | Duplicate role-based stores and incomplete user journey | Entity-oriented PostgreSQL, detailed receipt/data flow, Detail page and Owner metrics | Login/admin separation, real cancellations and external calendar sync are still deferred |
-
-The original instructor feedback is the evidence for these gaps; this matrix is a **later interpretation of the group's response**, not proof that the early proposal contained the corrected sections. The [post-feedback GC1 working draft](archive/gc1-post-feedback-revision.md) keeps the deeper comparison and explicitly labels untested assumptions.
 
 ## 4.2 Funnel map
 
@@ -188,5 +184,5 @@ Our three biggest risks are **ghost seats**, a premium studio unwilling to disco
 
 ### Studio applications
 
-The app can save a prospective provider's application and show its pending status. That is **not verification or permission to publish a studio**. Real onboarding would require identity, consent and commercial terms; see [provider onboarding](reference/provider-onboarding.md).
+The app can save a prospective provider's application and show its pending status. That is **not verification or permission to publish a studio**. Real onboarding would require identity, consent and commercial terms. [Studio application contract](routes.md#studio-research-and-applications)
 
