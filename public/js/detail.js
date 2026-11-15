@@ -32,7 +32,7 @@ function renderDetail(slot,id,quantity){
   const displayQuantity=quantity===1?"per person":`per person · ${quantity} selected`;
   const discount=slot.originalPriceCentavos>0?Math.round(100*(slot.originalPriceCentavos-quote.unit)/slot.originalPriceCentavos):0;
   const inclusions=traits.length?`<div class="detail-highlights">${traits.map(value=>`<span>${escapeHtml(value)}</span>`).join("")}</div>`:"";
-  const technique=slot.technique?` · ${slot.technique.replace(/-/g," ")}`:"";
+  const technique=slot.technique?slot.technique.replace(/-/g," "):"";
   const preparation=slot.preparationNote?`<section class="detail-section"><h2>Before you go</h2><p>${escapeHtml(slot.preparationNote)}</p></section>`:"";
   const scheduleNote=practice
     ? "Demo exception: Kept open for grading; regular offers appear within 72 hours of a session and close at their booking cutoff."
@@ -52,11 +52,11 @@ function renderDetail(slot,id,quantity){
       <div class="detail-primary">
         ${inclusions}
         <section class="detail-section">
-          <h2>About this workshop</h2>
-          <p>${escapeHtml(activityLabel(slot.activityType)+technique)} with ${escapeHtml(slot.providerName)}. ${escapeHtml(String(slot.durationMinutes))} minutes, in ${escapeHtml(slot.area)}, ${escapeHtml(slot.city)}.</p>
+          <h2>Session details</h2>
           <div class="detail-facts">
             <div class="detail-fact"><span class="fact-icon" aria-hidden="true">◷</span><span><small>Duration</small><strong>${escapeHtml(String(slot.durationMinutes))} minutes</strong></span></div>
             <div class="detail-fact"><span class="fact-icon" aria-hidden="true">⌖</span><span><small>Location</small><strong>${escapeHtml(slot.area)}, ${escapeHtml(slot.city)}</strong></span></div>
+            ${technique?`<div class="detail-fact"><span class="fact-icon" aria-hidden="true">✦</span><span><small>Technique</small><strong>${escapeHtml(technique)}</strong></span></div>`:""}
           </div>
         </section>
         ${preparation}
