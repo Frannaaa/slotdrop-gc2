@@ -8,9 +8,9 @@
 .detail-page .detail-heading h1 { max-width:56rem; margin:0 0 .85rem; font-size:clamp(2.4rem,5vw,4.5rem); line-height:1.04; letter-spacing:-.055em; }
 .detail-page .detail-subhead { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .8rem; color:#52594f; font-size:.95rem; }
 .detail-page .detail-subhead a { color:var(--color-blue); font-weight:700; }
-.detail-page .detail-shell { display:grid; grid-template-columns:minmax(0,1.62fr) minmax(300px,.91fr); gap:clamp(1.5rem,3vw,2.65rem); align-items:start; }
-.detail-page .detail-primary { min-width:0; }
-.detail-page .detail-image { position:relative; overflow:hidden; aspect-ratio:16/10; margin:0; border-radius:20px; background:linear-gradient(140deg,#c88f82,#edcdb7); }
+.detail-page .detail-shell { display:grid; grid-template-columns:minmax(0,1.62fr) minmax(300px,.91fr); grid-template-areas:"media booking" "content booking"; column-gap:clamp(1.5rem,3vw,2.65rem); row-gap:0; align-items:start; }
+.detail-page .detail-primary { grid-area:content; min-width:0; }
+.detail-page .detail-image { grid-area:media; position:relative; overflow:hidden; aspect-ratio:16/10; margin:0; border-radius:20px; background:linear-gradient(140deg,#c88f82,#edcdb7); }
 .detail-page .detail-image img { display:block; width:100%; height:100%; object-fit:cover; }
 .detail-page .detail-image .detail-fallback { display:flex; height:100%; align-items:flex-end; padding:1.6rem; color:#65453b; font:700 clamp(1.55rem,3vw,2.6rem)/1.05 var(--font-heading); }
 .detail-page .detail-image figcaption { position:absolute; right:.8rem; bottom:.8rem; }
@@ -29,7 +29,7 @@
 .detail-page .detail-disclosures summary { cursor:pointer; font-weight:700; color:#3a493c; }
 .detail-page .detail-disclosures p { margin:.75rem 0 0; line-height:1.6; }
 .detail-page .detail-disclosures a { color:var(--color-blue); }
-.detail-page .detail-booking { position:sticky; top:1rem; min-width:0; padding:1.55rem; border:1px solid #dcddd4; border-radius:19px; background:white; box-shadow:0 16px 46px rgba(32,35,30,.075); }
+.detail-page .detail-booking { grid-area:booking; position:sticky; top:1rem; min-width:0; padding:1.55rem; border:1px solid #dcddd4; border-radius:19px; background:white; box-shadow:0 16px 46px rgba(32,35,30,.075); }
 .detail-page .booking-eyebrow { margin:0 0 .85rem; color:#6d776a; font-size:.72rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
 .detail-page .booking-date { display:flex; align-items:center; gap:.55rem; margin:0; padding:0 0 1.1rem; border-bottom:1px solid #e5e7df; color:#293229; font-size:1rem; font-weight:700; }
 .detail-page .booking-price-block { padding:1.3rem 0 1rem; }
@@ -50,6 +50,6 @@
 .detail-page #status.error { margin:1rem 0; padding:1rem; background:#fff1ee; border:1px solid #edc2b9; border-radius:10px; color:#94392e; }
 .detail-page #retry { margin-top:1rem; }
 @media (max-width:900px) { .detail-page .detail-shell { grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr); gap:1.25rem; } .detail-page .detail-booking { padding:1.25rem; } }
-@media (max-width:700px) { .detail-page > main.detail-main { width:min(calc(100% - 2rem),74rem); padding-top:1.2rem; } .detail-page .detail-heading h1 { font-size:clamp(2.05rem,8.5vw,3.4rem); } .detail-page .detail-shell { grid-template-columns:minmax(0,1fr); gap:1.25rem; } .detail-page .detail-booking { position:static; grid-row:2; } .detail-page .detail-image { border-radius:15px; } .detail-page .detail-section { padding:1.3rem 0; } }
+@media (max-width:700px) { .detail-page > main.detail-main { width:min(calc(100% - 2rem),74rem); padding-top:1.2rem; } .detail-page .detail-heading h1 { font-size:clamp(2.05rem,8.5vw,3.4rem); } .detail-page .detail-shell { grid-template-columns:minmax(0,1fr); grid-template-areas:"media" "booking" "content"; gap:1.25rem; } .detail-page .detail-booking { position:static; } .detail-page .detail-image { border-radius:15px; } .detail-page .detail-section { padding:1.3rem 0; } }
 @media (max-width:400px) { .detail-page .detail-facts { grid-template-columns:1fr; } .detail-page .detail-booking { padding:1.1rem; } }
 @media (prefers-reduced-motion:reduce) { .detail-page .detail-booking .button { transition:none; } }
