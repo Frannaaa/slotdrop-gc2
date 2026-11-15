@@ -1,4 +1,4 @@
--- Group assignment: Fran. See docs/ownership-and-execution.md.
+-- Group assignment: Fran. See README.md#team.
 -- Synthetic, proposed demo inventory. No named real provider is a partner.
 -- Run only on a NEW database after schema.sql. Existing data is preserved on refusal.
 BEGIN;

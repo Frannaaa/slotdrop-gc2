@@ -2,13 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
-import {
-  date,
-  escapeHtml,
-  money,
-  notice,
-  pageParameters,
-} from '../public/js/customer-common.js';
+import * as common from '../public/js/customer-common.js';
 
 const validId = '11111111-1111-4111-8111-111111111111';
 
@@ -44,19 +38,15 @@ async function openConfirmation(search, request) {
   const source = (await readFile(
     new URL('../public/js/confirmation.js', import.meta.url),
     'utf8'
-  )).replace(/^import[^\n]*\r?\n/m, '');
+  )).replace(/^import\s*\{[^}]*\}\s*from "\.\/customer-common\.js";\r?\n/m, '');
 
   runInNewContext(source, {
+    ...common,
     document: {
       querySelector: selector => get(selector.replace('#', '')),
     },
     location: { search },
     request,
-    date,
-    escapeHtml,
-    money,
-    notice,
-    pageParameters,
   });
 
   await new Promise(resolve => setImmediate(resolve));
@@ -82,6 +72,7 @@ test('a nonexistent booking reference offers Browse, not Reload', async () => {
   const page = await openConfirmation(`?id=${validId}`, async () => {
     const error = new Error('Booking not found.');
     error.status = 404;
+    error.code = 'BOOKING_NOT_FOUND';
     throw error;
   });
 
@@ -94,8 +85,8 @@ test('temporary receipt errors offer Reload and retry when clicked', async () =>
   let requests = 0;
   const page = await openConfirmation(`?id=${validId}`, async () => {
     requests++;
-    const error = new Error('Service unavailable');
-    error.status = 503;
+    const error = new Error('Temporary route response');
+    error.status = requests === 1 ? 404 : 503;
     throw error;
   });
 
@@ -118,4 +109,27 @@ test('confirmation page links its stylesheet and Back to Browse', async () => {
   assert.match(html, /href="\/css\/style\.css"/);
   assert.match(html, /id="browse" class="button" href="\/browse\.html" hidden[\s\S]*?Back to Browse/);
   assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
+});
+
+test('confirmation waits for a complete receipt matching the link', async () => {
+  const receipt = {
+    id: validId, slotId: 1, quantity: 2, status: 'confirmed',
+    paymentMethod: 'pay_on_site', pricingType: 'buddy',
+    serviceName: 'Demo session', providerName: 'Demo studio', sessionStartsAt: null,
+    unitPriceCentavos: 1000, totalPriceCentavos: 2000,
+  };
+  let reply = { ...receipt, id: '11111111-1111-4111-8111-222222222222' };
+  const page = await openConfirmation('?id=' + validId, async () => reply);
+  assert.equal(page.get('receipt').innerHTML, '');
+  assert.equal(page.get('retry').hidden, false);
+
+  reply = { ...receipt, unitPriceCentavos: undefined };
+  await page.handlers.get('retry:click')();
+  assert.equal(page.get('receipt').innerHTML, '');
+  assert.equal(page.get('retry').hidden, false);
+
+  reply = receipt;
+  await page.handlers.get('retry:click')();
+  assert.match(page.get('receipt').innerHTML, /Your demo booking is saved.*Practice booking/s);
+  assert.equal(page.get('retry').hidden, true);
 });
