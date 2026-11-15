@@ -4,7 +4,7 @@ For these challenges, we tested what actually happens when someone books a works
 
 Our deployed tests used [the Render demo](https://slotdrop-gc2-group-zx8j.onrender.com/) and fictional customer details. We've linked the screenshots, test runs and code changes alongside each answer. Older local runs are in the [test archive](challenges-test-archive.md).
 
-## Challenge 1: Break your own API
+## Challenge 1 — Break your own API
 
 We sent five invalid booking requests and one search that shouldn't find anything. We wanted to see whether the server would reject bad inputs without creating bookings, rather than trusting whatever the browser sent.
 
@@ -25,7 +25,7 @@ Our first deployed run actually found a mistake in the **test collection**: its 
 
 One distinction mattered: the server rejects an invented client `total` outright, while an old accepted quote gets **409 PRICE_CHANGED** with a new server quote. Neither lets the browser decide the selling price.
 
-## Challenge 2: Trace one real request
+## Challenge 2 — Trace one real request
 
 We followed a booking in Chrome DevTools on **15 November at 2:01 AM PHT**, using the public Render build [`93d931a`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbs72tc9v7es73billgg) at a 400 × 552 viewport. The customer booked **one Bumi & Ashe mug-making seat for ₱2,385**.
 
@@ -56,7 +56,7 @@ The important part is that **showing a quote doesn't reserve a seat**. We lock a
 
 **Hand-drawn request trace:** The brief asks us to draw this same journey ourselves, in addition to the typed [system diagram](system.md). The diagram should follow the recorded booking `f6148274-8de0-4558-ada3-2a8b3dc68217` from Checkout POST → validation → slot lock/price check → database insert and commit → **201** response → Confirmation GET → **200** receipt. The photo will be linked here when supplied.
 
-## Challenge 3: Overrule the AI
+## Challenge 3 — Overrule the AI
 
 Three pieces of AI-assisted work needed a second look. In each case the code seemed reasonable until a test or teammate review exposed the problem.
 
@@ -80,7 +80,7 @@ For the [#71 regression](https://github.com/Frannaaa/slotdrop-gc2/pull/71), we u
 
 These weren't cosmetic changes. They affected the truth of our tests, the safety of Owner edits and whether a customer could actually book a listed workshop.
 
-## Challenge 4: The owner changes a rule
+## Challenge 4 — The owner changes a rule
 
 We chose a rule that affects both sides of a booking: **what if SlotDrop's commission changes from 10% to 12%?** We shouldn't have to change the rate separately in Checkout, the database and the Owner dashboard.
 
@@ -110,7 +110,7 @@ We tried the single-line **1000 → 1200** change in a disposable local test dat
 
 So our answer is **one configuration line for new bookings**, with past receipts left alone. The deployed demo still uses **10%**.
 
-## Challenge 5: Predict, then run
+## Challenge 5 — Predict, then run
 
 Each of us records our own function, predicts the outputs for **three inputs before running the function**, shows what actually happens, and explains any differences. We also change an input or line and explain the new result. The assignment requires **our own voice, an unedited recording of at most three minutes, and no AI assistance during the recording**.
 
