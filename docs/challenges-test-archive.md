@@ -69,7 +69,7 @@ These are older local and CI runs, kept for the record. They are **not** evidenc
 | 8 Nov | Challenge 1 collection with Newman 6.2.3, local, commit `b1cf5c0` | 6 requests, 12 assertions passed | [challenge1-newman-local-2026-11-08.json](evidence/challenge1-newman-local-2026-11-08.json) |
 | 8 Nov | Owner collection, pagination (#49) and limiter (#56) with Newman, local | 21 requests / 28 assertions; 4 / 6; 7 / 12, all passed | [owner-and-bonus-newman-local-2026-11-08.json](evidence/owner-and-bonus-newman-local-2026-11-08.json) |
 | 8 Nov | Full suite in CI (PR #37) | 104 of 104 tests passed | [CI run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) |
-| 12 Nov | Deployed site after Browse was merged: health, Browse page, Owner page and paged list, read-only | `/api/health` 200; Browse showed "8 sessions found." with a clean Console; `/checkout.html` 404; `bookingCount` 0 | [Pagination](#pagination) |
+| 12 Nov | Deployed site after Browse was merged: health, Browse page, Owner page and paged list, read-only | `/api/health` 200; Browse showed "8 sessions found." with a clean Console; `/checkout.html` 404; `bookingCount` 0 | [Pagination](challenges.md#pagination) |
 
 The [Owner and session Postman collection](SlotDrop-Fran.postman_collection.json) covers the Owner and session APIs.
 
