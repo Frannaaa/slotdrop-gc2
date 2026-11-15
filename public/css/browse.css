@@ -154,6 +154,10 @@
 .browse-page .closed-sessions > p { color: #55534d; font-size: .9rem; }
 .browse-page .closed-sessions > .error { color: #9d2424; }
 .browse-page #closed-status:empty { display: none; }
+.browse-page #closed-results {
+  grid-template-columns: minmax(0, 1fr);
+  gap: .65rem;
+}
 .browse-page .button {
   display: inline-flex;
   min-height: 2.7rem;

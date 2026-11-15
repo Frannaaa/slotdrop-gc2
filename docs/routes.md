@@ -36,7 +36,7 @@ Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optio
 
 `when` accepts `today`, `tomorrow` or `weekend` in Asia/Manila. On Sunday, the weekend includes the preceding Saturday. Date filters return dated offers, and the bookable view applies the 72-hour window. A search with no matches returns `200 []`.
 
-The bookable list requires an active activity, an open offer, a session confirmed to run and enough seats for the requested group. Dated offers require a future start less than 72 hours away and a future booking cutoff. Two startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
+The bookable list requires an active activity, an open offer, a session confirmed to run and enough seats for the requested group. Dated offers require a future start less than 72 hours away and a future booking cutoff. Three startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
 
 `view=closed` lists dated, active, open, confirmed-to-run sessions whose cutoff has passed, including offers that sold out. The `people` filter uses total capacity in this view. Without an explicit sort, the most recent cutoffs appear first. The view always applies pagination. Browse fetches the latest 16 only when someone opens **Closed sessions**. Its cards say “Booking closed” or “Event ended” and link to read-only details. Closed offers still return 409 from a new quote or booking.
 

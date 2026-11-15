@@ -81,7 +81,7 @@ test('cards accept the session API before additive attributes and escape studio 
   assert.deepEqual(previewPrice({...slot, buddyPriceCentavos:null}, 2), {buddy:false, unit:160000, total:320000});
 });
 
-test('closed cards label the cutoff and event end separately and omit the price and seats', t => {
+test('archive entries label the cutoff and event end separately and omit photos and prices', t => {
   const when = time => Date.parse('2026-11-01T' + time + ':00Z');
   assert.equal(closedSessionLabel(slot, when('03:59')), '');
   assert.equal(closedSessionLabel(slot, when('04:00')), 'Booking closed');
@@ -92,12 +92,16 @@ test('closed cards label the cutoff and event end separately and omit the price 
   t.mock.method(Date, 'now', () => now);
   assert.match(card(slot, 1, { closed: true }), /<span class="session-label">Booking closed<\/span>/);
   now = when('09:00');
-  const html = card(slot, 1, { closed: true });
+  const archived = { ...slot, studioReference: {
+    key: 'laro-mug', photo: { alt: 'Workshop photo', credit: 'Example Studio', page: 'https://example.com/workshop' },
+  } };
+  const html = card(archived, 1, { closed: true });
   assert.match(html, /activity-card card closed-card/);
   assert.match(html, /<span class="session-label">Event ended<\/span>/);
   assert.match(html, /detail\.html\?slotId=1&quantity=1/);
   assert.match(html, /View details/);
-  assert.doesNotMatch(html, /Book by|seat(s)? left|party-price/);
+  assert.match(html, /Nov 1, 2026/);
+  assert.doesNotMatch(html, /Book by|seat(s)? left|party-price|<img|card-photo/);
 });
 
 test('studio reference cards and profiles share safe HTTPS source-link validation', () => {

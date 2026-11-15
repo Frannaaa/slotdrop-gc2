@@ -699,8 +699,30 @@ body:not(.owner-page) .activity-card .button.secondary {
   text-decoration: none;
 }
 body:not(.owner-page) .activity-card .button.secondary:hover { color: #fff; background: #2437b0; border-color: #2437b0; }
+body:not(.owner-page) .activity-card.closed-card {
+  border-radius: 10px;
+  background: #faf9f5;
+  box-shadow: none;
+}
+body:not(.owner-page) .activity-card.closed-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+body:not(.owner-page) .activity-card.closed-card .card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .35rem 1.25rem;
+  padding: .85rem 1.1rem;
+}
+body:not(.owner-page) .activity-card.closed-card .card-body > :not(.button) {
+  grid-column: 1;
+}
 body:not(.owner-page) .activity-card.closed-card .button.secondary {
-  margin-top: auto;
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  align-self: center;
+  width: auto;
+  margin: 0;
   color: #4e5048;
   background: #fff;
   border-color: #d5d6ce;
@@ -708,6 +730,17 @@ body:not(.owner-page) .activity-card.closed-card .button.secondary {
 body:not(.owner-page) .activity-card.closed-card .button.secondary:hover {
   background: #f4f4ef;
   border-color: #96988e;
+}
+
+@media (max-width: 600px) {
+  body:not(.owner-page) .activity-card.closed-card .card-body {
+    display: flex;
+    gap: .4rem;
+  }
+  body:not(.owner-page) .activity-card.closed-card .button.secondary {
+    align-self: flex-start;
+    margin-top: .25rem;
+  }
 }
 #status:empty { display: none !important; }
 

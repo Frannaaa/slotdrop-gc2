@@ -205,10 +205,10 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
   const photo = slot.studioReference?.photo;
   const photoPage = safeHttpsUrl(photo?.page);
   const photoKey = slot.studioReference?.key;
-  const hasPhoto = photoPage && typeof photoKey === "string"
+  const hasPhoto = !closed && photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
-  const sessionDate = practice ? "" : cardDateFormat.format(new Date(slot.startsAt));
+  const sessionDate = practice ? "" : closed ? date(slot.startsAt) : cardDateFormat.format(new Date(slot.startsAt));
   const sessionLabel = closed
     ? closedSessionLabel(slot) || "Booking closed"
     : practice ? "Practice version" : "";
@@ -239,8 +239,8 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
           : escapeHtml(slot.providerName)}
       </p>
       <p class="session-time">
-        ${sessionDate ? `<strong>${sessionDate}</strong><br />` : ""}
-        ${slot.durationMinutes} min${closed ? "" : ` · ${seats}`}
+        ${sessionDate ? `<strong>${sessionDate}</strong>` : ""}
+        ${closed ? "" : `${sessionDate ? "<br />" : ""}${slot.durationMinutes} min · ${seats}`}
       </p>
       ${bookingNote ? `<p class="session-cutoff">${bookingNote}</p>` : ""}
       ${price ? `<div class="party-price">

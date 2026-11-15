@@ -71,7 +71,7 @@ Run `npm run db:init` only for a new, empty course database. Start with `npm sta
 
 ## Changes since GC1
 
-The broader last-minute appointment concept became a workshop booking MVP for GC2. Dated offers appear within 72 hours of their start and close at their own deadlines. Browse keeps recently closed offers available for viewing. Two undated practice offers let the instructor book after the dated samples close, while the practice offers remain open and have seats.
+The broader last-minute appointment concept became a workshop booking MVP for GC2. Dated offers appear within 72 hours of their start and close at their own deadlines. Browse keeps recently closed offers available for viewing. Three undated practice offers let the instructor book after the dated samples close, while the practice offers remain open and have seats.
 
 The two revenue features are released-seat availability and buddy prices. The server checks seats and the accepted price before saving. SlotDrop models a 10% commission, and Confirmation reads the saved receipt by ID. The course demo defers accounts, real payments and paid placements.
 

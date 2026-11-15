@@ -17,7 +17,7 @@ test('real studio demo installation is additive and preserves legacy receipts an
   assert.deepEqual((await f.db.query('SELECT * FROM slots WHERE id<=8 ORDER BY id')).rows,originalSlots);
   const rows=await(await fetch(f.base+'/api/slots')).json();
   assert.equal(rows.filter(row=>row.startsAt!==null).length,16);
-  assert.equal(rows.filter(row=>row.startsAt===null).length,2);
+  assert.equal(rows.filter(row=>row.startsAt===null).length,3);
   assert.ok(rows.every(r=>r.studioReference?.bookingIsSimulated));
   assert.ok(rows.every(r=>!r.providerName.startsWith('Demo ')));
   assert.equal(new Set(rows.map(r=>r.providerName)).size,5);
@@ -65,10 +65,10 @@ test('practice offers stay bookable after scheduled dates pass and keep their sa
   const firstPage=await response.json();
   const scheduled=firstPage.find(row=>row.startsAt!==null);
   assert.ok(scheduled);
-  assert.equal(firstPage.filter(row=>row.startsAt===null).length,2);
+  assert.equal(firstPage.filter(row=>row.startsAt===null).length,3);
   now=new Date(f.now.getTime()+60*24*3600000);
   const practice=await (await get('/api/slots?page=1&limit=6')).json();
-  assert.equal(practice.length,2);
+  assert.deepEqual(practice.map(slot=>slot.studioReference.key).sort(),['bumi-mug','laro-mug','sip-open']);
   assert.ok(practice.every(slot=>slot.startsAt===null && slot.bookingClosesAt===null));
   const [slot]=practice;
   await assert.rejects(
@@ -100,7 +100,16 @@ test('practice offers stay bookable after scheduled dates pass and keep their sa
   assert.equal((await send('/api/bookings','POST',payload)).status,200);
   assert.equal((await send('/api/bookings','POST',{...payload,requestId:crypto.randomUUID()})).status,409);
 
+  // Simulate a catalog from the release that had only the first two practice offers.
+  const painting=practice.find(row=>row.studioReference.key==='sip-open');
+  await f.db.query('DELETE FROM slots WHERE id=$1',[painting.id]);
   await ensureReferenceCatalog(f.db);
+  await ensureReferenceCatalog(f.db);
+  const restored=await (await get('/api/slots?type=painting')).json();
+  const paintingPractice=restored.filter(row=>row.startsAt===null);
+  assert.equal(paintingPractice.length,1);
+  assert.equal(paintingPractice[0].studioReference.key,'sip-open');
+  assert.equal(paintingPractice[0].remainingSeats,20);
   const soldOut=await (await get('/api/slots/'+slot.id)).json();
   assert.equal(soldOut.remainingSeats,0);
   assert.equal(soldOut.capacity,2);

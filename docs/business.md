@@ -19,7 +19,7 @@ These are the parts of GC1 we carried into the build, along with the decisions w
 | GC1 feature | GC2 decision |
 |---|---|
 | Slot Manager | “Stores service, date/time, location, original price, discounted price, and availability.” Owner creates a dated offer with prices, a cutoff and released seats. The edit route updates the cutoff, offer prices, capacity and sale status. |
-| Marketplace Feed and search | “Displays only upcoming slots that are still available.” The bookable list follows that rule for dated offers. Browse adds search, category buttons, six offers per page and a separate Closed sessions section. Two undated practice offers let the instructor test bookings after the dated samples expire. |
+| Marketplace Feed and search | “Displays only upcoming slots that are still available.” The bookable list follows that rule for dated offers. Browse adds search, category buttons, six offers per page and a separate Closed sessions section. Three undated practice offers let the instructor test bookings after the dated samples expire. |
 | Simulated Booking | “Checks availability, marks the slot as booked, and creates a booking record.” We added Detail after the GC1 feedback, followed by quantity and quote on Selection, simulated payment on Checkout, and a saved receipt on Confirmation. The server checks stock and price when the booking is saved. The five-minute hold from the wireframe was dropped. |
 | User Schedules and Provider Analytics | Owner shows saved bookings and five metrics. Personal schedules and role-specific reports are future work. |
 | Auth & Roles, real payments, integrations and paid placements | Outside the scope of the GC2 demo. |
@@ -52,7 +52,7 @@ The studio uses Owner to edit offers and check sales. The bookings table and fiv
 
 ## 4.3 Business rules
 
-Scheduled offers appear within 72 hours of their start and close at the studio’s cutoff. **Closed sessions** shows up to 16 recently closed offers. The two practice offers start with 20 simulated seats each. They stay bookable as long as the activity is active, sales are open and seats remain, so the instructor can still test the flow after the dated offers expire.
+Scheduled offers appear within 72 hours of their start and close at the studio’s cutoff. **Closed sessions** shows up to 16 recently closed offers. The three practice offers start with 20 simulated seats each. They stay bookable as long as the activity is active, sales are open and seats remain, so the instructor can still test the flow after the dated offers expire.
 
 | Rule, in the owner’s words | Where it’s enforced | What the customer sees |
 |---|---|---|
