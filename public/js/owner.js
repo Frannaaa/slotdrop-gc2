@@ -229,7 +229,7 @@ function renderOpenUtilization(now) {
   if (value.inconsistent) {
     message = "Utilization unavailable. Confirmed bookings exceed released capacity. Refresh data to retry.";
   } else if (value.utilizationPercent !== null) {
-    message = `${value.utilizationPercent}% of released seats booked (${value.confirmedSeats} of ${value.releasedSeats} seats across ${value.eligibleSessions} sessions).`;
+    message = `${value.confirmedSeats} of ${value.releasedSeats} released seats booked · ${value.utilizationPercent}% across ${value.eligibleSessions} eligible ${value.eligibleSessions === 1 ? "session" : "sessions"}.`;
   }
   const utilization = $("open-utilization");
   if (utilization.textContent !== message) utilization.textContent = message;
