@@ -7,6 +7,7 @@ export function bookingRateLimiter({
   now = () => Date.now(),
   // Only Render's Cloudflare ingress may supply this trusted header.
   useRenderClientIp = process.env.RENDER === 'true',
+  useVercelClientIp = process.env.VERCEL === '1',
 } = {}) {
   if(!Number.isSafeInteger(max)||max<1||!Number.isSafeInteger(windowMs)||windowMs<1000
     ||typeof now!=='function') throw new Error('Invalid rate-limit configuration');
@@ -15,16 +16,18 @@ export function bookingRateLimiter({
     // Do not impede receipt reads, Owner lists or other API routes.
     if(req.method!=='POST'||req.path!=='/') return next();
     const stamp=now();
-    // X-Forwarded-For is append-only at Render ingress. Its leftmost value
-    // may be chosen by the caller, so never use it to identify rate-limit clients.
-    // Render's Cloudflare ingress sets CF-Connecting-IP. Trust that header ONLY
-    // in the Render deployment, which must remain behind Cloudflare; direct
-    // deployments ignore all forwarding headers and use the socket address.
-    const cloudflareIp = useRenderClientIp
+    // Trust a provider-owned client-IP header only behind that provider's
+    // ingress. Render appends to caller-controlled X-Forwarded-For, so use
+    // Cloudflare's CF-Connecting-IP instead; Vercel overwrites its own
+    // X-Vercel-Forwarded-For. Direct servers ignore forwarding headers.
+    // An absent/invalid trusted header falls back to the socket address.
+    const trustedIp = useRenderClientIp
       ? req.get('cf-connecting-ip')?.trim()
-      : undefined;
-    const key = cloudflareIp && isIP(cloudflareIp)
-      ? cloudflareIp
+      : useVercelClientIp
+        ? req.get('x-vercel-forwarded-for')?.trim()
+        : undefined;
+    const key = trustedIp && isIP(trustedIp)
+      ? trustedIp
       : req.socket.remoteAddress || 'unknown';
     let record=requests.get(key);
     if(!record||stamp>=record.resetAt){
