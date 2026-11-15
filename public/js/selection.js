@@ -15,7 +15,6 @@ async function refresh() {
   const current = ++generation;
   next.disabled = true;
   summary.textContent = "";
-  notice(status, "");
   notice(status, "Checking price and seats...");
   try {
     const count = positive(quantity.value, 100);
@@ -36,8 +35,8 @@ async function refresh() {
   } catch (error) {
     if (current === generation) {
       notice(status, error.message, true);
+      next.disabled = true;
     }
-    next.disabled = true;
   }
 }
 
