@@ -1,4 +1,4 @@
-// Group assignment: Cholo. See docs/ownership-and-execution.md.
+// Group assignment: Cholo. See README.md#team.
 import { request, card, notice } from "./customer-common.js";
 
 const results = document.querySelector("#featured"),

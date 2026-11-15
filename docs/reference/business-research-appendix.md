@@ -1,13 +1,13 @@
 # SlotDrop — supporting studio research and model assumptions
 
-This is the source-and-calculation appendix to [the GC2 business case](business.md). The main document contains the decisions the group must explain under rubric sections 4.1–4.5. This appendix keeps the longer studio notes, alternative channels, pilot assumptions and sensitivity checks available for review.
+This is the source-and-calculation appendix to [the GC2 business case](../business.md). The main document contains the decisions the group must explain under rubric sections 4.1–4.5. This appendix keeps the longer studio notes, alternative channels, pilot assumptions and sensitivity checks available for review.
 
 **Evidence boundary:** Studio locations, product descriptions and published prices came from public sources researched around 29–30 October 2026 unless otherwise noted. SlotDrop's booking prices, partner agreements, released capacity, pilot attendance, unit costs, acquisition rates and fee arrangements are assumptions or simulated course data, not observed commercial results. The original GC1 proposal and its feedback are historical source documents held separately.
 
 ## A. Studios and why each might fit
 
 
-We checked the studios’ public pages on 29–30 October 2026. We’d confirm the branch, date, available seats and permission to list directly with a studio before the pilot. The [catalog data](../public/data/studio-research.json) contains the sources used in the demo.
+We checked the studios’ public pages on 29–30 October 2026. We’d confirm the branch, date, available seats and permission to list directly with a studio before the pilot. The [catalog data](../../public/data/studio-research.json) contains the sources used in the demo.
 
 <details>
 <summary>Studio profiles, published prices and questions for outreach</summary>

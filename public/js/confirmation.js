@@ -1,4 +1,4 @@
-// Group assignment: Kaitlyn. See docs/ownership-and-execution.md.
+// Group assignment: Kaitlyn. See README.md#team.
 import { request, money, date, escapeHtml, pageParameters, notice } from "./customer-common.js";
 const content = document.querySelector("#receipt"),
   status = document.querySelector("#status"),

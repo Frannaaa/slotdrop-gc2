@@ -2,42 +2,41 @@
 
 Group 1 · ITMGT 45.03-YZW
 
-SlotDrop helps people find available seats in nearby leisure sessions. Studios set their offers, booking deadlines and optional buddy prices. The sample catalog uses real studio names and sourced published facts; session dates, allocated seats, cutoffs, offers, bookings and payments are simulated. No partnership or real reservation is created.
+SlotDrop helps people near Katipunan find and book released workshop seats. Studios set their own allocation, booking cutoff and optional buddy price. The course demo uses sourced studio details and simulates all offers, bookings and payments.
 
 ## Deployed course demo
 
-[Open SlotDrop on Render](https://slotdrop-gc2-group-zx8j.onrender.com/). Start on Home and follow Browse, Detail, Selection, Checkout and Confirmation. The [Owner workspace](https://slotdrop-gc2-group-zx8j.onrender.com/owner.html) lists saved demo bookings and five metrics. Render deploys reviewed `main` to the course service in Singapore after checks pass. [Deployment history](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbr7meojo6nc73eq1920) identifies the build used for the baseline. Use fictional details and simulated payment. [Challenge evidence](docs/challenges.md) records the live walkthrough and remaining verification.
+[Open SlotDrop on Render](https://slotdrop-gc2-group-zx8j.onrender.com/) · [Owner workspace](https://slotdrop-gc2-group-zx8j.onrender.com/owner.html)
+
+Start at Home and follow Browse, Detail, Selection, Checkout and Confirmation. Use fictional guest details. The Owner workspace shows the saved booking and five metrics. Render may take a moment to start after it has been idle.
+
+## GC2 submission
+
+| What to open | Files |
+|---|---|
+| Architecture and request flow | [System diagram and booking data flow](docs/system.md) |
+| API and database | [Route table](docs/routes.md) · [Schema](docs/schema.md) |
+| Business case | [GC1 traceability, funnel and revenue features](docs/business.md) · [Two-page PDF](docs/SlotDrop_GC2_Summary.pdf) |
+| Challenges and stretch evidence | [Challenge 1–5 and five stretches](docs/challenges.md) · [Postman collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) · [Individual recording links](docs/challenges.md#individual-recording-links) |
+| Measured Browse baseline | [Mobile Lighthouse, requests, transfer size and API time](docs/baseline.md) |
+| Release and collaboration | [Submission checklist](docs/gc2-submission-gate.md) · [AI disclosure](AI-USAGE.md) |
 
 ## Run locally
 
 Use Node 22 or later.
 
-```powershell
+```sh
 npm ci
-npm run check
-npm test
-npm run check:sql
 npm run demo
 ```
 
-Open http://localhost:3000/api/slots and http://localhost:3000/owner.html. The demo stores its PGlite database in ignored .local-data/. Restarting keeps the records.
-
-Fresh seeds create 16 dated sample sessions across eight researched offerings. Startup can replenish dated allocations and supplies two undated practice offers for grading. The practice cards say “Demo only · No booking cutoff.” They use the same seat limits, server pricing and saved receipts as scheduled offers.
+Open [Home](http://localhost:3000/) or [Owner](http://localhost:3000/owner.html). The demo keeps its PGlite data in `.local-data/`. Run `npm run check`, `npm test` and `npm run check:sql` to check code, API behavior and schema constraints.
 
 ## PostgreSQL and deployment
 
-Database tools and Docker are available from PR #27.
+For a new PostgreSQL course database, set `DATABASE_URL`, `NODE_ENV=production` and `PORT` through the host environment or a local `.env`. Copy [`.env.example`](.env.example) for the variable names. Keep the filled file out of Git and leave database TLS verification enabled. `TEST_DATABASE_URL` optionally points the test suite at a disposable PostgreSQL test database.
 
-1. Set DATABASE_URL privately in .env or the host's environment settings.
-2. Run `npm run db:init` **once** against a new, empty course database. It must not be rerun on a populated database and must not target the reference-only project's database.
-3. Install with `npm ci --omit=dev` and run `npm start`, or build the included Dockerfile.
-4. Set NODE_ENV=production and use the host's PORT. Keep database TLS verification enabled.
-5. Check `/api/health` and `/api/slots`. In production, health probes PostgreSQL *and* the required booking tables; local demo health is deliberately lightweight.
-6. Run Postman against the public URL. [Production-container CI](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43354906742) verifies receipt readback across a PostgreSQL-backed server restart.
-
-.env.example lists PORT, DATABASE_URL and NODE_ENV with blank values. On Windows, copy it with `Copy-Item .env.example .env`; on macOS/Linux, use `cp .env.example .env`. Never commit the filled .env file.
-
-TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. Without it, local tests use PGlite and skip the PostgreSQL lock test.
+Run `npm run db:init` only for a new, empty course database. Start with `npm start` or the [Dockerfile](Dockerfile). Render uses the [startup configuration](render.yaml) to initialize an empty database or apply upgrades to an existing database. Verify `/api/health` and run `npm run check:gc2 -- https://slotdrop-gc2-group-zx8j.onrender.com` against the public demo.
 
 ## Team
 
@@ -70,55 +69,8 @@ TEST_DATABASE_URL is an optional test-shell variable for real PostgreSQL tests. 
 
 ## Changes since GC1
 
-The build focuses on recurring leisure sessions and released seat allocations. Dated offers appear within 72 hours of their start and close at their own deadlines. Two undated practice offers keep the grading flow available while they have seats. Studios control standard and optional buddy offers. The course commission is 10%.
+The broader last-minute appointment concept became a workshop booking MVP for GC2. Dated offers appear within 72 hours of their start and close at their own deadlines. Browse keeps recently closed offers available for viewing. Two undated practice offers let the instructor book after the dated samples close, while the practice offers remain open and have seats.
 
-Availability and buddy pricing are the two revenue features. The merged booking API enforces both availability and buddy pricing under a database transaction, with persisted receipt snapshots and stable request-ID retries. Paid add-ons, accounts, real payments, React and optimization are deferred.
+The two revenue features are released-seat availability and buddy prices. The server checks seats and the accepted price before saving. SlotDrop models a 10% commission, and Confirmation reads the saved receipt by ID. The course demo defers accounts, real payments and paid placements.
 
-## Design and documents
-
-The [brand book and prototype](https://slotdrop-gc2-design-studio.frannaaa216.chatgpt.site/prototype) are the visual reference. That prototype saves sample data in the browser; it is separate from this API-backed app. The app serves DM Sans and Space Grotesk locally; their licenses are in public/fonts/.
-
-- [Business case and sources](docs/business.md)
-- [Route contract](docs/routes.md)
-- [Database schema](docs/schema.md)
-- [System diagram and data flow](docs/system.md)
-- [Challenges and test results](docs/challenges.md)
-- [Deployed List baseline](docs/baseline.md)
-
-Use the [Challenge 1 Postman collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) for the six required cases and the [Owner and session collection](docs/SlotDrop-Fran.postman_collection.json) for additional checks. Point `baseUrl` at the group deployment and use fictional data.
-
-## Submission checklist
-
-See the [GC2 submission gate](docs/gc2-submission-gate.md) and [two-page business summary](docs/SlotDrop_GC2_Summary.pdf). The extended submission deadline is **November 16, 2026 at 11:59 PM Philippine time**.
-
-### Individual Challenge 5 recordings
-
-[Group video folder on Google Drive](https://drive.google.com/drive/folders/1U2MMvoRrhgov5SSZ0HdGHf51kiJ9c4Uj) · [Individual video links, roster and verification status](docs/challenges.md#individual-recording-links).
-
-Three recordings are linked so far (Cholo/Chonel, Janelle and Kirsten). Fran, Kaitlyn and Kat have no file in the supplied folder yet. These links are **not** a claim that all six recordings meet the assignment or that instructor access has been tested.
-
-## Released-seat discovery revision
-
-The main customer path is Home → Browse → Detail → Selection → Checkout → Confirmation. Browse supports search, category filters and pagination. Selection sets the party size. Studio research is supporting information. See [product and file handoff](docs/released-seat-discovery.md), [provider questions](docs/provider-readiness.md) and the additive migration in db/migrations/. Existing populated data is upgraded at configured startup; never reseed it.
-
-Studio research is available at `/studios.html` through `GET /api/activities`. It is separate from the database-backed booking inventory. See `docs/studio-discovery.md`.
-
-## Sourced catalog and studio application
-
-Fran's additional reference-catalog work supplies eight activities at five real businesses, with sixteen explicitly simulated dated allocations. Published business facts/prices have source URLs; discounts, seats and deadlines are sample data. Startup adds records once without renaming historical providers or changing receipts. Never reseed a populated database. `/provider-apply.html` saves a pending demo application, and `/provider-application.html?id=UUID` reads back only status. It does not publish or verify ownership. These supporting pages follow the shared styling; see `docs/provider-onboarding.md`.
-
-## Pre-checkpoint demo inventory check (read-only)
-
-Scheduled allocations close at their booking deadlines. Open **Closed sessions** in Browse to see up to 16 recently expired offers labeled “Booking closed” or “Event ended.” The two practice offers stay discoverable without a date cutoff while they have available seats. Owner can add practice capacity when needed. Startup preserves existing bookings and offer edits.
-
-Before each deployed demo/checkpoint, with the app running, run:
-
-```sh
-npm run check:demo -- https://YOUR-APP-HOST
-```
-
-Or run `npm run check:demo` against local `http://localhost:3000`. The check fetches `GET /api/slots`, reports remaining bookable demo allocations, and returns a failure exit code if none remain. It **never** creates offers, shifts existing dates, reactivates sold-out seats, modifies receipts or touches the database.
-
-If there are no bookable offers, open the **Owner course-demo screen** and adjust the practice allocation, resume a paused practice offer with seats left, or add a dated sample with a future cutoff. Then recheck Browse. Do not rerun `db:init` on a populated database, overwrite historic bookings, silently reseed or claim real studio consent. Because the public demo has no owner login, use fictional test data only and do not expose real provider management as a production feature.
-
-This check tests availability only. It does **not** prove that Detail, Selection, Checkout, Confirmation, PostgreSQL persistence or customer booking are integrated. Use the [transaction acceptance checklist](docs/transaction-flow-acceptance.md) for those checks.
+The [business case](docs/business.md) links the studio research and pilot assumptions. [Technical reference](docs/reference/README.md) covers photo sources, additional test notes and the backup deployment. [Historical handoffs](docs/archive/README.md) document the earlier work.

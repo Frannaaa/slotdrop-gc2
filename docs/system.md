@@ -23,7 +23,7 @@ flowchart LR
   API -->|"JSON and HTTP statuses"| Owner
 ```
 
-The customer and Owner pages share the same Express application and database. UI files do not query PostgreSQL directly. Express routes parse HTTP requests, services enforce booking rules, repositories execute parameterized SQL, and responses return JSON with explicit status codes. The Owner screen is a course-demo workspace without account authentication; it should only be used with fictional data.
+The pages in [public/](../public/) fetch JSON. [Express routes](../server/routes/) handle HTTP, [services](../server/services/) validate inputs and enforce rules, and [repositories](../server/repositories/) run PostgreSQL queries and transactions. The booking service uses a repository transaction to take the session row lock and save the receipt. Use fictional data in the public Owner workspace.
 
 ## Transaction: choose, quote, save, read back
 
@@ -109,7 +109,7 @@ The row lock serializes competing bookings and Owner capacity edits for the **sa
 
 The payment options are simulated and no card is charged. This architecture illustrates the Group 1 code path, not external supplier inventory synchronization.
 
-All money is modeled in PHP centavos. The active commission setting lives in `server/config/business.js`; quote and booking both derive totals on the server. The selected quantity is **not** reserved when merely viewing Detail/Selection; save is the transaction that reduces remaining seats. The code derives remaining seats from released capacity minus confirmed booking quantities rather than persisting a mutable display counter.
+Prices are integer centavos. [Shared pricing helpers](../public/js/business-config.js) apply the same tier and rounding rules in quotes, booking and previews. The server reads the commission rate from [one setting](../server/config/business.js). Only a confirmed save reduces available seats.
 
 ## Owner offer-management path
 

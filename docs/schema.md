@@ -5,12 +5,12 @@ The SQL is in [db/schema.sql](../db/schema.sql). It defines five tables:
 | Table | Stores |
 |---|---|
 | providers | Business name, city, area and stable source reference key |
-| services | Activity, provider, category, duration, recurrence note, active status and default booking lead time |
-| slots | Session start and cutoff, released capacity, regular/offer/buddy prices and status. The two practice offers have null dates. |
+| `services` | Activity and provider FK, category, type, technique, inclusions, preparation and cancellation notes, beginner flag, duration, recurrence, active status and default cutoff lead time |
+| `slots` | Activity FK, start and cutoff, released capacity, regular/offer/buddy prices, sale status and confirmation that the session will run. Undated practice offers have two null dates. |
 | bookings | Quantity, private demo customer details/retry key, status and saved time/price/fee fields |
 | provider_applications | Private demo contact/representation details, optional referenced provider, unique retry key and review status |
 
-Relationships: providers → services → slots → bookings. One session can have several bookings.
+The booking path is `providers` → `services` → `slots` → `bookings`, with one-to-many relationships at each step. A pending application may optionally refer to a provider.
 
 ## Seats and availability
 
@@ -23,7 +23,7 @@ remainingSeats = capacity - seatsBooked
 
 There is no separate remaining-seats counter. Booking and capacity edits must lock the same slots row before checking quantities. Owner edits and the booking service both use this lock. SQL constraints alone do not enforce capacity across all booking rows.
 
-Discovery requires an active activity, an open offer and enough released seats. Scheduled offers also require a start after now but before now + 72 hours and a cutoff after now. Undated practice offers can be booked without those time checks.
+Discovery requires an active activity, an open offer, confirmation that the session will run and enough released seats. Scheduled offers also require a start after now but before now + 72 hours and a cutoff after now. Undated practice offers can be booked without those time checks.
 
 ## Cutoffs
 
@@ -59,7 +59,7 @@ The API accepts price, capacity, cutoff and status edits. Start changes and cuto
 
 Schema creation refuses existing tables. Seeding refuses existing data. Neither script resets a shared database or migrates an older schema. Restarting the app preserves saved rows and does not refresh their timestamps.
 
-PostgreSQL 16 was tested in CI. PGlite 0.5.12 is used for the local demo and SQL checks. The group’s Render web service connects to a persistent Neon PostgreSQL database.
+Render connects to a persistent Neon PostgreSQL database. CI verifies PostgreSQL 16. The [README stack](../README.md#stack) lists the local demo and runtime versions.
 
 
 ## Explicit activity attributes and safe upgrade

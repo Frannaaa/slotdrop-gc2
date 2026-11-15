@@ -1,4 +1,4 @@
-// Group assignment: Kaitlyn. See docs/ownership-and-execution.md.
+// Group assignment: Kaitlyn. See README.md#team.
 import { request, retryLimitedBooking, money, date, positive, pageParameters, notice } from "./customer-common.js";
 
 const form = document.querySelector("#checkout"),

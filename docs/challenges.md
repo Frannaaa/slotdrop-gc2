@@ -2,7 +2,7 @@
 
 For these challenges, we tested what actually happens when someone books a workshop through SlotDrop. The workshops and payments are for the course demo, but the requests go through our Express API and the bookings are saved in PostgreSQL.
 
-Our deployed tests used [the Render demo](https://slotdrop-gc2-group-zx8j.onrender.com/) and fictional customer details. We've linked the screenshots, test runs and code changes alongside each answer. Older local runs are in the [test archive](challenges-test-archive.md).
+Our deployed tests used [the Render demo](https://slotdrop-gc2-group-zx8j.onrender.com/) and fictional customer details. We've linked the screenshots, test runs and code changes alongside each answer. Older local runs are in the [test archive](archive/challenges-test-archive.md).
 
 ## Challenge 1 — Break your own API
 
@@ -54,7 +54,7 @@ The paths below describe the [actual build used in the 15 November trace](https:
 
 The important part is that **showing a quote doesn't reserve a seat**. We lock and recheck the slot when saving, and the accepted prices stay on the booking row. That's why two people cannot both book the same last seat, and why reopening Confirmation doesn't depend on Checkout keeping its data in the browser.
 
-**Hand-drawn request trace:** The brief asks us to draw this same journey ourselves, in addition to the typed [system diagram](system.md). The diagram should follow the recorded booking `f6148274-8de0-4558-ada3-2a8b3dc68217` from Checkout POST → validation → slot lock/price check → database insert and commit → **201** response → Confirmation GET → **200** receipt. The photo will be linked here when supplied.
+**Hand-drawn request trace:** The brief asks us to draw this same journey ourselves, in addition to the typed [system diagram](system.md). The diagram should follow the recorded booking `f6148274-8de0-4558-ada3-2a8b3dc68217` from Checkout POST → validation → slot lock/price check → database insert and commit → **201** response → Confirmation GET → **200** receipt. Add the group’s photo to this section.
 
 ## Challenge 3 — Overrule the AI
 
@@ -92,7 +92,7 @@ We chose a rule that affects both sides of a booking: **what if SlotDrop's commi
 | `server/services/pricing.js:20,22` | Quotes the booking using the configured rate | No |
 | `server/services/bookings.js:109,120` | Recomputes and saves the fee and rate | No |
 | `server/repositories/owner.js:3,8` | Makes the rate available to Owner | No |
-| `public/js/business-config.js:17` | Computes the per-seat commission for display | No |
+| `public/js/business-config.js:18` | Rounds the per-seat commission for server quotes and Owner previews | No |
 | `public/js/owner.js:89` | Calculates the Owner payout preview | No |
 | `db/schema.sql:79` | Checks recorded fee against the rate saved on each receipt | No |
 
@@ -133,7 +133,7 @@ These are the three files in the supplied folder as of **15 November**. We still
 
 We also tested the five optional behaviors worth **one bonus point each**.
 
-### Sequential or parallel: two requests at once
+### Sequential or parallel
 
 Selection needs the session details and a quote, and neither depends on the other response. We changed it to use `Promise.all` in `public/js/selection.js`.
 
@@ -144,15 +144,15 @@ Selection needs the session details and a quote, and neither depends on the othe
 
 That saved about **198 ms (50%)** in the [timing benchmark](evidence/stretch-deployed/sequential-vs-parallel.jpg) ([CI run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799)). A [public browser check on 14 November](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) also showed the two requests starting **0.3 ms apart** and running at the same time.
 
-### Too many requests: wait and retry
+### Too many requests
 
 We deliberately sent **30 invalid booking POSTs** from one browser in a minute. The next submission returned **429 RATE_LIMITED** and `Retry-After: 59`. Checkout displayed the wait, kept Submit disabled and retried the **same request ID and body** after **59,003 ms**.
 
 The retried POST returned **201**, creating **one ₱2,880 booking**; [Confirmation](evidence/stretch-deployed/checkout-429/confirmation.jpg) and [Owner](evidence/stretch-deployed/checkout-429/owner.jpg) both showed `26ccfbce-9a9d-49f6-b3c1-35674477ebf5`, and seats fell from **3 to 2**. Here's the [Network record](evidence/stretch-deployed/checkout-429/network.json) and [waiting-screen screenshot](evidence/stretch-deployed/checkout-429/waiting.jpg).
 
-The captured Render build counted requests by socket address. PR #72 updates this to use the client address; [integration tests](bonus-rate-limit.md) cover clients behind the same proxy, while that newer behavior still needs a check on the final deployed host.
+The captured Render build counted requests by socket address. PR #72 updates this to use the client address; [integration tests](reference/bonus-rate-limit.md) cover clients behind the same proxy, while that newer behavior still needs a check on the final deployed host.
 
-### Double click: one click too many shouldn't mean two bookings
+### The double click
 
 We caught a short gap where Checkout re-enabled Submit after saving but before moving to Confirmation. A second click there could have sent a different request ID. [Kat's review on #43](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5817789602) led to a `navigating` lock that keeps Submit disabled, with a [browser regression](../tests/checkout-browser.test.js).
 
@@ -160,13 +160,13 @@ The server also treats identical request IDs as retries (same receipt, **200**) 
 
 In the [14 November deployed browser run](evidence/challenge2-final/browser-network.json), a double-click produced **one POST**, [one Confirmation receipt](evidence/challenge2-final/confirmation.jpg) and [one Owner booking row](evidence/challenge2-final/owner.jpg).
 
-### Pagination: only fetch the page we're showing
+### Pagination
 
-Browse calls `GET /api/slots?page=…&limit=…` so the server filters and pages sessions before returning them ([backend #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49), [Browse #63](https://github.com/Frannaaa/slotdrop-gc2/pull/63)).
+Browse calls `GET /api/slots?page=…&limit=…` so the server filters and pages sessions before returning them. The release shows the current page before checking whether another page exists ([backend #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49), [Browse #63](https://github.com/Frannaaa/slotdrop-gc2/pull/63)).
 
 With eight deployed sessions, `limit=3` returned **18, 20, 22** on page 1; **24, 26, 28** on page 2; **30, 32** on page 3; and an empty list with **200** on page 4. Invalid `page=0` and `limit=1000` returned **400 INVALID_INPUT**. In the actual six-card UI, [page 1](evidence/challenge2/browse-page-1.jpg) displayed six sessions, [page 2](evidence/challenge2/browse-page-2.jpg) displayed the remaining two, and Previous returned to page 1 ([Network capture](evidence/stretch-deployed/browser-readbacks-2026-11-14.json)).
 
-### Join and compute: Owner seat utilization
+### Join and compute
 
 Owner fetches **released-seat inventory** from `GET /api/owner/catalog` and **confirmed bookings** from `GET /api/bookings`. `openReleaseUtilization()` in `public/js/owner-insights.js` joins them by session and calculates:
 
@@ -176,4 +176,4 @@ On the deployed site, the metric changed from [**0/32 seats (0%)**](evidence/cha
 
 ---
 
-The supporting screenshots and runs are linked above. We kept the [older local and CI tests](challenges-test-archive.md) separately, since they are useful history but not a substitute for the public-site results.
+The supporting screenshots and runs are linked above. We kept the [older local and CI tests](archive/challenges-test-archive.md) separately, since they are useful history but not a substitute for the public-site results.

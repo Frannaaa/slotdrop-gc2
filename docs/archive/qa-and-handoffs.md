@@ -1,6 +1,6 @@
 # Group 1: checks and handoffs
 
-Historical planning notes. See the [current submission checklist](gc2-submission-gate.md) for release status and dates.
+Historical planning notes. See the [current submission checklist](../gc2-submission-gate.md) for release status and dates.
 
 The complete private reference is on `g1/m1-complete-build` in `Frannaaa/reference-only-slotdrop`. The official group repository is `Frannaaa/slotdrop-gc2`. Each owner builds and submits their own assigned implementation there through reviewed PRs.
 

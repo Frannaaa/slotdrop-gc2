@@ -1,4 +1,4 @@
--- Group assignment: Fran. See docs/ownership-and-execution.md.
+-- Group assignment: Fran. See README.md#team.
 -- Group 1 SlotDrop CP0 contract: fictional recurring leisure sessions.
 -- This is a fresh-schema proposal, not a migration for an existing database.
 -- Money is integer PHP centavos; timestamps use TIMESTAMPTZ.

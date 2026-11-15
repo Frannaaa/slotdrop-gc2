@@ -24,4 +24,4 @@ The counters are in memory and reset when the process restarts. Clients sharing 
 - Public Checkout on `8bdcfcb` returned 429 with `Retry-After: 59`, waited 59,003 ms, and resent an identical body to save one booking. Confirmation, Owner and the seat count matched.
 - The public run verifies the retry behavior on the older socket-address build. The integration test uses two Render ingress addresses to verify separate counters and tests the fallback for an invalid forwarded address. The direct-socket test also checks that forwarded headers do not alter the counter on a direct deployment.
 
-See the [request records and screenshots](challenges.md#too-many-requests).
+See the [request records and screenshots](../challenges.md#too-many-requests).

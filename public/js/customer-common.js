@@ -1,4 +1,4 @@
-// Group assignment: Fran. See docs/ownership-and-execution.md.
+// Group assignment: Fran. See README.md#team.
 import { withinBookingWindow, partyPrice as previewPrice } from "./business-config.js";
 
 export { previewPrice };

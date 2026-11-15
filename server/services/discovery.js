@@ -1,5 +1,5 @@
-// Group assignment: Fran. See docs/ownership-and-execution.md.
-import { DISCOVERY_HOURS, MAX_SEATS } from '../config/business.js';
+// Group assignment: Fran. See README.md#team.
+import { BUDDY_MIN_SEATS, DISCOVERY_HOURS, MAX_SEATS } from '../config/business.js';
 import { integer, invalid } from '../lib/validation.js';
 import { SLOT_BOOKING_WINDOW, SLOT_SELECT, slotResponse } from '../repositories/slots.js';
 
@@ -73,7 +73,7 @@ export async function listSlots(db, query, now, providerId = null) {
   if (query.tag === 'materials-included') where.push("'materials'=ANY(s.inclusions)");
   const range = dateRange(query.when, now);
   if (range) { values.push(...range); where.push(`sl.starts_at >= $${values.length - 1} AND sl.starts_at < $${values.length}`); }
-  const effectivePrice = `CASE WHEN ${partySize} >= 2 AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END`;
+  const effectivePrice = `CASE WHEN ${partySize} >= ${BUDDY_MIN_SEATS} AND sl.buddy_price_centavos IS NOT NULL THEN sl.buddy_price_centavos ELSE sl.offer_price_centavos END`;
   const scheduleOrder = 'sl.starts_at NULLS FIRST, sl.id';
   const defaultOrder = closed && !query.sort ? 'sl.booking_closes_at DESC, sl.id DESC' : scheduleOrder;
   const order = query.sort === 'price-low' ? effectivePrice + ' ASC, ' + scheduleOrder

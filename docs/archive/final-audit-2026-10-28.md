@@ -1,6 +1,6 @@
 # October 28 checkpoint and Fran code audit
 
-Historical planning notes. See the [current submission checklist](gc2-submission-gate.md) for release status and dates.
+Historical planning notes. See the [current submission checklist](../gc2-submission-gate.md) for release status and dates.
 
 Checked against the full GC2 brief supplied October 28, 2026. This report concerns the shared repository; the private reference build has a separate release checklist.
 

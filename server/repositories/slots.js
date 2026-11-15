@@ -1,4 +1,4 @@
-// Group assignment: Fran. See docs/ownership-and-execution.md.
+// Group assignment: Fran. See README.md#team.
 import { safeNumber } from '../lib/validation.js';
 import { studioReferences } from './reference-catalog.js';
 import { discountPercent } from '../../public/js/business-config.js';

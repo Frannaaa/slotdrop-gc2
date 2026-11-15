@@ -1,4 +1,4 @@
-// Group assignment: Fran. See docs/ownership-and-execution.md.
+// Group assignment: Fran. See README.md#team.
 import 'dotenv/config';
 import { createApp } from './app.js';
 import { ensureReferenceCatalog } from './repositories/reference-catalog.js';

@@ -2,7 +2,7 @@
 
 **Status checked 15 November 2026 (PHT).** Home (#35, #68), Browse (#62, #63), Detail and Selection (#41), Checkout and Confirmation (#43), booking and receipt APIs (#42), and the Owner workspace (#29, #51) are merged.
 
-On 14 November, a Checkout double-click at 390 px sent one POST (201), Confirmation fetched the same receipt (200), and Owner showed one matching row. The [15 November Chrome DevTools run](challenges.md#challenge-2--trace-one-real-request) captured the POST and GET directly. The outside-group phone test remains pending.
+On 14 November, a Checkout double-click at 390 px sent one POST (201), Confirmation fetched the same receipt (200), and Owner showed one matching row. The [15 November Chrome DevTools run](../challenges.md#challenge-2--trace-one-real-request) captured the POST and GET directly. The outside-group phone test remains pending.
 
 ### Fran-owned automated acceptance check
 

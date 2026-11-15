@@ -1,6 +1,6 @@
 # Earlier SlotDrop test records (archive)
 
-This is the historical local and CI testing record moved out of the main [Challenges report](challenges.md) for readability. These runs remain dated and **must not be presented as final deployed evidence**. The final rubric answers and their deployed captures remain in `challenges.md`.
+This is the historical local and CI testing record moved out of the main [Challenges report](../challenges.md) for readability. These runs remain dated and **must not be presented as final deployed evidence**. The final rubric answers and their deployed captures remain in `challenges.md`.
 
 ## Historical local and CI runs
 
@@ -56,8 +56,8 @@ These are older local and CI runs, kept for the record. They are **not** evidenc
 
 | Date | What was checked | Result | Record |
 |---|---|---|---|
-| 27 Oct | Owner and session collection in Postman, local | 21 requests, 26 assertions passed | [fran-api-local.json](evidence/fran-api-local.json) |
-| 28 Oct | Same collection, using activity 4 and its 30-minute deadline | 21 requests, 27 assertions passed | [repository-review-2026-10-28.json](evidence/repository-review-2026-10-28.json) |
+| 27 Oct | Owner and session collection in Postman, local | 21 requests, 26 assertions passed | [fran-api-local.json](../evidence/fran-api-local.json) |
+| 28 Oct | Same collection, using activity 4 and its 30-minute deadline | 21 requests, 27 assertions passed | [repository-review-2026-10-28.json](../evidence/repository-review-2026-10-28.json) |
 | 28 Oct | Node 22 + PostgreSQL 16 in CI; production container build, database setup and restart | 20 tests passed | [CI run 40556533287](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/40556533287) |
 | 28 Oct | Local syntax and tests (PGlite) | 19 passed, 1 PostgreSQL-only test skipped | Local run |
 | 28 Oct | SQL constraints and seed | 8 scenario groups passed | `tools/check-sql.mjs` |
@@ -66,12 +66,12 @@ These are older local and CI runs, kept for the record. They are **not** evidenc
 | 8 Nov | Selection timing in CI (PR #53) | Median 5.47 ms one after the other, 4.59 ms together, 7 rounds | [CI run 42394996195](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42394996195) |
 | 8 Nov | Challenge tests in CI (PR #37) | 86 tests passed | [CI run 42428732562](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42428732562) |
 | 8 Nov | Booking limiter in CI (PR #56) | 85 of 85 tests passed | [CI run 42429460881](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42429460881) |
-| 8 Nov | Challenge 1 collection with Newman 6.2.3, local, commit `b1cf5c0` | 6 requests, 12 assertions passed | [challenge1-newman-local-2026-11-08.json](evidence/challenge1-newman-local-2026-11-08.json) |
-| 8 Nov | Owner collection, pagination (#49) and limiter (#56) with Newman, local | 21 requests / 28 assertions; 4 / 6; 7 / 12, all passed | [owner-and-bonus-newman-local-2026-11-08.json](evidence/owner-and-bonus-newman-local-2026-11-08.json) |
+| 8 Nov | Challenge 1 collection with Newman 6.2.3, local, commit `b1cf5c0` | 6 requests, 12 assertions passed | [challenge1-newman-local-2026-11-08.json](../evidence/challenge1-newman-local-2026-11-08.json) |
+| 8 Nov | Owner collection, pagination (#49) and limiter (#56) with Newman, local | 21 requests / 28 assertions; 4 / 6; 7 / 12, all passed | [owner-and-bonus-newman-local-2026-11-08.json](../evidence/owner-and-bonus-newman-local-2026-11-08.json) |
 | 8 Nov | Full suite in CI (PR #37) | 104 of 104 tests passed | [CI run 42455580176](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42455580176) |
-| 12 Nov | Deployed site after Browse was merged: health, Browse page, Owner page and paged list, read-only | `/api/health` 200; Browse showed "8 sessions found." with a clean Console; `/checkout.html` 404; `bookingCount` 0 | [Pagination](challenges.md#pagination) |
+| 12 Nov | Deployed site after Browse was merged: health, Browse page, Owner page and paged list, read-only | `/api/health` 200; Browse showed "8 sessions found." with a clean Console; `/checkout.html` 404; `bookingCount` 0 | [Pagination](../challenges.md#pagination) |
 
-The [Owner and session Postman collection](SlotDrop-Fran.postman_collection.json) covers the Owner and session APIs.
+The [Owner and session Postman collection](../SlotDrop-Fran.postman_collection.json) covers the Owner and session APIs.
 
 </details>
 

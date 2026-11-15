@@ -1,5 +1,6 @@
 // Business rules and calculations shared by browser previews and the server.
 export const DISCOVERY_HOURS = 72;
+export const BUDDY_MIN_SEATS = 2;
 
 export function withinBookingWindow(slot, now, hours = DISCOVERY_HOURS) {
   if (slot.startsAt === null) return slot.bookingClosesAt === null;
@@ -9,7 +10,7 @@ export function withinBookingWindow(slot, now, hours = DISCOVERY_HOURS) {
 }
 
 export function partyPrice(slot, quantity = 1) {
-  const buddy = quantity >= 2 && slot.buddyPriceCentavos !== null;
+  const buddy = quantity >= BUDDY_MIN_SEATS && slot.buddyPriceCentavos !== null;
   const unit = buddy ? slot.buddyPriceCentavos : slot.offerPriceCentavos;
   return { buddy, unit, total: unit * quantity };
 }

@@ -1,6 +1,6 @@
 # API and screen contract
 
-Health, session list/detail/create/edit, pricing quote, owner catalog, saved-booking list, metrics, booking save and receipt readback are implemented. JSON uses camelCase; SQL uses snake_case.
+Requests and responses use JSON with camelCase fields. The [schema](schema.md) lists the corresponding PostgreSQL tables.
 
 ## Routes
 
@@ -22,19 +22,21 @@ Health, session list/detail/create/edit, pricing quote, owner catalog, saved-boo
 | POST /api/provider-applications | Pending application fields | 201 created; 200 identical retry | 400 invalid; 404 unknown referenced studio; 409 conflicting request key | Fran |
 | GET /api/provider-applications/:id | UUID | 200 id, status and createdAt | 400 malformed; 404 unknown | Fran |
 
-Implemented database routes return 503 DATABASE_UNAVAILABLE when DATABASE_URL is absent from normal server mode. Unexpected failures use 500.
+Database-backed APIs return `503 DATABASE_UNAVAILABLE` for recognized database failures. Unexpected server failures return `500 INTERNAL_ERROR`.
 
-Booking POSTs have a 30-attempt, 60-second limit per client IP. Render uses the address supplied by its public ingress. Other environments use the connected peer. See the [rate-limit contract and evidence](bonus-rate-limit.md).
+Booking POSTs have a 30-attempt, 60-second limit per client IP. Render uses the address supplied by its public ingress. Other environments use the connected peer. See the [rate-limit contract and evidence](reference/bonus-rate-limit.md).
 
 ## Discovery and session responses
 
 Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. The default bookable view returns the full eligible array when both fields are omitted. Browse requests six bookable sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination).
 
-q searches the provider and activity names, primary activity type, technique and inclusions using case-insensitive literal substrings. category is creative or active. area matches an area name, case-insensitively. people is an integer from 1 to 100. Repeated query keys, unsupported filters and null characters in q or area return 400.
+- `q` searches provider and activity names, primary type, technique and inclusions by case-insensitive literal substring. Blank text is ignored. `area` matches the area name case-insensitively. Both fields accept up to 100 characters and reject null characters.
+- `category` accepts `creative` or `active`. `type` accepts `pottery`, `painting`, `pilates`, `dance` or `other`. `tag` accepts `beginner`, `handbuilding`, `wheel-throwing`, `painting-included` or `materials-included`.
+- `people` is 1–100. `sort` accepts `soonest`, `price-low` or `price-high`. Price order uses the applicable per-seat tier for the party. Browse exposes search, category and pagination. Invalid, duplicate or unsupported filters return 400.
 
 when accepts today, tomorrow or weekend, using Asia/Manila calendar boundaries. The date range is intersected with the strict 72-hour discovery window. On Sunday, weekend still refers to the current weekend. No matching offers returns 200 with [].
 
-The list excludes inactive activities, paused/cancelled sessions and allocations too small for the requested group. Scheduled offers also require a confirmed session inside the 72-hour window and a future booking cutoff. Two startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
+The bookable list requires an active activity, an open offer, a session confirmed to run and enough seats for the requested group. Dated offers require a future start less than 72 hours away and a future booking cutoff. Two startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
 
 `view=closed` lists dated, active, open, confirmed-to-run sessions whose cutoff has passed, including offers that sold out. The `people` filter uses total capacity in this view. Without an explicit sort, the most recent cutoffs appear first. The view always applies pagination. Browse fetches the latest 16 only when someone opens **Closed sessions**. Its cards say “Booking closed” or “Event ended” and link to read-only details. Closed offers still return 409 from a new quote or booking.
 
@@ -50,7 +52,7 @@ discountPercent, status, serviceActive, recurrenceNote, runsAsScheduled, default
 
 Prices are per seat. discountPercent describes the standard offer versus the regular price. A null buddyPriceCentavos disables buddy pricing. A known unavailable session still returns 200 detail; the customer must not be allowed to book it. serviceActive identifies inactive activities, including when a session is opened through a direct link.
 
-Practice offers have `startsAt: null` and `bookingClosesAt: null`. Their receipts have `sessionStartsAt: null`. The optional `studioReference.photo` contains alt text, credit and a link to the listing. Card images are served locally using the reference key. See [photo sources](workshop-photos.md).
+Practice offers have `startsAt: null` and `bookingClosesAt: null`. Their receipts have `sessionStartsAt: null`. The optional `studioReference.photo` contains alt text, credit and a link to the listing. Card images are served locally using the reference key. See [photo sources](reference/workshop-photos.md).
 
 The owner catalog includes paused and expired inventory. Its services include id, providerId, providerName, name, active and defaultBookingCutoffMinutes. Its discoveryHours value comes from the server configuration so the owner page can distinguish future inventory from offers already in discovery.
 
@@ -65,7 +67,7 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 - Capacity cannot fall below confirmed seats.
 - A new standard offer cannot leave an incompatible buddy rate; update or disable the buddy rate in the same request.
 - A passed cutoff can close sales immediately.
-- Reopening paused or cancelled inventory requires available allocation and an active activity. Scheduled offers also need a future cutoff/start and a session confirmed to run. Read the current time after acquiring the database lock.
+- Reopening paused or cancelled inventory requires an active activity, confirmation that the session will run and available seats. Dated offers must have a future cutoff and start. The service reads the current time after taking the row lock.
 - Practice offers accept price, capacity and status edits. Their dates are set by startup, and a cutoff edit returns 400.
 - Cancelling with confirmed bookings returns 409.
 - Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
@@ -76,9 +78,7 @@ All per-seat amounts are integers from 1 to 100,000,000 centavos. Require buddy 
 
 ## Quote and booking contract
 
-Janelle's quote, booking save and receipt readback are implemented in server/services/pricing.js and server/services/bookings.js.
-
-GET /api/pricing/quote is implemented in server/services/pricing.js. It accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings reuses the same priceQuote() and checkBookable() functions.
+[Pricing](../server/services/pricing.js) and [booking](../server/services/bookings.js) share the same availability check and price quote. `GET /api/pricing/quote` accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings reuses the same priceQuote() and checkBookable() functions.
 
 A quote returns slotId, quantity, originalUnitPriceCentavos, offerUnitPriceCentavos, unitPriceCentavos, pricingType, groupSavingsCentavos, totalPriceCentavos, platformFeeCentavos, providerPayoutCentavos, discountPercent and quotedAt.
 
@@ -93,7 +93,7 @@ providerPayout = total - platformFee
 discountPercent = Math.round((regular - unitPrice) * 10000 / regular) / 100
 ```
 
-The active rate is 1000 basis points in `server/config/business.js`. Both the server and the browser previews use the calculations in `public/js/business-config.js`. The server chooses the tier and fee from the stored prices and configured rate before saving. Money is stored in centavos, and commission is deducted from the studio’s share.
+The active rate is 1,000 basis points in [server/config/business.js](../server/config/business.js). [business-config.js](../public/js/business-config.js) owns the buddy threshold, tier and total calculation, fee rounding and discount math. Server quotes and browser previews reuse it. The server chooses the tier and fee from the stored prices and configured rate before saving. Money is stored in centavos, and commission is deducted from the studio’s share.
 
 POST /api/bookings accepts requestId, slotId, quantity, customerName, customerEmail, paymentMethod and expectedTotalCentavos. Validate a UUID retry key, quantity 1–100, trimmed name 1–100 characters, trimmed basic email up to 254 characters, mock_card/pay_on_site and a nonnegative safe-integer acknowledged total. Reject unsupported price fields such as total with 400. Do not collect card numbers.
 
@@ -140,26 +140,10 @@ Errors use {error:{code,message}}. Invalid JSON returns 400 INVALID_JSON; oversi
 | Confirmation | /confirmation.html?id=UUID | Kaitlyn |
 | Owner workspace | /owner.html | Fran |
 
-The customer screens and Owner workspace are merged. The outside-group phone walkthrough is tracked in [Transaction acceptance](transaction-flow-acceptance.md).
+See the [submission checklist](gc2-submission-gate.md) for current deployment verification.
 
 The owner workspace stops waiting after 15 seconds, including while reading a response body. Read failures allow Refresh data. A save timeout does not trigger an automatic retry; the page asks the owner to refresh and check whether the change was saved.
 
-## Released-seat discovery contract (Issue #33)
+## Studio research and applications
 
-The customer journey starts at `/browse.html` and stays in the app through saving a booking and reading it back by ID. Studio research is supporting material, not a substitute for the transaction funnel.
-
-GET /api/slots keeps q/category/area/when/people and adds optional type (pottery, painting, pilates, dance, other), tag (beginner, handbuilding, wheel-throwing, painting-included, materials-included) and sort (soonest, price-low, price-high). Unsupported/duplicate/bad enum filters return 400. The bookable view sorts by the effective per-seat tier for the requested party and still filters on confirmed-to-run status and remaining allocation. Scheduled offers also obey the discovery window and booking cutoff. Search matches provider/activity plus explicit type, technique and inclusions. A secondary search match does not duplicate a session ID.
-
-Slot list and Detail add activityType, technique, inclusions (array), preparationNote and cancellationNote. These are stored service attributes. Cards preview the stored standard/buddy tier. The server still computes the quote and save totals.
-
-The shipped Browse UI uses text search, category buttons and pagination. Cards show the per-person price, cutoff, duration and remaining seats. Selection accepts the party size and fetches its total. A ceramic painting session has primary type pottery but can match a painting search.
-
-Whitespace-only q is intentionally ignored; the 100-character limit applies to the raw query value. Metadata search matches each field or inclusion separately and omits the placeholder activity type other. The discovery window is defined once in public/js/business-config.js and re-exported by server/config/business.js. Startup/shutdown diagnostics report safe error codes, not raw database messages.
-
-## Studio research
-
-`GET /api/activities` returns sourced studio references, not live inventory. See `docs/studio-discovery.md`. The booking API remains `/api/slots`.
-
-## Studio reference and pending applications
-
-GET /api/providers/:id: 200 public real-reference profile, activity sources and eligible sample slots; 400 malformed ID, 404 unknown/legacy fixture. POST /api/provider-applications: 201 pending record, 200 identical retry, 400 validation, 404 unknown referenced studio, 409 conflicting key reuse. GET /api/provider-applications/:id: 200 id/status/createdAt only; 400 malformed UUID, 404 absent record. No public list/edit/approval endpoint exists. See `docs/provider-onboarding.md` for fields and privacy. Slot responses add nullable `studioReference`.
+The published studio catalog comes from `GET /api/activities`. The studio profile adds eligible demo offers via `GET /api/providers/:id`. An application stays pending and the public readback exposes its ID, status and creation time. See [studio catalog](reference/studio-discovery.md) and [provider onboarding](reference/provider-onboarding.md).

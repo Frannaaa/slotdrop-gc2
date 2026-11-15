@@ -1,6 +1,6 @@
 # Who owns what and how to hand it over
 
-Historical planning notes. See the [current submission checklist](gc2-submission-gate.md) for release status and dates.
+Historical planning notes. See the [current submission checklist](../gc2-submission-gate.md) for release status and dates.
 
 Updated 4 November 2026. This is the shared group repository. The private reference is a guide; it does not replace anyone's implementation, testing or review.
 

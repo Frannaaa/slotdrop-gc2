@@ -4,7 +4,7 @@
 
 We’d start with one pottery studio and a small release of seats it expects to go unsold. The [four-week pilot plan](#pilot-and-risks) explains how we’d check that. Studio details and published prices come from [public research](#studio-research). The course demo uses simulated dates, seat releases, offers, bookings and payments.
 
-The [post-feedback revision of GC1](gc1-post-feedback-revision.md) documents the instructor's strategic feedback, the originally missing monetization/features/tech-stack sections, updated competitor categories and the proposed partner validation plan. It is a **later working draft**, not a replacement for the original assessed GC1 proposal. The original proposal and instructor feedback are retained as separate course source files; the GC2 submission brief requires quotations and traceability, but does not explicitly request that feedback PDF as an additional public attachment.
+The [post-feedback revision of GC1](archive/gc1-post-feedback-revision.md) documents the instructor's strategic feedback, the originally missing monetization/features/tech-stack sections, updated competitor categories and the proposed partner validation plan. It is a **later working draft**, not a replacement for the original assessed GC1 proposal. The original proposal and instructor feedback are retained as separate course source files; the GC2 submission brief requires quotations and traceability, but does not explicitly request that feedback PDF as an additional public attachment.
 
 ## 4.1 GC1 traceability
 
@@ -37,7 +37,7 @@ The quotes below come from our GC1 proposal and the instructor’s feedback.
 | Commission, platform features and stack missing | Modeled **10% studio-paid commission**, persisted quotes and receipts, clear built/deferred features and stack in README | Real supplier unit costs, acquisition costs and agreed commercial terms |
 | Duplicate role-based stores and incomplete user journey | Entity-oriented PostgreSQL, detailed receipt/data flow, Detail page and Owner metrics | Login/admin separation, real cancellations and external calendar sync are still deferred |
 
-The original instructor feedback is the evidence for these gaps; this matrix is a **later interpretation of the group's response**, not proof that the early proposal contained the corrected sections. The [post-feedback GC1 working draft](gc1-post-feedback-revision.md) keeps the deeper comparison and explicitly labels untested assumptions.
+The original instructor feedback is the evidence for these gaps; this matrix is a **later interpretation of the group's response**, not proof that the early proposal contained the corrected sections. The [post-feedback GC1 working draft](archive/gc1-post-feedback-revision.md) keeps the deeper comparison and explicitly labels untested assumptions.
 
 ## 4.2 Funnel map
 
@@ -130,7 +130,7 @@ The harder side is supply. A workshop must already be confirmed to run, and its 
 
 ### Studio research
 
-Our [studio research and sources](business-research-appendix.md#a-studios-and-why-each-might-fit) cover Laro Ceramics, Marz Today, Metals & Gems, Bumi & Ashe, Tahanan Pottery, Sip & Gogh and AMT Ceramics. **Laro** is near the proposed Katipunan customer area and publishes a **₱3,000** mug-making class; **Tahanan** publishes recurring weekend classes. These are reasons to **approach** them, not proof that either has empty seats or agreed to sell through SlotDrop. We would verify the exact QC branch, next dated session, preparation lead time and a studio-approved allocation before listing anything real.
+Our [studio research and sources](reference/business-research-appendix.md#a-studios-and-why-each-might-fit) cover Laro Ceramics, Marz Today, Metals & Gems, Bumi & Ashe, Tahanan Pottery, Sip & Gogh and AMT Ceramics. **Laro** is near the proposed Katipunan customer area and publishes a **₱3,000** mug-making class; **Tahanan** publishes recurring weekend classes. These are reasons to **approach** them, not proof that either has empty seats or agreed to sell through SlotDrop. We would verify the exact QC branch, next dated session, preparation lead time and a studio-approved allocation before listing anything real.
 
 ### Competitors
 
@@ -145,7 +145,7 @@ The GC1 feedback asked us to name competitors instead of vaguely referring to �
 | **Auxiliary alternatives** | Studio social pages, Google Maps/search, cafés, cinema and other leisure plans | Compete for discovery and the same discretionary afternoon, even without offering the same booking service |
 | **Cross-industry reference** | [HotelTonight](https://www.hoteltonight.com/faq) | Last-minute unused capacity is not new, but room economics should not be assumed to work for pottery |
 
-**Our proposed position:** a small, local marketplace where studios control the released allocation and buyers see a peso price, cutoff and saved receipt. It is an **unproven** position until studios and customers choose it over their existing options. [Full competitor notes and links](business-research-appendix.md#b-competitors-categories-and-source-notes).
+**Our proposed position:** a small, local marketplace where studios control the released allocation and buyers see a peso price, cutoff and saved receipt. It is an **unproven** position until studios and customers choose it over their existing options. [Full competitor notes and links](reference/business-research-appendix.md#b-competitors-categories-and-source-notes).
 
 ### Provider economics and business-model benchmarks
 
@@ -171,9 +171,9 @@ For scale, a **hypothetical four-week pilot** could release four seats in each o
 | **Studio incremental contribution versus no SlotDrop** | **₱38,288** |
 | **SlotDrop pilot surplus** after 28 × ₱50 support and ₱6,000 outreach/ops | **₱1,132** |
 
-These totals are **not forecasts or net profit**. None of the 16 sessions, 50% fill, eight displaced buyers or spending assumptions has been observed; the platform surplus excludes founder labor, taxes, real payment costs, refunds and scale. Under the same mix, SlotDrop would need roughly **27 of 64 released seats** merely to cover that assumed ₱6,000 budget. The [appendix](business-research-appendix.md#c-detailed-per-seat-and-pilot-calculations) tests attendance-cost sensitivity and the assumptions behind this calculation.
+These totals are **not forecasts or net profit**. None of the 16 sessions, 50% fill, eight displaced buyers or spending assumptions has been observed; the platform surplus excludes founder labor, taxes, real payment costs, refunds and scale. Under the same mix, SlotDrop would need roughly **27 of 64 released seats** merely to cover that assumed ₱6,000 budget. The [appendix](reference/business-research-appendix.md#c-detailed-per-seat-and-pilot-calculations) tests attendance-cost sensitivity and the assumptions behind this calculation.
 
-**Competitor economics change the decision.** [ClassPass](https://classpass.com/partners/faqs) uses a credit membership and negotiated minimum partner payouts, rather than a universally published Philippine commission percentage. [Fresha](https://www.fresha.com/pricing) publishes a **20% one-time marketplace fee for new customers** (with a minimum), while charging no such marketplace fee for direct and repeat clients; its software and processing charges differ. SlotDrop's proposed **10% on every booking** could therefore be less attractive to a studio with many repeat customers. Laro also advertises friends discounts of up to ₱500 per person, so our buddy tier is **not automatically the lowest available price**. These are models to learn from, not evidence that our chosen fee is optimal. [Detailed business-model comparison](business-research-appendix.md#d-competing-marketplace-business-models).
+**Competitor economics change the decision.** [ClassPass](https://classpass.com/partners/faqs) uses a credit membership and negotiated minimum partner payouts, rather than a universally published Philippine commission percentage. [Fresha](https://www.fresha.com/pricing) publishes a **20% one-time marketplace fee for new customers** (with a minimum), while charging no such marketplace fee for direct and repeat clients; its software and processing charges differ. SlotDrop's proposed **10% on every booking** could therefore be less attractive to a studio with many repeat customers. Laro also advertises friends discounts of up to ₱500 per person, so our buddy tier is **not automatically the lowest available price**. These are models to learn from, not evidence that our chosen fee is optimal. [Detailed business-model comparison](reference/business-research-appendix.md#d-competing-marketplace-business-models).
 
 ### Pilot and risks
 
@@ -188,5 +188,5 @@ Our three biggest risks are **ghost seats**, a premium studio unwilling to disco
 
 ### Studio applications
 
-The app can save a prospective provider's application and show its pending status. That is **not verification or permission to publish a studio**. Real onboarding would require identity, consent and commercial terms; see [provider onboarding](provider-onboarding.md).
+The app can save a prospective provider's application and show its pending status. That is **not verification or permission to publish a studio**. Real onboarding would require identity, consent and commercial terms; see [provider onboarding](reference/provider-onboarding.md).
 

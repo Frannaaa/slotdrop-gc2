@@ -23,4 +23,4 @@ This is the **course-demo released allocation** only, **not** total studio occup
 
 ## Public evidence
 
-Owner displayed 0 of 32 released seats booked before the fictional booking and 1 of 32 afterward. A later browser capture recorded both source requests while opening Owner. See [Challenges](challenges.md#join-and-compute) for the screenshots, request record and conditions.
+Owner displayed 0 of 32 released seats booked before the fictional booking and 1 of 32 afterward. A later browser capture recorded both source requests while opening Owner. See [Challenges](../challenges.md#join-and-compute) for the screenshots, request record and conditions.
