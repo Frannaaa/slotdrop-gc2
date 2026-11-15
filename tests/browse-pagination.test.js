@@ -29,14 +29,14 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     ['#results', '#status', '#search', '#pagination', '#retry',
       '#closed-sessions', '#closed-results', '#closed-status', '#closed-retry'].map(key => [key, new Element()])
   );
-  const categories = ['all', 'creative', 'active'].map(category => {
+  const activities = ['all', 'pottery', 'painting'].map(activity => {
     const button = new Element();
-    button.dataset.category = category;
+    button.dataset.activity = activity;
     return button;
   });
   const catalog = Array.from({length:13}, (_x, i) => ({
     id:i+1, serviceName:'Pottery '+(i+1), providerName:'Demo Studio',
-    category:i%2===0?'creative':'active',
+    activityType:i%2===0?'pottery':'painting',
   }));
   const sent = [];
   let failLookahead = false;
@@ -61,7 +61,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
     assert.ok(Number.isSafeInteger(page) && page > 0);
     if (failLookahead && page === 2) throw new Error('Request failed');
     const match = catalog.filter(slot =>
-      (!params.has('category') || slot.category === params.get('category')) &&
+      (!params.has('type') || slot.activityType === params.get('type')) &&
       (!params.has('q') || slot.serviceName.toLowerCase().includes(params.get('q').toLowerCase()))
     );
     return match.slice((page-1)*limit, page*limit);
@@ -70,7 +70,7 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
   runInNewContext(source, {
     document: {
       querySelector: selector => elements.get(selector),
-      querySelectorAll: () => categories,
+      querySelectorAll: () => activities,
       createElement: () => new Element(),
     },
     URLSearchParams, request,
@@ -113,15 +113,15 @@ test('Browse requests API-filtered page/limit and navigates without skipping slo
 
   elements.get('#search').value = '';
   elements.get('#search').handlers.input();
-  categories[2].handlers.click();
+  activities[2].handlers.click();
   await flush();
   assert.deepEqual(shownIds(), [2,4,6,8,10,12]);
-  assert.ok(sent.some(path => path.includes('category=active') && path.includes('limit=6')));
+  assert.ok(sent.some(path => path.includes('type=painting') && path.includes('limit=6')));
   assert.equal(pagination.children.length, 0, 'exactly one full page has no phantom next button');
   assert.ok(sent.every(path => path !== '/api/slots'), 'never fetch the unpaginated list');
 
   failLookahead = true;
-  categories[0].handlers.click();
+  activities[0].handlers.click();
   await flush();
   assert.deepEqual(shownIds(), [1,2,3,4,5,6], 'valid results stay visible when lookahead fails');
   assert.match(elements.get('#status').textContent, /Could not check for more pages/);
