@@ -173,7 +173,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error("Invalid booking response.");
     }
 
-    // Keep the retry request until confirmation navigation starts.
+    // Clear the retry request once the Confirmation redirect is scheduled.
     location.assign("/confirmation.html?id=" + encodeURIComponent(receipt.id));
     navigating = true;
     clear();
