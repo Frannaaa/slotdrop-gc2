@@ -57,7 +57,7 @@ The API accepts price, capacity, cutoff and status edits. Start changes and cuto
 
 [db/seed.sql](../db/seed.sql) creates five real studio reference records, eight activities and sixteen sample sessions on the next two Philippine calendar days. Published prices and durations have official sources; session dates, released seats, default lead times and discounts are simulated.
 
-Schema creation refuses existing tables. Seeding refuses existing data. Neither script resets a shared database or migrates an older schema. Restarting the app preserves saved rows and does not refresh their timestamps.
+`bootstrapDatabase()` runs schema creation and seeding in one transaction for an empty database. A database with all four booking tables goes through additive upgrades at application startup, including migration 003 if it predates studio applications. Startup stops if only some booking tables exist. Restarting preserves saved rows and their timestamps.
 
 Render connects to a persistent Neon PostgreSQL database. CI verifies PostgreSQL 16. The [README stack](../README.md#stack) lists the local demo and runtime versions.
 

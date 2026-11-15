@@ -15,8 +15,8 @@ export function checkBookable(slot, quantity, now) {
   }
 }
 
-// Pure calculation, reused later by POST /api/bookings so quote and save always agree.
-// All amounts are integer centavos. The server picks the tier; the client never sends a price.
+// Quote and booking save use the same calculation in integer centavos.
+// The server picks the tier. The submitted total only acknowledges the quoted amount.
 export function priceQuote(slot, quantity, now, commissionBasisPoints = COMMISSION_BASIS_POINTS) {
   const { buddy, unit: unitPrice, total } = partyPrice(slot, quantity);
   const platformFee = commissionPerSeat(unitPrice, commissionBasisPoints) * quantity;

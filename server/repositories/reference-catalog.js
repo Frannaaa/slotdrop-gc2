@@ -7,7 +7,7 @@ export const studioReferences = new Map(
   referenceCatalog.offerings.map(item => [item.key, item])
 );
 
-function samplePrices(item, index) {
+export function samplePrices(item, index) {
   const offer = Math.round(item.publishedPriceCentavos * 0.9);
   const buddy = index % 3 === 2 ? null : Math.round(offer * 0.95);
   return [item.publishedPriceCentavos, offer, buddy];

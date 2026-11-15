@@ -32,7 +32,7 @@ The pages in [public/](../public/) fetch JSON. [Express routes](../server/routes
 | Hop | Code location | Behavior |
 |---|---|---|
 | 1. Browse | Home and Browse interface → `GET /api/slots` | Requests eligible sessions. Browse sends search text, category and pagination to the list API |
-| 2. Discover | `server/routes/slots.js` → `listSlots()` in `server/services/discovery.js` → `server/repositories/slots.js` | Filters active offers and remaining seats. Scheduled sessions also follow the 72-hour window and cutoff. |
+| 2. Discover | `server/routes/slots.js` → `listSlots()` in `server/services/discovery.js` → `searchSlots()` in `server/repositories/slots.js` | The service validates filters. The repository applies them and uses the same confirmed-seat count for filtering and rendering. Scheduled sessions follow the 72-hour window and cutoff. |
 | 3. Choose | `public/js/detail.js` and `public/js/selection.js` | Fetches detail and quantity-aware quote; displays the selected session and party price |
 | 4. Quote | `server/routes/pricing.js` → `server/services/pricing.js` | Validates session and quantity; selects standard or buddy tier stored in DB, never browser money |
 | 5. Submit | Checkout submit → `retryLimitedBooking()` → `request()` in `public/js/customer-common.js` | Sends session ID, quantity, fictional guest details, accepted quote and a stable UUID request ID |
@@ -121,6 +121,6 @@ Prices are integer centavos. [Shared pricing helpers](../public/js/business-conf
 
 ## Persistence and deployment boundary
 
-Production-mode Node.js reads `DATABASE_URL` from its environment and uses the `pg` connection pool. `server/repositories/database.js` wraps booking operations in PostgreSQL `BEGIN`/`COMMIT` or `ROLLBACK`. At startup, `server/index.js` applies additive migrations and checks whether the reference catalog needs fresh demo allocations. Saved bookings remain in PostgreSQL across web-server restarts.
+Production-mode Node.js reads `DATABASE_URL` from its environment and uses the `pg` connection pool. `server/repositories/database.js` wraps booking operations in PostgreSQL `BEGIN`/`COMMIT` or `ROLLBACK`. Render, Vercel and the local demo use `server/repositories/migrations.js` for database setup. It seeds an empty database in one transaction and applies additive upgrades before the reference catalog is checked. Saved bookings remain in PostgreSQL across web-server restarts.
 
 The local `npm run demo` uses a separate PGlite database for development. Production health checks database reachability and required tables. The [deployed booking trace](challenges.md#challenge-2--trace-one-real-request) and [PostgreSQL restart check](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43666651287) verify separate parts of the persistence path. [Database schema](schema.md) and [API contracts](routes.md) hold the field-level details.

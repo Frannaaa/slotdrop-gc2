@@ -83,9 +83,8 @@ export async function request(path, options = {}) {
     clearTimeout(timeout);
   }
 }
-// Optional Fran-owned helper for Kaitlyn's Checkout handoff.
-// It retries only explicit HTTP 429, never a network-uncertain save, 409, or 400.
-// The SAME already serialized body/requestId is sent again; caller must lock UI during wait.
+// Retry only HTTP 429 and keep the original serialized body and request ID.
+// Checkout keeps the form locked while it waits.
 export async function retryLimitedBooking(path, options, {
   maxRetries = 1,
   onWait = () => {},
