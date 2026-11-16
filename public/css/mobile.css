@@ -1,0 +1,6 @@
+/* Group 1 customer mobile layout: loaded by Home, Detail, and Selection. */
+@media (max-width: 480px) {
+  .button {
+    width: 100%; /* Full-width buttons on narrow screens */
+  }
+}
