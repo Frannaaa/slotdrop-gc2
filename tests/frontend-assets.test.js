@@ -126,3 +126,12 @@ test('three grading practice workshops ship credited WebP photos', async () => {
     assert.equal(bytes.subarray(8, 12).toString(), 'WEBP', 'Invalid WebP file for ' + key);
   }
 });
+
+test('demo-choice label across Checkout and Owner is not silently replaced with generic practice text', async () => {
+  const checkout = await readFile(resolve(publicRoot, 'js/checkout.js'), 'utf8');
+  const owner = await readFile(resolve(publicRoot, 'js/owner.js'), 'utf8');
+  assert.equal((checkout.match(/practiceChoiceLabel\(slot\)/g) || []).length, 2,
+    'Both new and pending-retry checkout paths must display the fictional date');
+  assert.match(owner, /slot\.startsAt === null \? practiceChoiceLabel\(slot\)/);
+  assert.match(owner, /row\.sessionStartsAt === null \? practiceChoiceLabel\(row\)/);
+});
