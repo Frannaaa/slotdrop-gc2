@@ -120,6 +120,7 @@ test('a saved offer with failed refresh warns against a duplicate submission', a
     .replace(/\r\n/g, "\n")
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/,'')
     .replace(/^import \{ api \} from "\.\/api\.js";\n/m,'')
+    .replace(/^import \{ practiceChoiceLabel \} from "\.\/customer-common\.js";\n/m,'')
     .replace(/reset\(\);\nload\(\);\s*$/,'');
   const ctx={document:doc,...policy,practiceChoiceLabel,Intl,URL,Date, setInterval() {},
     api:async(path,options) => {
