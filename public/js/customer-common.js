@@ -223,7 +223,7 @@ export function card(slot, quantity = 1, { closed = false, compact = false, sess
   const photo = slot.studioReference?.photo;
   const photoPage = safeHttpsUrl(photo?.page);
   const photoKey = slot.studioReference?.key;
-  const hasPhoto = !closed && !compact && photoPage && typeof photoKey === "string"
+  const hasPhoto = !closed && photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
   const sessionDate = practice ? "" : closed ? date(slot.startsAt) : cardDateFormat.format(new Date(slot.startsAt));
