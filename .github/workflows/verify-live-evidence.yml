@@ -1,13 +1,14 @@
-name: SlotDrop final read-only readiness
+name: Verify SlotDrop live release
 on:
   push:
     branches: ['qa/gc2-live-3ef579d']
 permissions:
   contents: read
+concurrency: slotdrop-gc2-live-evidence-3ef579d
 jobs:
-  readiness:
+  evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -15,30 +16,22 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-      - name: Check health and count practice seats
+      - name: Live read-only readiness checks
+        id: preflight
+        run: node tools/check-live-evidence.mjs preflight
+      - name: Install browser and measurement tools
+        id: browser-tools
         run: |
-          node --input-type=module <<'NODE'
-          const origin = 'https://slotdrop-gc2-group-zx8j.onrender.com';
-          let healthy = false;
-          for (let attempt = 0; attempt < 3 && !healthy; attempt++) {
-            try {
-              const response = await fetch(origin + '/api/health', { signal: AbortSignal.timeout(45000) });
-              healthy = response.ok && (await response.json()).status === 'ok';
-            } catch {}
-            if (!healthy && attempt < 2) await new Promise(resolve => setTimeout(resolve, 5000));
-          }
-          if (!healthy) throw new Error('The public deployment did not become ready');
-          const get = async path => {
-            const response = await fetch(origin + path, { signal: AbortSignal.timeout(20000) });
-            if (!response.ok) throw new Error(path + ' returned ' + response.status);
-            return response.json();
-          };
-          const [slots, catalog] = await Promise.all([get('/api/slots'), get('/api/owner/catalog')]);
-          const practice = slots.filter(slot => slot.startsAt === null && slot.bookingClosesAt === null)
-            .map(({ id, serviceName, remainingSeats }) => ({ id, serviceName, remainingSeats }));
-          console.log('GC2_FINAL_INVENTORY ' + JSON.stringify({ checkedAt: new Date().toISOString(),
-            bookable: slots.length, catalogServices: catalog.services.length, activeServices: catalog.services.filter(item => item.active).length, practice }));
-          if (!practice.some(item => item.remainingSeats > 0)) throw new Error('No bookable practice capacity');
-          NODE
-      - name: Run the release readiness checks
-        run: npm run check:gc2 -- https://slotdrop-gc2-group-zx8j.onrender.com
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1 lighthouse@13.6.0
+          npx --no-install playwright install --with-deps chromium
+      - name: Cache-disabled mobile Browse and archive
+        run: node tools/check-live-evidence.mjs browser
+      - name: Lighthouse mobile Browse
+        if: ${{ !cancelled() && steps.browser-tools.outcome == 'success' }}
+        run: node tools/check-live-evidence.mjs lighthouse
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slotdrop-live-release-evidence
+          path: live-evidence/
+          retention-days: 90

@@ -172,7 +172,15 @@ async function mobileLighthouse(chromium) {
     const start = list.networkRequestTime ?? list.startTime;
     const end = list.networkEndTime ?? list.endTime;
     assert.ok(Number.isFinite(start) && Number.isFinite(end), 'Lighthouse List timings');
+    const bestPractices = lhr.categories['best-practices'];
+    const failedBestPractices = bestPractices.auditRefs
+      .filter(({ id, weight }) => weight > 0 && lhr.audits[id].score != null && lhr.audits[id].score < 1)
+      .map(({ id }) => ({
+        id,
+        items: lhr.audits[id].details?.items ?? [],
+      }));
     const summary = {
+      failedBestPractices,
       measuredAt: lhr.fetchTime, version: lhr.lighthouseVersion, browser: browser.version(),
       formFactor: lhr.configSettings.formFactor, throttlingMethod: lhr.configSettings.throttlingMethod,
       screenEmulation: lhr.configSettings.screenEmulation, scores, metrics,
