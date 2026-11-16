@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import * as policy from '../public/js/owner-policy.js';
+import { practiceChoiceLabel } from '../public/js/customer-common.js';
 
 test('the owner clock updates existing cards across deadlines without disturbing a draft', async () => {
   const elements = new Map(), listeners = new Map(), timers = [];
@@ -37,12 +38,13 @@ test('the owner clock updates existing cards across deadlines without disturbing
     .replace(/\r\n/g, "\n")
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/, '')
     .replace(/^import \{ api \} from "\.\/api\.js";\n/m, '')
+    .replace(/^import \{ practiceChoiceLabel \} from "\.\/customer-common\.js";\n/m, '')
     .replace(/reset\(\);\nload\(\);\s*$/, '');
   const readOwner = async path => path === '/api/owner/catalog' ? catalog
     : path === '/api/bookings' ? []
       : {bookingCount:0,platformRevenueCentavos:0,averageOrderValueCentavos:0,nearlyFullSessionCount:0};
   let requests = 0;
-  const context = {document, ...policy, Intl,
+  const context = {document, ...policy, practiceChoiceLabel, Intl,
     Date:class extends Date { static now() { return now; } },
     openReleaseUtilization: (catalog, bookings, at = now) =>
       policy.openReleaseUtilization(catalog, bookings, at),
@@ -119,7 +121,7 @@ test('a saved offer with failed refresh warns against a duplicate submission', a
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/,'')
     .replace(/^import \{ api \} from "\.\/api\.js";\n/m,'')
     .replace(/reset\(\);\nload\(\);\s*$/,'');
-  const ctx={document:doc,...policy,Intl,URL,Date, setInterval() {},
+  const ctx={document:doc,...policy,practiceChoiceLabel,Intl,URL,Date, setInterval() {},
     api:async(path,options) => {
       sent.push({path,method:options?.method||'GET'});
       if(options?.method==='POST') return {id:42};
