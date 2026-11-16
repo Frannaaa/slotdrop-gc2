@@ -187,7 +187,6 @@ for (const control of [when, people, sort]) {
   control?.addEventListener("change", () => {
     clearTimeout(searchTimer);
     load(1);
-loadPractice();
   });
 }
 activityButtons.forEach((button) => {
@@ -207,3 +206,4 @@ closedSessions.addEventListener("toggle", () => {
 });
 closedRetry.addEventListener("click", loadClosedSessions);
 load(1);
+loadPractice();
