@@ -165,7 +165,7 @@ These are the parts of GC1 we carried into the build, along with the decisions w
 | GC1 feedback | What we changed | What we’d check in a pilot |
 |---|---|---|
 | The target buyer was vague, and we had no estimate of vacant seats. | Defined a [proposed QC customer segment](#customer-and-supply) and a three-day discovery window. | Interview customers and ask one studio for four weeks of capacity and sales. |
-| We referred to unnamed “booking giants.” | Compared Klook, ClassPass, studio websites and Fresha in [Competitors](#competitors). | Check actual local listings and ask what would make customers and studios switch. |
+| We referred to unnamed “booking giants.” | Compared Klook, ClassPass, studio websites and Fresha in [Competitors](#3-competitors-direct-indirect-and-auxiliary). | Check actual local listings and ask what would make customers and studios switch. |
 | We assumed popular studios would have openings to list. | The app offers only seats a studio has released from a class going ahead. | Confirm recurring spare seats and agree on the allocation with the studio. |
 | Studios may resist discounts, and existing customers may move to cheaper offers. | Owners set prices and can pause sales. The server takes confirmed bookings out of the available allocation. | Agree on a minimum payout and compare total sales across SlotDrop and the studio’s own channels. |
 | Commission, app features and stack needed specifics. | Set a 10% studio-paid fee, saved the accepted price and fee with each receipt, and listed the stack in the README. | Check supplier costs, acquisition costs and terms with a pilot studio. |
