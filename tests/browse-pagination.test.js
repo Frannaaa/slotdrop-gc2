@@ -104,10 +104,9 @@ test('Browse pages workshops separately from practice bookings and closed dates'
   assert.equal(sent.filter(path => path.includes('view=workshops')).length, 1, 'page and Next state use one request');
   const practiceDisclosure = elements.get('#practice-sessions');
   const practiceRetry = elements.get('#practice-retry');
-  assert.ok(sent.every(path => !path.includes('view=practice')), 'the closed practice panel makes no request');
-  practiceDisclosure.open = true;
-  practiceDisclosure.handlers.toggle();
-  await flush();
+  assert.equal(sent.filter(path => path.includes('view=practice')).length, 1,
+    'always-visible grading panel loads automatically once');
+  assert.equal(practiceDisclosure.handlers.toggle, undefined, 'grading examples are not collapsible');
   assert.equal(practiceRetry.hidden, false);
   failPractice = false;
   practiceRetry.handlers.click();

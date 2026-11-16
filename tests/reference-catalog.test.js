@@ -17,7 +17,7 @@ test('real studio demo installation is additive and preserves legacy receipts an
   assert.deepEqual((await f.db.query('SELECT * FROM slots WHERE id<=8 ORDER BY id')).rows,originalSlots);
   const rows=await(await fetch(f.base+'/api/slots')).json();
   assert.equal(rows.filter(row=>row.startsAt!==null).length,16);
-  assert.equal(rows.filter(row=>row.startsAt===null).length,3);
+  assert.equal(rows.filter(row=>row.startsAt===null).length,4);
   assert.ok(rows.every(r=>r.studioReference?.bookingIsSimulated));
   assert.ok(rows.every(r=>!r.providerName.startsWith('Demo ')));
   assert.equal(new Set(rows.map(r=>r.providerName)).size,5);
@@ -65,10 +65,10 @@ test('practice offers stay bookable after scheduled dates pass and keep their sa
   const firstPage=await response.json();
   const scheduled=firstPage.find(row=>row.startsAt!==null);
   assert.ok(scheduled);
-  assert.equal(firstPage.filter(row=>row.startsAt===null).length,3);
+  assert.equal(firstPage.filter(row=>row.startsAt===null).length,4);
   now=new Date(f.now.getTime()+60*24*3600000);
   const practice=await (await get('/api/slots?page=1&limit=6')).json();
-  assert.deepEqual(practice.map(slot=>slot.studioReference.key).sort(),['bumi-mug','laro-mug','sip-open']);
+  assert.deepEqual(practice.map(slot=>slot.studioReference.key).sort(),['bumi-mug','bumi-mug','laro-mug','sip-open']);
   assert.ok(practice.every(slot=>slot.startsAt===null && slot.bookingClosesAt===null));
   const [slot]=practice;
   await assert.rejects(

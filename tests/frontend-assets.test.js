@@ -100,6 +100,18 @@ test('Detail head contains metadata only, with no stray merge-conflict text', as
   assert.equal(strayText, '', 'Unexpected raw text inside the Detail head');
 });
 
+test('grading practice examples are visible without an accordion', async () => {
+  const html = await readFile(resolve(publicRoot, 'browse.html'), 'utf8');
+  assert.match(html, /<section id="practice-sessions" class="practice-sessions"/);
+  assert.match(html, /<h2 id="practice-heading">Practice bookings for grading<\/h2>/);
+  assert.match(html, /never expire/);
+  assert.match(html, /72-hour discovery window/);
+  assert.doesNotMatch(html, /<details id="practice-sessions"/);
+  const js = await readFile(resolve(publicRoot, 'js/browse.js'), 'utf8');
+  assert.match(js, /loadPractice\(\);/);
+  assert.doesNotMatch(js, /practiceSessions\.addEventListener\("toggle"/);
+});
+
 test('three grading practice workshops ship credited WebP photos', async () => {
   const catalog = JSON.parse(await readFile(resolve(publicRoot, 'data/real-studio-demo.json'), 'utf8'));
   const browse = await readFile(resolve(publicRoot, 'browse.html'), 'utf8');
@@ -113,4 +125,13 @@ test('three grading practice workshops ship credited WebP photos', async () => {
     assert.equal(bytes.subarray(0, 4).toString(), 'RIFF', 'Invalid WebP header for ' + key);
     assert.equal(bytes.subarray(8, 12).toString(), 'WEBP', 'Invalid WebP file for ' + key);
   }
+});
+
+test('demo-choice label across Checkout and Owner is not silently replaced with generic practice text', async () => {
+  const checkout = await readFile(resolve(publicRoot, 'js/checkout.js'), 'utf8');
+  const owner = await readFile(resolve(publicRoot, 'js/owner.js'), 'utf8');
+  assert.equal((checkout.match(/practiceChoiceLabel\(slot\)/g) || []).length, 2,
+    'Both new and pending-retry checkout paths must display the fictional date');
+  assert.match(owner, /slot\.startsAt === null \? practiceChoiceLabel\(slot\)/);
+  assert.match(owner, /row\.sessionStartsAt === null \? practiceChoiceLabel\(row\)/);
 });

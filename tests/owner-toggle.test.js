@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import * as policy from '../public/js/owner-policy.js';
+import { practiceChoiceLabel } from '../public/js/customer-common.js';
 
 test('successful Owner sales toggle reports saved status when refresh fails',async()=>{
  const elements=new Map(),writes=[];
@@ -27,8 +28,9 @@ test('successful Owner sales toggle reports saved status when refresh fails',asy
  const file=await readFile(new URL('../public/js/owner.js',import.meta.url),'utf8');
  const js=file.replace(/^import\s*\{[\s\S]*?\}\s*from "\.\/owner-policy\.js";\r?\n/,'')
   .replace(/^import \{ api \} from "\.\/api\.js";\r?\n/,'')
+  .replace(/^import \{ practiceChoiceLabel \} from "\.\/customer-common\.js";\r?\n/, '')
   .replace(/reset\(\);\r?\nload\(\);\s*$/,'');
- const context={document,...policy,Intl,Date,setInterval(){},
+ const context={document,...policy,practiceChoiceLabel,Intl,Date,setInterval(){},
   api:async(path,options)=>{
    if(options?.method==='PATCH'){writes.push({path,body:JSON.parse(options.body)});return {id:1};}
    throw new Error('Readback unavailable');

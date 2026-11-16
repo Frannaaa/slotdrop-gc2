@@ -10,7 +10,6 @@ const people = document.querySelector("#people");
 const sort = document.querySelector("#sort");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
-const practiceSessions = document.querySelector("#practice-sessions");
 const practiceResults = document.querySelector("#practice-results");
 const practiceStatus = document.querySelector("#practice-status");
 const practiceRetry = document.querySelector("#practice-retry");
@@ -136,8 +135,16 @@ async function loadPractice() {
   try {
     const items = await request("/api/slots?view=practice");
     if (!Array.isArray(items)) throw new Error("The practice response was not a list.");
-    practiceResults.innerHTML = items.map(slot => card(slot, 1, { compact: true })).join("");
-    notice(practiceStatus, items.length ? "" : "No practice spots are available right now.");
+    const byWorkshop = new Map();
+    for (const slot of items) {
+      if (!byWorkshop.has(slot.serviceId)) byWorkshop.set(slot.serviceId, []);
+      byWorkshop.get(slot.serviceId).push(slot);
+    }
+    practiceResults.innerHTML = [...byWorkshop.values()].map(sessions => {
+      sessions.sort((a, b) => (a.demoVariant ?? 1) - (b.demoVariant ?? 1));
+      return card(sessions[0], 1, { compact: true, sessions });
+    }).join("");
+    notice(practiceStatus, byWorkshop.size ? "" : "No practice spots are available right now.");
   } catch {
     notice(practiceStatus, "Could not load practice bookings. Please try again.", true);
     practiceRetry.hidden = false;
@@ -193,12 +200,10 @@ activityButtons.forEach((button) => {
   });
 });
 retry.addEventListener("click", () => load(requestedPage));
-practiceSessions.addEventListener("toggle", () => {
-  if (practiceSessions.open) loadPractice();
-});
 practiceRetry.addEventListener("click", loadPractice);
 closedSessions.addEventListener("toggle", () => {
   if (closedSessions.open) loadClosedSessions();
 });
 closedRetry.addEventListener("click", loadClosedSessions);
 load(1);
+loadPractice();

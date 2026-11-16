@@ -30,6 +30,7 @@ export function slotResponse(row) {
     preparationNote: row.preparation_note, cancellationNote: row.cancellation_note,
     city: row.city, area: row.area, durationMinutes: number('duration_minutes'), beginnerFriendly: row.beginner_friendly,
     startsAt: row.starts_at === null ? null : new Date(row.starts_at).toISOString(),
+    demoVariant: row.starts_at === null ? number('demo_variant') : null,
     bookingClosesAt: row.booking_closes_at === null ? null : new Date(row.booking_closes_at).toISOString(),
     capacity: number('capacity'), remainingSeats: number('capacity') - number('seats_booked'),
     originalPriceCentavos, offerPriceCentavos,

@@ -147,14 +147,22 @@ Each member picks one function they wrote and writes down what it will return fo
 
 ### Sequential or parallel
 
-Selection needs the session details and the quote. Either request can start first, so `public/js/selection.js` starts both with `Promise.all`.
+**Decision: run the two Selection requests in parallel.** To let a customer proceed, the page needs two API responses:
 
-| Load method | Median of 15 trials |
+- `GET /api/slots/:id` — the selected workshop's details (including its name and date).
+- `GET /api/pricing/quote?slotId=:id&quantity=:n` — a fresh server-calculated price for the chosen number of seats.
+
+The page already knows the **slot ID from the URL** and **quantity from the form**, so the quote request does **not** need the details request to finish first. Waiting for one and then starting the other adds avoidable latency. In [`public/js/selection.js`](../public/js/selection.js), `refresh()` starts both requests together and waits for their results using `Promise.all`. This means the wait is closer to the **slower** response than the **sum** of both response times.
+
+| Loading approach | Median duration, 15 benchmark trials |
 |---|---:|
-| Sequential | **398.0 ms** |
-| Parallel | **200.2 ms** |
+| Sequential — wait for session, then request quote | **398.0 ms** |
+| Parallel — start both requests together | **200.2 ms** |
+| **Difference** | **197.8 ms saved (about 49.7% faster)** |
 
-Parallel loading saved about **198 ms (50%)** in the [benchmark](evidence/stretch-deployed/sequential-vs-parallel.jpg) ([CI run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799)). In a [14 November browser capture](evidence/stretch-deployed/browser-readbacks-2026-11-14.json), the requests started **0.3 ms apart** and overlapped.
+**Evidence and interpretation.** The [15-trial benchmark capture](evidence/stretch-deployed/sequential-vs-parallel.jpg) and its [CI run](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/42462032799) show the measured comparison. A separate [14 November deployed-browser network capture](evidence/stretch-deployed/browser-readbacks-2026-11-14.json) recorded the two requests starting only **0.3 ms apart** and overlapping. That live capture confirms **parallel execution**, while the 398.0/200.2 ms figures belong to the **benchmark**, not a guaranteed saving for every real visitor.
+
+**Correctness matters too:** `Continue` stays disabled until both requests succeed and the returned quote matches the selected slot and quantity. If one fails, the page shows an error and supports Retry rather than accepting an unverified total. A generation counter also prevents an older response from overwriting a newer quantity choice. [Selection browser regression test](../tests/selection-browser.test.js).
 
 ### Too many requests
 

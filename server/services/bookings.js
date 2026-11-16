@@ -11,7 +11,7 @@ const PAYMENT_METHODS = ['mock_card', 'pay_on_site'];
 
 // Receipts are read back from the saved row, never rebuilt from the live slot or the browser.
 const RECEIPT_SELECT = `SELECT b.id,b.request_id,b.slot_id,b.quantity,b.customer_name,b.customer_email,
-  b.payment_method,b.status,b.session_starts_at,b.original_unit_price_centavos,b.offer_unit_price_centavos,
+  b.payment_method,b.status,b.session_starts_at,sl.demo_variant,b.original_unit_price_centavos,b.offer_unit_price_centavos,
   b.unit_price_centavos,b.pricing_type,b.commission_basis_points,b.total_price_centavos,
   b.platform_fee_centavos,b.provider_payout_centavos,b.created_at,s.name AS service_name,p.name AS provider_name
   FROM bookings b JOIN slots sl ON sl.id=b.slot_id JOIN services s ON s.id=sl.service_id JOIN providers p ON p.id=s.provider_id`;
@@ -60,6 +60,7 @@ export function receiptResponse(row) {
     paymentMethod: row.payment_method, status: row.status,
     serviceName: row.service_name, providerName: row.provider_name,
     sessionStartsAt: row.session_starts_at === null ? null : new Date(row.session_starts_at).toISOString(),
+    demoVariant: row.session_starts_at === null ? number('demo_variant') : null,
     originalUnitPriceCentavos: number('original_unit_price_centavos'), offerUnitPriceCentavos: number('offer_unit_price_centavos'),
     unitPriceCentavos: number('unit_price_centavos'), pricingType: row.pricing_type,
     commissionBasisPoints: number('commission_basis_points'), totalPriceCentavos: number('total_price_centavos'),

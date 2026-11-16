@@ -11,5 +11,5 @@ DO $$ BEGIN
    CHECK ((starts_at IS NULL) = (booking_closes_at IS NULL));
  END IF;
  ALTER TABLE bookings ALTER COLUMN session_starts_at DROP NOT NULL;
- CREATE UNIQUE INDEX IF NOT EXISTS slots_practice_service_idx ON slots(service_id) WHERE starts_at IS NULL;
+ -- Migration 005 owns the per-service/per-choice practice uniqueness index.
 END $$;

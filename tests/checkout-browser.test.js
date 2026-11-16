@@ -239,7 +239,7 @@ test('checkout verifies the quote and preserves one request through confirmation
     },
 
     request: async (path, options) => {
-      if (path === '/api/slots/1') return { serviceName: 'Demo session' };
+      if (path === '/api/slots/1') return { serviceName: 'Demo session', startsAt: null, demoVariant: 2 };
       if (path.startsWith('/api/pricing/quote?')) {
         if (!quoteReply) throw new Error('Quote unavailable');
         return quoteReply;
@@ -297,6 +297,7 @@ test('checkout verifies the quote and preserves one request through confirmation
 
   quoteReply = sampleQuote;
   await load();
+  assert.equal(get('chosenSession').textContent, 'Demo session · Month Y, 20XX');
   assert.equal(ack.disabled, false);
   assert.equal(ack.checked, false);
   assert.equal(button.disabled, true);

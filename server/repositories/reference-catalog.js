@@ -13,14 +13,18 @@ export function samplePrices(item, index) {
   return [item.publishedPriceCentavos, offer, buddy];
 }
 
-async function ensurePracticeSession(client, item, prices) {
-  await client.query(
-    `INSERT INTO slots (service_id, capacity, original_price_centavos, offer_price_centavos, buddy_price_centavos)
-     SELECT s.id, 20, $2, $3, $4 FROM services s WHERE s.reference_key = $1 AND s.active
-       AND NOT EXISTS (SELECT 1 FROM slots sl WHERE sl.service_id = s.id AND sl.starts_at IS NULL)
-     ON CONFLICT (service_id) WHERE starts_at IS NULL DO NOTHING`,
-    [item.key, ...prices],
-  );
+async function ensurePracticeSessions(client, item, prices) {
+  // Bumi demonstrates choosing between two fictional dates; other activities
+  // demonstrate the single-slot path. Both variants have no actual cutoff.
+  const count = item.key === 'bumi-mug' ? 2 : 1;
+  for (let variant = 1; variant <= count; variant++) {
+    await client.query(
+      `INSERT INTO slots (service_id, demo_variant, capacity, original_price_centavos, offer_price_centavos, buddy_price_centavos)
+       SELECT s.id, $2, 20, $3, $4, $5 FROM services s WHERE s.reference_key = $1 AND s.active
+       ON CONFLICT DO NOTHING`,
+      [item.key, variant, ...prices],
+    );
+  }
 }
 
 // Add only missing references. Never alter saved booking dates, prices or receipts.
@@ -87,7 +91,7 @@ export async function ensureReferenceCatalog(db) {
 
     for (const [index, item] of referenceCatalog.offerings.entries()) {
       if (['laro-mug', 'bumi-mug', 'sip-open'].includes(item.key)) {
-        await ensurePracticeSession(client, item, samplePrices(item, index));
+        await ensurePracticeSessions(client, item, samplePrices(item, index));
       }
     }
 

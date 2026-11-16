@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import app from '../server/app.js';
-import { card, previewPrice, request, positive, available, closedSessionLabel, safeHttpsUrl, studioEvidence } from '../public/js/customer-common.js';
+import { card, previewPrice, request, positive, available, closedSessionLabel, safeHttpsUrl, studioEvidence, practiceChoiceLabel } from '../public/js/customer-common.js';
 import { DISCOVERY_HOURS } from '../public/js/business-config.js';
 
 // Session response before #34's additive metadata: Home must also work with #27.
@@ -158,6 +158,21 @@ test('practice cards show the cutoff exception and render a credited local works
   assert.doesNotMatch(compact, /session-label/);
   const unsafe = { ...practice, studioReference: { ...practice.studioReference, key: '../../elsewhere' } };
   assert.doesNotMatch(card(unsafe), /<img/);
+});
+
+test('fictional Month X/Y practice options link to distinct valid slot IDs', () => {
+  const first = { ...slot, startsAt: null, bookingClosesAt: null, demoVariant: 1 };
+  const second = { ...first, id: 42, demoVariant: 2 };
+  assert.equal(practiceChoiceLabel(first), 'Month X, 20XX');
+  assert.equal(practiceChoiceLabel(second), 'Month Y, 20XX');
+  const html = card(first, 1, { compact: true, sessions: [first, second] });
+  assert.match(html, /aria-label="Choose a fictional demo date"/);
+  assert.match(html, /Month X, 20XX/);
+  assert.match(html, /Month Y, 20XX/);
+  assert.match(html, /detail\.html\?slotId=1&quantity=1/);
+  assert.match(html, /detail\.html\?slotId=42&quantity=1/);
+  assert.equal((html.match(/No expiry · fictional demo date/g) || []).length, 2);
+  assert.doesNotMatch(html, /1970|Invalid Date|Book by/);
 });
 
 test('a repeated workshop shows each date, seat count, and its own price and detail link', () => {

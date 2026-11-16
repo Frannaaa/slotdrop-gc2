@@ -1,6 +1,6 @@
 
 import {
-  request, money, date, positive, pageParameters, notice, hasBookingTotal,
+  request, money, date, positive, pageParameters, notice, hasBookingTotal, practiceChoiceLabel,
 } from "./customer-common.js";
 
 const form = document.querySelector("#selection"),
@@ -31,7 +31,7 @@ async function refresh() {
   const sessionRequest = request("/api/slots/" + slotId)
     .then(slot => {
       if (current === generation) {
-        notice(chosenSession, slot.serviceName + " " + date(slot.startsAt));
+        notice(chosenSession, slot.serviceName + " " + (slot.startsAt === null ? practiceChoiceLabel(slot) : date(slot.startsAt)));
       }
       return { ok: true };
     })

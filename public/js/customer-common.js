@@ -195,18 +195,26 @@ const cardDateFormat = new Intl.DateTimeFormat("en-PH", {
   minute: "2-digit",
 });
 
+export function practiceChoiceLabel(slot) {
+  if (slot?.demoVariant === 1) return "Month X, 20XX";
+  if (slot?.demoVariant === 2) return "Month Y, 20XX";
+  return "Practice booking";
+}
+
 function sessionLinks(sessions, quantity) {
-  return `<ul class="session-options" aria-label="Available dates">
+  const demo = sessions.every(slot => slot.startsAt === null);
+  return `<ul class="session-options" aria-label="${demo ? "Choose a fictional demo date" : "Available dates"}">
     ${sessions.map((slot) => {
-      const time = cardDateFormat.format(new Date(slot.startsAt));
-      const cutoff = cardDateFormat.format(new Date(slot.bookingClosesAt));
+      const practice = slot.startsAt === null;
+      const time = practice ? practiceChoiceLabel(slot) : cardDateFormat.format(new Date(slot.startsAt));
+      const cutoff = practice ? "No expiry · fictional demo date" : "Book by " + cardDateFormat.format(new Date(slot.bookingClosesAt));
       const price = previewPrice(slot, quantity);
       const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
       return `<li>
         <a href="/detail.html?slotId=${slot.id}&quantity=${quantity}">
           <strong>${time}</strong>
           <span>${money(price.total)} ${quantity === 1 ? "per person" : `for ${quantity} people`} · ${seats}</span>
-          <small>Book by ${cutoff}</small>
+          <small>${cutoff}</small>
         </a>
       </li>`;
     }).join("")}
@@ -226,7 +234,7 @@ export function card(slot, quantity = 1, { closed = false, compact = false, sess
   const hasPhoto = !closed && photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
-  const sessionDate = practice ? "" : closed ? date(slot.startsAt) : cardDateFormat.format(new Date(slot.startsAt));
+  const sessionDate = practice ? practiceChoiceLabel(slot) : closed ? date(slot.startsAt) : cardDateFormat.format(new Date(slot.startsAt));
   const sessionLabel = closed
     ? closedSessionLabel(slot) || "Booking closed"
     : practice && !compact ? "Practice booking" : "";

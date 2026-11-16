@@ -1,7 +1,7 @@
 // Group assignment: Kaitlyn. See README.md#team.
 import {
   request, retryLimitedBooking, money, date, positive, pageParameters, notice,
-  hasBookingTotal, isBookingId, isBookingReceipt,
+  hasBookingTotal, isBookingId, isBookingReceipt, practiceChoiceLabel,
 } from "./customer-common.js";
 
 const form = document.querySelector("#checkout"),
@@ -90,7 +90,7 @@ async function load() {
     if (!matchesQuote(loaded))
       throw new Error("Could not verify the booking price. Refresh quote to try again.");
 
-    notice(chosenSession, slot.serviceName + " · " + date(slot.startsAt));
+    notice(chosenSession, slot.serviceName + " · " + (slot.startsAt === null ? practiceChoiceLabel(slot) : date(slot.startsAt)));
 
     quote = loaded;
     showQuote();
@@ -266,7 +266,7 @@ try {
 
     request("/api/slots/" + slotId)
       .then((slot) => {
-        notice(chosenSession, slot.serviceName + " · " + date(slot.startsAt));
+        notice(chosenSession, slot.serviceName + " · " + (slot.startsAt === null ? practiceChoiceLabel(slot) : date(slot.startsAt)));
       })
       .catch((error) =>
         notice(chosenSession, error.message, true),
