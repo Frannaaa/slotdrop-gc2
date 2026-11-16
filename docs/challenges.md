@@ -58,6 +58,8 @@ The slot lock matters most when two customers ask for the last seat. Each save c
 
 [Our four-page hand-drawn trace](https://drive.google.com/file/d/1sD5XV-f596rkS2WaccFFvecWElqiZHw-/view?usp=drivesdk) follows the same booking for slot **38**, quantity **1**. Pages 1 and 2 trace the Checkout POST through the PostgreSQL transaction and `201` response. Page 3 follows the separate receipt GET. Page 4 shows Owner reading the saved booking.
 
+**Hand-drawn label clarification:** The page 2 slot-lock step is written as “slot 28”; the actual traced request, booking reference and database record identify **slot 38**. The Network evidence is authoritative; no second booking or alternate slot was used.
+
 The [system diagram](system.md) covers the full app.
 
 ### Separate outside-group phone test — 16 November
