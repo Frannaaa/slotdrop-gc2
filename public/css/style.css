@@ -548,9 +548,9 @@ body.owner-page .workspace .editor select[name="serviceId"] {
 
 
 /* Workshop discovery cards shared by Home, Browse and the studio preview. */
-@font-face { font-family: "DM Sans"; src: url("/fonts/DMSans400.ttf") format("truetype"); font-display: swap; font-weight: 400; }
-@font-face { font-family: "DM Sans"; src: url("/fonts/DMSans700.ttf") format("truetype"); font-display: swap; font-weight: 700; }
-@font-face { font-family: "Space Grotesk"; src: url("/fonts/SpaceGrotesk700.ttf") format("truetype"); font-display: swap; font-weight: 700; }
+@font-face { font-family: "DM Sans"; src: url("/fonts/DMSans400.woff2") format("woff2"), url("/fonts/DMSans400.ttf") format("truetype"); font-display: swap; font-weight: 400; }
+@font-face { font-family: "DM Sans"; src: url("/fonts/DMSans700.woff2") format("woff2"), url("/fonts/DMSans700.ttf") format("truetype"); font-display: swap; font-weight: 700; }
+@font-face { font-family: "Space Grotesk"; src: url("/fonts/SpaceGrotesk700.woff2") format("woff2"), url("/fonts/SpaceGrotesk700.ttf") format("truetype"); font-display: swap; font-weight: 700; }
 
 body:not(.owner-page) .activity-card.card {
   min-width: 0;
