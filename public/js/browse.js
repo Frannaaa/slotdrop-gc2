@@ -192,10 +192,10 @@ activityButtons.forEach((button) => {
   });
 });
 retry.addEventListener("click", () => load(requestedPage));
-loadPractice();
 practiceRetry.addEventListener("click", loadPractice);
 closedSessions.addEventListener("toggle", () => {
   if (closedSessions.open) loadClosedSessions();
 });
 closedRetry.addEventListener("click", loadClosedSessions);
 load(1);
+loadPractice();
