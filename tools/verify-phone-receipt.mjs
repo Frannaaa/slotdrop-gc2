@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 const origin='https://slotdrop-gc2-group-zx8j.onrender.com';
-const bookingId='57ec16ea-c871-48b2-8351-5965df467f79';
+const bookingId='fbbfb294-20de-4e33-847b-15bc41e42eb9';
 async function get(path){
   const r=await fetch(origin+path,{cache:'no-store',signal:AbortSignal.timeout(30000)});
   assert.equal(r.status,200,'GET '+path+' should return 200');
@@ -10,10 +10,10 @@ async function get(path){
 const booking=await get('/api/bookings/'+bookingId);
 assert.equal(booking.id,bookingId);
 assert.equal(booking.status,'confirmed');
-assert.equal(booking.providerName,'Laro Ceramics');
-assert.equal(booking.quantity,4);
-assert.equal(booking.unitPriceCentavos,256500);
-assert.equal(booking.totalPriceCentavos,1026000);
+assert.equal(booking.providerName,'Bumi & Ashe');
+assert.equal(booking.quantity,1);
+assert.equal(booking.unitPriceCentavos,288000);
+assert.equal(booking.totalPriceCentavos,288000);
 assert.equal(booking.paymentMethod,'mock_card');
 const ownerRows=await get('/api/bookings');
 assert.ok(Array.isArray(ownerRows),'Owner bookings endpoint should return an array');
