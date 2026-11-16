@@ -27,7 +27,7 @@ test('Browse pages workshops separately from practice bookings and closed dates'
 
   const elements = new Map(
     ['#results', '#status', '#search', '#when', '#people', '#sort', '#pagination', '#retry',
-      '#practice-results', '#practice-status', '#practice-retry',
+      '#practice-sessions', '#practice-results', '#practice-status', '#practice-retry',
       '#closed-sessions', '#closed-results', '#closed-status', '#closed-retry'].map(key => [key, new Element()])
   );
   elements.get('#people').value = '1';
@@ -102,7 +102,12 @@ test('Browse pages workshops separately from practice bookings and closed dates'
   await flush();
   assert.deepEqual(shownIds(), [1,2,3,4,5,6]);
   assert.equal(sent.filter(path => path.includes('view=workshops')).length, 1, 'page and Next state use one request');
+  const practiceDisclosure = elements.get('#practice-sessions');
   const practiceRetry = elements.get('#practice-retry');
+  assert.ok(sent.every(path => !path.includes('view=practice')), 'the closed practice panel makes no request');
+  practiceDisclosure.open = true;
+  practiceDisclosure.handlers.toggle();
+  await flush();
   assert.equal(practiceRetry.hidden, false);
   failPractice = false;
   practiceRetry.handlers.click();

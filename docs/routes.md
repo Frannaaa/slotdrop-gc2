@@ -40,7 +40,7 @@ The bookable list requires an active activity, an open offer, a session confirme
 
 `view=workshops` returns `{ workshops: [{ serviceId, sessions }], hasNextPage }` for Browse’s upcoming workshop list. Only this opt-in view changes the response shape. Each group contains its eligible dated slots in start-time order. Filters apply to dates first, then the server groups by service and pages the workshops. Soonest orders groups by their first date. Price sorting uses the lowest or highest eligible date price for the selected party size. Browse requests six workshops per page. The server checks for an additional group to supply `hasNextPage` in the same response.
 
-`view=practice` returns eligible undated slots as the usual flat array. Browse displays them above the upcoming workshop filters so the instructor can find a sample booking after the dated offers expire.
+`view=practice` returns eligible undated slots as the usual flat array. Browse loads them when someone opens **Practice bookings for grading** above the upcoming workshop filters.
 
 `view=closed` lists dated, active, open, confirmed-to-run sessions whose cutoff has passed, including offers that sold out. The `people` filter uses total capacity in this view. Without an explicit sort, the most recent cutoffs appear first. The view always applies pagination. Browse fetches the latest 16 only when someone opens **Closed sessions**. Its cards say “Booking closed” or “Event ended” and link to read-only details. Closed offers still return 409 from a new quote or booking.
 

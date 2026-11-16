@@ -281,7 +281,21 @@
 }
 
 .browse-page main > section > h2 { margin-bottom: .75rem; }
-.browse-page .practice-sessions { margin-bottom: 2rem; }
+.browse-page .practice-sessions {
+  margin-bottom: 1.5rem;
+  padding: .7rem 1rem;
+  border: 1px solid var(--browse-border);
+  border-radius: .65rem;
+  background: #eef0ff;
+}
+.browse-page .practice-sessions summary {
+  min-height: 2rem;
+  align-content: center;
+  color: #25338b;
+  font-weight: 700;
+  cursor: pointer;
+}
+.browse-page #practice-results:not(:empty) { margin: .7rem 0 .25rem; }
 .browse-page #practice-status:empty { display: none; }
 .browse-page #practice-retry { margin-bottom: .75rem; }
 .browse-page .session-options {
