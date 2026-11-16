@@ -74,3 +74,14 @@ test('served HTML scripts, stylesheets and relative JS imports resolve to real f
   }
   assert.deepEqual(missing,[],'Missing first-party scripts, styles or module imports');
 });
+
+test('Detail and Selection back links return to Browse', async () => {
+  const pages = [
+    ['detail.html', /<a\b[^>]*class="detail-back"[^>]*href="\/browse\.html"[^>]*>/],
+    ['selection.html', /<a\b[^>]*href="\/browse\.html"[^>]*>Back to Browse<\/a>/],
+  ];
+  for (const [page, pattern] of pages) {
+    const source = await readFile(resolve(publicRoot, page), 'utf8');
+    assert.match(source, pattern, page + ' should provide a back link to Browse');
+  }
+});
