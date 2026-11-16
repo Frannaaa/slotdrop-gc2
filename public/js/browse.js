@@ -10,7 +10,6 @@ const people = document.querySelector("#people");
 const sort = document.querySelector("#sort");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
-const practiceSessions = document.querySelector("#practice-sessions");
 const practiceResults = document.querySelector("#practice-results");
 const practiceStatus = document.querySelector("#practice-status");
 const practiceRetry = document.querySelector("#practice-retry");
@@ -193,9 +192,7 @@ activityButtons.forEach((button) => {
   });
 });
 retry.addEventListener("click", () => load(requestedPage));
-practiceSessions.addEventListener("toggle", () => {
-  if (practiceSessions.open) loadPractice();
-});
+loadPractice();
 practiceRetry.addEventListener("click", loadPractice);
 closedSessions.addEventListener("toggle", () => {
   if (closedSessions.open) loadClosedSessions();
