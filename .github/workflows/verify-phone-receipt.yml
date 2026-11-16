@@ -1,0 +1,25 @@
+name: Verify saved phone booking and Owner match
+on:
+  push:
+    branches: ['qa/gc2-phone-receipt-20261116']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Read back recorded phone receipt and independent Owner row
+        run: node tools/verify-phone-receipt.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slotdrop-stranger-phone-receipt-check
+          path: phone-receipt-evidence/
+          retention-days: 90
