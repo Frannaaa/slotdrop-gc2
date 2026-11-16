@@ -2,7 +2,7 @@
 
 *Post-feedback revision of Group 3's original GC1 proposal · 16 November 2026*
 
-**The idea hasn't changed. The assumptions have.** Our original pitch was that empty appointment slots should not automatically mean lost revenue. We called it **SlotDrop — “Empty slot, better price.”** Ma'am agreed that the two-sided problem made sense, but asked an important question: *where would those available slots actually come from?* A popular provider with a months-long waiting list may have almost nothing to discount.
+Our original GC1 pitch was **SlotDrop — “Empty slot, better price.”** We wanted customers to find lower-priced appointments on short notice and providers to earn from empty or cancelled slots. Ma'am thought the two-sided problem was worth exploring, but she was right to question the supply: a popular provider may not have spare appointments, and discounting an available seat does not help if that customer would otherwise have paid full price.
 
 This revision keeps the original GC1 concept and corrects its weak points. It describes the **proposed business**, while [`business.md`](../business.md) shows what the team actually built in GC2. It does not replace the historically submitted GC1 or claim signed studio partners, measured demand or earned commercial revenue.
 
