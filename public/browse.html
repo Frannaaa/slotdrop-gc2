@@ -32,13 +32,14 @@
         <p>Find a nearby workshop that fits your schedule and budget. Compare dates, prices and available seats.</p>
       </section>
 
-      <details id="practice-sessions" class="practice-sessions">
-        <summary>Practice bookings for grading</summary>
-        <p class="practice-intro">Undated sample workshops stay bookable for your instructor to try the full flow. All bookings and payments here are simulated.</p>
+      <section id="practice-sessions" class="practice-sessions" aria-labelledby="practice-heading">
+        <h2 id="practice-heading">Practice bookings for grading</h2>
+        <p class="practice-intro"><strong>Why these are here:</strong> Upcoming workshops below have scheduled demo dates. The app lists them within 72 hours of their start and stops bookings at each workshop's configured cutoff.</p>
+        <p class="practice-intro"><strong>For grading:</strong> These three undated sample offers do not expire by date, so the instructor can test the full booking flow even after the scheduled offers close. They still require open sales and available seats. All bookings and payments are simulated.</p>
         <p id="practice-status" class="notice" role="status">Loading practice bookings…</p>
         <button id="practice-retry" class="button secondary" type="button" hidden>Retry practice bookings</button>
         <div id="practice-results" class="activity-grid" aria-label="Practice workshops"></div>
-      </details>
+      </section>
 
       <section aria-labelledby="upcoming-heading">
         <h2 id="upcoming-heading">Upcoming workshops</h2>
