@@ -29,18 +29,20 @@ Use this dated public measurement as the comparison point. [PR #72](https://gith
 
 ## Reviewed release measurement
 
-Measured on 15 November 2026 at 22:59 PHT on Render commit [`3ef579d`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbsrohu7bikc73fdfbl0). A GitHub Actions runner checked a warmed instance. The browser used 412 × 823 CSS pixels, device scale factor 1.75, and cache disabled for the separate Network capture. Lighthouse 13.6.0 used simulated mobile throttling.
+Measured on 16 November 2026 at 8:08 AM PHT on Render commit [`3ef579d`](https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbsrohu7bikc73fdfbl0). The GitHub Actions runner checked a warmed instance. The browser used 412 × 823 CSS pixels, a device scale factor of 1.75, and cache disabled for the separate Network capture. Lighthouse 13.6.0 used simulated mobile throttling.
 
 | Measure | Reviewed release |
 |---|---:|
-| Lighthouse mobile Performance | 100/100 |
+| Lighthouse mobile Performance | 99/100 |
 | Lighthouse mobile Accessibility | 100/100 |
 | Lighthouse mobile Best Practices | 96/100 |
-| First-load same-origin requests, cache disabled | 16 |
-| First-load transfer size, cache disabled | 228,691 bytes (223.33 KiB) |
-| First List API response time | 248 ms in Lighthouse, HTTP 200 |
-| Mobile layout shift | 0.0002 |
+| First-load same-origin requests, cache disabled | 17 |
+| First-load transfer size, cache disabled | 270,462 bytes (264.12 KiB) |
+| First List API response time | 257 ms in the Network capture, HTTP 200 |
+| Mobile layout shift | 0 |
 
-Browse rendered 6 cards without horizontal overflow at 412 CSS pixels. The first workshop photo loaded. The Closed sessions section loaded 16 records.
+Browse rendered 6 cards without horizontal overflow at 412 CSS pixels. Its first photo loaded, and Closed sessions showed 16 records. The missing default `/favicon.ico` caused the only Best Practices deduction. The first List API request took 259 ms in Lighthouse and 257 ms in the separate Network capture.
 
-[Measurement data](evidence/live-release-3ef579d.json) · [Mobile screenshot and Lighthouse report](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727217983/artifacts/14167315733)
+The 15 November run measured 100 Performance, 100 Accessibility and 96 Best Practices on the same deployment. Both readings show the conditions of the run, including the warmed server.
+
+[16 November browser and Lighthouse reports](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43778545230/artifacts/14186994082) · [Machine-readable data from both runs](evidence/live-release-3ef579d.json)

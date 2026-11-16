@@ -320,5 +320,221 @@
     "ownerRowText": "1267ec9f-e9a4-4395-9c84-0f8f4f74c69b · Mug-making + painting\tPractice booking\t1\tstandard · ₱2,700.00\t₱2,700.00\t₱270.00\t₱2,430.00\tconfirmed",
     "seatsBefore": 19,
     "seatsAfter": 19
+  },
+  "nov16MobileRecheck": {
+    "workflowRun": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43778545230",
+    "cacheDisabledNetwork": {
+      "measuredAt": "2026-11-16T00:08:39.623Z",
+      "browser": "151.0.7922.34",
+      "viewport": {
+        "width": 412,
+        "height": 823
+      },
+      "deviceScaleFactor": 1.75,
+      "cacheDisabled": true,
+      "sameOriginRequests": 17,
+      "totalTransferBytes": 270462,
+      "listRequest": {
+        "path": "/api/slots?page=1&limit=6",
+        "type": "Fetch",
+        "status": 200,
+        "durationMs": 257,
+        "transferBytes": 2606
+      },
+      "records": [
+        {
+          "path": "/browse.html",
+          "type": "Document",
+          "status": 200,
+          "durationMs": 317,
+          "transferBytes": 1527
+        },
+        {
+          "path": "/css/style.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 271,
+          "transferBytes": 5017
+        },
+        {
+          "path": "/css/browse.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 257,
+          "transferBytes": 2348
+        },
+        {
+          "path": "/css/pagination.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 271,
+          "transferBytes": 339
+        },
+        {
+          "path": "/js/browse.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 270,
+          "transferBytes": 2181
+        },
+        {
+          "path": "/js/customer-common.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 258,
+          "transferBytes": 4101
+        },
+        {
+          "path": "/fonts/DMSans700.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 1178,
+          "transferBytes": 30964
+        },
+        {
+          "path": "/fonts/SpaceGrotesk700.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 326,
+          "transferBytes": 43154
+        },
+        {
+          "path": "/fonts/DMSans400.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 272,
+          "transferBytes": 30649
+        },
+        {
+          "path": "/js/business-config.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 725,
+          "transferBytes": 749
+        },
+        {
+          "path": "/api/slots?page=1&limit=6",
+          "type": "Fetch",
+          "status": 200,
+          "durationMs": 257,
+          "transferBytes": 2606
+        },
+        {
+          "path": "/api/slots?page=2&limit=6",
+          "type": "Fetch",
+          "status": 200,
+          "durationMs": 260,
+          "transferBytes": 2185
+        },
+        {
+          "path": "/images/workshops/laro-mug.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 273,
+          "transferBytes": 25831
+        },
+        {
+          "path": "/images/workshops/bumi-mug.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 260,
+          "transferBytes": 17440
+        },
+        {
+          "path": "/images/workshops/bumi-freeform.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 288,
+          "transferBytes": 33497
+        },
+        {
+          "path": "/images/workshops/amt-handbuilding.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 289,
+          "transferBytes": 38412
+        },
+        {
+          "path": "/images/workshops/amt-wheel.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 266,
+          "transferBytes": 29462
+        }
+      ],
+      "visibleCards": 6,
+      "layout": {
+        "viewportWidth": 412,
+        "documentWidth": 412
+      },
+      "pageErrors": [],
+      "firstPhotoLoaded": true,
+      "closedSessions": {
+        "http": 200,
+        "cards": 16
+      }
+    },
+    "mobileLighthouse": {
+      "failedBestPractices": [
+        {
+          "id": "errors-in-console",
+          "items": [
+            {
+              "source": "network",
+              "description": "Failed to load resource: the server responded with a status of 404 ()",
+              "sourceLocation": {
+                "type": "source-location",
+                "url": "https://slotdrop-gc2-group-zx8j.onrender.com/favicon.ico",
+                "urlProvider": "network",
+                "line": 0,
+                "column": 0
+              }
+            }
+          ]
+        }
+      ],
+      "measuredAt": "2026-11-16T00:08:42.495Z",
+      "version": "13.6.0",
+      "browser": "151.0.7922.34",
+      "formFactor": "mobile",
+      "throttlingMethod": "simulate",
+      "screenEmulation": {
+        "mobile": true,
+        "width": 412,
+        "height": 823,
+        "deviceScaleFactor": 1.75,
+        "disabled": false
+      },
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "best-practices": 96
+      },
+      "metrics": {
+        "first-contentful-paint": {
+          "value": 1005.363,
+          "unit": "millisecond"
+        },
+        "largest-contentful-paint": {
+          "value": 1005.363,
+          "unit": "millisecond"
+        },
+        "speed-index": {
+          "value": 2084.0436599999994,
+          "unit": "millisecond"
+        },
+        "total-blocking-time": {
+          "value": 120.5,
+          "unit": "millisecond"
+        },
+        "cumulative-layout-shift": {
+          "value": 0,
+          "unit": "unitless"
+        }
+      },
+      "listApiStatus": 200,
+      "listApiMs": 259,
+      "warnings": []
+    }
   }
 }
