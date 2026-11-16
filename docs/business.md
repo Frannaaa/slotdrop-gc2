@@ -134,13 +134,9 @@ The example pilot later in this document assumes **28 bookings** producing **₱
 
 **Decision:** keep 10% as a transparent *pilot hypothesis*. Do not announce it as proven optimal, or charge an unapproved supplier rate. We would negotiate a minimum payout with the pilot studio, compare against its direct-price promotions, and revisit the fee if realistic costs show the platform or the studio cannot sustain it.
 
-## 5. What we built in GC2 and how it supports the business
-
-The original GC1 roadmap gave the right direction—post a slot, find it, book it and show it in a schedule—but left business and technical details open. GC2 resolves the core path as **Browse → Select → Confirm → Save**, with Home and Detail before the transaction and a separate Owner view afterward.
-
-
-
 ## 5. From GC1 into the working GC2 platform
+
+The original roadmap had the right core journey: post a slot, discover it, book it, confirm it. GC2 now carries that **Browse → Select → Confirm → Save** sequence through actual server routes and a saved PostgreSQL booking, with Home and Detail before checkout and Owner afterward.
 
 The important improvement is that the business rules are backed by the same saved data from Browse through Owner. A listing is not just a picture or a hardcoded discount. The following tables trace the original idea, its feedback, what the team implemented, and how it is enforced.
 
@@ -276,17 +272,17 @@ A new booking locks its slot row and recalculates availability and commission **
 
 Would a studio earn more by using SlotDrop? We’d start with one pottery studio and track what happens to bookings and payout across its sales channels.
 
-#### Customer and supply
+### Customer and supply
 
 We’d start by interviewing working adults **22–35** near Katipunan, UP Village and Teachers Village who sometimes make plans within three days and would consider a **₱2,500–₱3,000** workshop. A gross monthly income of **₱35,000–₱80,000** is a proposed screening range. We’d interview students separately to learn what fits their budget.
 
 The first thing we’d ask a studio for is four weeks of capacity, attendance and cancellations. We need to know which classes are already confirmed and how many seats are still open before the preparation deadline.
 
-#### Studio research
+### Studio research
 
 We looked at Laro Ceramics, Marz Today, Metals & Gems, Bumi & Ashe, Tahanan Pottery, Sip & Gogh and AMT Ceramics. Laro is close to our pilot area and listed a **₱3,000** mug-making class. Tahanan listed recurring weekend classes. We’d ask each about its exact branch, next session, preparation lead time and seats it could set aside. [Studio research and sources](reference/business-research-appendix.md#a-studios-and-why-each-might-fit)
 
-#### Provider economics and business-model benchmarks
+### Provider economics and business-model benchmarks
 
 For the modeled costs below, we used Laro’s **₱3,000** listed price and assumed **₱500 per extra guest** for clay, finishing, firing and handling. The studio would need to supply its actual costs.
 
@@ -314,7 +310,7 @@ These figures come from our assumptions about fill, sales mix, direct bookings a
 
 ClassPass uses credits and agreed partner payouts. Fresha listed a **20% one-time marketplace fee for new customers**, with a minimum, alongside separate software and payment terms. SlotDrop’s **10% on every booking** could cost a studio more if many customers return. Laro also advertised friend discounts of up to ₱500 per person. We’d compare both the studio payout and what the customer actually pays before picking a pilot offer. [Business-model comparison](reference/business-research-appendix.md#d-competing-marketplace-business-models)
 
-#### Pilot and risks
+### Pilot and risks
 
 | Step | What we'd verify | Decision |
 |---|---|---|
@@ -325,7 +321,7 @@ ClassPass uses credits and agreed partner payouts. Fresha listed a **20% one-tim
 
 Our main risks are listing a seat the studio already sold, asking a studio to discount below its minimum, and moving full-price buyers onto a cheaper offer. For a pilot we’d set aside seats with the studio, agree on a payout floor and compare total sales with the studio’s usual results. Calendar reconciliation would be manual.
 
-#### Studio applications
+### Studio applications
 
 A studio can send an application and look up its pending status. Before publishing a real studio page, we’d verify who submitted it, confirm permission and agree on commercial terms. [Studio application contract](routes.md#studio-research-and-applications)
 
