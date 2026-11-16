@@ -130,7 +130,7 @@ Each member picks one function they wrote and writes down what it will return fo
 | Cholo / Chonel (M2) | [Chonel's recording](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) |
 | Janelle (M3) | [Janelle's `priceQuote` recording](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) |
 | Kaitlyn (M4) | [Kaitlyn's recording](https://drive.google.com/file/d/1jPN4CTLE5_KpL4tUCRJR3l0DEeh7YxNu/view?usp=drivesdk) |
-| Kat / Kaithlyn (M5) | Pending upload |
+| Kat / Kaithlyn (M5) | [Kat's Challenge 5 recording](https://drive.google.com/file/d/1t7A2f4rJCbbHtlpFybopUxAeqIQ1TLiV/view?usp=drivesdk) |
 | Kirsten (M6) | [Kirsten's recording](https://drive.google.com/file/d/1LJxyMj9HbWRehO8hwoVBs4Eeh2n9MUKE/view?usp=drivesdk) |
 
 ## Stretch challenges
