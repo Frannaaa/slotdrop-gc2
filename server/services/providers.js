@@ -4,6 +4,7 @@ import { ApiError, integer, invalid, object } from "../lib/validation.js";
 import { studioReferences } from "../repositories/reference-catalog.js";
 import { listSlots } from "./discovery.js";
 const types = ["pottery", "painting", "pilates", "dance", "other"];
+const maxWebsiteLength = 2048;
 function uuid(value) {
   if (
     typeof value !== "string" ||
@@ -42,7 +43,7 @@ function normalize(body) {
     providerId:
       body.providerId == null ? null : integer(body.providerId, "providerId"),
     businessName: text(body.businessName, "studio name", 120),
-    website: text(body.website, "public website", 2048),
+    website: text(body.website, "public website", maxWebsiteLength),
     city: text(body.city, "city", 100),
     area: text(body.area, "area", 100),
     contactName: text(body.contactName, "contact name", 100),
@@ -57,6 +58,8 @@ function normalize(body) {
   }
   if (url.protocol !== "https:" || url.username || url.password)
     invalid("Use an HTTPS link without a username or password.");
+  if (url.href.length > maxWebsiteLength)
+    invalid("Use a shorter website or social-profile link.");
   input.website = url.href;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.contactEmail))
     invalid("Enter a valid contact email.");

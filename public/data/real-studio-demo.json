@@ -12,6 +12,11 @@
       "priceNote": "Published per-person price; may change.",
       "address": "Ground Floor, YDG Building, 219 Katipunan Ave., Quezon City",
       "key": "laro-mug",
+      "photo": {
+        "alt": "Two people shaping mugs at Laro Ceramics",
+        "credit": "Laro Ceramics",
+        "page": "https://laro-ceramics.com/products/mug-making-class-manila"
+      },
       "providerKey": "laro-qc",
       "city": "Quezon City",
       "area": "Katipunan",
@@ -39,6 +44,11 @@
       "priceNote": "Published per-person price; may change.",
       "address": "Ground Floor, YDG Building, 219 Katipunan Ave., Quezon City",
       "key": "laro-wheel",
+      "photo": {
+        "alt": "Hands shaping a clay bowl on a pottery wheel",
+        "credit": "Laro Ceramics",
+        "page": "https://laro-ceramics.com/products/pottery-wheel-class-manila"
+      },
       "providerKey": "laro-qc",
       "city": "Quezon City",
       "area": "Katipunan",
@@ -66,6 +76,11 @@
       "priceNote": "Published sale price; may change.",
       "address": "Cubao Expo, Quezon City (branch named on official page; full street address not independently verified)",
       "key": "bumi-mug",
+      "photo": {
+        "alt": "Hands shaping a mug during a Bumi & Ashe workshop",
+        "credit": "Bumi & Ashe",
+        "page": "https://bumiandashe.com/products/mug-making-workshop-1"
+      },
       "providerKey": "bumi-cubao",
       "city": "Quezon City",
       "area": "Cubao Expo",
@@ -93,6 +108,11 @@
       "priceNote": "Published per-person price; may change.",
       "address": "Cubao Expo, Quezon City (branch named on official page; full street address not independently verified)",
       "key": "bumi-freeform",
+      "photo": {
+        "alt": "Handbuilt ceramic dish painted with blue floral details",
+        "credit": "Bumi & Ashe",
+        "page": "https://bumiandashe.com/products/pottery-workshop-handbuilding"
+      },
       "providerKey": "bumi-cubao",
       "city": "Quezon City",
       "area": "Cubao Expo",
@@ -120,6 +140,11 @@
       "priceNote": "Published per-person price; may change.",
       "address": "La Chesa Heights Subdivision, Tandang Sora, Quezon City",
       "key": "amt-handbuilding",
+      "photo": {
+        "alt": "Two people handbuilding pottery at AMT Ceramics",
+        "credit": "AMT Ceramics",
+        "page": "https://amtceramics.com/products/hand-building-single-session"
+      },
       "providerKey": "amt-qc",
       "city": "Quezon City",
       "area": "Tandang Sora",
@@ -144,6 +169,11 @@
       "priceNote": "Published per-person price; may change.",
       "address": "La Chesa Heights Subdivision, Tandang Sora, Quezon City",
       "key": "amt-wheel",
+      "photo": {
+        "alt": "A participant working with clay on a pottery wheel",
+        "credit": "AMT Ceramics",
+        "page": "https://amtceramics.com/products/wheel-throwing-exploratory-single-session"
+      },
       "providerKey": "amt-qc",
       "city": "Quezon City",
       "area": "Tandang Sora",
@@ -168,6 +198,11 @@
       "priceNote": "Published per-person price; may change.",
       "address": "Century City, Kalayaan Ave., Salamanca St., Poblacion, Makati",
       "key": "sip-open",
+      "photo": {
+        "alt": "Canvases and painters at the Sip & Gogh Century Mall studio",
+        "credit": "Sip & Gogh’s listing on Traveloka",
+        "page": "https://www.traveloka.com/en-au/activities/philippines/product/painting-class-with-sip-gogh-century-mall-2001024365505"
+      },
       "providerKey": "sip-century",
       "city": "Makati",
       "area": "Century City",
@@ -183,6 +218,11 @@
     },
     {
       "key": "tahanan-wheel",
+      "photo": {
+        "alt": "Hands guiding clay on the wheel at Tahanan Pottery",
+        "credit": "Tahanan Pottery Shop & Studio",
+        "page": "https://tahananpottery.ph/products/pottery-wheel-exploratory-workshop"
+      },
       "providerKey": "tahanan-qc",
       "business": "Tahanan Pottery Shop & Studio",
       "activity": "Exploratory Wheel Workshop",

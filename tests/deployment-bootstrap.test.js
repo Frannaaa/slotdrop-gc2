@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { randomUUID } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
-import { bootstrapDatabase } from '../tools/db-bootstrap.mjs';
-import { migrateDatabase } from '../server/repositories/migrations.js';
-import { ensureReferenceCatalog } from '../server/repositories/reference-catalog.js';
 import { createApp } from '../server/app.js';
+import { bootstrapDatabase, upgradeDatabase } from '../server/repositories/migrations.js';
+import { createBooking, findReceipt } from '../server/services/bookings.js';
+import { listSlots } from '../server/services/discovery.js';
 
 function pglite() {
   const database = new PGlite();
@@ -21,8 +21,7 @@ function pglite() {
 
 async function startSequence(db) {
   const created = await bootstrapDatabase(db);
-  await migrateDatabase(db);
-  await ensureReferenceCatalog(db);
+  await upgradeDatabase(db);
   return created;
 }
 
@@ -80,6 +79,31 @@ test('bootstrap refuses a partial schema instead of reseeding over it', async ()
     await assert.rejects(bootstrapDatabase(db), /Partial SlotDrop schema/);
     const { rows } = await db.query("SELECT to_regclass('bookings') AS bookings");
     assert.equal(rows[0].bookings, null, 'the failed bootstrap rolled back');
+  } finally { await db.close(); }
+});
+
+test('startup adds the applications table to an older database and preserves its receipt', async () => {
+  const db = pglite();
+  try {
+    await bootstrapDatabase(db);
+    await db.query('DROP TABLE provider_applications');
+
+    const now = new Date();
+    const [slot] = await listSlots(db, {}, now);
+    const { receipt } = await createBooking(db, {
+      requestId: randomUUID(),
+      slotId: slot.id,
+      quantity: 1,
+      customerName: 'Upgrade Check',
+      customerEmail: 'upgrade.check@example.com',
+      paymentMethod: 'mock_card',
+      expectedTotalCentavos: slot.offerPriceCentavos,
+    }, () => now);
+
+    assert.equal(await startSequence(db), false);
+    const { rows: [applications] } = await db.query('SELECT count(*)::int AS count FROM provider_applications');
+    assert.equal(applications.count, 0);
+    assert.deepEqual(await findReceipt(db, receipt.id), receipt);
   } finally { await db.close(); }
 });
 

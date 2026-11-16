@@ -196,6 +196,18 @@ label {
   margin-top: var(--space-md);
 }
 
+#featured {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  #featured { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  #featured { grid-template-columns: minmax(0, 1fr); }
+}
+
 .card {
   background-color: var(--color-white);
   border: 1px solid var(--color-border);
@@ -204,6 +216,35 @@ label {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+}
+
+.card-photo {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-clay);
+}
+
+.card-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.card-photo figcaption {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+}
+
+.activity-card .card-photo a {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--color-ink);
+  color: var(--color-white);
+  font-size: 0.72rem;
 }
 
 /* Buddy Tier Badge */
@@ -227,41 +268,6 @@ label {
   border-radius: 12px;
   display: inline-block;
 }
-
-/* hello there! these are your classes and ids:
-
-CSS VARIABLES:
---color-paper
---color-ink
---color-blue
---color-lime
---color-clay 
---font-heading
---font-body 
-
-BUTTONS: 
-.button
-.text-button
-.activity-types 
-
-FORM INPUTS: 
-input[type="text"]
-input[type="number"]
-select
-
-GRIDS AND CARDS:
-.activity-grid 
-.card
-
-BADGES:
-.badge-buddy (this is lime)
-.badge-editorial (this is clay)
-
-SEPARATE IDS:
-#status 
-#status.error
-
-pls enjoy i love you all mwah mwah mwah */
 
 /* Captain integration fix: preserve the native hidden attribute even when a
    shared class (including .button) sets display explicitly. */
@@ -400,12 +406,6 @@ body:not(.owner-page) .total { font-size: 1.2rem; font-weight: 700; }
   #receipt dd + dt { margin-top: .5rem; }
 }
 
-body:not(.owner-page) .how-strip {
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  background: var(--color-lime);
-  border-radius: var(--radius-lg);
-}
-body:not(.owner-page) .how-strip > * + * { margin-top: .8rem; }
 body:not(.owner-page) .reference { font-size: .82rem; }
 body:not(.owner-page) .button {
   min-height: 44px;
@@ -439,11 +439,7 @@ body:not(.owner-page) .hero h1 {
 body:not(.owner-page) .hero > p:not(.eyebrow) {
   color: #555b52;
 }
-body:not(.owner-page) .section-heading h2,
-body:not(.owner-page) .how-strip h2 {
-  color: var(--color-ink);
-}
-body:not(.owner-page) .how-strip {
+body:not(.owner-page) .section-heading h2 {
   color: var(--color-ink);
 }
 @media (max-width: 440px) {
@@ -548,4 +544,267 @@ body.owner-page .workspace .editor select[name="serviceId"] {
     calc(100% - 12px) 20px;
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
+}
+
+
+/* Workshop discovery cards shared by Home, Browse and the studio preview. */
+@font-face { font-family: "DM Sans"; src: url("/fonts/DMSans400.woff2") format("woff2"), url("/fonts/DMSans400.ttf") format("truetype"); font-display: swap; font-weight: 400; }
+@font-face { font-family: "DM Sans"; src: url("/fonts/DMSans700.woff2") format("woff2"), url("/fonts/DMSans700.ttf") format("truetype"); font-display: swap; font-weight: 700; }
+@font-face { font-family: "Space Grotesk"; src: url("/fonts/SpaceGrotesk700.woff2") format("woff2"), url("/fonts/SpaceGrotesk700.ttf") format("truetype"); font-display: swap; font-weight: 700; }
+
+body:not(.owner-page) .activity-card.card {
+  min-width: 0;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #dcdcd4;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(32,35,30,.055);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+body:not(.owner-page) .activity-card.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(32,35,30,.11);
+}
+body:not(.owner-page) .activity-card .card-photo {
+  aspect-ratio: 16 / 10;
+  border-radius: 0;
+  overflow: hidden;
+  background: #e4d9d1;
+}
+body:not(.owner-page) .activity-card .card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+body:not(.owner-page) .activity-card .card-photo figcaption {
+  right: .55rem;
+  bottom: .55rem;
+}
+body:not(.owner-page) .activity-card .card-photo figcaption a {
+  color: #fff;
+  background: rgba(32,35,30,.84);
+  padding: .35rem .55rem;
+  font-size: .68rem;
+  text-decoration: none;
+  border-radius: 6px;
+}
+body:not(.owner-page) .activity-card .card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .65rem;
+  padding: 1.25rem 1.35rem 1.35rem;
+}
+body:not(.owner-page) .activity-card .card-body > * { margin: 0; }
+body:not(.owner-page) .activity-card .card-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .3rem .5rem;
+}
+body:not(.owner-page) .activity-card .eyebrow {
+  color: #677060;
+  font-size: .69rem;
+  letter-spacing: .105em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+body:not(.owner-page) .activity-card h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.16rem, 1.5vw, 1.38rem);
+  line-height: 1.18;
+  letter-spacing: -.025em;
+}
+body:not(.owner-page) .activity-card .provider-name {
+  color: #4e5048;
+  font-size: .91rem;
+  font-weight: 500;
+}
+body:not(.owner-page) .activity-card .provider-name a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid #b5b9ac;
+}
+body:not(.owner-page) .activity-card .session-time {
+  color: #51554d;
+  font-size: .86rem;
+  line-height: 1.6;
+}
+body:not(.owner-page) .activity-card .session-time strong {
+  color: #20231e;
+  font-size: .93rem;
+}
+body:not(.owner-page) .activity-card .session-cutoff {
+  color: #63685d;
+  font-size: .78rem;
+  line-height: 1.45;
+}
+body:not(.owner-page) .activity-card .session-label {
+  padding: .22rem .5rem;
+  border-radius: 999px;
+  color: #5e4c40;
+  background: #f5eae1;
+  font-size: .72rem;
+  font-weight: 700;
+}
+body:not(.owner-page) .activity-card .session-label.practice {
+  color: #25338b;
+  background: #eef0ff;
+}
+body:not(.owner-page) .activity-card .party-price {
+  display: flex;
+  gap: .3rem .55rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e8e8e2;
+}
+body:not(.owner-page) .activity-card .party-price strong {
+  color: #20231e;
+  font-family: var(--font-heading);
+  font-size: 1.52rem;
+  letter-spacing: -.04em;
+}
+body:not(.owner-page) .activity-card .party-price span { color: #60665d; font-size: .79rem; }
+body:not(.owner-page) .activity-card .buddy {
+  align-self: flex-start;
+  padding: .32rem .58rem;
+  margin: 0;
+  color: #364416;
+  background: #eff7d7;
+  border-radius: 7px;
+  font-size: .75rem;
+  font-weight: 650;
+}
+body:not(.owner-page) .activity-card .button.secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 46px;
+  margin-top: .45rem;
+  padding: .7rem 1rem;
+  color: #fff;
+  border: 1px solid #3048db;
+  border-radius: 9px;
+  background: #3048db;
+  font-size: .92rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+body:not(.owner-page) .activity-card .button.secondary:hover { color: #fff; background: #2437b0; border-color: #2437b0; }
+body:not(.owner-page) .activity-card.closed-card {
+  border-radius: 10px;
+  background: #faf9f5;
+  box-shadow: none;
+}
+body:not(.owner-page) .activity-card.closed-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+body:not(.owner-page) .activity-card.closed-card .card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .35rem 1.25rem;
+  padding: .85rem 1.1rem;
+}
+body:not(.owner-page) .activity-card.closed-card .card-body > :not(.button) {
+  grid-column: 1;
+}
+body:not(.owner-page) .activity-card.closed-card .button.secondary {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  align-self: center;
+  width: auto;
+  margin: 0;
+  color: #4e5048;
+  background: #fff;
+  border-color: #d5d6ce;
+}
+body:not(.owner-page) .activity-card.closed-card .button.secondary:hover {
+  background: #f4f4ef;
+  border-color: #96988e;
+}
+
+@media (max-width: 600px) {
+  body:not(.owner-page) .activity-card.closed-card .card-body {
+    display: flex;
+    gap: .4rem;
+  }
+  body:not(.owner-page) .activity-card.closed-card .button.secondary {
+    align-self: flex-start;
+    margin-top: .25rem;
+  }
+}
+#status:empty { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  body:not(.owner-page) .activity-card.card { transition: none; }
+  body:not(.owner-page) .activity-card.card:hover { transform: none; }
+}
+
+
+/* Editorial Home hero with credited studio photo. */
+body:not(.owner-page) .home-hero {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1.14fr) minmax(300px, .86fr);
+  align-items: center;
+  justify-items: stretch;
+  gap: clamp(1.6rem, 5vw, 4.5rem);
+  padding-block: clamp(1rem, 4vw, 3rem);
+}
+body:not(.owner-page) .home-hero-copy { display:grid; justify-items:start; gap:1.15rem; }
+body:not(.owner-page) .home-hero-copy h1 {
+  max-width: 13ch;
+  margin:0;
+  font-size: clamp(2.8rem, 5.3vw, 5rem);
+  line-height:1.02;
+  letter-spacing:-.058em;
+}
+body:not(.owner-page) .home-hero-copy h1 span { color:#3048db; }
+body:not(.owner-page) .home-hero-copy > p:not(.eyebrow) {
+  max-width: 31rem;
+  color:#545b53;
+  font-size: clamp(1rem, 1.25vw, 1.13rem);
+  line-height:1.6;
+}
+body:not(.owner-page) .home-hero-copy > .button { margin-top:.35rem; padding:.85rem 1.45rem; font-weight:700; }
+body:not(.owner-page) .home-hero-photo {
+  position:relative;
+  width:100%;
+  aspect-ratio: 4/4.4;
+  min-height:360px;
+  overflow:hidden;
+  border-radius:22px;
+  margin:0;
+  background:#ddc2b7;
+  box-shadow:0 18px 48px rgba(32,35,30,.09);
+}
+body:not(.owner-page) .home-hero-photo img { display:block; width:100%; height:100%; object-fit:cover; }
+body:not(.owner-page) .home-hero-photo figcaption {
+  position:absolute;
+  right:.8rem;
+  bottom:.8rem;
+  padding:.45rem .65rem;
+  color:#fff;
+  background:rgba(30,37,31,.82);
+  border-radius:999px;
+  font-size:.7rem;
+}
+body:not(.owner-page) .home-hero-photo figcaption a { color:inherit; text-decoration:underline; }
+@media (max-width:760px) {
+  body:not(.owner-page) .home-hero {
+    grid-template-columns:minmax(0,1fr);
+    gap:1.5rem;
+    padding-block:1rem 2rem;
+  }
+  body:not(.owner-page) .home-hero-copy h1 { font-size:clamp(2.45rem,9vw,3.5rem); }
+  body:not(.owner-page) .home-hero-photo { min-height:0; aspect-ratio:16/11; border-radius:16px; }
 }
