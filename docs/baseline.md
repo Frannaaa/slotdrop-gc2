@@ -46,3 +46,27 @@ Browse rendered 6 cards without horizontal overflow at 412 CSS pixels. Its first
 The 15 November run measured 100 Performance, 100 Accessibility and 96 Best Practices on the same deployment. Both readings show the conditions of the run, including the warmed server.
 
 [16 November browser and Lighthouse reports](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43778545230/artifacts/14186994082) · [Machine-readable data from both runs](evidence/live-release-3ef579d.json)
+
+## Final deployed verification — 16 November 2026
+
+The final code build [`d3d2f13`](https://github.com/Frannaaa/slotdrop-gc2/commit/d3d2f1381c0ef8776685abf46c081130f33dd889) was reported **live** by Render. A separate GitHub-hosted [read-only verification](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43831616352) measured the deployed `/browse.html` page at about **4:30 PM PHT**.
+
+| Measure | First Lighthouse run | Second Lighthouse run |
+|---|---:|---:|
+| Mobile Performance | **100/100** | **100/100** |
+| Mobile Accessibility | **100/100** | **100/100** |
+| Mobile Best Practices | **100/100** | **100/100** |
+| First Contentful Paint | 1,001 ms | 1,013 ms |
+| Largest Contentful Paint | 1,001 ms | 1,013 ms |
+| Speed Index | 1,538 ms | 2,613 ms |
+| Total Blocking Time | 34.5 ms | 0 ms |
+| Cumulative Layout Shift | 0 | 0 |
+| Grouped List API duration in Lighthouse | 254 ms | 263 ms |
+
+The same workflow passed **16/16 read-only release checks** and confirmed that `/favicon.svg` serves HTTP 200, resolving the browser-icon failure responsible for the previous 96 Best Practices score. At **412 × 823 CSS pixels**, Browse showed six grouped workshop cards, three undated practice cards, no horizontal overflow (**412 px document and viewport widths**) and no page-level JavaScript errors. The first grouped List request and the practice List request both returned HTTP 200.
+
+The three practice booking samples each had seats remaining (12, 20 and 17 respectively at the measurement time); these figures will change after further demo bookings. This is a warmed GitHub-runner measurement with Lighthouse 13.6.0 and simulated mobile throttling; it is **not** a new comparable cache-disabled transfer-size benchmark, and the test did not create a booking.
+
+[Download the final browser, API and Lighthouse artifact](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43831616352/artifacts/14209445042) · [Verified workflow](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43831616352)
+
+The full real customer booking → refreshed receipt → matching Owner row and the independent non-group phone test must still be verified on the final submitted build; these are separate from Lighthouse.
