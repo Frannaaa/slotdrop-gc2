@@ -126,14 +126,12 @@ Each member picks one function they wrote and writes down what it will return fo
 
 | Member | Video |
 |---|---|
-| Fran (M1) | Pending upload |
+| Fran (M1) | [Fran's `openReleaseUtilization` recording (2:58)](https://drive.google.com/file/d/1GFZk8pZMc15Siq2pIOhDi_KqcupARUIT/view?usp=drivesdk) |
 | Cholo / Chonel (M2) | [Chonel's recording](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) |
 | Janelle (M3) | [Janelle's `priceQuote` recording](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) |
-| Kaitlyn (M4) | Pending upload |
+| Kaitlyn (M4) | [Kaitlyn's recording](https://drive.google.com/file/d/1jPN4CTLE5_KpL4tUCRJR3l0DEeh7YxNu/view?usp=drivesdk) |
 | Kat / Kaithlyn (M5) | Pending upload |
 | Kirsten (M6) | [Kirsten's recording](https://drive.google.com/file/d/1LJxyMj9HbWRehO8hwoVBs4Eeh2n9MUKE/view?usp=drivesdk) |
-
-Three recordings were in the folder when we checked on **15 November**.
 
 ## Stretch challenges
 
@@ -155,6 +153,8 @@ We sent **30 invalid booking POSTs** from one browser in a minute. The next requ
 The retry returned **201** for one **₱2,880** booking and seats went from **3 to 2**. [Confirmation](evidence/stretch-deployed/checkout-429/confirmation.jpg) and [Owner](evidence/stretch-deployed/checkout-429/owner.jpg) showed the same reference, `26ccfbce-9a9d-49f6-b3c1-35674477ebf5`. [Network record](evidence/stretch-deployed/checkout-429/network.json) · [Waiting screen](evidence/stretch-deployed/checkout-429/waiting.jpg)
 
 The traced Render build counted requests by socket address. PR #72 uses the client address on Render. The [integration tests](../tests/booking-rate-limit.test.js) cover clients behind the same proxy.
+
+On the reviewed Render release, the browser received a simulated `429` with a 5-second wait. Checkout stayed locked, then sent the identical request after 5,008 ms. Render returned `200` for the existing practice booking. Confirmation reloaded receipt `1267ec9f-e9a4-4395-9c84-0f8f4f74c69b` and Owner showed the same ₱2,700.00 total and one matching row. [Release verification](evidence/live-release-3ef579d.json) · [Checkout, receipt and Owner screenshots](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727564732/artifacts/14167311156)
 
 ### The double click
 
