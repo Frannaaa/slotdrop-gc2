@@ -10,7 +10,7 @@
 | 4. System diagram and booking data flow | [Architecture and booking path](system.md) |
 | 5. API routes and database schema | [Route table](routes.md) · [Schema](schema.md) |
 | 6. Exported Postman collection | [Challenge 1 collection](SlotDrop-GC2-Challenge1.postman_collection.json) · [Deployed results](challenges.md#challenge-1-break-your-own-api) |
-| 7. Business, challenges and public baseline | [Business](business.md) · [Challenges and stretches](challenges.md) · [Browse baseline](baseline.md) |
+| 7. Business, challenges and public baseline | [Business](business.md) · [**Improved GC1 / post-feedback proposal**](reference/gc1-revised-business-proposal.md) · [Challenges and stretches](challenges.md) · [Browse baseline](baseline.md) |
 | 8. Stack versions and rationale | [README stack](../README.md#stack) |
 | 9. AI-use disclosure | [AI-USAGE.md](../AI-USAGE.md) and each PR's disclosure |
 | 10. Run steps, roster, environment and changes since GC1 | [README](../README.md) |
