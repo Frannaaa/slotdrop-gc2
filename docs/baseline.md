@@ -69,4 +69,4 @@ The three practice booking samples each had seats remaining (12, 20 and 17 respe
 
 [Download the final browser, API and Lighthouse artifact](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43831616352/artifacts/14209445042) · [Verified workflow](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43831616352)
 
-The full real customer booking → refreshed receipt → matching Owner row and the independent non-group phone test must still be verified on the final submitted build; these are separate from Lighthouse.
+The separate [replacement iPhone booking and saved receipt/Owner verification](challenges.md#separate-outside-group-phone-test--16-november) now provide the live booking evidence on the deployed code: one ₱2,880 booking, a readable saved receipt and exactly one matching Owner row. The new recording does not distinctly show a manual Confirmation reload; the independent receipt GET and earlier refresh evidence establish readback. These are separate from Lighthouse, which did not create a booking.
