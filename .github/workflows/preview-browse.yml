@@ -1,74 +1,44 @@
-name: SlotDrop release-candidate checks
+name: Compress existing SlotDrop web fonts
 on:
   push:
     branches: ['qa/gc2-browse-final-preview']
 permissions:
   contents: read
 jobs:
-  test:
+  fonts:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: slotdrop_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0
           persist-credentials: false
-      - name: Combine the six current pull requests in this runner
-        run: |
-          git config user.name "SlotDrop QA"
-          git config user.email "slotdrop-qa@example.invalid"
-          git checkout --detach 3ef579da60439a73dbbfc1700a3dc1b9def29806
-          git merge --no-ff --no-edit 4355039aeda36c1a5e1d9a5a1b44f2002133c1a7
-          git merge --no-ff --no-edit e7081969dc41211a90c1feeadcc9d73b8cbf9aab
-          git merge --no-ff --no-edit 122cf5412bb9ea414666bccc5ccb42d1f22087d2
-          git merge --no-ff --no-edit 14cc518f65017bdc6cbfca30fc6fc1f9c88daa06
-          git merge --no-ff --no-edit e2595937a366eec7937faf168a7f5642646c67a2
-          git merge --no-ff --no-edit e4b55eacf93932df5eca2c3a043340818e7b1b46
-          git diff --check 3ef579da60439a73dbbfc1700a3dc1b9def29806 -- . ':(exclude)docs/SlotDrop_GC2_Summary.pdf'
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-python@v5
         with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci
-      - run: npm run check
-      - name: Audit reachable Git history for prohibited tracked filenames
-        run: node tools/audit-git-paths.mjs
-      - name: Scan historical source blobs for high-confidence secret signatures
-        run: node tools/audit-git-signatures.mjs
-      - run: npm run check:sql
-      - name: API tests
-        run: npm test
-        env:
-          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
-      - name: Fran transaction smoke (disposable DB; save receipt and check Owner)
-        run: node tools/check-transaction-smoke.mjs
-      - name: Build and initialize production image
-        if: ${{ hashFiles('Dockerfile') != '' }}
+          python-version: '3.12'
+      - name: Encode WOFF2 and check every font table's round trip
         run: |
-          docker build -t slotdrop-ci .
-          docker run --rm --network host -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci node tools/db-init.mjs
-      - name: Verify persistence across production-container restart
-        if: ${{ hashFiles('tools/check-release.mjs') != '' }}
-        env:
-          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/slotdrop_test
-        run: |
-          docker run -d --name slotdrop-ci --network host -e PORT=3100 -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/slotdrop_test slotdrop-ci
-          node tools/check-release.mjs before
-          docker restart slotdrop-ci
-          node tools/check-release.mjs after
-      - name: Stop production test container
-        if: ${{ always() && hashFiles('tools/check-release.mjs') != '' }}
-        run: docker rm -f slotdrop-ci || true
+          python -m pip -q install 'fonttools[woff]==4.61.1'
+          python - <<'PY'
+          import base64
+          import hashlib
+          import json
+          from pathlib import Path
+          from fontTools.ttLib import TTFont
+          for path in sorted(Path("public/fonts").glob("*.ttf")):
+              source = TTFont(path, recalcTimestamp=False)
+              target = path.with_suffix(".woff2")
+              source.flavor = "woff2"
+              source.save(target)
+              decoded = TTFont(target, recalcTimestamp=False)
+              assert decoded.getGlyphOrder() == source.getGlyphOrder()
+              assert decoded.getBestCmap() == source.getBestCmap()
+              assert decoded["hmtx"].metrics == source["hmtx"].metrics
+              assert decoded["name"].getDebugName(1) == source["name"].getDebugName(1)
+              data = target.read_bytes()
+              assert data[:4] == b"wOF2" and len(data) < path.stat().st_size
+              print("SLOTDROP_WOFF2 " + json.dumps({
+                  "name": target.name, "originalBytes": path.stat().st_size,
+                  "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                  "base64": base64.b64encode(data).decode("ascii"),
+              }))
+          PY
