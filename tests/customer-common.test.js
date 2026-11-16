@@ -153,7 +153,9 @@ test('practice cards show the cutoff exception and render a credited local works
   const compact = card(practice, 1, { compact: true });
   assert.match(compact, /Sample booking with no expiry for grading/);
   assert.match(compact, /Try practice booking/);
-  assert.doesNotMatch(compact, /<img|session-label/);
+  assert.match(compact, /src="\/images\/workshops\/laro-mug\.webp"/);
+  assert.match(compact, /aria-label="Photo source: Example Studio"/);
+  assert.doesNotMatch(compact, /session-label/);
   const unsafe = { ...practice, studioReference: { ...practice.studioReference, key: '../../elsewhere' } };
   assert.doesNotMatch(card(unsafe), /<img/);
 });
