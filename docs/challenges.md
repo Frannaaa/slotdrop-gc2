@@ -60,6 +60,14 @@ The slot lock matters most when two customers ask for the last seat. Each save c
 
 The [system diagram](system.md) covers the full app.
 
+### Separate outside-group phone test — 16 November
+
+Kaitlyn supplied a [1 minute 21.6 second phone-camera and screen recording](https://drive.google.com/file/d/1pjoItpPhLSJo2zyTNgwlPlEDR8Pvs8eW/view?usp=sharing) of the deployed SlotDrop demo being used on an iPhone in Messenger's in-app browser. The tester starts on Home, chooses a **Laro Ceramics Mug-making + painting practice booking** from the featured offers, changes the party size to **four**, accepts the **₱2,565 buddy price per seat**, selects a **simulated mock-card payment**, and reaches the saved Confirmation for **₱10,260**. The booking reference displayed is `57ec16ea-c871-48b2-8351-5965df467f79`. No actual payment was taken.
+
+A separate [read-only live verification](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43844969223) fetched this specific receipt by ID (**HTTP 200**) and cross-checked it against `GET /api/bookings` (**HTTP 200**). Exactly **one Owner record** matched its ID, quantity **4**, buddy-tier unit price **₱2,565**, total **₱10,260**, simulated platform fee **₱1,026** and studio payout **₱9,234**. The [saved Owner-screen row screenshot and sanitized response evidence](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43844969223/artifacts/14215081853) are available without the test guest's contact details.
+
+This is **separate from the 15 November Network/hand-drawn trace** above. The phone video shows Home's featured-offer route, Detail, Selection, Checkout and Confirmation; it does **not** separately navigate the standalone Browse list or film the Owner screen. The separate browser check captured the Owner row without altering the booking. The participant's outside-group status was reported by the team; a video alone cannot verify who assisted outside the camera view.
+
 <a name="challenge-3--overrule-the-ai"></a>
 
 ## Challenge 3. Overrule the AI
