@@ -100,6 +100,18 @@ test('Detail head contains metadata only, with no stray merge-conflict text', as
   assert.equal(strayText, '', 'Unexpected raw text inside the Detail head');
 });
 
+test('grading practice examples are visible without an accordion', async () => {
+  const html = await readFile(resolve(publicRoot, 'browse.html'), 'utf8');
+  assert.match(html, /<section id="practice-sessions" class="practice-sessions"/);
+  assert.match(html, /<h2 id="practice-heading">Practice bookings for grading<\/h2>/);
+  assert.match(html, /never expire/);
+  assert.match(html, /72-hour discovery window/);
+  assert.doesNotMatch(html, /<details id="practice-sessions"/);
+  const js = await readFile(resolve(publicRoot, 'js/browse.js'), 'utf8');
+  assert.match(js, /loadPractice\(\);/);
+  assert.doesNotMatch(js, /practiceSessions\.addEventListener\("toggle"/);
+});
+
 test('three grading practice workshops ship credited WebP photos', async () => {
   const catalog = JSON.parse(await readFile(resolve(publicRoot, 'data/real-studio-demo.json'), 'utf8'));
   const browse = await readFile(resolve(publicRoot, 'browse.html'), 'utf8');
