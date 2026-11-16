@@ -99,3 +99,18 @@ test('Detail head contains metadata only, with no stray merge-conflict text', as
     .trim();
   assert.equal(strayText, '', 'Unexpected raw text inside the Detail head');
 });
+
+test('three grading practice workshops ship credited WebP photos', async () => {
+  const catalog = JSON.parse(await readFile(resolve(publicRoot, 'data/real-studio-demo.json'), 'utf8'));
+  const browse = await readFile(resolve(publicRoot, 'browse.html'), 'utf8');
+  assert.match(browse, /class="practice-intro"/);
+  for (const key of ['laro-mug', 'bumi-mug', 'sip-open']) {
+    const offering = catalog.offerings.find(item => item.key === key);
+    assert.ok(offering, 'Missing grading sample offering: ' + key);
+    assert.ok(offering.photo?.alt && offering.photo?.credit, 'Missing photo alt/credit: ' + key);
+    assert.match(offering.photo.page, /^https:\/\//);
+    const bytes = await readFile(resolve(publicRoot, 'images', 'workshops', key + '.webp'));
+    assert.equal(bytes.subarray(0, 4).toString(), 'RIFF', 'Invalid WebP header for ' + key);
+    assert.equal(bytes.subarray(8, 12).toString(), 'WEBP', 'Invalid WebP file for ' + key);
+  }
+});
