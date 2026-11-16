@@ -1,194 +1,189 @@
-# SlotDrop | Business Case and Real-Studio Research
+# SlotDrop business case
 
-**Business proposal:** Launch a focused Quezon City catalog of released seats in sessions already scheduled to proceed. Start with beginner-friendly creative workshops and test the consistency of supplier availability before expanding. Young professionals are the primary customer hypothesis, with students as a secondary audience.
+SlotDrop started as a way to find last-minute appointments. For GC2 we focused on workshops near Katipunan. Say you and a friend have a free Saturday. You can check which studios still have two seats, what you’d pay together and when booking closes. Studios decide how many seats to release from classes that are already going ahead. SlotDrop models a **10% commission on each confirmed booking**, deducted from the studio’s payout.
 
-The business model uses publicly sourced studio and activity information alongside simulated seat allocations and prices. No supplier partnership, live inventory allocation or validated customer demand is claimed.
+We’d try this with one pottery studio and a few seats it usually leaves empty. The [pilot plan](#pilot-and-risks) shows how we’d test whether the studio earns more. We took the studio details and reference prices from [public listings](#studio-research). Dates, seats, offers, bookings and payments in the app are simulated.
 
-## Executive decision summary
+## 4.1 GC1 traceability
 
-| Business question | SlotDrop GC2 response | Decision implication |
+These are the parts of GC1 we carried into the build, along with the decisions we made after feedback.
+
+| From GC1 | What we wrote in GC1 | Where it shows up in GC2 |
 |---|---|---|
-| Who is this for? | Young professionals making near-term activity plans around Katipunan and neighboring Quezon City areas; students are a secondary hypothesis | Validate spontaneous demand and willingness to pay before expanding beyond the initial area |
-| Where does supply come from? | A studio explicitly releases a **limited allocation** in a class that is already confirmed to run | The allocation must be ring-fenced and kept accurate, rather than assuming every advertised class has vacancies |
-| What creates revenue? | A modeled **10% platform commission** on a confirmed saved booking, deducted from the provider's proceeds | Revenue is realized per successful transaction, not per listing or page view; this is a proposed fee, not a negotiated contract |
-| What are the two distinguishing features? | **Released-seat availability with a booking cutoff** and **optional two-or-more-person buddy pricing** | The first makes released inventory bookable without overselling; the second may convert incremental attendees, but can also discount customers who would have paid more |
-| What makes a trial worth pursuing? | Genuine studio agreement, separately managed inventory, accurate booking/receipt operations, and positive contribution **after** marginal attendance costs | Pilot only where provider proceeds and operational reliability justify the discount; mock bookings and source research do not demonstrate demand |
+| Target market | “a wide range of people who are looking for last-minute appointment availability … people in need of a quick and cheap service that they can book on a last minute basis” (p. 1) | We narrowed this to young professionals near Katipunan and UP Village who make some plans within three days. Browse puts the area, start time and booking deadline on one card. Selection gives the party total before Checkout asks for contact details. Students are a secondary group. |
+| Problem statement | “it can be hard for one to get an appointment soon, especially with popular service providers whose next available date is weeks or months away” (p. 1). For the studio, “a lost appointment is still lost money” (p. 2). | A visitor can check multiple workshops in one Browse list. Owner can release a few seats, set a cutoff or pause sales for a specific session. |
+| Value proposition | “Empty slot, better price.” (p. 1). Providers “profit off of empty slots rather than making no money at all” (p. 2). | Home says “A free evening. An open seat.” The session card gives the price, seats left and booking cutoff. Detail explains what the workshop includes, and Selection quotes the total for the actual group size. |
+| Monetization | The feedback notes that GC1 put “a commission and featured placements” in the canvas without specifying the rate. | We model a 10% commission. [`priceQuote()`](../server/services/pricing.js) calculates it for both the quote and the booking. The booking saves the accepted price, fee and studio payout. Paid placements are deferred. |
+| Core features | Phase 1 listed Auth & Roles, Slot Manager, Marketplace Feed, Simulated Booking and User Schedules (pp. 6–7). | Owner publishes offers, Browse lists them, and Confirmation reads the booking that Checkout saved. |
 
-**Decision:** Keep a narrow, reliable released-seat pilot rather than launching a broad generic activity marketplace. Offer the buddy tier selectively, not automatically: the worked scenarios in Section 6 show that higher order quantity alone does not mean higher margins.
+| GC1 feature | GC2 decision |
+|---|---|
+| Slot Manager | “Stores service, date/time, location, original price, discounted price, and availability.” Owner creates a dated offer with prices, a cutoff and released seats. The edit route updates the cutoff, offer prices, capacity and sale status. |
+| Marketplace Feed and search | “Displays only upcoming slots that are still available.” The bookable list follows that rule for dated offers. Browse shows six workshops per page and lists each workshop’s upcoming dates together. It keeps closed dates in the archive. Three undated sample bookings have their own section so the instructor can test after the dated offers expire. |
+| Simulated Booking | “Checks availability, marks the slot as booked, and creates a booking record.” We added Detail after the GC1 feedback, followed by quantity and quote on Selection, simulated payment on Checkout, and a saved receipt on Confirmation. The server checks stock and price when the booking is saved. The five-minute hold from the wireframe was dropped. |
+| User Schedules and Provider Analytics | Owner shows saved bookings and five metrics. Personal schedules and role-specific reports are future work. |
+| Auth & Roles, real payments, integrations and paid placements | Outside the scope of the GC2 demo. |
 
-## 1. Positioning, customer and supply
+### How we used the instructor’s feedback
 
-Working value proposition: Find an activity near you happening within 72 hours, compare the provider-set price and deadline, and book a released seat. Keep GC1’s “Empty slot, better price.” as the idea, without promising that popular studios always have openings or that every direct price is higher.
-
-Primary recruitment hypothesis: young professionals who live, study or work around Katipunan, UP Village and nearby Quezon City; can pay for an occasional leisure activity; and sometimes decide within three days. Recruit by location, leisure spending and planning behavior rather than assuming an income level. Actual age distribution, income, willingness to pay and frequency remain unmeasured. Students are a secondary segment, not the basis for assuming workshops are affordable.
-
-Customer job: choose a feasible activity without comparing several disconnected calendars and discovering the cutoff or materials cost late. Show date/time, branch, duration, included materials, collection requirements, total party price and last booking time before asking for contact details.
-
-Provider job: earn incremental proceeds from a small allocation in an already-confirmed class. SlotDrop should complement direct booking. It must not require the studio to create an otherwise unviable class or discount all its remaining inventory.
-
-Supply cadence is different from customer frequency. A studio may run classes every weekend while one customer attends pottery monthly or less. Recurring provider schedules can replenish the catalog; they do not prove weekly customer use. Painting or dance may offer other repeat occasions, but cross-category retention is still a hypothesis. Start with suppliers that can identify genuinely recurring spare inventory, not simply the most attractive brands.
-
-Launch geography is a proposed operating boundary, not a distance search feature. Katipunan/UP Village is the first supplier-search area; Cubao, Scout Tobias and Eastwood are separate QC expansion candidates. The app currently filters stored area names; it does not calculate travel time, geolocation or a radius.
-
-## 2. GC1 traceability and deliberate scope changes
-
-| GC1 anchor | GC2 choice and reason |
-| --- | --- |
-| Proposal p.1: “a wide range of people”; “quick and cheap service” | Narrow to near-term leisure activities and a local supplier search. This makes a small catalog easier to compare; segment fit still needs evidence. |
-| Proposal p.1: “Empty slot, better price.”; p.2: “profit off of cancelled/empty appointment slots.” | Use explicit released-seat allocations and provider-set offer prices. An opening is not a guarantee of attendance or a claim that all popular studios have spare seats. |
-| Proposal p.6: “Displays only upcoming slots that are still available.” | Exclude inactive, paused, unconfirmed-to-run, full and expired sessions. Restrict discovery to starts strictly inside the next 72 hours. |
-| Proposal pp.4–6: provider posting/editing and booking flow | Owner publishes/edits an allocation; customer selects quantity, confirms and saves a receipt. Four entities are providers, services, slots and bookings, rather than separate databases for roles. |
-| Feedback p.1: canvas describes commission and featured placements | Model a 10% commission on the accepted booking amount. Featured placement is deferred; the fee is not partner-approved. |
-| Proposal pp.5–7: accounts, integrations and later search | GC2 uses simulated payment and no login, as permitted by its brief. Basic discovery filters move forward to support the required Browse step. Paid add-ons, dynamic price drops, favorites, refunds and real payment/calendar integrations are deferred. |
-| Proposal wireframe: temporary hold | No five-minute hold is implemented. Selection is a preview; seats and price are checked again when saving. Explain this before submission rather than showing a false countdown. |
-
-## 3. Discovery structure that matches the build
-
-Classify the activity once, then describe its attributes. services.category is the broad creative/active grouping; services.activity_type is the primary activity: pottery, painting, pilates, dance or other. Technique and inclusions describe the same service without creating duplicate inventory. Each slot is one dated session with one released-seat counter.
-
-Browse activity shortcuts: All, Pottery and Canvas painting. Unsupported or unverified supply does not get an empty shortcut. All is a view, not a stored type. Pilates is supported by the data contract and researched as a possible category, but no bookable Pilates supply is claimed. Crafts/jewelry/printmaking remain research prospects; they are not implemented navigation tabs.
-
-Example: a mug-making session remains pottery even when painting is included. Store handbuilding as its technique and painting/materials/firing as inclusions. A painting search may find it through its attributes; both paths open the same slot ID and consume the same seats. Do not copy the session into a second category.
-
-Implemented discovery contract: search text, broad category, area, date choice, people, primary type, one approved attribute and sort. Date controls cover today, tomorrow and weekend within the 72-hour boundary; the default is all eligible upcoming sessions. Price sorting uses the effective per-person rate for the selected party. There is no price-range slider, map-distance filter or public tag creation.
-
-Approved attribute keys are beginner, handbuilding, wheel-throwing, painting-included and materials-included. These are controlled descriptive filters, not claims such as popular or solo-friendly without evidence. A provider-facing free-tag editor and multi-select tag semantics are future work.
-
-## 4. Customer funnel and measures
-
-| Step / screen | Control and why it fits | Route / intended measure |
-| --- | --- | --- |
-| Discover / Home | A short introduction and up to three eligible featured sessions explain the offer and lead visitors into the session catalog. | GET /api/slots. Future measure: eligible Home visits that open Browse or Detail. |
-| Browse | Cards plus search, date, area, people and activity filters support comparison. Show total party price and per-person rate together. | GET /api/slots with validated filters. Future measure: Browse visits that open a session. |
-| Select / Detail | Show the specific branch, start, deadline, duration, inclusions, preparation and available allocation. A link continues with the same slotId. | GET /api/slots/:id. Future measure: eligible Detail visits reaching Selection. |
-| Select / Selection | Quantity selector and fresh server quote show the rate and full booking amount; no seat is reserved here. | GET /api/pricing/quote. Future measure: valid selections reaching Checkout. |
-| Confirm / Checkout | Labeled fictional contact fields, simulated payment choices and an explicit total acceptance prevent ambiguous submission. | POST /api/bookings. Future measure: valid Checkout attempts saved successfully; count each requestId once. |
-| Save / Confirmation | Fetch by returned booking ID so refresh displays the saved receipt, not a browser-calculated success screen. | GET /api/bookings/:id. Measure from saved confirmed receipts; no event conversion rate is currently collected. |
-| Manage / Owner | Separate forms for releasing/editing seats and tables for saved bookings and five metrics support allocation decisions. | GET /api/owner/catalog, GET /api/bookings, GET /api/metrics; POST/PATCH /api/slots. |
-
-## 5. Rules, enforcement and customer result
-
-| Plain-language rule | Enforcement / persistence | Customer result |
-| --- | --- | --- |
-| Only sell a released allocation in an already-going-ahead session. | listSlots() / server/services/discovery.js; slot status, runs_as_scheduled and service active flag. | Ineligible sessions are excluded from discovery; a public product listing alone cannot make one eligible. |
-| Respect each session’s deadline. | Service default cutoff minutes produces a slot deadline; createOffer()/editOffer() validate it. Slot override is allowed. | Different studios can need different lead times. The default is not a universal minimum. |
-| Only discover sessions starting inside the next 72 hours. | listSlots(); future start and future cutoff required. Offer creation may schedule farther ahead. | A valid future session appears only when it enters the window; exactly 72 hours ahead is outside it. |
-| Standard and buddy prices must be valid provider-set offers. | createOffer()/editOffer(), SQL price constraints; standard < regular, optional buddy < standard. | Invalid or negative offers are refused; buddy is optional. |
-| Buddy means two or more seats in one booking for one session. | The server's shared quote and booking services enforce this; bookings persist pricing_type and the accepted unit price. | Two separate one-person bookings do not combine automatically. Browser totals cannot select their own rate. |
-| Never sell more seats than remain. | Booking transaction must lock the slot and recheck confirmed quantities; editOffer() cannot shrink below already sold seats. | Insufficient seats return 409 without saving. Allocation describes SlotDrop seats, not total room capacity. |
-| Recompute price and fee on the server. | One pricing service, integer centavos; persist quantity, selected unit price, total, commission rate, fee and provider payout. | If the accepted total changes, return 409 PRICE_CHANGED and require fresh acceptance. |
-| Retry one booking, rather than creating another. | Unique request_id plus identical-payload retry contract; conflicting reuse returns 409. | A lost response can be retried using the same key. Save is the reservation point; there is no hold. |
-| Keep old receipts stable when offers change. | Offer edits never update saved booking amounts; receipt is read by ID. | Confirmation reflects the purchased price, not today’s offer. |
-| Pause sales without pretending existing bookings disappeared. | Owner edit controls; confirmed bookings prevent cancelling their session; reopening rechecks eligibility. | Pausing stops new discovery. Customer refunds/rebooking are not implemented. |
-| Return useful HTTP errors. | 400 invalid input, 404 absent session/receipt, 409 stock/price/request conflict, 503 unavailable DB; 201 newly saved booking. | An error must not display a successful receipt. Booking and receipt routes return explicit JSON errors without creating a receipt for a rejected order. |
-
-DB constraints support the rules but do not replace transactional booking checks. Main must receive the reviewed implementations before the team calls the official flow complete. Scope does not include production account security, real card handling or synchronization with a studio’s direct calendar.
-
-## 6. Two revenue features and worked conclusions
-
-Feature A — availability: a released allocation, strict deadline and booking-time stock check make a sellable seat reliable. This supports commission income only when a booking is genuinely incremental. Feature B — tiered pricing: optional buddy pricing encourages a shared booking; the server selects the tier and stores its effect. General discounts alone are not being counted as a third custom feature.
-
-The two features have distinct saved data and server enforcement:
-
-| Revenue feature | Persisted fields | Server enforcement and revenue link |
+| GC1 feedback | What we changed | What we’d check in a pilot |
 |---|---|---|
-| **A. Released-seat availability** | `slots.capacity`, `starts_at`, `booking_closes_at`, `status`, `runs_as_scheduled`; saved `bookings.quantity` | Discovery shows eligible allocations; the booking transaction locks the slot and excludes unavailable, full or expired inventory. A completed booking creates the modeled commission, rather than counting a listing as revenue. |
-| **B. Buddy pricing** | `slots.offer_price_centavos`, optional `buddy_price_centavos`; `bookings.pricing_type`, `unit_price_centavos`, `total_price_centavos`, `platform_fee_centavos` | Shared quote and save services select the buddy tier only for a qualifying two-or-more-seat order, recompute totals on the server, and store the accepted amounts. The commercial effect depends on whether the second customer is incremental. |
+| The target buyer was vague, and we had no estimate of vacant seats. | Defined a [proposed QC customer segment](#customer-and-supply) and a three-day discovery window. | Interview customers and ask one studio for four weeks of capacity and sales. |
+| We referred to unnamed “booking giants.” | Compared Klook, ClassPass, studio websites and Fresha in [Competitors](#competitors). | Check actual local listings and ask what would make customers and studios switch. |
+| We assumed popular studios would have openings to list. | The app offers only seats a studio has released from a class going ahead. | Confirm recurring spare seats and agree on the allocation with the studio. |
+| Studios may resist discounts, and existing customers may move to cheaper offers. | Owners set prices and can pause sales. The server takes confirmed bookings out of the available allocation. | Agree on a minimum payout and compare total sales across SlotDrop and the studio’s own channels. |
+| Commission, app features and stack needed specifics. | Set a 10% studio-paid fee, saved the accepted price and fee with each receipt, and listed the stack in the README. | Check supplier costs, acquisition costs and terms with a pilot studio. |
+| The data design duplicated roles and the customer journey stopped too early. | Used linked PostgreSQL tables, added Detail and connected Checkout, Confirmation and Owner to the same saved booking. | Work out how customer and studio accounts would fit the existing flow. |
 
-Classroom model: Laro Ceramics advertises its mug-making + painting activity at ₱3,000. The course sample uses that reference price, a simulated standard offer of ₱2,700, an optional simulated buddy rate of ₱2,565 per person and four sample released seats. These offers are not approved by Laro. Commission is 10% of the accepted amount, deducted from provider proceeds; it is not an extra customer fee. All figures below are before platform operating costs and provider attendance costs.
+## 4.2 Funnel map
 
-| Booking | Customer total | Platform fee | Provider proceeds |
-| --- | --- | --- | --- |
-| 1 standard seat | ₱2,700 | ₱270 | ₱2,430 |
-| 2 standard seats | ₱5,400 | ₱540 | ₱4,860 |
-| 2 buddy seats | ₱5,130 | ₱513 | ₱4,617 |
+The last column is what we’d measure in a pilot. GC2 records bookings and Owner metrics.
 
-The same buddy price has very different economics depending on the customer's alternative:
+| Stage | Screen | What we put there and why | Endpoint | What we’d measure |
+|---|---|---|---|---|
+| Browse | Home | Up to three bookable offers give someone with a free afternoon a quick sense of what’s available. Practice offers are labeled. “Browse all sessions” opens the full list. | `GET /api/slots` | Home visits that open Browse or Detail ÷ Home visits |
+| Browse | Browse | Each workshop lists its bookable dates with their own price, seats and cutoff. Search accepts studio or activity names, the activity buttons narrow the list, and six workshops per page keep it short. | `GET /api/slots?view=workshops&q=…&type=…&page=…&limit=6` | Browse visits that open a bookable session’s Detail page ÷ Browse visits |
+| Select | Detail | A labelled list puts inclusions, preparation, location and the deadline where a customer can scan them before choosing seats. | `GET /api/slots/:id` | Detail visits that continue to Selection ÷ Detail visits |
+| Select | Selection | A number field lets the customer enter the group size directly. The server returns a new price as it changes, so a pair can see what the buddy rate does to the total. | `GET /api/slots/:id`, `GET /api/pricing/quote` | Selection visits that open Checkout ÷ Selection visits |
+| Confirm | Checkout | Labelled contact fields show which entry needs fixing. A dropdown keeps the two simulated payment options in one place. The checkbox sits next to the quote so the customer can see the exact amount they’re accepting. | `GET /api/slots/:id`, `GET /api/pricing/quote`, `POST /api/bookings` | Confirmed saves ÷ unique submitted request IDs |
+| Save | Confirmation | The page fetches the saved booking by its reference. Refreshing it shows the accepted seat count, price and payment choice again. The reference also lets Owner find the same booking. | `GET /api/bookings/:id` | Saved bookings and average booking value |
 
-| Counterfactual without buddy pricing | Change when two customers book buddy instead | Decision |
+The studio uses Owner to edit offers and check sales. The bookings table and five metrics come from `GET /api/bookings` and `GET /api/metrics`.
+
+## 4.3 Business rules
+
+Scheduled offers appear within 72 hours of their start and close at the studio’s cutoff. **Closed sessions** shows up to 16 recently closed offers. The three practice offers start with 20 simulated seats each. They stay bookable as long as the activity is active, sales are open and seats remain, so the instructor can still test the flow after the dated offers expire.
+
+| Rule, in the owner’s words | Where it’s enforced | What the customer sees |
 |---|---|---|
-| **Two people would both buy standard seats** (₱5,400 combined) | Customer pays **₱270 less**; platform fee falls **₱27**; provider proceeds fall **₱243** | Do not discount two purchases that were already likely to happen |
-| **Only one person would buy standard and the second seat would be empty** (₱2,700 combined) | Customer booking total rises **₱2,430**; platform fee rises **₱243**; provider proceeds rise **₱2,187** | Buddy can add contribution if the incremental guest costs **less than ₱2,187** to serve and does not displace another buyer |
+| “Only offer seats we’ve released for a class that’s going ahead.” | `createOffer()` requires the class to be marked as running. `listSlots()` filters for active, open, confirmed sessions with seats left. | Browse shows eligible sessions with their remaining allocation. |
+| “Show the next three days. Close each listing at that studio’s cutoff.” | `listSlots()` and `checkBookable()` check the start and cutoff. `createOffer()` and `editOffer()` validate the deadline. | Dated cards show the deadline. Recent offers that were still listed appear in Closed sessions. An attempt to quote or book after cutoff returns 409. |
+| “Set the regular price above the offer price. The buddy price goes lower if we offer it.” | `createOffer()`, `editOffer()` and the price constraints in [`db/schema.sql`](../db/schema.sql). | The card shows the prices side by side and only shows a buddy price when one is set. |
+| “Give the buddy rate to two or more people in the same booking.” | `priceQuote()` selects the tier. `createBooking()` saves it in `bookings.pricing_type`. | Selection displays “Buddy price applied” for a qualifying group. |
+| “Never book more seats than we’ve set aside.” | `createBooking()` locks the `slots` row, then calls `checkBookable()` before the insert. `editOffer()` guards against lowering capacity below sold seats. | A request for three when only two remain is refused with 409 and creates no booking. |
+| “Ask the customer again if their total changes.” | `createBooking()` recomputes the price with `priceQuote()` and compares it with `expectedTotalCentavos`. | Checkout asks the customer to accept a fresh total after `409 PRICE_CHANGED`. |
+| “A retry should give the customer their original receipt.” | `bookings.request_id` is unique. `createBooking()` replays an identical request and rejects a conflicting reuse. | Checkout keeps the original request if the save result is uncertain. A matching retry returns the same reference. |
+| “A price edit should leave earlier receipts alone.” | Booking rows store the accepted prices, fee and payout. `findReceipt()` reads those values by ID. | Confirmation keeps the original total. |
+| “We can pause new sales for a session with bookings.” | `editOffer()` changes the offer status and refuses cancellation if it has confirmed bookings. | The paused offer leaves Browse. Existing receipts stay available. |
+| “Take 10% out of the studio’s share.” | `COMMISSION_BASIS_POINTS` feeds `priceQuote()`. The accepted rate and amounts are saved with the booking. | The customer pays the quoted total. Owner can see the fee and payout separately. |
 
-These comparisons are alternatives, not forecasts. No provider marginal-cost, conversion, or acceptance data was collected. If a second attendee displaces a full-price direct booking, the incremental-revenue argument no longer holds.
+## 4.4 Two revenue features
 
-After the two-seat buddy booking, two of four allocated seats remain. A request for three must fail without adding a booking. So allocation checks protect the promise and avoid collecting commission on an impossible booking. Correct inventory is operational support for revenue, not proof of demand.
+Both examples use [the seeded Laro Ceramics mug-making session](../db/seed.sql). Laro listed the class at **₱3,000**. In our demo we released **four seats** at **₱2,700 standard** or **₱2,565 per person** for buddies, with a 10% commission.
 
-Money convention: store whole centavos. Fee per seat = round(unit price × commission basis points / 10,000); multiply that rounded fee by quantity. Payout = total − fee. Keep quote, save, schema documentation and examples consistent with this rounding rule.
+| Booking | Customer total | SlotDrop fee | Studio payout before attendance costs |
+|---|---:|---:|---:|
+| One standard seat | ₱2,700 | ₱270 | ₱2,430 |
+| Two standard seats | ₱5,400 | ₱540 | ₱4,860 |
+| Two buddy seats | ₱5,130 | ₱513 | ₱4,617 |
 
-## 7. Owner dashboard: five numbers, five decisions
+### Feature A. Released-seat availability
 
-| Actual metric | Definition / worked value | Decision and limit |
-| --- | --- | --- |
-| bookingCount | Confirmed transactions, not seats. After one 2-seat buddy booking: 1. | Check saved orders against transactions. A two-person order is not two conversions. |
-| platformRevenueCentavos | Sum of stored confirmed booking fees. Example: ₱513. | Use as gross commission, then compare with acquisition/support costs; it is not profit or gross booking value. |
-| averageOrderValueCentavos | Mean full confirmed booking total. Example: ₱5,130. | Compare single and shared order value before expanding buddy offers; order value alone says nothing about margin. |
-| topSellingService | Most confirmed seats by service. Example: Laro Mug-making + painting, 2 seats. | Consider similar supply only after real bookings; seeded examples do not establish popularity. |
-| nearlyFullSessionCount | Eligible open sessions with 1–25% of released seats remaining; excludes sold-out. Example: 2/4 remain → 0. | Ask a provider whether more allocation is actually available. Do not interpret released allocation as whole-class occupancy. |
+When a studio sells an otherwise empty seat at ₱2,700, SlotDrop earns ₱270 and the studio gets ₱2,430 before the extra cost of serving that guest. If the customer would have paid the studio ₱3,000 directly, the same sale cuts the studio’s proceeds by ₱570 before channel cost differences.
 
-Reconciliation check: add a second booking for one standard seat in the same four-seat session. Expected totals are 2 bookings, ₱783 platform fees, ₱3,915 average order value, 3 seats for the top service and 1 nearly-full session because 1/4 remains. Paused/expired sessions leave the nearly-full set; their saved confirmed receipts still contribute to booking totals. No gross-sales or seats-sold KPI card is currently implemented separately.
+We’d ask the studio to release a few seats once direct bookings slow down, while there’s still time to prepare. We’d use its sales records to pick sessions. In the demo, if a pair books two of four released seats, the next group of three gets a 409 and the booking is declined.
 
-## 8. Real-studio evidence register
+The `slots` table holds the allocation and cutoff. [Discovery](../server/services/discovery.js) lists the active releases. The [booking service](../server/services/bookings.js) locks the slot and counts confirmed seats again before saving.
 
-Official sources were checked on 29–30 October 2026 as stated below. Published products prove that a format and price were advertised; they do not prove future seats, supplier consent, spare capacity or permission to resell. The private course catalog now uses real studio identities and published activity facts with source links. Dates, released seats, cutoffs, offers, payments and reservations remain explicitly simulated; this does not establish a partnership. Historical synthetic records remain unchanged. Branch, date, price type, inclusions and policies must be checked together.
+### Feature B. Buddy pricing
 
-A1 — Laro Ceramics, 219 Katipunan Avenue, Blue Ridge A, QC. Mug making + painting is ₱3,000 for three hours; clay/tools, painting, glazing and firing are described. The product offers QC/BGC branch selection, so do not transfer a BGC date to Katipunan. Collection is approximately three months, not same-day take-home. Wheel throwing at ₱3,200 and the three-hour single-session duration were rechecked on the official product/collection pages on 30 October; dated branch availability remains unverified. Fit: local beginner format and companion occasion. Unknown: exact next eligible date, allocated seats, cutoff, costs and partnership.
+Two friends pay ₱5,130 together. Whether it’s worth offering depends on who would have booked at the standard price.
 
-Sources: https://laro-ceramics.com/products/mug-making-class-manila | https://laro-ceramics.com/collections/pottery-classes-laro-ceramics
+| Without the buddy price | Change in customer spend | Change in SlotDrop fee | Change in studio payout |
+|---|---:|---:|---:|
+| Both friends would pay standard, ₱5,400 total | −₱270 | −₱27 | −₱243 |
+| One friend would pay standard, ₱2,700, and the other seat would stay empty | +₱2,430 | +₱243 | +₱2,187 |
 
-A2 — Marz Today, 44 Matimtiman Street, Teachers Village, QC. Beginner stamp carving is advertised from ₱2,500. Booking is by appointment; workshop capacity is up to five, while open events can host up to ten. Do not treat the latter as workshop seats. Fit: local craft prospect. Risk: an appointment made on demand may not be an already-going-ahead session. Kat must establish dated group sessions and their release rules first.
+For SlotDrop, nine buddy bookings that replace two standard seats cost ₱243 in fees. One buddy booking that adds a second attendee makes that back, so the break-even point is **1 in 10**. At an assumed **₱500** cost for the extra attendee, the studio gains ₱1,687 when a buddy booking adds a guest and loses ₱243 when both would have come anyway. The studio breaks even at **12.6%** (₱243 ÷ [₱243 + ₱1,687]), about 13 in 100.
 
-Sources: https://shop.marz.today/collections/workshops | https://marz.today/booking/
+We’d test the buddy rate on some comparable classes and keep the standard price on the others. We’d count total paid seats across SlotDrop and direct sales, then compare what the studio earned after costs.
 
-A3 — Metals & Gems, White Plains/Katipunan Extension, QC; address retained from 28 October contact research pending recheck. Gem-to-Jewelry is ₱5,000 per person per piece, including silver and stone. The current product description says 2.5–3 hours, while its FAQ says approximately five hours: duration is unresolved. Sold-out labels and cart controls coexist; neither proves a dated opening. Fit: premium craft/cost comparison, not current bookable supply.
+The optional rate lives in `slots.buddy_price_centavos`. The server uses the buddy rate for groups of two or more when the rate is set. It rounds the fee per seat in centavos, then multiplies by the number of seats. The [worked-number test](../tests/business-worked-numbers.test.js) checks the saved amounts and the Owner figures.
 
-Sources: https://www.metalsandgems.com.ph/products/gem-to-jewelry-workshop | https://www.metalsandgems.com.ph/pages/contact-us
+## 4.5 What Owner does with the numbers
 
-B1 — Bumi & Ashe, Cubao Expo candidate; the site also offers Makati, so confirm the selected branch. Mug making shows ₱2,650 sale / ₱3,200 regular, a two-hour class, painting and firing. The FAQ gives 6–8 weeks for collection. The page’s one-mug description conflicts with FAQ wording about three pieces, so confirm the exact package. Mixed sold-out/cart indicators do not establish availability. The free-form + paint product was rechecked on 30 October at ₱3,200 for three hours. Wheel products remain separate research and are not added to booking samples. Fit: creative supply expansion, with collection and schedule constraints.
+Here’s what [`GET /api/metrics`](../server/repositories/owner.js) reports after two bookings in the same four-seat release. A pair takes two buddy seats first, then someone books one standard seat.
 
-Sources: https://bumiandashe.com/products/mug-making-workshop-1 | https://bumiandashe.com/collections/workshops-1
+| Owner number | Two buddy seats | Plus one standard seat | What we’d do with it |
+|---|---:|---:|---|
+| Confirmed bookings | 1 | 2 | Few bookings despite steady availability? Check where visitors drop out before asking the studio for more seats. |
+| Platform revenue | ₱513 | ₱783 = ₱513 + ₱270 | Compare fees with what we spent getting and supporting those bookings. Hold paid acquisition if those costs eat up the fee. |
+| Average booking value | ₱5,130 | ₱3,915 = (₱5,130 + ₱2,700) ÷ 2 | More bookings can bring in more fees even when the average falls. Check whether larger groups bring extra attendees before expanding buddy pricing. |
+| Top-selling activity by confirmed seats | Mug-making + painting, 2 | Mug-making + painting, 3 | If mug-making leads across several releases, ask that studio for another release and compare how many of those seats sell. |
+| Nearly full sessions | 0, with 2 of 4 left | 1, with 1 of 4 left | Ask if the studio has another seat it can set aside before cutoff. Increase the allocation only after it confirms. |
 
-B2 — Tahanan Pottery, 27 Scout Tobias Street, QC. The official overview lists exploratory wheel at ₱2,500 and Saturday 2–5 PM; handbuilding is listed Sunday 9:30 AM–12:30 PM. These are published schedule patterns, not confirmed inventory for a specific coming weekend. Fit: a recurring supply hypothesis. Check the dated product, cutoff and actual allocation.
+Nearly full counts eligible releases with **at least one and at most 25% of released seats left**. A sold-out session leaves that count. Its confirmed bookings still contribute to the other metrics.
 
-Source: https://tahananpottery.ph/collections/pottery-classes-workshops
+The separate utilization figure shows confirmed seats as a share of currently open releases. It updates when a session crosses its cutoff. Use **Refresh data** to get newer bookings or inventory.
 
-B3 — Sip & Gogh Eastwood, QC. Keep branch/date/price as a verification task. The earlier official FAQ research directs customers to the branch calendar; no current Eastwood price is asserted here. Fit: a separate painting occasion. Do not reuse another branch’s price or call an old calendar current.
+## Pilot plan and economics
 
-Source: https://sipandgogh.com/faqs
+Would a studio earn more by using SlotDrop? We’d start with one pottery studio and track what happens to bookings and payout across its sales channels.
 
-B4 — AMT Ceramics, Tandang Sora, QC. The official FAQ advertises handbuilding and wheel exploratory single sessions at ₱2,900 each, Fridays/Saturdays/Sundays 10 AM–1 PM. The sample catalog includes both three-hour activities. A recurring pattern does not confirm a specific date, spare capacity, inclusions or a cutoff. Source: https://amtceramics.com/pages/faqs .
+### Customer and supply
 
-B5 — Sip & Gogh Century Mall, Makati, separate from the Eastwood prospect. Its published Open Session on 6 November 2026 is ₱1,400, 6–9 PM. This provides a painting price/duration example; it does not prove a QC offering or an eligible live session. The private sample has simulated dates and is not that official reservation. Source: https://www.sipandgogh.com/branches/century-mall/sessions/12100 .
+We’d start by interviewing working adults **22–35** near Katipunan, UP Village and Teachers Village who sometimes make plans within three days and would consider a **₱2,500–₱3,000** workshop. A gross monthly income of **₱35,000–₱80,000** is a proposed screening range. We’d interview students separately to learn what fits their budget.
 
-Core Pilates remains a research-only reference: the published ₱1,150 single-session credit is not a dated class reservation, and the exact class duration/timetable has not been verified. Source: https://corestudio.ph/class-packages .
+The first thing we’d ask a studio for is four weeks of capacity, attendance and cancellations. We need to know which classes are already confirmed and how many seats are still open before the preparation deadline.
 
-Policy counterexample — Studio Matisse, San Juan, outside the initial catchment. Its published policy requires reservations at least two days ahead. A 72-hour discovery window and 48-hour deadline leave a theoretical 24-hour sales window; a 72-hour-or-longer deadline leaves none. This illustrates operational fit, not a QC partner or a claim that the provider accepts resale.
+### Studio research
 
-Source: https://studiomatisse.myshopify.com/pages/studio-policies
+We looked at Laro Ceramics, Marz Today, Metals & Gems, Bumi & Ashe, Tahanan Pottery, Sip & Gogh and AMT Ceramics. Laro is close to our pilot area and listed a **₱3,000** mug-making class. Tahanan listed recurring weekend classes. We’d ask each about its exact branch, next session, preparation lead time and seats it could set aside. [Studio research and sources](reference/business-research-appendix.md#a-studios-and-why-each-might-fit)
 
-Research priority: verify Laro’s next dated QC session and Tahanan’s recurring scheduled supply first; use Marz to test whether appointment-based crafts fit the model at all. Keep Metals & Gems as a higher-cost counterexample until duration and availability are resolved. This priority is our proposed next action, not a supplier ranking validated by bookings.
+### Competitors
 
-## 9. Competitors and the reason to choose SlotDrop
+We checked where a customer might book and what a studio already gets from those channels.
 
-| Alternative | What it already does / implication | SlotDrop’s proposed response |
-| --- | --- | --- |
-| ClassPass Manila | A named local alternative for fitness/wellness discovery. Its partner material describes excess-capacity distribution, pricing/inventory tools and rate protection; these are the platform’s own claims. | Keep the manual GC2 offer much smaller: transparent provider-set cash price, one released allocation, no membership or credit wallet. This is a focus choice, not proven superiority. |
-| Studio-direct sites | Laro, Bumi and Tahanan already publish products, schedules and policies; customers can book without a new marketplace. | Offer comparable near-term details across willing studios. A provider needs incremental customers or simpler distribution to justify a fee. |
-| FunNow | Near-term experience-booking analogy. Philippine coverage was not established in this research. | Do not claim that last-minute booking is novel or present FunNow as a verified Philippine competitor. |
+| Type | Alternative | What it means for SlotDrop |
+|---|---|---|
+| Direct marketplace | Klook lists Philippine pottery experiences. [Sample listing](https://www.klook.com/en-PH/activity/116888-pottery-workshop-wabi-sabi/) | Win bookings with near-term QC availability, a visible cutoff and a final peso price. |
+| Spare-capacity marketplace | ClassPass sells membership credits and gives partners tools to manage unused capacity, mostly in fitness and wellness. [Manila listings](https://classpass.com/search-index/manila) · [Partner FAQ](https://classpass.com/partners/faqs) | A studio will compare what it earns when it releases a seat, including any agreed minimum payout. |
+| Studio-direct sales | Laro, Bumi & Ashe, Tahanan and other studios take direct bookings. [Laro booking page](https://laro-ceramics.com/products/mug-making-class-manila) | Studios keep the customer relationship and the full sale price. We need to bring in buyers they would otherwise miss. |
+| Wider appointment platforms | Fresha covers salons and other appointments from the original GC1 concept. [Fresha pricing](https://www.fresha.com/pricing) | A focused workshop pilot is easier to test than a general appointments marketplace. |
+| Discovery and leisure alternatives | Studio social pages, Google Maps, cafés and cinemas | A customer can find a studio directly or make a different plan for the afternoon. |
+| Cross-industry example | HotelTonight sells last-minute hotel availability. [HotelTonight FAQ](https://www.hoteltonight.com/faq) | It shows how a marketplace can sell spare capacity. Pottery still needs its own cost and demand evidence. |
 
-Sources: https://classpass.com/search-index/manila | https://classpass.com/partners/faqs | https://www.events.myfunnow.com/whyfunnow-en . ClassPass is a comparison, not evidence that SlotDrop’s 10% fee, manual inventory or customer segment will work.
+We’d test one specific offer against those alternatives: released workshop seats in QC with the studio’s cutoff, a final peso price and a saved receipt. [Full competitor notes](reference/business-research-appendix.md#b-competitors-categories-and-source-notes)
 
-## 10. Risks, controls and what remains unknown
+### Provider economics and business-model benchmarks
 
-| Risk from the business case / feedback | Current control | Remaining commercial gap |
-| --- | --- | --- |
-| Ghost slots / external overselling | Dedicated release allocation, future cutoff, runs-as-scheduled flag, pause controls and a transaction lock for saves. | No external calendar sync. A supplier must ring-fence seats or update allocation reliably; locking our database cannot stop direct-channel sales. |
-| Provider refuses discounts or fee | Provider chooses standard/buddy prices and can pause sales. | No signed partner, cost floor or 10% acceptance evidence. Ask minimum net payout and trial conditions. |
-| Discount cannibalizes full-price demand | Release a limited allocation; buddy optional; work through the two-person counterfactual. | No measured direct-channel displacement or incremental demand. |
-| Deal-only customers / weak repeat use | Clear session value, location and inclusions; avoid promising permanent discounts. | No retention or willingness-to-pay study; pottery need not be weekly. |
-| Thin or unsuitable supply | Small geography; verify recurring, already-confirmed sessions and prep deadlines. | Published workshop catalogs are not a supplier pipeline. If too few eligible sessions exist, revisit geography/window rather than fabricate dates. |
-| Materials/prep or collection mismatch | Display technique, inclusions, preparation and collection notes. | Real-provider data must be verified before a pilot; no real cancellations/refunds or payment handling is implemented. |
+For the modeled costs below, we used Laro’s **₱3,000** listed price and assumed **₱500 per extra guest** for clay, finishing, firing and handling. The studio would need to supply its actual costs.
 
-## 11. Studio applications, separate from verified supply
+| One seat | Customer pays | Studio receives after our fee | Studio contribution after assumed ₱500 extra cost |
+|---|---:|---:|---:|
+| Direct at published reference price | ₱3,000 | ₱3,000 | **₱2,500** |
+| SlotDrop standard | ₱2,700 | ₱2,430 | **₱1,930** |
+| SlotDrop buddy, per attendee | ₱2,565 | ₱2,308.50 | **₱1,808.50** |
 
-ClassPass separates submission of business information from onboarding a profile; Klook reviews merchant applications before access to listing tools. SlotDrop follows Apply → Review → Set up. The reference catalog has a separate studio profile, a validated application form and database-backed pending-status readback. It records authorization as an attestation, not proof; it does not publish a page, grant account access or verify a partnership. Use sample contacts, keep them private, and retain the same request key after an uncertain save. Public profile ownership and real inventory need later verified onboarding. Sources checked 30 October: https://classpass.com/partners/how-it-works | https://merchant.klook.com/introduction .
+A ₱2,700 sale adds **₱1,930** before fixed class costs if the chair would have stayed empty. If the same buyer would have booked directly for ₱3,000, the studio earns **₱570 less**.
+
+In a four-week example, the studio releases four seats in each of 16 classes that are already going ahead. If half of those 64 seats sell, and we sell 24 at standard and eight as buddy seats in four pairs, that gives us **32 seats and 28 bookings**.
+
+| Hypothetical four-week outcome | Modeled amount |
+|---|---:|
+| Customer booking value | **₱85,320** |
+| SlotDrop gross commission | **₱8,532** |
+| Studio payout before added-attendee costs | **₱76,788** |
+| Studio added-attendee costs, 32 × ₱500 | **(₱16,000)** |
+| Less hypothetical eight displaced direct buyers × ₱2,500, and ₱2,500 studio coordination | **(₱22,500)** |
+| **Studio incremental contribution versus no SlotDrop** | **₱38,288** |
+| **SlotDrop pilot surplus** after 28 × ₱50 support and ₱6,000 outreach/ops | **₱1,132** |
+
+These figures come from our assumptions about fill, sales mix, direct bookings and operating costs. At the same mix, SlotDrop would need to sell about **27 of 64 released seats** to cover the assumed ₱6,000 budget, after ₱50 of support per booking. Founder labor, taxes, real payment costs and refunds sit outside that calculation. [Detailed math and cost sensitivity](reference/business-research-appendix.md#c-detailed-per-seat-and-pilot-calculations)
+
+ClassPass uses credits and agreed partner payouts. Fresha listed a **20% one-time marketplace fee for new customers**, with a minimum, alongside separate software and payment terms. SlotDrop’s **10% on every booking** could cost a studio more if many customers return. Laro also advertised friend discounts of up to ₱500 per person. We’d compare both the studio payout and what the customer actually pays before picking a pilot offer. [Business-model comparison](reference/business-research-appendix.md#d-competing-marketplace-business-models)
+
+### Pilot and risks
+
+| Step | What we'd verify | Decision |
+|---|---|---|
+| Before launch | Four weeks of studio sales and capacity, actual costs, preparation cutoffs, a minimum net payout and a set-aside allocation. | Proceed if the studio has enough spare seats before cutoff. |
+| Weeks 1–2 | Start with the standard offer. Check SlotDrop bookings against the studio calendar and count direct and SlotDrop attendance together. | Pause the release if the calendars disagree. |
+| Weeks 3–4 | Test the buddy rate on comparable sessions. Track how many extra visitors came, how many would have paid full price and what serving them cost. | Keep it where it improves the studio’s contribution. |
+| End of week 4 | Compare incremental studio earnings and SlotDrop fees with the actual costs of getting and supporting bookings. | Expand if both sides gained. |
+
+Our main risks are listing a seat the studio already sold, asking a studio to discount below its minimum, and moving full-price buyers onto a cheaper offer. For a pilot we’d set aside seats with the studio, agree on a payout floor and compare total sales with the studio’s usual results. Calendar reconciliation would be manual.
+
+### Studio applications
+
+A studio can send an application and look up its pending status. Before publishing a real studio page, we’d verify who submitted it, confirm permission and agree on commercial terms. [Studio application contract](routes.md#studio-research-and-applications)

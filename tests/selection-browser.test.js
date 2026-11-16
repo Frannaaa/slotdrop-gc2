@@ -39,7 +39,7 @@ test("Selection keeps session details visible when quote fails and allows retry"
     new URL("../public/js/selection.js", import.meta.url),
     "utf8"
   ))
-    .replace(/^import[^\n]*\r?\n/m, "")
+    .replace(/^import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];\s*/m, "")
     .replace(/\ntry\s*\{\s*const params = pageParameters[\s\S]*$/, "");
 
   let quoteCalls = 0;
@@ -71,9 +71,11 @@ test("Selection keeps session details visible when quote fails and allows retry"
         }
 
         return {
+          slotId: 1,
+          quantity: 1,
           unitPriceCentavos: 1500,
           totalPriceCentavos: 1500,
-          pricingType: "standard"
+	  pricingType: "standard"
         };
       }
 
@@ -82,6 +84,9 @@ test("Selection keeps session details visible when quote fails and allows retry"
     money: value => `₱${value}`,
     date: () => "DATE",
     positive: value => Number(value),
+    hasBookingTotal: quote =>
+      Number.isInteger(quote.totalPriceCentavos) &&
+      Number.isInteger(quote.unitPriceCentavos),
     pageParameters: search => new URLSearchParams(search),
     notice(element, message) {
       element.textContent = message;

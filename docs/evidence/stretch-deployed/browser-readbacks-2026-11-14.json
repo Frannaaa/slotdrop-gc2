@@ -1,0 +1,138 @@
+{
+  "origin": "https://slotdrop-gc2-group-zx8j.onrender.com",
+  "renderCommit": "8bdcfcbd3e24b58e70bdac48effb017146112fcb",
+  "capturedAt": "2026-11-14T10:37:06.584Z",
+  "viewport": "390 × 844 CSS px",
+  "pagination": {
+    "page1": [
+      36,
+      38,
+      40,
+      41,
+      43,
+      45
+    ],
+    "page2": [
+      47,
+      42,
+      44,
+      46,
+      48
+    ],
+    "returnToPage1": [
+      36,
+      38,
+      40,
+      41,
+      43,
+      45
+    ],
+    "requested": [
+      "/api/slots?page=1&limit=6",
+      "/api/slots?page=2&limit=6",
+      "/api/slots?page=2&limit=6",
+      "/api/slots?page=1&limit=6",
+      "/api/slots?page=2&limit=6"
+    ]
+  },
+  "selection": {
+    "slotId": 36,
+    "timingOrigin": "milliseconds since Selection navigation start",
+    "requests": [
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/slots/36",
+        "start": 1096.1,
+        "end": 1393.9
+      },
+      {
+        "url": "https://slotdrop-gc2-group-zx8j.onrender.com/api/pricing/quote?slotId=36&quantity=1",
+        "start": 1096.4,
+        "end": 1352.6
+      }
+    ]
+  },
+  "owner": {
+    "sources": [
+      "/api/owner/catalog",
+      "/api/metrics",
+      "/api/bookings"
+    ],
+    "eligibleReleases": [
+      {
+        "slotId": 34,
+        "capacity": 4
+      },
+      {
+        "slotId": 36,
+        "capacity": 4
+      },
+      {
+        "slotId": 38,
+        "capacity": 4
+      },
+      {
+        "slotId": 40,
+        "capacity": 4
+      },
+      {
+        "slotId": 41,
+        "capacity": 4
+      },
+      {
+        "slotId": 43,
+        "capacity": 4
+      },
+      {
+        "slotId": 45,
+        "capacity": 4
+      },
+      {
+        "slotId": 47,
+        "capacity": 4
+      },
+      {
+        "slotId": 42,
+        "capacity": 4
+      },
+      {
+        "slotId": 44,
+        "capacity": 4
+      },
+      {
+        "slotId": 46,
+        "capacity": 4
+      },
+      {
+        "slotId": 48,
+        "capacity": 4
+      }
+    ],
+    "confirmedQuantities": [
+      {
+        "slotId": 36,
+        "quantity": 1
+      },
+      {
+        "slotId": 36,
+        "quantity": 1
+      },
+      {
+        "slotId": 34,
+        "quantity": 1
+      },
+      {
+        "slotId": 34,
+        "quantity": 1
+      },
+      {
+        "slotId": 34,
+        "quantity": 1
+      },
+      {
+        "slotId": 34,
+        "quantity": 1
+      }
+    ],
+    "observedText": "6 of 48 released demo seats booked (13%) across 12 currently eligible sessions."
+  }
+}

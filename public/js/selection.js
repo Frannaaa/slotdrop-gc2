@@ -1,12 +1,14 @@
 
-import { request, money, date, positive, pageParameters, notice } from "./customer-common.js";
+import {
+  request, money, date, positive, pageParameters, notice, hasBookingTotal,
+} from "./customer-common.js";
 
 const form = document.querySelector("#selection"),
 quantity = document.querySelector("#quantity"),
 summary = document.querySelector("#summary"),
+chosenSession = document.querySelector("#chosenSession"),
 status = document.querySelector("#status"),
-next = document.querySelector("#continue"),
-chosenSession = document.querySelector("#chosenSession");
+next = document.querySelector("#continue");
 
 let slotId, generation = 0;
 
@@ -14,7 +16,6 @@ async function refresh() {
   const current = ++generation;
   next.disabled = true;
   summary.textContent = "";
-  notice(status, "");
   notice(status, "Checking price and seats...");
   notice(chosenSession, "Loading session details...");
 
@@ -34,25 +35,25 @@ async function refresh() {
       }
       return { ok: true };
     })
-    .catch(error => {
-      if (current === generation) {
-        notice(chosenSession, error.message, true);
-      }
-      return { ok: false, error };
-    });
+  .catch(error => {
+    if (current === generation) {
+      notice(status, error.message, true);
+    }
+    return { ok: false, error };
+  });
 
   const quoteRequest = request(
     "/api/pricing/quote?" +
     new URLSearchParams({ slotId, quantity: count })
   )
     .then(quote => {
-      if (current === generation) {
-        summary.textContent =
-          `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
+      if (!hasBookingTotal(quote) || quote.slotId !== slotId || quote.quantity !== count) {
+        throw new Error("Could not verify the booking price. Refresh quote to try again.");
       }
-      return { ok: true };
+
+      return { ok: true, quote };
     })
-    .catch(error => {
+     .catch(error => {
       if (current === generation) {
         notice(status, error.message, true);
       }
@@ -67,14 +68,19 @@ async function refresh() {
   if (current !== generation) return;
 
   if (sessionResult.ok && quoteResult.ok) {
+    const quote = quoteResult.quote;
+
+    summary.textContent =
+      `${count} x ${money(quote.unitPriceCentavos)} = ${money(quote.totalPriceCentavos)}${quote.pricingType === "buddy" ? " Buddy price applied" : ""}`;
+
     notice(status, "");
     next.disabled = false;
   } else {
-    if (!quoteResult.ok) {
-      notice(status, quoteResult.error.message, true);
-    } else if (!sessionResult.ok) {
-      notice(status, sessionResult.error.message, true);
-    }
+    const error = !quoteResult.ok
+      ? quoteResult.error
+      : sessionResult.error;
+
+    notice(status, error.message, true);
     next.disabled = true;
   }
 }

@@ -32,18 +32,25 @@ test('the owner clock updates existing cards across deadlines without disturbing
     buddyPriceCentavos:null, runsAsScheduled:true};
   const catalog = {services:[{id:1,active:true}], discoveryHours:72, slots:[slot,
     {...slot,id:2,status:'paused'},
-    {...slot,id:3,startsAt:new Date(now+72*3600000+1000).toISOString(),bookingClosesAt:new Date(now+71*3600000).toISOString()}]};
+    {...slot,id:3,capacity:6,remainingSeats:6,startsAt:new Date(now+72*3600000+1000).toISOString(),bookingClosesAt:new Date(now+71*3600000).toISOString()}]};
   const source = (await readFile(new URL('../public/js/owner.js', import.meta.url), 'utf8'))
     .replace(/\r\n/g, "\n")
     .replace(/^import[\s\S]*?from "\.\/owner-policy\.js";\n/, '')
     .replace(/^import \{ api \} from "\.\/api\.js";\n/m, '')
     .replace(/reset\(\);\nload\(\);\s*$/, '');
+  const readOwner = async path => path === '/api/owner/catalog' ? catalog
+    : path === '/api/bookings' ? []
+      : {bookingCount:0,platformRevenueCentavos:0,averageOrderValueCentavos:0,nearlyFullSessionCount:0};
+  let requests = 0;
   const context = {document, ...policy, Intl,
     Date:class extends Date { static now() { return now; } },
+    openReleaseUtilization: (catalog, bookings, at = now) =>
+      policy.openReleaseUtilization(catalog, bookings, at),
     setInterval(callback, milliseconds) { timers.push({callback,milliseconds}); },
-    fetch() { throw new Error('A clock update must not fetch or reload the form.'); },
-    initialCatalog:catalog};
-  runInNewContext(source + '\ncatalog = initialCatalog; loaded = true; renderSessions();', context);
+    api: path => { requests++; return readOwner(path); },
+  };
+  assert.equal(await runInNewContext(source + '\nload()', context), true);
+  assert.match(elements.get('open-utilization').textContent, /0 of 4 released/);
   const cards = elements.get('sessions').children;
   const tag = card => card.children[0].children[0];
   const resume = cards[1].children.at(-1).children[1];
@@ -59,6 +66,8 @@ test('the owner clock updates existing cards across deadlines without disturbing
   timers[0].callback();
   assert.equal(tag(cards[0]).textContent, 'Bookings closed');
   assert.equal(tag(cards[2]).textContent, 'Bookable');
+  assert.match(elements.get('open-utilization').textContent, /0 of 6 released/);
+  assert.equal(requests, 3, 'Clock updates use already loaded data');
   assert.equal(resume.disabled, true);
   assert.equal(elements.get('sessions').children[0], cards[0]);
   assert.equal(draft.value, '2026-11-03T19:42');
@@ -76,9 +85,7 @@ test('the owner clock updates existing cards across deadlines without disturbing
   assert.equal(elements.get('offer-fields').disabled, false);
   assert.equal(elements.get('save').disabled, true);
   assert.equal(draft.value, '2026-11-03T19:42');
-  context.api = async path => path === '/api/owner/catalog' ? catalog
-    : path === '/api/bookings' ? []
-      : {bookingCount:0,platformRevenueCentavos:0,averageOrderValueCentavos:0,nearlyFullSessionCount:0};
+  context.api = readOwner;
   assert.equal(await runInNewContext('load()', context), true);
   assert.equal(elements.get('refresh').disabled, false);
   assert.equal(elements.get('save').disabled, false);

@@ -1,7 +1,8 @@
 <!doctype html>
-<!-- Group assignment: Cholo. See docs/ownership-and-execution.md. -->
+<!-- Group assignment: Cholo. See README.md#team. -->
 <html lang="en">
   <head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Nearby activities. Released seats. | SlotDrop</title>
@@ -19,35 +20,32 @@
     </header>
 
     <main id="main">
-      <section class="hero">
-        <p class="eyebrow">Nearby activities / Next 72 hours</p>
-        <h1>A free evening.<br />An open seat.</h1>
-        <p>
-          Book nearby activities happening in the next 72 hours, with released seats and upfront prices.
-        </p>
-        <a class="button" href="/browse.html">Browse all sessions ↗</a>
+      <section class="hero home-hero">
+        <div class="home-hero-copy">
+          <p class="eyebrow">Nearby creative workshops</p>
+          <h1>A free evening.<br /><span>An open seat.</span></h1>
+          <p>Find open seats in workshops that are already scheduled to run. Bring a friend for a lower price on eligible sessions.</p>
+          <a class="button" href="/browse.html">Explore workshops</a>
+        </div>
+        <figure class="home-hero-photo">
+          <img src="/images/workshops/laro-mug.webp" alt="Hands shaping a mug at a pottery workshop" width="720" height="405" fetchpriority="high" />
+          <figcaption>Workshop photo: <a href="https://laro-ceramics.com/products/mug-making-class-manila" target="_blank" rel="noopener noreferrer">Laro Ceramics ↗</a></figcaption>
+        </figure>
       </section>
 
       <section>
         <div class="section-heading">
           <h2>Released seats near you</h2>
-          <a href="/browse.html">See all activities</a>
+          <a href="/browse.html">See all sessions</a>
         </div>
-        <p>Preview up to three featured sessions, or browse all available activities and filters.</p>
         <p id="status" role="status"></p>
-        <button id="retry" class="text-button" type="button">
+        <button id="retry" class="text-button" type="button" hidden>
           Refresh activities
         </button>
         <div id="featured" class="activity-grid"></div>
       </section>
-
-      <section class="how-strip" aria-label="How released seats work">
-        <h2>A small opening. A good plan.</h2>
-        <p>Providers release a limited number of seats in sessions already going ahead. Pick a time and group size, check the price, then save your booking.</p>
-        <p class="reference">Course demo: uses real studio public details, but session dates, seats, and offers are simulated. Published studio research is linked in the footer.</p>
-      </section>
     </main>
 
-    <footer><a href="/studios.html">Published studio research</a><p>Course demonstration. Session dates, released seats, offers, bookings and payments are simulated. Any researched studios are independent references, not confirmed partners.</p></footer>
+    <footer><a href="/studios.html">Studio sources</a><p>Demo only. Sessions and payments are simulated; referenced studios are not partners.</p></footer>
   </body>
 </html>

@@ -2,6 +2,7 @@
 // Vercel detects this root file as one Express Function and serves public/ from CDN.
 // Preserve original /api/... paths and reuse the booking, pricing, Owner and
 // PostgreSQL routes from the Render deployment.
+import 'dotenv/config';
 import express from 'express';
 import { createHandler } from './server/vercel-handler.js';
 import { postgresDatabase } from './server/repositories/database.js';

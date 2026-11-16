@@ -1,5 +1,7 @@
-// Group assignment: Kaitlyn. See docs/ownership-and-execution.md.
-import { request, money, date, escapeHtml, pageParameters, notice } from "./customer-common.js";
+// Group assignment: Kaitlyn. See README.md#team.
+import {
+  request, money, date, escapeHtml, pageParameters, notice, isBookingId, isBookingReceipt,
+} from "./customer-common.js";
 const content = document.querySelector("#receipt"),
   status = document.querySelector("#status"),
   retry = document.querySelector("#retry"),
@@ -15,7 +17,7 @@ async function load() {
   let id;
   try {
     id = pageParameters(location.search, ["id"]).get("id");
-    if (!id || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id))
+    if (!isBookingId(id))
       throw new Error("Invalid booking reference.");
   } catch {
     if (current === generation) {
@@ -28,6 +30,8 @@ async function load() {
   try {
     const booking = await request("/api/bookings/" + id);
     if (current !== generation) return;
+    if (!isBookingReceipt(booking) || booking.id.toLowerCase() !== id.toLowerCase())
+      throw new Error("Invalid booking receipt.");
     const cancelled = booking.status === "cancelled";
     content.innerHTML = `<p class="eyebrow">${escapeHtml(booking.status)}</p><h1>${cancelled ? "This booking is cancelled." : "Your demo booking is saved."}</h1><h2>${escapeHtml(booking.serviceName)}</h2><p>${escapeHtml(booking.providerName)} · ${date(booking.sessionStartsAt)}</p><dl><dt>Booking reference</dt><dd class="reference">${escapeHtml(booking.id)}</dd><dt>Seats</dt><dd>${booking.quantity}</dd><dt>Price per person</dt><dd>${money(booking.unitPriceCentavos)}</dd><dt>Saved total</dt><dd>${money(booking.totalPriceCentavos)}</dd><dt>Payment choice</dt><dd>${booking.paymentMethod === "pay_on_site" ? "Pay on site (simulated)" : "Mock card (simulated)"}</dd></dl><a class="button" href="/#featured">See featured sessions</a>`;
     notice(
@@ -37,7 +41,7 @@ async function load() {
   } catch (error) {
     if (current !== generation) return;
 
-    if (error.status === 400 || error.status === 404) {
+    if (error.status === 404 && error.code === "BOOKING_NOT_FOUND") {
       notice(status, "No booking was found for this reference. Check the link or browse sessions.", true);
       browse.hidden = false;
     } else {

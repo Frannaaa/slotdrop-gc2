@@ -5,26 +5,43 @@ import { request, card, notice } from "./customer-common.js";
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const search = document.querySelector("#search");
+const when = document.querySelector("#when");
+const people = document.querySelector("#people");
+const sort = document.querySelector("#sort");
 const pagination = document.querySelector("#pagination");
 const retry = document.querySelector("#retry");
-const categoryButtons = [...document.querySelectorAll("[data-category]")];
+const practiceSessions = document.querySelector("#practice-sessions");
+const practiceResults = document.querySelector("#practice-results");
+const practiceStatus = document.querySelector("#practice-status");
+const practiceRetry = document.querySelector("#practice-retry");
+const closedSessions = document.querySelector("#closed-sessions");
+const closedResults = document.querySelector("#closed-results");
+const closedStatus = document.querySelector("#closed-status");
+const closedRetry = document.querySelector("#closed-retry");
+const activityButtons = [...document.querySelectorAll("[data-activity]")];
 
 const ITEMS_PER_PAGE = 6;
-let category = "all";
+let activity = "all";
 let currentPage = 1;
-let slots = [];
+let requestedPage = 1;
+let workshops = [];
 let hasNextPage = false;
 let generation = 0;
 let searchTimer = null;
+let loadingClosedSessions = false;
 
 function pageUrl(page) {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(ITEMS_PER_PAGE),
+    view: "workshops",
   });
   const query = search.value.trim();
   if (query) params.set("q", query);
-  if (category !== "all") params.set("category", category);
+  if (activity !== "all") params.set("type", activity);
+  if (when?.value) params.set("when", when.value);
+  if (sort?.value && sort.value !== "soonest") params.set("sort", sort.value);
+  if (people?.value && people.value !== "1") params.set("people", people.value);
   return "/api/slots?" + params;
 }
 
@@ -58,56 +75,93 @@ function renderPagination() {
 }
 
 function render() {
-  results.innerHTML = slots.map((slot) => card(slot)).join("");
+  const groupSize = Number(people?.value || 1);
+  results.innerHTML = workshops.map(({ sessions }) =>
+    card(sessions[0], groupSize, { sessions })
+  ).join("");
   renderPagination();
-  if (!slots.length) {
-    notice(status, search.value.trim() || category !== "all"
-      ? "No sessions match those filters. Try another search or category."
-      : "No sessions are available right now. Check back soon.");
+  if (!workshops.length) {
+    notice(status, search.value.trim() || when.value || people.value !== "1" || activity !== "all"
+      ? "No upcoming workshops match those filters."
+      : "No upcoming workshops are available right now.");
     return;
   }
   const first = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-  notice(status, `Showing sessions ${first}–${first + slots.length - 1} · page ${currentPage}.`);
+  notice(status, `Showing workshops ${first}–${first + workshops.length - 1} · page ${currentPage}.`);
 }
 
 async function load(page = 1) {
+  requestedPage = page;
   const current = ++generation;
   results.replaceChildren();
   pagination.replaceChildren();
   retry.disabled = true;
-  notice(status, "Loading sessions…");
+  retry.hidden = true;
+  notice(status, "Loading workshops…");
 
   try {
-    // Filters and LIMIT/OFFSET are handled by GET /api/slots on the server.
-    const items = await request(pageUrl(page));
+    // The server filters dates, groups workshops and applies the page limit.
+    const data = await request(pageUrl(page));
     if (current !== generation) return;
-    if (!Array.isArray(items)) throw new Error("The sessions response was not a list.");
+    if (!Array.isArray(data?.workshops) || typeof data.hasNextPage !== "boolean") {
+      throw new Error("The workshop page response was invalid.");
+    }
+    const items = data.workshops;
     if (items.length === 0 && page > 1) {
       // Inventory may change between clicks. Don't strand the customer on an empty page.
       return load(page - 1);
     }
 
-    let more = false;
-    if (items.length === ITEMS_PER_PAGE) {
-      // The API returns an array, not total-count metadata. A small lookahead
-      // prevents a fake Next button when the last page has exactly six items.
-      const nextItems = await request(pageUrl(page + 1));
-      if (current !== generation) return;
-      if (!Array.isArray(nextItems)) throw new Error("The sessions response was not a list.");
-      more = nextItems.length > 0;
-    }
-
     currentPage = page;
-    slots = items;
-    hasNextPage = more;
+    workshops = items;
+    hasNextPage = data.hasNextPage;
     render();
   } catch (error) {
     if (current !== generation) return;
-    slots = [];
+    workshops = [];
     hasNextPage = false;
-    notice(status, error.message || "Could not load sessions. Please try again.", true);
+    notice(status, error.message || "Could not load workshops. Please try again.", true);
+    retry.hidden = false;
   } finally {
     if (current === generation) retry.disabled = false;
+  }
+}
+
+async function loadPractice() {
+  if (practiceRetry.disabled) return;
+  practiceRetry.disabled = true;
+  practiceRetry.hidden = true;
+  practiceResults.replaceChildren();
+  notice(practiceStatus, "Loading practice bookings…");
+  try {
+    const items = await request("/api/slots?view=practice");
+    if (!Array.isArray(items)) throw new Error("The practice response was not a list.");
+    practiceResults.innerHTML = items.map(slot => card(slot, 1, { compact: true })).join("");
+    notice(practiceStatus, items.length ? "" : "No practice spots are available right now.");
+  } catch {
+    notice(practiceStatus, "Could not load practice bookings. Please try again.", true);
+    practiceRetry.hidden = false;
+  } finally {
+    practiceRetry.disabled = false;
+  }
+}
+
+async function loadClosedSessions() {
+  if (loadingClosedSessions) return;
+  loadingClosedSessions = true;
+  closedRetry.hidden = true;
+  closedResults.replaceChildren();
+  notice(closedStatus, "Loading recently closed sessions…");
+  try {
+    const items = await request("/api/slots?view=closed&limit=16");
+    if (!Array.isArray(items)) throw new Error("The workshops response was not a list.");
+    closedResults.innerHTML = items.map(slot => card(slot, 1, { closed: true })).join("");
+    notice(closedStatus, items.length ? "" : "No closed sessions yet.");
+  } catch {
+    notice(closedStatus, "Could not load recently closed sessions. Please try again.", true);
+    closedRetry.hidden = false;
+  } finally {
+    loadingClosedSessions = false;
   }
 }
 
@@ -117,20 +171,34 @@ function resetSearchPage() {
   generation++;
   results.replaceChildren();
   pagination.replaceChildren();
-  notice(status, "Searching sessions…");
+  notice(status, "Searching workshops…");
   searchTimer = setTimeout(() => load(1), 180);
 }
 
 search.addEventListener("input", resetSearchPage);
-categoryButtons.forEach((button) => {
+for (const control of [when, people, sort]) {
+  control?.addEventListener("change", () => {
+    clearTimeout(searchTimer);
+    load(1);
+  });
+}
+activityButtons.forEach((button) => {
   button.addEventListener("click", () => {
     clearTimeout(searchTimer);
-    category = button.dataset.category;
-    categoryButtons.forEach((item) => {
+    activity = button.dataset.activity;
+    activityButtons.forEach((item) => {
       item.setAttribute("aria-pressed", String(item === button));
     });
     load(1);
   });
 });
-retry.addEventListener("click", () => load(currentPage));
+retry.addEventListener("click", () => load(requestedPage));
+practiceSessions.addEventListener("toggle", () => {
+  if (practiceSessions.open) loadPractice();
+});
+practiceRetry.addEventListener("click", loadPractice);
+closedSessions.addEventListener("toggle", () => {
+  if (closedSessions.open) loadClosedSessions();
+});
+closedRetry.addEventListener("click", loadClosedSessions);
 load(1);
