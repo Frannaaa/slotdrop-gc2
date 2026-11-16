@@ -1,0 +1,33 @@
+name: SlotDrop final live verification (read-only)
+on:
+  push:
+    branches: ['qa/gc2-live-final-20261116']
+permissions:
+  contents: read
+jobs:
+  release-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Final deployed read-only API verification
+        run: node tools/final-live-verification.mjs readiness
+      - name: Install Chromium and Lighthouse
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1 lighthouse@13.6.0
+          npx --no-install playwright install --with-deps chromium
+      - name: Mobile Browse and practice bookings
+        run: node tools/final-live-verification.mjs browser
+      - name: Repeat Lighthouse mobile measurement
+        run: node tools/final-live-verification.mjs lighthouse
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slotdrop-final-live-20261116
+          path: final-live-evidence/
+          retention-days: 90
