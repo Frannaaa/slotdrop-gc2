@@ -80,7 +80,7 @@ In the [test](../tests/owner-edit.test.js), we paused the workshop, set capacity
 
 The [Claude-assisted catalog change in #59](https://github.com/Frannaaa/slotdrop-gc2/pull/59) counted any future start as available. Kirsten pointed out that a class can start later in the day even after bookings have closed.
 
-In [#71](https://github.com/Frannaaa/slotdrop-gc2/pull/71), two classes started **30 and 40 minutes later** with both cutoffs already past. The old logic added **0** sessions when we expected **2**. Janelle changed it to check the cutoff, sales status, whether the class was going ahead and remaining seats. Kirsten reviewed the fix, and the [catalog tests](../tests/reference-catalog.test.js) passed.
+In [#71](https://github.com/Frannaaa/slotdrop-gc2/pull/71), two classes started **30 and 40 minutes later** with both cutoffs already past. The old startup roll-forward added **0 new bookable sessions** even though both existing sessions had passed their booking cutoffs; it should have added **2 replacements**. Janelle changed the eligibility check to consider booking cutoff, sale status, whether the class was going ahead, and remaining seats. Kirsten reviewed the fix, and the [catalog tests](../tests/reference-catalog.test.js) passed.
 
 <a name="challenge-4--the-owner-changes-a-rule"></a>
 
@@ -110,9 +110,9 @@ Two buddy seats at ₱2,565 each give these totals.
 | SlotDrop gets | ₱513 | ₱615.60 |
 | Studio receives | ₱4,617 | ₱4,514.40 |
 
-We tested **1000 → 1200** in a disposable database and restarted the app against the same database. The earlier ₱1,600 booking kept its **₱160** fee and **₱1,440** payout. A new booking recorded **₱192** and **₱1,408**. [Tested baseline](https://github.com/Frannaaa/slotdrop-gc2/commit/e994ffddb1ba9635e19091eab30436b80d299489)
+The **12% column is a worked what-if**, not the live rate. For another ₱1,600 booking, the formula would change the fee from **₱160 at 10%** to **₱192 at 12%**, and the studio payout from **₱1,440** to **₱1,408**. The [active-rate regression test](../tests/challenge4-rate.test.js) confirms that a single server setting feeds Quote, Booking and Owner, while a later **offer-price edit** cannot rewrite an already saved receipt. That test does not independently demonstrate a live commission-rate transition. 
 
-The live demo uses 10%.
+The live demo remains at 10%.
 
 <a name="challenge-5--predict-then-run"></a>
 
