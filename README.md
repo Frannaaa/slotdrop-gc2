@@ -18,7 +18,7 @@ For grading after the scheduled dates pass, choose a practice session to complet
 |---|---|
 | Architecture and request flow | [System diagram and booking data flow](docs/system.md) |
 | API and database | [Route table](docs/routes.md) · [Schema](docs/schema.md) |
-| Business case | [GC1 traceability, funnel and revenue features](docs/business.md) · [Two-page PDF](docs/SlotDrop_GC2_Summary.pdf) |
+| Business case | [GC1 traceability, funnel and revenue features](docs/business.md) · [Improved post-feedback GC1 proposal](docs/reference/gc1-revised-business-proposal.md) · [Two-page PDF](docs/SlotDrop_GC2_Summary.pdf) |
 | Challenges and stretch evidence | [Challenge 1–5 and five stretches](docs/challenges.md) · [Postman collection](docs/SlotDrop-GC2-Challenge1.postman_collection.json) · [Individual recording links](docs/challenges.md#individual-recording-links) |
 | Measured Browse baseline | [Mobile Lighthouse, requests, transfer size and API time](docs/baseline.md) |
 | Release and collaboration | [Submission checklist](docs/gc2-submission-gate.md) · [AI disclosure](AI-USAGE.md) |
