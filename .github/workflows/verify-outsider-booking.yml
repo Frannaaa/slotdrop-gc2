@@ -17,6 +17,12 @@ jobs:
           node-version: '22'
       - name: Read saved phone-test receipt and match Owner list
         run: node tools/verify-outsider-booking.mjs
+      - name: Install browser for Owner UI confirmation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.62.1
+          npx --no-install playwright install --with-deps chromium
+      - name: Capture Owner row for verified phone booking
+        run: node tools/screenshot-outsider-owner.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
