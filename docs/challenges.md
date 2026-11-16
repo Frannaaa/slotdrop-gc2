@@ -96,7 +96,7 @@ In [#71](https://github.com/Frannaaa/slotdrop-gc2/pull/71), two classes started 
 
 ## Challenge 4. The owner changes a rule
 
-We tried raising the modeled commission from **10% to 12%**. `COMMISSION_BASIS_POINTS` is the only setting we had to edit for new bookings.
+We examined the owner's proposed change from a modeled **10% to 12%** commission **without changing the deployed rule**. `COMMISSION_BASIS_POINTS` is the only setting that would need editing for new bookings.
 
 ### Files involved
 
