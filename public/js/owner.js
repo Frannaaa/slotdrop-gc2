@@ -11,6 +11,7 @@ import {
   commissionPerSeat,
 } from "./owner-policy.js";
 import { api } from "./api.js";
+import { practiceChoiceLabel } from "./customer-common.js";
 const $ = (id) => document.getElementById(id);
 const form = $("offer-form");
 // Cache the formatters; Owner renders many rows with the same locale.
@@ -288,7 +289,7 @@ function renderSessions() {
     card.append(
       heading,
       element("p", slot.providerName + " · " + slot.area),
-      element("p", slot.startsAt === null ? "Practice booking" : time(slot.startsAt)),
+      element("p", slot.startsAt === null ? practiceChoiceLabel(slot) : time(slot.startsAt)),
       element("p", slot.bookingClosesAt === null ? "No booking cutoff" : "Bookings close " + time(slot.bookingClosesAt)),
     );
     card.append(
@@ -398,7 +399,7 @@ function renderBookings(rows) {
     const tr = element("tr");
     for (const value of [
       row.id + " · " + row.serviceName,
-      row.sessionStartsAt === null ? "Practice booking" : time(row.sessionStartsAt),
+      row.sessionStartsAt === null ? practiceChoiceLabel(row) : time(row.sessionStartsAt),
       String(row.quantity),
       row.pricingType + " · " + money(row.unitPriceCentavos),
       money(row.totalPriceCentavos),
