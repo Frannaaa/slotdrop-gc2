@@ -86,7 +86,7 @@ export async function ensureReferenceCatalog(db) {
     }
 
     for (const [index, item] of referenceCatalog.offerings.entries()) {
-      if (item.key === 'laro-mug' || item.key === 'bumi-mug') {
+      if (['laro-mug', 'bumi-mug', 'sip-open'].includes(item.key)) {
         await ensurePracticeSession(client, item, samplePrices(item, index));
       }
     }

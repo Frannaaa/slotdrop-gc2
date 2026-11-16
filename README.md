@@ -10,6 +10,8 @@ SlotDrop helps people near Katipunan find and book released workshop seats. Stud
 
 Start at Home and follow Browse, Detail, Selection, Checkout and Confirmation. Use fictional guest details. The Owner workspace shows the saved booking and five metrics. Render may take a moment to start after it has been idle.
 
+For grading after the scheduled dates pass, choose a practice session to complete a booking. Open **Closed sessions** at the bottom of Browse to look up dated sessions whose booking cutoff has passed.
+
 ## GC2 submission
 
 | What to open | Files |
@@ -71,7 +73,7 @@ Run `npm run db:init` only for a new, empty course database. Start with `npm sta
 
 ## Changes since GC1
 
-The broader last-minute appointment concept became a workshop booking MVP for GC2. Dated offers appear within 72 hours of their start and close at their own deadlines. Browse keeps recently closed offers available for viewing. Two undated practice offers let the instructor book after the dated samples close, while the practice offers remain open and have seats.
+The broader last-minute appointment concept became a workshop booking MVP for GC2. Dated offers appear within 72 hours of their start and close at their own deadlines. Browse groups available dates by workshop and keeps recently closed dates in an archive. Three undated sample bookings appear in a separate section so the instructor can book after the dated samples close while seats remain.
 
 The two revenue features are released-seat availability and buddy prices. The server checks seats and the accepted price before saving. SlotDrop models a 10% commission, and Confirmation reads the saved receipt by ID. The course demo defers accounts, real payments and paid placements.
 

@@ -195,7 +195,25 @@ const cardDateFormat = new Intl.DateTimeFormat("en-PH", {
   minute: "2-digit",
 });
 
-export function card(slot, quantity = 1, { closed = false } = {}) {
+function sessionLinks(sessions, quantity) {
+  return `<ul class="session-options" aria-label="Available dates">
+    ${sessions.map((slot) => {
+      const time = cardDateFormat.format(new Date(slot.startsAt));
+      const cutoff = cardDateFormat.format(new Date(slot.bookingClosesAt));
+      const price = previewPrice(slot, quantity);
+      const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
+      return `<li>
+        <a href="/detail.html?slotId=${slot.id}&quantity=${quantity}">
+          <strong>${time}</strong>
+          <span>${money(price.total)} ${quantity === 1 ? "per person" : `for ${quantity} people`} · ${seats}</span>
+          <small>Book by ${cutoff}</small>
+        </a>
+      </li>`;
+    }).join("")}
+  </ul>`;
+}
+
+export function card(slot, quantity = 1, { closed = false, compact = false, sessions = [] } = {}) {
   const selectedQuantity =
     Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 100
       ? quantity
@@ -205,20 +223,22 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
   const photo = slot.studioReference?.photo;
   const photoPage = safeHttpsUrl(photo?.page);
   const photoKey = slot.studioReference?.key;
-  const hasPhoto = photoPage && typeof photoKey === "string"
+  const hasPhoto = !closed && !compact && photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
-  const sessionDate = practice ? "Practice booking" : cardDateFormat.format(new Date(slot.startsAt));
+  const sessionDate = practice ? "" : closed ? date(slot.startsAt) : cardDateFormat.format(new Date(slot.startsAt));
+  const sessionLabel = closed
+    ? closedSessionLabel(slot) || "Booking closed"
+    : practice && !compact ? "Practice booking" : "";
+  const actionLabel = closed ? "View details" : practice ? "Try practice booking" : "View workshop";
   const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
   let bookingNote = "";
-  if (closed) {
-    bookingNote = closedSessionLabel(slot) || "Booking closed";
-  } else if (practice) {
-    bookingNote = "No booking cutoff";
-  } else if (Number.isFinite(Date.parse(slot.bookingClosesAt))) {
+  if (!closed && practice) {
+    bookingNote = "Sample booking with no expiry for grading.";
+  } else if (!closed && Number.isFinite(Date.parse(slot.bookingClosesAt))) {
     bookingNote = `Book by ${cardDateFormat.format(new Date(slot.bookingClosesAt))}`;
   }
-  return /* HTML */ `<article class="activity-card card">
+  return /* HTML */ `<article class="activity-card card${closed ? " closed-card" : ""}">
     ${hasPhoto
       ? `<figure class="card-photo">
           <img src="/images/workshops/${photoKey}.webp" alt="${escapeHtml(photo.alt)}" width="720" height="405" loading="lazy" decoding="async">
@@ -226,18 +246,22 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
         </figure>`
       : ""}
     <div class="card-body">
-      <p class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</p>
+      <p class="card-context">
+        <span class="eyebrow">${escapeHtml(slot.area)} · ${escapeHtml(slot.city)}</span>
+        ${sessionLabel ? `<span class="session-label${closed ? "" : " practice"}">${sessionLabel}</span>` : ""}
+      </p>
       <h2>${escapeHtml(slot.serviceName || slot.title || "Untitled Session")}</h2>
       <p class="provider-name">
         ${slot.studioReference
           ? `<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>`
           : escapeHtml(slot.providerName)}
       </p>
+      ${sessions.length > 1 ? sessionLinks(sessions, selectedQuantity) : `
       <p class="session-time">
-        <strong>${sessionDate}</strong>
-        <br />${slot.durationMinutes} min${closed ? "" : ` · ${seats}`}
+        ${sessionDate ? `<strong>${sessionDate}</strong>` : ""}
+        ${closed ? "" : `${sessionDate ? "<br />" : ""}${slot.durationMinutes} min · ${seats}`}
       </p>
-      ${bookingNote ? `<p class="session-cutoff${closed ? " closed" : ""}">${bookingNote}</p>` : ""}
+      ${bookingNote ? `<p class="session-cutoff">${bookingNote}</p>` : ""}
       ${price ? `<div class="party-price">
         <strong>${money(price.total)}</strong>
         <span>${selectedQuantity === 1 ? "per person" : `total for ${selectedQuantity} people`}</span>
@@ -250,8 +274,8 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
       <a
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
-        >${closed ? "View details" : "View workshop"}</a
-      >
+        >${actionLabel}</a
+      >`}
     </div>
   </article>`;
 }

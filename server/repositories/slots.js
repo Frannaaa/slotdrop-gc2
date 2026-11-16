@@ -62,6 +62,8 @@ export async function searchSlots(db, query) {
     where.push(SLOT_BOOKING_WINDOW,
       'sl.capacity - inventory.seats_booked >= ' + partySize);
   }
+  if (query.view === 'practice') where.push('sl.starts_at IS NULL');
+  if (query.view === 'workshops') where.push('sl.starts_at IS NOT NULL');
   if (providerId !== null) where.push('s.provider_id=' + bind(providerId));
   // position() is a literal substring match, so user %/_ do not become wildcards.
   if (query.q) {
@@ -93,7 +95,39 @@ export async function searchSlots(db, query) {
   const defaultOrder = closed && !query.sort ? 'sl.booking_closes_at DESC, sl.id DESC' : scheduleOrder;
   const order = query.sort === 'price-low' ? effectivePrice + ' ASC, ' + scheduleOrder
     : query.sort === 'price-high' ? effectivePrice + ' DESC, ' + scheduleOrder : defaultOrder;
-  let sql = SLOT_SELECT + ' WHERE ' + where.join(' AND ') + ' ORDER BY ' + order;
+  const matching = SLOT_SELECT + ' WHERE ' + where.join(' AND ');
+  if (query.view === 'workshops') {
+    const { rows } = await db.query(`
+      WITH matching AS (${matching}),
+      ranked AS (
+        SELECT sl.*, row_number() OVER (ORDER BY ${order}) AS position
+        FROM matching sl
+      ),
+      page AS (
+        SELECT service_id, MIN(position) AS first_position
+        FROM ranked
+        GROUP BY service_id
+        ORDER BY first_position
+        LIMIT ${bind(pagination.limit + 1)} OFFSET ${bind(pagination.offset)}
+      )
+      SELECT ranked.*
+      FROM page JOIN ranked USING (service_id)
+      ORDER BY page.first_position, ranked.starts_at, ranked.id
+    `, values);
+    const workshops = new Map();
+    for (const row of rows) {
+      const slot = slotResponse(row);
+      if (!workshops.has(slot.serviceId)) workshops.set(slot.serviceId, []);
+      workshops.get(slot.serviceId).push(slot);
+    }
+    return {
+      workshops: [...workshops].slice(0, pagination.limit)
+        .map(([serviceId, sessions]) => ({ serviceId, sessions })),
+      hasNextPage: workshops.size > pagination.limit && Number(query.page ?? 1) < 10000,
+    };
+  }
+
+  let sql = matching + ' ORDER BY ' + order;
   if (pagination) sql += ` LIMIT ${bind(pagination.limit)} OFFSET ${bind(pagination.offset)}`;
   const result = await db.query(sql, values);
   return result.rows.map(slotResponse);

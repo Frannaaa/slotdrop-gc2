@@ -1,0 +1,540 @@
+{
+  "deployedCommit": "3ef579da60439a73dbbfc1700a3dc1b9def29806",
+  "renderDeployment": "https://dashboard.render.com/web/srv-dbo1183m8hqs73f8soq0/deploys/dep-dbsrohu7bikc73fdfbl0",
+  "observedBrowserScripts": {
+    "/js/checkout.js": "7420275551e06aaaa1aaa2164c88d35ecdf86a15",
+    "/js/browse.js": "ded27166e007a337a5d1e664540b6586ab61c179",
+    "/js/customer-common.js": "1aed3f3a63bf1e71051b5ce64b35ff86560c4b40"
+  },
+  "readiness": {
+    "checkedAt": "2026-11-15T14:58:51.527Z",
+    "deployedCommit": "3ef579da60439a73dbbfc1700a3dc1b9def29806",
+    "origin": "https://slotdrop-gc2-group-zx8j.onrender.com",
+    "checks": [
+      {
+        "name": "Database readiness endpoint",
+        "pass": true,
+        "detail": "OK"
+      },
+      {
+        "name": "Home",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Browse",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Detail",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Selection",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Checkout",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Confirmation",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Owner",
+        "pass": true,
+        "detail": "HTML includes page script"
+      },
+      {
+        "name": "Database-backed Browse API",
+        "pass": true,
+        "detail": "OK"
+      },
+      {
+        "name": "Sample inventory for public demo",
+        "pass": true,
+        "detail": "13 discoverable demo offers"
+      },
+      {
+        "name": "Session detail API",
+        "pass": true,
+        "detail": "OK"
+      },
+      {
+        "name": "Quantity-aware quote API",
+        "pass": true,
+        "detail": "OK"
+      },
+      {
+        "name": "Saved booking receipt-by-ID route",
+        "pass": true,
+        "detail": "Receipt lookup route responds correctly to an unknown ID"
+      },
+      {
+        "name": "Owner catalog API",
+        "pass": true,
+        "detail": "OK"
+      },
+      {
+        "name": "Owner booking list API",
+        "pass": true,
+        "detail": "OK"
+      },
+      {
+        "name": "Five metrics API",
+        "pass": true,
+        "detail": "OK"
+      }
+    ]
+  },
+  "mobileBrowse": {
+    "runner": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727217983",
+    "artifact": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727217983/artifacts/14167315733",
+    "cacheDisabledNetwork": {
+      "measuredAt": "2026-11-15T14:59:35.451Z",
+      "browser": "151.0.7922.34",
+      "viewport": {
+        "width": 412,
+        "height": 823
+      },
+      "deviceScaleFactor": 1.75,
+      "cacheDisabled": true,
+      "sameOriginRequests": 16,
+      "totalTransferBytes": 228691,
+      "listRequest": {
+        "path": "/api/slots?page=1&limit=6",
+        "type": "Fetch",
+        "status": 200,
+        "durationMs": 251,
+        "transferBytes": 2207
+      },
+      "records": [
+        {
+          "path": "/browse.html",
+          "type": "Document",
+          "status": 200,
+          "durationMs": 406,
+          "transferBytes": 1528
+        },
+        {
+          "path": "/css/style.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 273,
+          "transferBytes": 5016
+        },
+        {
+          "path": "/css/browse.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 781,
+          "transferBytes": 2330
+        },
+        {
+          "path": "/css/pagination.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 254,
+          "transferBytes": 381
+        },
+        {
+          "path": "/js/browse.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 270,
+          "transferBytes": 2181
+        },
+        {
+          "path": "/js/customer-common.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 255,
+          "transferBytes": 4101
+        },
+        {
+          "path": "/js/business-config.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 259,
+          "transferBytes": 750
+        },
+        {
+          "path": "/fonts/DMSans400.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 1286,
+          "transferBytes": 30622
+        },
+        {
+          "path": "/fonts/SpaceGrotesk700.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 341,
+          "transferBytes": 43197
+        },
+        {
+          "path": "/fonts/DMSans700.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 265,
+          "transferBytes": 30999
+        },
+        {
+          "path": "/api/slots?page=1&limit=6",
+          "type": "Fetch",
+          "status": 200,
+          "durationMs": 251,
+          "transferBytes": 2207
+        },
+        {
+          "path": "/api/slots?page=2&limit=6",
+          "type": "Fetch",
+          "status": 200,
+          "durationMs": 246,
+          "transferBytes": 2734
+        },
+        {
+          "path": "/images/workshops/laro-mug.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 271,
+          "transferBytes": 25834
+        },
+        {
+          "path": "/images/workshops/bumi-mug.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 275,
+          "transferBytes": 17444
+        },
+        {
+          "path": "/images/workshops/laro-wheel.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 264,
+          "transferBytes": 25866
+        },
+        {
+          "path": "/images/workshops/bumi-freeform.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 277,
+          "transferBytes": 33501
+        }
+      ],
+      "visibleCards": 6,
+      "layout": {
+        "viewportWidth": 412,
+        "documentWidth": 412
+      },
+      "pageErrors": [],
+      "firstPhotoLoaded": true,
+      "closedSessions": {
+        "http": 200,
+        "cards": 16
+      }
+    },
+    "lighthouse": {
+      "measuredAt": "2026-11-15T14:59:38.923Z",
+      "version": "13.6.0",
+      "browser": "151.0.7922.34",
+      "formFactor": "mobile",
+      "throttlingMethod": "simulate",
+      "screenEmulation": {
+        "mobile": true,
+        "width": 412,
+        "height": 823,
+        "deviceScaleFactor": 1.75,
+        "disabled": false
+      },
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 96
+      },
+      "metrics": {
+        "first-contentful-paint": {
+          "value": 1067.2730000000001,
+          "unit": "millisecond"
+        },
+        "largest-contentful-paint": {
+          "value": 1067.2730000000001,
+          "unit": "millisecond"
+        },
+        "speed-index": {
+          "value": 1347.3154699999955,
+          "unit": "millisecond"
+        },
+        "total-blocking-time": {
+          "value": 0,
+          "unit": "millisecond"
+        },
+        "cumulative-layout-shift": {
+          "value": 0.000220598078228092,
+          "unit": "unitless"
+        }
+      },
+      "listApiStatus": 200,
+      "listApiMs": 248,
+      "warnings": []
+    }
+  },
+  "checkoutAndReceipt": {
+    "runner": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727564732",
+    "artifact": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727564732/artifacts/14167311156",
+    "replayReusedRequestFrom": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727217983",
+    "checkedAt": "2026-11-15T15:02:46.728Z",
+    "deployedCommit": "3ef579da60439a73dbbfc1700a3dc1b9def29806",
+    "simulatedFirstResponse": 429,
+    "simulatedRetryAfterSeconds": 5,
+    "checkoutPostResponses": [
+      429,
+      200
+    ],
+    "waitMs": 5008,
+    "waitText": "Booking traffic is high. Retrying this same request in 5 seconds…",
+    "disabledWhileWaiting": true,
+    "acknowledgementLocked": true,
+    "sameRequestId": true,
+    "sameRequestBody": true,
+    "liveBookingStatus": 200,
+    "receiptGetAfterReload": 200,
+    "receipt": {
+      "id": "1267ec9f-e9a4-4395-9c84-0f8f4f74c69b",
+      "slotId": 57,
+      "quantity": 1,
+      "totalPriceCentavos": 270000,
+      "status": "confirmed",
+      "platformFeeCentavos": 27000,
+      "providerPayoutCentavos": 243000,
+      "serviceName": "Mug-making + painting"
+    },
+    "ownerGetStatus": 200,
+    "matchingOwnerRows": 1,
+    "ownerRowText": "1267ec9f-e9a4-4395-9c84-0f8f4f74c69b · Mug-making + painting\tPractice booking\t1\tstandard · ₱2,700.00\t₱2,700.00\t₱270.00\t₱2,430.00\tconfirmed",
+    "seatsBefore": 19,
+    "seatsAfter": 19
+  },
+  "nov16MobileRecheck": {
+    "workflowRun": "https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43778545230",
+    "cacheDisabledNetwork": {
+      "measuredAt": "2026-11-16T00:08:39.623Z",
+      "browser": "151.0.7922.34",
+      "viewport": {
+        "width": 412,
+        "height": 823
+      },
+      "deviceScaleFactor": 1.75,
+      "cacheDisabled": true,
+      "sameOriginRequests": 17,
+      "totalTransferBytes": 270462,
+      "listRequest": {
+        "path": "/api/slots?page=1&limit=6",
+        "type": "Fetch",
+        "status": 200,
+        "durationMs": 257,
+        "transferBytes": 2606
+      },
+      "records": [
+        {
+          "path": "/browse.html",
+          "type": "Document",
+          "status": 200,
+          "durationMs": 317,
+          "transferBytes": 1527
+        },
+        {
+          "path": "/css/style.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 271,
+          "transferBytes": 5017
+        },
+        {
+          "path": "/css/browse.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 257,
+          "transferBytes": 2348
+        },
+        {
+          "path": "/css/pagination.css",
+          "type": "Stylesheet",
+          "status": 200,
+          "durationMs": 271,
+          "transferBytes": 339
+        },
+        {
+          "path": "/js/browse.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 270,
+          "transferBytes": 2181
+        },
+        {
+          "path": "/js/customer-common.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 258,
+          "transferBytes": 4101
+        },
+        {
+          "path": "/fonts/DMSans700.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 1178,
+          "transferBytes": 30964
+        },
+        {
+          "path": "/fonts/SpaceGrotesk700.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 326,
+          "transferBytes": 43154
+        },
+        {
+          "path": "/fonts/DMSans400.ttf",
+          "type": "Font",
+          "status": 200,
+          "durationMs": 272,
+          "transferBytes": 30649
+        },
+        {
+          "path": "/js/business-config.js",
+          "type": "Script",
+          "status": 200,
+          "durationMs": 725,
+          "transferBytes": 749
+        },
+        {
+          "path": "/api/slots?page=1&limit=6",
+          "type": "Fetch",
+          "status": 200,
+          "durationMs": 257,
+          "transferBytes": 2606
+        },
+        {
+          "path": "/api/slots?page=2&limit=6",
+          "type": "Fetch",
+          "status": 200,
+          "durationMs": 260,
+          "transferBytes": 2185
+        },
+        {
+          "path": "/images/workshops/laro-mug.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 273,
+          "transferBytes": 25831
+        },
+        {
+          "path": "/images/workshops/bumi-mug.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 260,
+          "transferBytes": 17440
+        },
+        {
+          "path": "/images/workshops/bumi-freeform.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 288,
+          "transferBytes": 33497
+        },
+        {
+          "path": "/images/workshops/amt-handbuilding.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 289,
+          "transferBytes": 38412
+        },
+        {
+          "path": "/images/workshops/amt-wheel.webp",
+          "type": "Image",
+          "status": 200,
+          "durationMs": 266,
+          "transferBytes": 29462
+        }
+      ],
+      "visibleCards": 6,
+      "layout": {
+        "viewportWidth": 412,
+        "documentWidth": 412
+      },
+      "pageErrors": [],
+      "firstPhotoLoaded": true,
+      "closedSessions": {
+        "http": 200,
+        "cards": 16
+      }
+    },
+    "mobileLighthouse": {
+      "failedBestPractices": [
+        {
+          "id": "errors-in-console",
+          "items": [
+            {
+              "source": "network",
+              "description": "Failed to load resource: the server responded with a status of 404 ()",
+              "sourceLocation": {
+                "type": "source-location",
+                "url": "https://slotdrop-gc2-group-zx8j.onrender.com/favicon.ico",
+                "urlProvider": "network",
+                "line": 0,
+                "column": 0
+              }
+            }
+          ]
+        }
+      ],
+      "measuredAt": "2026-11-16T00:08:42.495Z",
+      "version": "13.6.0",
+      "browser": "151.0.7922.34",
+      "formFactor": "mobile",
+      "throttlingMethod": "simulate",
+      "screenEmulation": {
+        "mobile": true,
+        "width": 412,
+        "height": 823,
+        "deviceScaleFactor": 1.75,
+        "disabled": false
+      },
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "best-practices": 96
+      },
+      "metrics": {
+        "first-contentful-paint": {
+          "value": 1005.363,
+          "unit": "millisecond"
+        },
+        "largest-contentful-paint": {
+          "value": 1005.363,
+          "unit": "millisecond"
+        },
+        "speed-index": {
+          "value": 2084.0436599999994,
+          "unit": "millisecond"
+        },
+        "total-blocking-time": {
+          "value": 120.5,
+          "unit": "millisecond"
+        },
+        "cumulative-layout-shift": {
+          "value": 0,
+          "unit": "unitless"
+        }
+      },
+      "listApiStatus": 200,
+      "listApiMs": 259,
+      "warnings": []
+    }
+  }
+}

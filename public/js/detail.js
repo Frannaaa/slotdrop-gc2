@@ -3,6 +3,7 @@ import {
   available, closedSessionLabel, notice, inclusionLabel, activityLabel,
   comparisonLabel, safeHttpsUrl, previewPrice
 } from "./customer-common.js";
+import { discountPercent } from "./business-config.js";
 
 const content = document.querySelector("#detail");
 const status = document.querySelector("#status");
@@ -30,7 +31,7 @@ function renderDetail(slot,id,quantity){
   const sourceLink=source?`<p><a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer">Studio workshop details ↗</a></p>`:"";
   const priceLink=priceSource?`<p><a href="${escapeHtml(priceSource)}" target="_blank" rel="noopener noreferrer">Published price source ↗</a></p>`:"";
   const displayQuantity=quantity===1?"per person":`per person · ${quantity} selected`;
-  const discount=slot.originalPriceCentavos>0?Math.round(100*(slot.originalPriceCentavos-quote.unit)/slot.originalPriceCentavos):0;
+  const discount=discountPercent(slot.originalPriceCentavos,quote.unit);
   const inclusions=traits.length?`<div class="detail-highlights">${traits.map(value=>`<span>${escapeHtml(value)}</span>`).join("")}</div>`:"";
   const technique=slot.technique?slot.technique.replace(/-/g," "):"";
   const preparation=slot.preparationNote?`<section class="detail-section"><h2>Before you go</h2><p>${escapeHtml(slot.preparationNote)}</p></section>`:"";
@@ -80,7 +81,7 @@ function renderDetail(slot,id,quantity){
         <div class="booking-availability"><span>Availability</span><strong>${escapeHtml(String(slot.remainingSeats))} ${slot.remainingSeats===1?"seat":"seats"} left</strong></div>
         <div class="booking-availability"><span>Book before</span><strong class="muted">${escapeHtml(cutoff)}</strong></div>
         <a id="continue" class="button" href="/selection.html?slotId=${id}&quantity=${quantity}">Choose seats ↗</a>
-        <p id="unavailable-message" class="booking-micro" hidden>Bookings are closed for this session.</p>
+        <p id="unavailable-message" class="booking-micro" hidden></p>
         <p class="booking-micro">Course demo · No real payment is collected</p>
       </aside>
     </div>`;
@@ -92,11 +93,19 @@ function sync(){
   if(!link)return;
   const open=available(slot,quantity);
   const closed=slot.serviceActive&&slot.status==="open"&&slot.runsAsScheduled?closedSessionLabel(slot):"";
-  const message=open?"":(closed||"This session is unavailable")+". Browse for another session.";
-  link.hidden=!open;
-  const unavailable=document.querySelector("#unavailable-message");
-  if(unavailable) unavailable.hidden=open;
-  if(status.textContent!==message) notice(status,message,!open);
+  const smallerGroup = !open && available(slot);
+  const reason = smallerGroup
+    ? `Only ${slot.remainingSeats} ${slot.remainingSeats === 1 ? "seat is" : "seats are"} left.`
+    : `${closed || "This session is unavailable"}.`;
+  const nextStep = smallerGroup ? "Choose a smaller group in Browse." : "Browse for another session.";
+  const message = open ? "" : `${reason} ${nextStep}`;
+  link.hidden = !open;
+  const unavailable = document.querySelector("#unavailable-message");
+  if (unavailable) {
+    unavailable.hidden = open;
+    if (!open && unavailable.textContent !== reason) unavailable.textContent = reason;
+  }
+  if (status.textContent !== message) notice(status, message, !open);
 }
 
 async function load(){

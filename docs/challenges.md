@@ -126,14 +126,12 @@ Each member picks one function they wrote and writes down what it will return fo
 
 | Member | Video |
 |---|---|
-| Fran (M1) | Pending upload |
+| Fran (M1) | [Fran's `openReleaseUtilization` recording (2:58)](https://drive.google.com/file/d/1GFZk8pZMc15Siq2pIOhDi_KqcupARUIT/view?usp=drivesdk) |
 | Cholo / Chonel (M2) | [Chonel's recording](https://drive.google.com/file/d/1Ms970zkXeCqHRqoOGZNs8MHzaGo3ivZ4/view?usp=drivesdk) |
 | Janelle (M3) | [Janelle's `priceQuote` recording](https://drive.google.com/file/d/1pJMJDHhrfR6EWDazqLopU-RuFoPVv5Pw/view?usp=drivesdk) |
-| Kaitlyn (M4) | Pending upload |
+| Kaitlyn (M4) | [Kaitlyn's recording](https://drive.google.com/file/d/1jPN4CTLE5_KpL4tUCRJR3l0DEeh7YxNu/view?usp=drivesdk) |
 | Kat / Kaithlyn (M5) | Pending upload |
 | Kirsten (M6) | [Kirsten's recording](https://drive.google.com/file/d/1LJxyMj9HbWRehO8hwoVBs4Eeh2n9MUKE/view?usp=drivesdk) |
-
-Three recordings were in the folder when we checked on **15 November**.
 
 ## Stretch challenges
 
@@ -156,6 +154,8 @@ The retry returned **201** for one **₱2,880** booking and seats went from **3 
 
 The traced Render build counted requests by socket address. PR #72 uses the client address on Render. The [integration tests](../tests/booking-rate-limit.test.js) cover clients behind the same proxy.
 
+On the reviewed Render release, the browser received a simulated `429` with a 5-second wait. Checkout stayed locked, then sent the identical request after 5,008 ms. Render returned `200` for the existing practice booking. Confirmation reloaded receipt `1267ec9f-e9a4-4395-9c84-0f8f4f74c69b` and Owner showed the same ₱2,700.00 total and one matching row. [Release verification](evidence/live-release-3ef579d.json) · [Checkout, receipt and Owner screenshots](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43727564732/artifacts/14167311156)
+
 ### The double click
 
 [Kat’s review on #43](https://github.com/Frannaaa/slotdrop-gc2/pull/43#pullrequestreview-5817789602) caught Submit turning back on between Save and Confirmation. We lock the form through navigation and cover that path in the [browser test](../tests/checkout-browser.test.js).
@@ -166,9 +166,11 @@ In the [14 November deployed browser run](evidence/challenge2-final/browser-netw
 
 ### Pagination
 
-Browse sends `page` and `limit` to `GET /api/slots`. The server filters first, then returns the requested page. Browse shows the results while it checks for a next page. [Backend #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49) · [Browse #63](https://github.com/Frannaaa/slotdrop-gc2/pull/63)
+The deployed test below used `GET /api/slots` with `page` and `limit`. The server filtered dates before returning the requested page, and Browse displayed the results while it checked for a next page. [Backend #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49) · [Browse #63](https://github.com/Frannaaa/slotdrop-gc2/pull/63)
 
 With eight deployed sessions and `limit=3`, page 1 returned **18, 20, 22**, page 2 returned **24, 26, 28**, and page 3 returned **30, 32**. Page 4 returned `200 []`. Both `page=0` and `limit=1000` got **400 INVALID_INPUT**. In Browse, [page 1](evidence/challenge2/browse-page-1.jpg) showed six cards, [page 2](evidence/challenge2/browse-page-2.jpg) showed two, and Previous returned to page 1. [Network capture](evidence/stretch-deployed/browser-readbacks-2026-11-14.json)
+
+Browse’s `view=workshops` still pages on the server. Dates for the same workshop are grouped after filtering, so they stay together when Next is used. The same response tells Browse whether there is another page. The plain slot list still pages individual dates. [API regression test](../tests/discovery.test.js)
 
 ### Join and compute
 
