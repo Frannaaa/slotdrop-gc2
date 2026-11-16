@@ -161,8 +161,34 @@ test('Browse groups repeated dates before paging and keeps practice bookings sep
       return response.json();
     };
     const practice = await get('view=practice');
-    assert.equal(practice.length, 3);
+    assert.equal(practice.length, 4);
     assert.ok(practice.every(slot => slot.startsAt === null && slot.bookingClosesAt === null));
+    assert.equal(new Set(practice.map(slot => slot.serviceId)).size, 3);
+    const choiceSlots = practice.filter(slot => slot.studioReference?.key === 'bumi-mug');
+    assert.deepEqual(choiceSlots.map(slot => slot.demoVariant), [1, 2]);
+    assert.notEqual(choiceSlots[0].id, choiceSlots[1].id);
+    // Each fictional date is an independently bookable, non-expiring slot.
+    for (let index = 0; index < choiceSlots.length; index++) {
+      const slot = choiceSlots[index];
+      const quote = await fetch(f.base + '/api/pricing/quote?slotId=' + slot.id + '&quantity=1');
+      assert.equal(quote.status, 200);
+      const booking = await fetch(f.base + '/api/bookings', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: '88000000-0000-4000-8000-00000000000' + (index + 1),
+          slotId: slot.id, quantity: 1,
+          customerName: 'Demo Date Tester', customerEmail: 'demo' + index + '@example.com',
+          paymentMethod: 'mock_card', expectedTotalCentavos: slot.offerPriceCentavos,
+        }),
+      });
+      assert.equal(booking.status, 201);
+      const receipt = await booking.json();
+      assert.equal(receipt.demoVariant, index + 1);
+      assert.equal(receipt.sessionStartsAt, null);
+      assert.equal(receipt.slotId, slot.id);
+      const after = await (await fetch(f.base + '/api/slots/' + slot.id)).json();
+      assert.equal(after.remainingSeats, slot.remainingSeats - 1);
+    }
 
     const firstPage = await get('view=workshops&limit=1');
     assert.equal(firstPage.hasNextPage, true);
