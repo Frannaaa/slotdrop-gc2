@@ -13,10 +13,11 @@ const list=await get('/api/bookings');
 assert.ok(Array.isArray(list),'Owner booking list must be an array');
 const matches=list.filter(b=>b.id===id);
 assert.equal(matches.length,1,'Owner list needs exactly one matching saved booking');
-for(const [field,expected] of Object.entries({id,quantity:4,totalPriceCentavos:1026000,status:'confirmed',paymentMethod:'mock_card'})){
+for(const [field,expected] of Object.entries({id,quantity:4,totalPriceCentavos:1026000,status:'confirmed'})){
  assert.equal(receipt[field],expected,'Receipt field '+field);
  assert.equal(matches[0][field],expected,'Owner field '+field);
 }
+assert.equal(receipt.paymentMethod,'mock_card','Payment choice visible in Confirmation only');
 for(const field of ['slotId','unitPriceCentavos','pricingType','platformFeeCentavos','providerPayoutCentavos','serviceName','providerName']){
  assert.deepEqual(matches[0][field],receipt[field],'Owner/receipt mismatch for '+field);
 }
