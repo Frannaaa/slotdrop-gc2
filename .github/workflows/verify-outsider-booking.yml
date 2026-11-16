@@ -1,0 +1,25 @@
+name: SlotDrop outsider phone receipt cross-check
+on:
+  push:
+    branches: ['qa/gc2-outsider-receipt-20261116']
+permissions:
+  contents: read
+jobs:
+  receipt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Read saved phone-test receipt and match Owner list
+        run: node tools/verify-outsider-booking.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slotdrop-outsider-receipt-check
+          path: outsider-evidence/
+          retention-days: 90
