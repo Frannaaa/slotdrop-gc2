@@ -114,3 +114,21 @@ test('three grading practice workshops ship credited WebP photos', async () => {
     assert.equal(bytes.subarray(8, 12).toString(), 'WEBP', 'Invalid WebP file for ' + key);
   }
 });
+
+test('Browse shows grading practice cards without requiring an accordion click', async () => {
+  const html = await readFile(resolve(publicRoot, 'browse.html'), 'utf8');
+  const js = await readFile(resolve(publicRoot, 'js/browse.js'), 'utf8');
+  const css = await readFile(resolve(publicRoot, 'css/browse.css'), 'utf8');
+  const practiceSection = html.match(/<section\b[^>]*id="practice-sessions"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(practiceSection, 'Practice should be an always-visible section, not a details widget');
+  assert.match(practiceSection, /<h2 id="practice-heading">Practice bookings for grading<\/h2>/);
+  assert.match(practiceSection, /within 72 hours of their start/);
+  assert.match(practiceSection, /configured cutoff/);
+  assert.match(practiceSection, /do not expire by date/);
+  assert.match(practiceSection, /require open sales and available seats/);
+  assert.match(practiceSection, /id="practice-results"/);
+  assert.doesNotMatch(practiceSection, /<(?:details|summary)\b/);
+  assert.doesNotMatch(js, /practiceSessions\.addEventListener\(["']toggle["']/);
+  assert.match(js, /loadPractice\(\);\s*$/);
+  assert.doesNotMatch(css, /\.practice-sessions summary/);
+});
