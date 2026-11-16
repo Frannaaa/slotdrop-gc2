@@ -7,7 +7,7 @@ Requests and responses use JSON with camelCase fields. The [schema](schema.md) l
 | Method and path | Input | Success | Errors | Owner |
 |---|---|---|---|---|
 | GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | 503 if the production database or required tables are unavailable | Fran |
-| GET /api/slots | q, category, area, when, people, type, tag, sort, page, limit, view | 200 array, including [] | 400 bad filter | Fran |
+| GET /api/slots | q, category, area, when, people, type, tag, sort, page, limit, view | 200 array (including `[]`) by default, for `view=practice` or `view=closed`; for `view=workshops`, 200 `{workshops: [{serviceId, sessions}], hasNextPage}` | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 session started, or capacity/cancellation/resumption conflict | Fran |
