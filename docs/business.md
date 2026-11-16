@@ -4,6 +4,8 @@ SlotDrop started as a way to find last-minute appointments. For GC2 we focused o
 
 We’d try this with one pottery studio and a few seats it usually leaves empty. The [pilot plan](#pilot-and-risks) shows how we’d test whether the studio earns more. We took the studio details and reference prices from [public listings](#studio-research). Dates, seats, offers, bookings and payments in the app are simulated.
 
+**GC1 source and improvement:** Our earlier submission was the original **Group 3 - GC1: SlotDrop Business Proposal**. The separately preserved [**revised GC1 proposal (post-feedback)**](reference/gc1-revised-business-proposal.md) makes the improved positioning, scoped launch market, named competitors, studio payout math, pilot assumptions and risks explicit. This `business.md` records which revisions were implemented in GC2 and why; the revised proposal is a strategic working version, **not** a replacement of the original submitted GC1 or proof of real partnerships.
+
 ## 4.1 GC1 traceability
 
 These are the parts of GC1 we carried into the build, along with the decisions we made after feedback.
