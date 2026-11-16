@@ -1,6 +1,6 @@
 // Group assignment: Kaitlyn. See README.md#team.
 import {
-  request, money, date, escapeHtml, pageParameters, notice, isBookingId, isBookingReceipt,
+  request, money, date, escapeHtml, pageParameters, notice, isBookingId, isBookingReceipt, practiceChoiceLabel,
 } from "./customer-common.js";
 const content = document.querySelector("#receipt"),
   status = document.querySelector("#status"),
@@ -33,7 +33,7 @@ async function load() {
     if (!isBookingReceipt(booking) || booking.id.toLowerCase() !== id.toLowerCase())
       throw new Error("Invalid booking receipt.");
     const cancelled = booking.status === "cancelled";
-    content.innerHTML = `<p class="eyebrow">${escapeHtml(booking.status)}</p><h1>${cancelled ? "This booking is cancelled." : "Your demo booking is saved."}</h1><h2>${escapeHtml(booking.serviceName)}</h2><p>${escapeHtml(booking.providerName)} · ${date(booking.sessionStartsAt)}</p><dl><dt>Booking reference</dt><dd class="reference">${escapeHtml(booking.id)}</dd><dt>Seats</dt><dd>${booking.quantity}</dd><dt>Price per person</dt><dd>${money(booking.unitPriceCentavos)}</dd><dt>Saved total</dt><dd>${money(booking.totalPriceCentavos)}</dd><dt>Payment choice</dt><dd>${booking.paymentMethod === "pay_on_site" ? "Pay on site (simulated)" : "Mock card (simulated)"}</dd></dl><a class="button" href="/#featured">See featured sessions</a>`;
+    content.innerHTML = `<p class="eyebrow">${escapeHtml(booking.status)}</p><h1>${cancelled ? "This booking is cancelled." : "Your demo booking is saved."}</h1><h2>${escapeHtml(booking.serviceName)}</h2><p>${escapeHtml(booking.providerName)} · ${booking.sessionStartsAt === null ? escapeHtml(practiceChoiceLabel(booking)) : date(booking.sessionStartsAt)}</p><dl><dt>Booking reference</dt><dd class="reference">${escapeHtml(booking.id)}</dd><dt>Seats</dt><dd>${booking.quantity}</dd><dt>Price per person</dt><dd>${money(booking.unitPriceCentavos)}</dd><dt>Saved total</dt><dd>${money(booking.totalPriceCentavos)}</dd><dt>Payment choice</dt><dd>${booking.paymentMethod === "pay_on_site" ? "Pay on site (simulated)" : "Mock card (simulated)"}</dd></dl><a class="button" href="/#featured">See featured sessions</a>`;
     notice(
       status,
       cancelled ? "This saved booking is cancelled and is not an active reservation. Payments in this course demo are simulated." : "Demo booking saved in SlotDrop. This does not reserve a real studio place or charge a payment.",
