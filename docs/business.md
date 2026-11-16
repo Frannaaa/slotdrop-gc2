@@ -187,4 +187,3 @@ Our main risks are listing a seat the studio already sold, asking a studio to di
 ### Studio applications
 
 A studio can send an application and look up its pending status. Before publishing a real studio page, we’d verify who submitted it, confirm permission and agree on commercial terms. [Studio application contract](routes.md#studio-research-and-applications)
-
