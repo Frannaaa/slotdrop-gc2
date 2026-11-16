@@ -32,17 +32,24 @@ try {
     const page = await browser.newPage({ viewport });
     const errors = [];
     const browseCalls = [];
+    const practiceCalls = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => {
       const url = new URL(request.url());
       if (url.searchParams.get('view') === 'workshops') browseCalls.push(url.searchParams.get('page'));
+      if (url.searchParams.get('view') === 'practice') practiceCalls.push(url.pathname);
     });
     await page.goto(target);
     const available = page.locator('#results .activity-card');
     const samples = page.locator('#practice-results .activity-card');
     const rows = page.locator('#results .session-options a');
     await available.first().waitFor();
+    const practicePanel = page.locator('#practice-sessions');
+    assert.equal(await practicePanel.evaluate(node => node.open), false);
+    assert.deepEqual(practiceCalls, [], 'The grading panel waits until someone opens it');
+    await practicePanel.locator('summary').click();
     await samples.first().waitFor();
+    assert.equal(practiceCalls.length, 1);
     assert.equal(await available.count(), 6);
     assert.equal(await samples.count(), 3);
     assert.equal(await samples.locator('img').count(), 0);
@@ -103,10 +110,13 @@ for (let attempt = 1; attempt <= 3; attempt++) {
     });
     assert.ok(!lhr.runtimeError, lhr.runtimeError?.message);
     const scores = Object.fromEntries(Object.entries(lhr.categories).map(([k, v]) => [k, Math.round(v.score * 100)]));
+    const metrics = Object.fromEntries(
+      ['first-contentful-paint','largest-contentful-paint','speed-index','total-blocking-time','cumulative-layout-shift']
+        .map(key => [key, lhr.audits[key].numericValue]));
     const failures = Object.fromEntries(Object.entries(lhr.categories).map(([key, category]) =>
       [key, category.auditRefs.filter(({id,weight}) => weight && lhr.audits[id].score != null && lhr.audits[id].score < 1)
         .map(({id}) => [id, lhr.audits[id].score, lhr.audits[id].numericValue])]));
-    const result = { attempt, scores, failures, lighthouse: lhr.lighthouseVersion, formFactor: lhr.configSettings.formFactor };
+    const result = { attempt, scores, metrics, failures, lighthouse: lhr.lighthouseVersion, formFactor: lhr.configSettings.formFactor };
     console.log('SLOTDROP_LIGHTHOUSE_GROUPED ' + JSON.stringify(result));
     await writeFile('browse-preview/lighthouse-' + attempt + '.json', JSON.stringify(lhr));
     assert.equal(scores['best-practices'], 100);
