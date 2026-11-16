@@ -195,7 +195,25 @@ const cardDateFormat = new Intl.DateTimeFormat("en-PH", {
   minute: "2-digit",
 });
 
-export function card(slot, quantity = 1, { closed = false } = {}) {
+function sessionLinks(sessions, quantity) {
+  return `<ul class="session-options" aria-label="Available dates">
+    ${sessions.map((slot) => {
+      const time = cardDateFormat.format(new Date(slot.startsAt));
+      const cutoff = cardDateFormat.format(new Date(slot.bookingClosesAt));
+      const price = previewPrice(slot, quantity);
+      const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
+      return `<li>
+        <a href="/detail.html?slotId=${slot.id}&quantity=${quantity}">
+          <strong>${time}</strong>
+          <span>${money(price.total)} ${quantity === 1 ? "per person" : `for ${quantity} people`} · ${seats}</span>
+          <small>Book by ${cutoff}</small>
+        </a>
+      </li>`;
+    }).join("")}
+  </ul>`;
+}
+
+export function card(slot, quantity = 1, { closed = false, compact = false, sessions = [] } = {}) {
   const selectedQuantity =
     Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 100
       ? quantity
@@ -205,18 +223,18 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
   const photo = slot.studioReference?.photo;
   const photoPage = safeHttpsUrl(photo?.page);
   const photoKey = slot.studioReference?.key;
-  const hasPhoto = !closed && photoPage && typeof photoKey === "string"
+  const hasPhoto = !closed && !compact && photoPage && typeof photoKey === "string"
     && /^[a-z-]+$/.test(photoKey) && typeof photo.alt === "string"
     && typeof photo.credit === "string";
   const sessionDate = practice ? "" : closed ? date(slot.startsAt) : cardDateFormat.format(new Date(slot.startsAt));
   const sessionLabel = closed
     ? closedSessionLabel(slot) || "Booking closed"
-    : practice ? "Practice version" : "";
+    : practice && !compact ? "Practice booking" : "";
   const actionLabel = closed ? "View details" : practice ? "Try practice booking" : "View workshop";
   const seats = slot.remainingSeats === 1 ? "1 seat left" : `${slot.remainingSeats} seats left`;
   let bookingNote = "";
   if (!closed && practice) {
-    bookingNote = "Same workshop, no booking cutoff.";
+    bookingNote = "Sample booking with no expiry for grading.";
   } else if (!closed && Number.isFinite(Date.parse(slot.bookingClosesAt))) {
     bookingNote = `Book by ${cardDateFormat.format(new Date(slot.bookingClosesAt))}`;
   }
@@ -238,6 +256,7 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
           ? `<a href="/studio.html?providerId=${slot.providerId}">${escapeHtml(slot.providerName)}</a>`
           : escapeHtml(slot.providerName)}
       </p>
+      ${sessions.length > 1 ? sessionLinks(sessions, selectedQuantity) : `
       <p class="session-time">
         ${sessionDate ? `<strong>${sessionDate}</strong>` : ""}
         ${closed ? "" : `${sessionDate ? "<br />" : ""}${slot.durationMinutes} min · ${seats}`}
@@ -256,7 +275,7 @@ export function card(slot, quantity = 1, { closed = false } = {}) {
         class="button secondary"
         href="/detail.html?slotId=${slot.id}&quantity=${selectedQuantity}"
         >${actionLabel}</a
-      >
+      >`}
     </div>
   </article>`;
 }

@@ -151,3 +151,50 @@ test('optional page/limit paginate eligible slots with stable ordering and 400 v
     }
   } finally { await f.close(); }
 });
+
+test('Browse groups repeated dates before paging and keeps practice bookings separate', async () => {
+  const f = await fixture({ realCatalog: true });
+  try {
+    const get = async params => {
+      const response = await fetch(f.base + '/api/slots?' + params);
+      assert.equal(response.status, 200, params);
+      return response.json();
+    };
+    const practice = await get('view=practice');
+    assert.equal(practice.length, 3);
+    assert.ok(practice.every(slot => slot.startsAt === null && slot.bookingClosesAt === null));
+
+    const firstPage = await get('view=workshops&limit=1');
+    assert.equal(firstPage.hasNextPage, true);
+    assert.equal(firstPage.workshops.length, 1);
+    const [first] = firstPage.workshops;
+    const baseId = first.sessions[0].id;
+    const { rows: [extra] } = await f.database.query(`
+      INSERT INTO slots (service_id, starts_at, booking_closes_at, capacity,
+        original_price_centavos, offer_price_centavos, buddy_price_centavos)
+      SELECT service_id, starts_at + interval '10 minutes', booking_closes_at,
+        1, original_price_centavos, offer_price_centavos, buddy_price_centavos
+      FROM slots WHERE id=$1 RETURNING id
+    `, [baseId]);
+    const extraId = Number(extra.id);
+    const [firstAgain] = (await get('view=workshops&page=1&limit=1')).workshops;
+    assert.equal(firstAgain.serviceId, first.serviceId);
+    assert.ok(firstAgain.sessions.some(slot => slot.id === baseId));
+    assert.ok(firstAgain.sessions.some(slot => slot.id === extraId));
+    assert.ok(firstAgain.sessions.every(slot =>
+      slot.serviceId === first.serviceId && slot.startsAt !== null));
+    const [second] = (await get('view=workshops&page=2&limit=1')).workshops;
+    assert.notEqual(firstAgain.serviceId, second.serviceId);
+
+    const sorted = await get('view=workshops&people=2&sort=price-low&limit=50');
+    assert.equal(sorted.hasNextPage, false);
+    const filtered = sorted.workshops;
+    assert.ok(filtered.flatMap(workshop => workshop.sessions).every(slot => slot.remainingSeats >= 2));
+    assert.ok(filtered.flatMap(workshop => workshop.sessions).every(slot => slot.id !== extraId));
+    assert.equal(new Set(filtered.map(workshop => workshop.serviceId)).size, filtered.length);
+    await f.database.query('UPDATE slots SET booking_closes_at=$1 WHERE id=$2', [f.now, baseId]);
+    const { workshops: available } = await get('view=workshops&limit=50');
+    assert.ok(available.flatMap(workshop => workshop.sessions).every(slot => slot.id !== baseId));
+    assert.ok((await get('view=closed&limit=50')).some(slot => slot.id === baseId));
+  } finally { await f.close(); }
+});

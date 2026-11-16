@@ -166,9 +166,11 @@ In the [14 November deployed browser run](evidence/challenge2-final/browser-netw
 
 ### Pagination
 
-Browse sends `page` and `limit` to `GET /api/slots`. The server filters first, then returns the requested page. Browse shows the results while it checks for a next page. [Backend #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49) · [Browse #63](https://github.com/Frannaaa/slotdrop-gc2/pull/63)
+The deployed test below used `GET /api/slots` with `page` and `limit`. The server filtered dates before returning the requested page, and Browse displayed the results while it checked for a next page. [Backend #49](https://github.com/Frannaaa/slotdrop-gc2/pull/49) · [Browse #63](https://github.com/Frannaaa/slotdrop-gc2/pull/63)
 
 With eight deployed sessions and `limit=3`, page 1 returned **18, 20, 22**, page 2 returned **24, 26, 28**, and page 3 returned **30, 32**. Page 4 returned `200 []`. Both `page=0` and `limit=1000` got **400 INVALID_INPUT**. In Browse, [page 1](evidence/challenge2/browse-page-1.jpg) showed six cards, [page 2](evidence/challenge2/browse-page-2.jpg) showed two, and Previous returned to page 1. [Network capture](evidence/stretch-deployed/browser-readbacks-2026-11-14.json)
+
+Browse’s `view=workshops` still pages on the server. Dates for the same workshop are grouped after filtering, so they stay together when Next is used. The same response tells Browse whether there is another page. The plain slot list still pages individual dates. [API regression test](../tests/discovery.test.js)
 
 ### Join and compute
 

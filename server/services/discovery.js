@@ -28,13 +28,13 @@ export async function listSlots(db, query, now, providerId = null) {
   if (query.tag !== undefined && !['beginner','handbuilding','wheel-throwing','painting-included','materials-included'].includes(query.tag)) invalid('Invalid activity attribute.');
   if (query.sort !== undefined && !['soonest','price-low','price-high'].includes(query.sort)) invalid('Invalid sort.');
   if (query.when !== undefined && !['today','tomorrow','weekend'].includes(query.when)) invalid('Invalid date filter.');
-  if (query.view !== undefined && query.view !== 'closed') invalid('Invalid session view.');
+  if (query.view !== undefined && !['closed', 'practice', 'workshops'].includes(query.view)) invalid('Invalid session view.');
   if ((query.q?.length ?? 0) > 100 || (query.area?.length ?? 0) > 100) invalid('Search text is too long.');
   if ([query.q, query.area].some(value => value?.includes('\u0000'))) invalid('Search text cannot contain null characters.');
   const people = query.people === undefined ? 1 : integer(query.people, 'people', 1, MAX_SEATS);
   const closed = query.view === 'closed';
-  // Bound the closed view. Keep pagination opt-in for existing callers.
-  const paginated = closed || query.page !== undefined || query.limit !== undefined;
+  // Bound the specialized views. Keep pagination opt-in for existing callers.
+  const paginated = query.view !== undefined || query.page !== undefined || query.limit !== undefined;
   const page = query.page === undefined ? 1 : integer(query.page, 'page', 1, 10000);
   const limit = query.limit === undefined ? 12 : integer(query.limit, 'limit', 1, 50);
   return searchSlots(db, {

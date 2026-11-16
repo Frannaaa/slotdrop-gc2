@@ -140,16 +140,35 @@ test('practice cards show the cutoff exception and render a credited local works
     studioReference: { key: 'laro-mug', sourceUrl: 'https://example.com/source', checkedAt: '2026-11-04',
       photo: { alt: 'Pottery & painting', credit: 'Example Studio', page: 'https://example.com/workshop' } } };
   const html = card(practice);
-  assert.match(html, /<span class="session-label practice">Practice version<\/span>/);
-  assert.match(html, /Same workshop, no booking cutoff\./);
+  assert.match(html, /<span class="session-label practice">Practice booking<\/span>/);
+  assert.match(html, /Sample booking with no expiry for grading\./);
   assert.match(html, /Try practice booking/);
   const scheduled = card({ ...practice, startsAt: slot.startsAt, bookingClosesAt: slot.bookingClosesAt });
   assert.match(scheduled, /View workshop/);
   assert.match(scheduled, /Book by Nov 1/);
-  assert.doesNotMatch(scheduled, /Practice version|Try practice booking/);
+  assert.doesNotMatch(scheduled, /Practice booking|Try practice booking/);
   assert.match(html, /src="\/images\/workshops\/laro-mug\.webp" alt="Pottery &amp; painting"/);
   assert.match(html, /aria-label="Photo source: Example Studio"/);
   assert.doesNotMatch(html, /Real studio reference|1970|Book by/);
+  const compact = card(practice, 1, { compact: true });
+  assert.match(compact, /Sample booking with no expiry for grading/);
+  assert.match(compact, /Try practice booking/);
+  assert.doesNotMatch(compact, /<img|session-label/);
   const unsafe = { ...practice, studioReference: { ...practice.studioReference, key: '../../elsewhere' } };
   assert.doesNotMatch(card(unsafe), /<img/);
+});
+
+test('a repeated workshop shows each date, seat count, and its own price and detail link', () => {
+  const later = {
+    ...slot, id: 2, startsAt: '2026-11-02T06:00:00Z',
+    bookingClosesAt: '2026-11-02T04:00:00Z', remainingSeats: 3,
+    offerPriceCentavos: 130000, buddyPriceCentavos: null,
+  };
+  const html = card(slot, 2, { sessions: [slot, later] });
+  assert.equal((html.match(/<article/g) || []).length, 1);
+  assert.match(html, /aria-label="Available dates"/);
+  assert.match(html, /detail\.html\?slotId=1&quantity=2/);
+  assert.match(html, /detail\.html\?slotId=2&quantity=2/);
+  assert.match(html, /₱2,600\.00 for 2 people · 3 seats left/);
+  assert.match(html, /Book by Nov 2/);
 });

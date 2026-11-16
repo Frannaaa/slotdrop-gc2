@@ -28,7 +28,7 @@ The [booking limiter](../server/middleware/booking-rate-limit.js) counts up to 3
 
 ## Discovery and session responses
 
-Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. The default bookable view returns the full eligible array when both fields are omitted. Browse requests six bookable sessions at a time. The deployed pagination evidence is in [Challenges](challenges.md#pagination).
+Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optional; supplying either enables bounded SQL pagination after all search/filter conditions. Default page is 1; default limit is 12; valid page is 1–10000 and limit is 1–50. An invalid, repeated or unsupported parameter returns 400; a page past the end returns 200 with `[]`. The default bookable view returns the full eligible array when both fields are omitted. The deployed session pagination evidence is in [Challenges](challenges.md#pagination).
 
 - `q` searches provider and activity names, primary type, technique and inclusions by case-insensitive literal substring. Blank text is ignored. `area` matches the area name case-insensitively. Both fields accept up to 100 characters and reject null characters.
 - `category` accepts `creative` or `active`. `type` accepts `pottery`, `painting`, `pilates`, `dance` or `other`. `tag` accepts `beginner`, `handbuilding`, `wheel-throwing`, `painting-included` or `materials-included`.
@@ -37,6 +37,10 @@ Optional **pagination**: `GET /api/slots?page=1&limit=12`. Both fields are optio
 `when` accepts `today`, `tomorrow` or `weekend` in Asia/Manila. On Sunday, the weekend includes the preceding Saturday. Date filters return dated offers, and the bookable view applies the 72-hour window. A search with no matches returns `200 []`.
 
 The bookable list requires an active activity, an open offer, a session confirmed to run and enough seats for the requested group. Dated offers require a future start less than 72 hours away and a future booking cutoff. Three startup-created practice offers have no start or cutoff and appear first in the default order. Date filters return scheduled offers only.
+
+`view=workshops` returns `{ workshops: [{ serviceId, sessions }], hasNextPage }` for Browse’s upcoming workshop list. Only this opt-in view changes the response shape. Each group contains its eligible dated slots in start-time order. Filters apply to dates first, then the server groups by service and pages the workshops. Soonest orders groups by their first date. Price sorting uses the lowest or highest eligible date price for the selected party size. Browse requests six workshops per page. The server checks for an additional group to supply `hasNextPage` in the same response.
+
+`view=practice` returns eligible undated slots as the usual flat array. Browse displays them above the upcoming workshop filters so the instructor can find a sample booking after the dated offers expire.
 
 `view=closed` lists dated, active, open, confirmed-to-run sessions whose cutoff has passed, including offers that sold out. The `people` filter uses total capacity in this view. Without an explicit sort, the most recent cutoffs appear first. The view always applies pagination. Browse fetches the latest 16 only when someone opens **Closed sessions**. Its cards say “Booking closed” or “Event ended” and link to read-only details. Closed offers still return 409 from a new quote or booking.
 

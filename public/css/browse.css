@@ -279,3 +279,28 @@
   .browse-page .browse-filter-row label:last-child { grid-column: auto; }
   .browse-page .activity-types button { padding: .5rem .85rem; }
 }
+
+.browse-page main > section > h2 { margin-bottom: .75rem; }
+.browse-page .practice-sessions { margin-bottom: 2rem; }
+.browse-page #practice-status:empty { display: none; }
+.browse-page #practice-retry { margin-bottom: .75rem; }
+.browse-page .session-options {
+  display: grid;
+  gap: .55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.browse-page .session-options a {
+  display: grid;
+  gap: .12rem;
+  padding: .65rem .75rem;
+  border: 1px solid var(--browse-border);
+  border-radius: .65rem;
+  color: var(--browse-ink);
+  text-decoration: none;
+}
+.browse-page .session-options a:hover { border-color: var(--browse-blue); }
+.browse-page .session-options a strong { color: var(--browse-blue); text-decoration: underline; }
+.browse-page .session-options span,
+.browse-page .session-options small { font-size: .8rem; }
