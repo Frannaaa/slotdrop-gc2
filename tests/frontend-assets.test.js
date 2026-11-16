@@ -85,3 +85,17 @@ test('Detail and Selection back links return to Browse', async () => {
     assert.match(source, pattern, page + ' should provide a back link to Browse');
   }
 });
+
+// Regression: stray merge labels in <head> are parsed as visible page text.
+test('Detail head contains metadata only, with no stray merge-conflict text', async () => {
+  const html = await readFile(resolve(publicRoot, 'detail.html'), 'utf8');
+  const head = html.match(/<head>([\s\S]*?)<\/head>/i)?.[1];
+  assert.ok(head, 'Detail should include a head element');
+  const strayText = head
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<title\b[^>]*>[\s\S]*?<\/title>/gi, '')
+    .replace(/<(?:link|meta)\b[^>]*>/gi, '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .trim();
+  assert.equal(strayText, '', 'Unexpected raw text inside the Detail head');
+});
