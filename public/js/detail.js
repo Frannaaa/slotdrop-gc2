@@ -1,7 +1,7 @@
 import {
   request, money, date, positive, pageParameters, escapeHtml,
   available, closedSessionLabel, notice, inclusionLabel, activityLabel,
-  comparisonLabel, safeHttpsUrl, previewPrice
+  comparisonLabel, safeHttpsUrl, previewPrice, practiceChoiceLabel
 } from "./customer-common.js";
 import { discountPercent } from "./business-config.js";
 
@@ -36,7 +36,7 @@ function renderDetail(slot,id,quantity){
   const technique=slot.technique?slot.technique.replace(/-/g," "):"";
   const preparation=slot.preparationNote?`<section class="detail-section"><h2>Before you go</h2><p>${escapeHtml(slot.preparationNote)}</p></section>`:"";
   const scheduleNote=practice
-    ? "Demo exception: Kept open for grading; regular offers appear within 72 hours of a session and close at their booking cutoff."
+    ? "Fictional "+practiceChoiceLabel(slot)+". This example remains open for grading; dated offers appear within 72 hours and close at their own booking cutoff."
     : "This session is part of a simulated booking flow, not verified studio availability.";
   const cutoff=practice?"No cutoff for grading":date(slot.bookingClosesAt);
   const sourceSection=sourceLink||priceLink?`<p>Studio research sources:</p>${sourceLink}${priceLink}`:"";
@@ -69,7 +69,7 @@ function renderDetail(slot,id,quantity){
       </div>
       <aside class="detail-booking" id="offer" aria-label="Booking and pricing">
         <p class="booking-eyebrow">Your session</p>
-        <p class="booking-date"><span aria-hidden="true">▣</span>${practice?"Practice booking":escapeHtml(date(slot.startsAt))}</p>
+        <p class="booking-date"><span aria-hidden="true">▣</span>${practice?escapeHtml(practiceChoiceLabel(slot)):escapeHtml(date(slot.startsAt))}</p>
         <div class="booking-price-block">
           <p class="booking-price">${money(quote.unit)}</p>
           <p class="booking-per">${escapeHtml(displayQuantity)}</p>
