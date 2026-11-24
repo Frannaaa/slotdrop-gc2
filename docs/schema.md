@@ -1,6 +1,6 @@
 # Database schema
 
-The SQL is in [db/schema.sql](../db/schema.sql). It defines five tables:
+The SQL is in [db/schema.sql](../db/schema.sql). It defines six tables:
 
 | Table | Stores |
 |---|---|
@@ -8,6 +8,7 @@ The SQL is in [db/schema.sql](../db/schema.sql). It defines five tables:
 | `services` | Activity and provider FK, category, type, technique, inclusions, preparation and cancellation notes, beginner flag, duration, recurrence, active status and default cutoff lead time |
 | `slots` | Activity FK, start and cutoff, released capacity, regular/offer/buddy prices, sale status and confirmation that the session will run. Undated practice offers have two null dates. |
 | bookings | Quantity, private demo customer details/retry key, status and saved time/price/fee fields |
+| seat_holds | Unique retry key, session FK, quantity, server expiry, state and optional unique saved-booking FK |
 | provider_applications | Private demo contact/representation details, optional referenced provider, unique retry key and review status |
 
 The booking path is `providers` → `services` → `slots` → `bookings`, with one-to-many relationships at each step. A pending application may optionally refer to a provider.
@@ -18,10 +19,11 @@ capacity is the allocation released to SlotDrop, not the venue's total capacity.
 
 ```text
 seatsBooked = sum of confirmed booking quantities
-remainingSeats = capacity - seatsBooked
+seatsHeld = sum of hold quantities where status is active and expires_at > server time
+remainingSeats = capacity - seatsBooked - seatsHeld
 ```
 
-There is no separate remaining-seats counter. Booking and capacity edits must lock the same slots row before checking quantities. Owner edits and the booking service both use this lock. SQL constraints alone do not enforce capacity across all booking rows.
+There is no separate remaining-seats counter. Holds, bookings and capacity edits lock the same slots row before checking quantities. `slotSelect()` in the slot repository owns the shared count. SQL constraints alone do not enforce capacity across rows.
 
 Discovery requires an active activity, an open offer, confirmation that the session will run and enough released seats. Scheduled offers also require a start after now but before now + 72 hours and a cutoff after now. Undated practice offers can be booked without those time checks.
 
@@ -29,7 +31,7 @@ Discovery requires an active activity, an open offer, confirmation that the sess
 
 services.default_booking_cutoff_minutes is positive. Scheduled offer creation uses it when no explicit bookingClosesAt is supplied. Each scheduled slot saves its resolved deadline, strictly before its start. Changing the activity default does not rewrite session deadlines.
 
-A provider may set a different deadline for a particular session. The grading offers use a null start and cutoff, enforced as a pair. A partial unique index allows one undated offer per activity. Their saved receipts have a null `session_starts_at`.
+A provider may set a different deadline for a particular session. The grading offers use a null start and cutoff, enforced as a pair. A partial unique index allows a stable `demo_variant` of 1 or 2 per activity, preserving the two fictional date choices. Their saved receipts have a null `session_starts_at`.
 
 ## Prices and receipts
 
@@ -51,7 +53,7 @@ BIGINT IDs and totals must be converted to safe JSON integers. PostgreSQL's pg d
 
 ## Owner edits
 
-The API accepts price, capacity, cutoff and status edits. Start changes and cutoff edits for practice offers return 400. Cancelling a session with confirmed bookings or reducing capacity below confirmed seats returns 409. Reopening requires an active activity, confirmation that the session will run and at least one available seat. Scheduled offers also require a future booking cutoff.
+The API accepts price, capacity, cutoff and status edits. Start changes and cutoff edits for practice offers return 400. Cancelling a session with confirmed bookings or active holds, or reducing capacity below their combined quantity, returns 409. Reopening requires an active activity, confirmation that the session will run and at least one available seat. Scheduled offers also require a future booking cutoff.
 
 ## Seed and setup
 
@@ -73,3 +75,13 @@ Fresh schema and seed contain these fields. Existing databases use db/migrations
 Migration 002 adds unique nullable `reference_key` values to providers and services. `ensureReferenceCatalog()` adds any missing source-backed records at startup and can add future sample allocations for active reference activities whose existing sessions are no longer bookable. Historical bookings and session dates are preserved. Known legacy fixture services are deactivated for customer discovery. Migration 003 adds `provider_applications` without deleting data. The provider FK is optional because a new studio may not have a reference page. Applications are pending; they cannot update providers, create accounts or publish offers. Public readback exposes only application UUID, status and received time. Contacts, retry keys and signatures remain private.
 
 [Migration 004](../db/migrations/004_practice_sessions.sql) permits paired null dates on practice offers and a null session date on their receipts. Catalog startup creates three practice offers if absent. It keeps the original dates, seat totals and receipt snapshots of existing rows.
+
+
+## Final seat-hold upgrade
+
+[Migration 006](../db/migrations/006_seat_holds.sql) adds `seat_holds` without rewriting old sessions or receipts. It stores UUID `id`, unique UUID `request_id`, `slot_id`, positive `quantity`, `created_at`, `expires_at`, `status` and an optional unique `booking_id`. A database check requires a saved booking relation exactly when status is `converted`. `expires_at` must be later than creation.
+
+The API stores the earlier of ten minutes and the current booking cutoff. Undated practice sessions have no cutoff, but each individual hold still expires. No timer process or deletion is required to restore availability: the shared slot query ignores inactive and expired rows at the server's current time. Expired rows remain available for readback and retry comparisons.
+
+The own-hold exclusion argument in `findSlot()` is internal. Booking conversion must validate and lock the matching hold before using it, then update the hold and booking together. That conversion is Janelle's pending integration work. [API and handoff](routes.md#seat-holds-and-teammate-handoff).
+

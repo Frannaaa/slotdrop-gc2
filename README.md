@@ -27,6 +27,8 @@ The app is organized into [browser pages](public/), [Express routes and services
 
 ## Run locally
 
+Fran's Final foundation adds server-enforced seat holds while preserving the current booking journey. The countdown and hold-to-booking conversion are still teammate integration work. See [changes since GC2](docs/changes-since-gc2.md), the [hold API and handoff](docs/routes.md#seat-holds-and-teammate-handoff), and [actual local API captures](docs/refusals.md). The published `gc2-v1.0` tag is unchanged.
+
 Use Node 22 or later.
 
 ```sh
@@ -59,7 +61,7 @@ Run `npm run db:init` only for a new, empty course database. Start with `npm sta
 
 | Tool | Version | Why |
 |---|---|---|
-| HTML, CSS and JavaScript | GC2 frontend | Fetch JSON and render each page; prepare for the later React upgrade |
+| HTML, CSS and JavaScript | Current frontend | Fetch JSON and render each page; no framework is required for the Final |
 | Node.js | 22 configured for Render, CI and Docker | JavaScript server |
 | Express | 5.3.0 | API between the browser and database |
 | PostgreSQL | 16 in CI | Persistent tables, constraints and transactions |

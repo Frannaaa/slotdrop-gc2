@@ -84,7 +84,7 @@ sequenceDiagram
   A-->>C: 200 receipt JSON
 ```
 
-The row lock serializes competing bookings and Owner capacity edits for the **same** slot. Confirmed booking quantities, not a mutable remaining-seat counter, determine available allocation. A submitted quote is only a price acknowledgement: the server recomputes it after acquiring the lock. If the total changed, the API returns a fresh quote with `409 PRICE_CHANGED`; it does not save the order.
+The row lock serializes competing holds, bookings and Owner capacity edits for the **same** slot. Confirmed booking quantities and unexpired active holds determine available allocation. A submitted quote is only a price acknowledgement: the server recomputes it after acquiring the lock. If the total changed, the API returns a fresh quote with `409 PRICE_CHANGED`; it does not save the order.
 
 ### Data boundaries and outcomes
 
@@ -92,7 +92,7 @@ The row lock serializes competing bookings and Owner capacity edits for the **sa
 |---|---|---|
 | Activity and studio information | `providers` and `services` tables | Public activity, studio and inclusion details |
 | Dated offer, booking cutoff, released capacity, prices | `slots` table | Eligible listings and a fresh session/price quote |
-| Remaining allocation | Slot capacity minus **confirmed** booking quantities | Derived `remainingSeats`, updated after a confirmed save |
+| Remaining allocation | Slot capacity minus confirmed bookings and unexpired active holds | Derived `remainingSeats`, plus separate `confirmedSeats` and `heldSeats` |
 | Booking result | `bookings` record: session, quantity, accepted tier, fee, payout and timestamp | Receipt read by ID; guest email/name and requestId remain server-side |
 | Owner reports | Confirmed saved booking rows and session eligibility | Booking list without contact information and five derived metrics |
 | Provider inquiries | `provider_applications` table, separate from checkout | Pending application ID/status, not automatic listing approval |
@@ -109,13 +109,13 @@ The row lock serializes competing bookings and Owner capacity edits for the **sa
 
 The payment options are simulated and no card is charged. This architecture illustrates the Group 1 code path, not external supplier inventory synchronization.
 
-Prices are integer centavos. [Shared pricing helpers](../public/js/business-config.js) apply the same tier and rounding rules in quotes, booking and previews. The server reads the commission rate from [one setting](../server/config/business.js). Only a confirmed save reduces available seats.
+Prices are integer centavos. [Shared pricing helpers](../public/js/business-config.js) apply the same tier and rounding rules in quotes, booking and previews. The server reads the commission rate from [one setting](../server/config/business.js). A hold temporarily reduces availability. Only a confirmed booking contributes to orders, revenue and average order value.
 
 ## Owner offer-management path
 
 1. `public/js/owner.js` sends `POST /api/slots` or `PATCH /api/slots/:id`; edits send only changed fields.
 2. `server/routes/slots.js` calls `createOffer()` or `editOffer()` in `server/services/offers.js`.
-3. The service validates cutoff/price/capacity, locks the relevant activity or slot and refuses edits conflicting with confirmed seats.
+3. The service validates cutoff/price/capacity, locks the relevant activity or slot and refuses edits conflicting with confirmed or actively held seats.
 4. `server/repositories/slots.js` returns the updated offer and available-seat count.
 5. Owner refreshes catalog, metrics and saved bookings. Prior confirmed receipts are not rewritten by later offers.
 
@@ -124,3 +124,15 @@ Prices are integer centavos. [Shared pricing helpers](../public/js/business-conf
 Production-mode Node.js reads `DATABASE_URL` from its environment and uses the `pg` connection pool. `server/repositories/database.js` wraps booking operations in PostgreSQL `BEGIN`/`COMMIT` or `ROLLBACK`. Render, Vercel and the local demo use `server/repositories/migrations.js` for database setup. It seeds an empty database in one transaction and applies additive upgrades before the reference catalog is checked. Saved bookings remain in PostgreSQL across web-server restarts.
 
 The local `npm run demo` uses a separate PGlite database for development. Production health checks database reachability and required tables. The [deployed booking trace](challenges.md#challenge-2-trace-one-real-request) and [PostgreSQL restart check](https://github.com/Frannaaa/slotdrop-gc2/actions/runs/43666651287) verify separate parts of the persistence path. [Database schema](schema.md) and [API contracts](routes.md) hold the field-level details.
+
+
+## Final upgrade: hold backend foundation
+
+`POST /api/holds` reaches `holdRouter()`, then `createHold()`. The service validates the retry key and selection, locks the session row, reads the server time and shared availability, and stores a hold expiring at the earlier of ten minutes and the session cutoff. Identical retries read the existing state. `GET` reports active/expired/released/converted status; `DELETE` releases an active hold under the same lock order.
+
+`slotSelect()` in `server/repositories/slots.js` counts both confirmed bookings and unexpired active holds. Browse, Detail, quotes, ordinary booking saves, Owner and low-stock metrics use this query. A hold changes availability, while orders/revenue/AOV still use saved confirmed bookings only. Owner edits cannot reduce capacity below the combined reservations.
+
+Expiry is enforced by persisted timestamps and the server query, including after reopening the database with no browser running. The browser countdown and atomic conversion into a booking remain teammate integration tasks. Their required lock order and shared helpers are in the [route handoff](routes.md#seat-holds-and-teammate-handoff). The existing GC2 customer journey remains usable in the foundation branch.
+
+The prepared [health pinger](../.github/workflows/keep-awake.yml) requests the live `/api/health` route on a ten-minute schedule after merge. GitHub can delay scheduled runs, so open the app before presenting and verify actual successful checks. This does not by itself prove the upgrade is deployed.
+

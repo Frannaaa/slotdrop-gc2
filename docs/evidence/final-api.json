@@ -1,0 +1,378 @@
+{
+  "capturedAt": "2026-11-24T18:24:22.965Z",
+  "sourceBaseCommit": "905b4c7dbaece6c121f48cf4d4d860ff8a215dd2",
+  "build": "Fran hold backend working tree; final integrated release evidence must be refreshed",
+  "environment": "Disposable local PGlite PostgreSQL engine over actual Express HTTP routes",
+  "node": "v24.19.0",
+  "expiryMethod": "Injected server clock advanced by 600000 ms; no browser timer used",
+  "requests": [
+    {
+      "label": "1 Invalid quantity",
+      "request": {
+        "method": "POST",
+        "path": "/api/bookings",
+        "body": {
+          "requestId": "39d4b74b-80d0-4a77-86af-e71369474bd3",
+          "slotId": 1,
+          "quantity": 0,
+          "customerName": "Final API fixture",
+          "customerEmail": "final.fixture@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 160000
+        }
+      },
+      "status": 400,
+      "response": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "quantity is outside the allowed range."
+        }
+      },
+      "bookingsBefore": 0,
+      "bookingsAfter": 0
+    },
+    {
+      "label": "2 Missing customerName",
+      "request": {
+        "method": "POST",
+        "path": "/api/bookings",
+        "body": {
+          "requestId": "39d4b74b-80d0-4a77-86af-e71369474bd3",
+          "slotId": 1,
+          "quantity": 1,
+          "customerEmail": "final.fixture@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 160000
+        }
+      },
+      "status": 400,
+      "response": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "Provide customerName."
+        }
+      },
+      "bookingsBefore": 0,
+      "bookingsAfter": 0
+    },
+    {
+      "label": "3 More seats than allocated",
+      "request": {
+        "method": "POST",
+        "path": "/api/bookings",
+        "body": {
+          "requestId": "39d4b74b-80d0-4a77-86af-e71369474bd3",
+          "slotId": 1,
+          "quantity": 5,
+          "customerName": "Final API fixture",
+          "customerEmail": "final.fixture@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 760000
+        }
+      },
+      "status": 409,
+      "response": {
+        "error": {
+          "code": "SLOT_UNAVAILABLE",
+          "message": "Only 4 seats are left for this session."
+        }
+      },
+      "bookingsBefore": 0,
+      "bookingsAfter": 0
+    },
+    {
+      "label": "4 Wrong accepted total",
+      "request": {
+        "method": "POST",
+        "path": "/api/bookings",
+        "body": {
+          "requestId": "39d4b74b-80d0-4a77-86af-e71369474bd3",
+          "slotId": 1,
+          "quantity": 1,
+          "customerName": "Final API fixture",
+          "customerEmail": "final.fixture@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 1
+        }
+      },
+      "status": 409,
+      "response": {
+        "error": {
+          "code": "PRICE_CHANGED",
+          "message": "The price for this booking changed. Please review the new total.",
+          "quote": {
+            "slotId": 1,
+            "quantity": 1,
+            "originalUnitPriceCentavos": 200000,
+            "offerUnitPriceCentavos": 160000,
+            "unitPriceCentavos": 160000,
+            "pricingType": "standard",
+            "groupSavingsCentavos": 0,
+            "totalPriceCentavos": 160000,
+            "platformFeeCentavos": 16000,
+            "providerPayoutCentavos": 144000,
+            "discountPercent": 20,
+            "quotedAt": "2026-11-24T18:24:22.705Z"
+          }
+        }
+      },
+      "bookingsBefore": 0,
+      "bookingsAfter": 0
+    },
+    {
+      "label": "5 Unknown product/session",
+      "request": {
+        "method": "GET",
+        "path": "/api/slots/999999"
+      },
+      "status": 404,
+      "response": {
+        "error": {
+          "code": "SLOT_NOT_FOUND",
+          "message": "Session not found."
+        }
+      },
+      "bookingsBefore": 0,
+      "bookingsAfter": 0
+    },
+    {
+      "label": "6 Search with no matches",
+      "request": {
+        "method": "GET",
+        "path": "/api/slots?q=no-such-final-fixture-workshop"
+      },
+      "status": 200,
+      "response": [],
+      "bookingsBefore": 0,
+      "bookingsAfter": 0
+    },
+    {
+      "label": "Accepted fresh server quote",
+      "request": {
+        "method": "POST",
+        "path": "/api/bookings",
+        "body": {
+          "requestId": "39d4b74b-80d0-4a77-86af-e71369474bd3",
+          "slotId": 1,
+          "quantity": 1,
+          "customerName": "Final API fixture",
+          "customerEmail": "final.fixture@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 160000
+        }
+      },
+      "status": 201,
+      "response": {
+        "id": "bc337390-14e1-406f-a56b-4a4b8ae2311d",
+        "slotId": 1,
+        "quantity": 1,
+        "paymentMethod": "mock_card",
+        "status": "confirmed",
+        "serviceName": "Beginner Mug Handbuilding",
+        "providerName": "Demo Clay Corner",
+        "sessionStartsAt": "2026-11-26T02:00:00.000Z",
+        "demoVariant": null,
+        "originalUnitPriceCentavos": 200000,
+        "offerUnitPriceCentavos": 160000,
+        "unitPriceCentavos": 160000,
+        "pricingType": "standard",
+        "commissionBasisPoints": 1000,
+        "totalPriceCentavos": 160000,
+        "platformFeeCentavos": 16000,
+        "providerPayoutCentavos": 144000,
+        "createdAt": "2026-11-24T18:24:22.852Z"
+      },
+      "bookingsBefore": 0,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Read saved receipt by ID",
+      "request": {
+        "method": "GET",
+        "path": "/api/bookings/bc337390-14e1-406f-a56b-4a4b8ae2311d"
+      },
+      "status": 200,
+      "response": {
+        "id": "bc337390-14e1-406f-a56b-4a4b8ae2311d",
+        "slotId": 1,
+        "quantity": 1,
+        "paymentMethod": "mock_card",
+        "status": "confirmed",
+        "serviceName": "Beginner Mug Handbuilding",
+        "providerName": "Demo Clay Corner",
+        "sessionStartsAt": "2026-11-26T02:00:00.000Z",
+        "demoVariant": null,
+        "originalUnitPriceCentavos": 200000,
+        "offerUnitPriceCentavos": 160000,
+        "unitPriceCentavos": 160000,
+        "pricingType": "standard",
+        "commissionBasisPoints": 1000,
+        "totalPriceCentavos": 160000,
+        "platformFeeCentavos": 16000,
+        "providerPayoutCentavos": 144000,
+        "createdAt": "2026-11-24T18:24:22.852Z"
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Matching Owner booking",
+      "request": {
+        "method": "GET",
+        "path": "/api/bookings"
+      },
+      "status": 200,
+      "response": [
+        {
+          "id": "bc337390-14e1-406f-a56b-4a4b8ae2311d",
+          "slotId": 1,
+          "quantity": 1,
+          "status": "confirmed",
+          "sessionStartsAt": "2026-11-26T02:00:00.000Z",
+          "originalUnitPriceCentavos": 200000,
+          "offerUnitPriceCentavos": 160000,
+          "pricingType": "standard",
+          "unitPriceCentavos": 160000,
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 160000,
+          "platformFeeCentavos": 16000,
+          "providerPayoutCentavos": 144000,
+          "createdAt": "2026-11-24T18:24:22.852Z",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner"
+        }
+      ],
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Create hold",
+      "request": {
+        "method": "POST",
+        "path": "/api/holds",
+        "body": {
+          "requestId": "93d5259b-e9d8-49d7-99c7-551cdb2537ef",
+          "slotId": 1,
+          "quantity": 2
+        }
+      },
+      "status": 201,
+      "response": {
+        "id": "823e9b6c-37b8-4076-9721-4cf53b5b2cdd",
+        "slotId": 1,
+        "quantity": 2,
+        "status": "active",
+        "expiresAt": "2026-11-24T18:34:22.705Z",
+        "serverNow": "2026-11-24T18:24:22.705Z",
+        "remainingSeats": 1
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Identical hold retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/holds",
+        "body": {
+          "requestId": "93d5259b-e9d8-49d7-99c7-551cdb2537ef",
+          "slotId": 1,
+          "quantity": 2
+        }
+      },
+      "status": 200,
+      "response": {
+        "id": "823e9b6c-37b8-4076-9721-4cf53b5b2cdd",
+        "slotId": 1,
+        "quantity": 2,
+        "status": "active",
+        "expiresAt": "2026-11-24T18:34:22.705Z",
+        "serverNow": "2026-11-24T18:24:22.705Z",
+        "remainingSeats": 1
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Read hold",
+      "request": {
+        "method": "GET",
+        "path": "/api/holds/823e9b6c-37b8-4076-9721-4cf53b5b2cdd"
+      },
+      "status": 200,
+      "response": {
+        "id": "823e9b6c-37b8-4076-9721-4cf53b5b2cdd",
+        "slotId": 1,
+        "quantity": 2,
+        "status": "active",
+        "expiresAt": "2026-11-24T18:34:22.705Z",
+        "serverNow": "2026-11-24T18:24:22.705Z",
+        "remainingSeats": 1
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Release hold",
+      "request": {
+        "method": "DELETE",
+        "path": "/api/holds/823e9b6c-37b8-4076-9721-4cf53b5b2cdd"
+      },
+      "status": 200,
+      "response": {
+        "id": "823e9b6c-37b8-4076-9721-4cf53b5b2cdd",
+        "slotId": 1,
+        "quantity": 2,
+        "status": "released",
+        "expiresAt": "2026-11-24T18:34:22.705Z",
+        "serverNow": "2026-11-24T18:24:22.705Z",
+        "remainingSeats": 3
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "New hold for expiry proof",
+      "request": {
+        "method": "POST",
+        "path": "/api/holds",
+        "body": {
+          "requestId": "f7b614ea-dcaa-4ba2-b73f-589b0eb8e20b",
+          "slotId": 1,
+          "quantity": 2
+        }
+      },
+      "status": 201,
+      "response": {
+        "id": "187dfcdd-6f1d-48ca-8a2f-debf89ef5a08",
+        "slotId": 1,
+        "quantity": 2,
+        "status": "active",
+        "expiresAt": "2026-11-24T18:34:22.705Z",
+        "serverNow": "2026-11-24T18:24:22.705Z",
+        "remainingSeats": 1
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    },
+    {
+      "label": "Read after advancing fixture server clock ten minutes",
+      "request": {
+        "method": "GET",
+        "path": "/api/holds/187dfcdd-6f1d-48ca-8a2f-debf89ef5a08"
+      },
+      "status": 200,
+      "response": {
+        "id": "187dfcdd-6f1d-48ca-8a2f-debf89ef5a08",
+        "slotId": 1,
+        "quantity": 2,
+        "status": "expired",
+        "expiresAt": "2026-11-24T18:34:22.705Z",
+        "serverNow": "2026-11-24T18:34:22.705Z",
+        "remainingSeats": 3
+      },
+      "bookingsBefore": 1,
+      "bookingsAfter": 1
+    }
+  ]
+}

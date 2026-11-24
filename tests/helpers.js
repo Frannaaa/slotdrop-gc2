@@ -16,7 +16,15 @@ export async function fixture({ clock, realCatalog = false, bookingRateLimit } =
     cleanup = async () => { await db.close(); await admin.query('DROP SCHEMA ' + schema + ' CASCADE'); await admin.end(); };
   } else {
     database = new PGlite();
-    db = { query: (sql, values) => database.query(sql, values), transaction: run => database.transaction(tx => run(tx)) };
+    db = {
+      query: (sql, values) => database.query(sql, values),
+      transaction: run => database.transaction(tx => run({
+        // Match the local demo adapter and pg's multi-statement migration support.
+        query: (sql, values) => values === undefined
+          ? tx.exec(sql).then(results => results.at(-1))
+          : tx.query(sql, values),
+      })),
+    };
     cleanup = () => database.close();
   }
   await database.exec(await readFile(new URL('../db/schema.sql', import.meta.url), 'utf8'));

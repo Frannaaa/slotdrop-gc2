@@ -9,9 +9,9 @@ export default function healthRouter(db, checkDatabase = false) {
       let ready = false;
       try {
         const { rows: [tables] } = await db.query(
-          "SELECT to_regclass('slots') AS slots, to_regclass('services') AS services, to_regclass('bookings') AS bookings"
+          "SELECT to_regclass('slots') AS slots, to_regclass('services') AS services, to_regclass('bookings') AS bookings, to_regclass('seat_holds') AS seat_holds"
         );
-        ready = Boolean(tables?.slots && tables.services && tables.bookings);
+        ready = Boolean(tables?.slots && tables.services && tables.bookings && tables.seat_holds);
       } catch {
         // Treat connection failures like missing tables; never expose database details.
       }

@@ -17,13 +17,14 @@ test('production health checks that the required SlotDrop tables exist', async (
   const statements = [];
   await withServer({query: async statement => {
     statements.push(statement);
-    return {rows:[{slots:'slots',services:'services',bookings:'bookings'}]};
+    return {rows:[{slots:'slots',services:'services',bookings:'bookings',seat_holds:'seat_holds'}]};
   }}, true, async response => {
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), {status:'ok',app:'SlotDrop'});
   });
   assert.equal(statements.length, 1);
   assert.match(statements[0], /to_regclass\('slots'\)/);
+  assert.match(statements[0], /to_regclass\('seat_holds'\)/);
 });
 
 test('production health rejects a reachable but uninitialized database', async () => {
@@ -33,6 +34,8 @@ test('production health rejects a reachable but uninitialized database', async (
       assert.deepEqual(await response.json(),{status:'unavailable',app:'SlotDrop'});
     });
   await withServer({query:async () => ({rows:[{slots:'slots',services:'services',bookings:null}]})},
+    true, async response => assert.equal(response.status,503));
+  await withServer({query:async () => ({rows:[{slots:'slots',services:'services',bookings:'bookings',seat_holds:null}]})},
     true, async response => assert.equal(response.status,503));
 });
 

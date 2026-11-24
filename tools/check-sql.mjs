@@ -37,9 +37,9 @@ async function saveReceipt(quantity, requestId) {
 try {
   await db.exec(schema);
   await db.exec(seed);
-  await check('five tables and eight eligible synthetic regression sessions', async () => {
+  await check('six tables and eight eligible synthetic regression sessions', async () => {
     const tables = await db.query("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'");
-    assert.equal(tables.rows[0].n, 5);
+    assert.equal(tables.rows[0].n, 6);
     const slots = await db.query("SELECT count(*)::int AS n FROM slots WHERE starts_at > NOW() AND starts_at < NOW()+INTERVAL '72 hours' AND booking_closes_at > NOW() AND booking_closes_at < starts_at");
     assert.equal(slots.rows[0].n, 8);
     const daytime = await db.query("SELECT count(*)::int AS n FROM slots WHERE EXTRACT(HOUR FROM starts_at AT TIME ZONE 'Asia/Manila') BETWEEN 9 AND 20");

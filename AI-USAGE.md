@@ -130,3 +130,11 @@ These entries summarize what the PR authors already reported. Dates identify the
 | 2026-11-16 | Fran / M1 | ChatGPT GPT-6 | Complete the fictional Month X/Y booking flow and consolidate PRs #87/#89 into #88 | Found and repaired generic “Practice booking” labels in Checkout's new/retry paths and Owner's session/receipt tables, reusing `practiceChoiceLabel`; added Checkout and frontend regression coverage and updated the Owner VM tests to mock the new shared helper, with #89 stretch prose and its disclosure folded into #88 | Verified source paths, migration/backfill tests and previous green PR88 CI; the revised consolidated head needs fresh CI and human review. Existing production code and previously-saved transaction data remain untouched until this PR merges. |
 
 The private reference build is separate. Its completed pages do not count as contributions by the teammates assigned to those pages. Group members remain responsible for verifying and explaining their business decisions and challenge results. The table above records the AI writing assistance. Each member records their own predictions and explains the results in their own voice in one unedited take.
+
+
+## Final Project Phase 2
+
+| Date | Member | Tool | Request | What changed | Validation and ownership |
+|---|---|---|---|---|---|
+| 2026-11-25 | Fran / M1 | Codex / ChatGPT | Align the Final plan with the supplied 105/100 GC2 feedback and execute Fran's finalized allocation | Added the persisted hold schema/migration, create/read/release routes, one availability query shared by discovery/Detail/quotes/bookings/Owner, active-reservation guards on capacity edits, required-table health checks, regression tests, reproducible local API captures and a prepared health-ping workflow. Updated existing route/schema/system/README documentation and the required changes/refusals files. Extracted the existing UUID validator without changing its booking behavior. | Fran's backend foundation only. Existing GC2 pricing, stale accepted-total refusal and identical receipt retries are preserved. Countdown UI and atomic hold conversion remain assigned to teammates. Local tests and SQL checks are recorded in the PR; real PostgreSQL race coverage is run by CI. The workflow's scheduled activity must be verified after merge. AI assistance is not credited as another teammate's independent work. |
+
