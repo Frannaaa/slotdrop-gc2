@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SlotDrop Final Project Report - working draft</title>
+<style>
+@font-face{font-family:DM;src:url('../public/fonts/DMSans400.woff2')}@font-face{font-family:DM;src:url('../public/fonts/DMSans700.woff2');font-weight:700}
+@page{size:A4;margin:12mm}*{box-sizing:border-box}body{margin:0;color:#222a32;font:10pt/1.38 DM,Arial,sans-serif;background:#fff}
+.sheet{width:186mm;min-height:272mm;position:relative;padding-bottom:9mm;break-after:page}.sheet:last-child{break-after:auto}
+h1{font-size:24pt;line-height:1.07;margin:3mm 0 2mm;letter-spacing:-.5pt}h2{font-size:13pt;line-height:1.2;margin:5mm 0 2mm;color:#263d55}h3{font-size:10pt;margin:3mm 0 1mm}
+p{margin:0 0 2.5mm}ol,ul{margin:1mm 0 3mm;padding-left:5mm}li{margin-bottom:1.4mm}a{color:#253eb0;text-decoration:none}code{font:8.8pt Consolas,monospace;overflow-wrap:anywhere}
+.eyebrow{font-size:8pt;letter-spacing:1pt;text-transform:uppercase;color:#596675}.sub{font-size:9pt;color:#596675}.notice{padding:3mm;background:#fff6de;border-left:3px solid #d5a02a;margin:3mm 0;font-size:9pt}
+table{border-collapse:collapse;width:100%;font-size:9pt;line-height:1.3;margin:2mm 0 3mm}th{background:#eaf0f5;text-align:left;color:#263d55}td,th{padding:2mm 2.3mm;border-bottom:1px solid #d9e0e5;vertical-align:top}td:first-child{font-weight:700}.small{font-size:8.5pt;line-height:1.35}.footer{position:absolute;bottom:0;width:100%;border-top:1px solid #ccd6df;padding-top:2mm;font-size:8pt;color:#596675;display:flex;justify-content:space-between}.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;margin:3mm 0}.kpi div{background:#f0f4f7;padding:2.5mm}.kpi b{display:block;font-size:14pt;color:#263d55}.kpi span{font-size:8pt}svg{width:100%;height:auto;margin:2mm 0}
+@media screen{body{background:#e9edf0;padding:16px}.sheet{margin:0 auto 20px;background:#fff;padding:10mm;min-height:297mm;width:210mm;box-shadow:0 3px 16px #0002}.footer{width:calc(100% - 20mm);bottom:6mm}}
+</style></head><body>
+<section class="sheet">
+<div class="eyebrow">Group 1 / ITMGT 45.03 / 25 November 2026</div>
+<h1>SlotDrop<br>Final Project Report</h1>
+<div class="sub">A controlled seat reservation for perishable workshop inventory</div>
+<div class="notice"><b>Working draft, not submission ready.</b> Fran's backend foundation is implemented in PR #92. Countdown, hold-to-booking conversion, integrated user testing and the reviewed final release are still pending. The public deployment remains GC2 commit <code>905b4c7</code>.</div>
+
+<h2>1. System overview</h2>
+<p>SlotDrop is a workshop-booking sandbox for people near Katipunan and studios with released seats. Customers browse activities, select seats, review a server quote and save a simulated booking. Studios control the allocation, deadline and standard or buddy price. An Express API enforces availability, calculates totals in centavos and stores receipts in PostgreSQL. Confirmation reads the saved booking by ID, while Owner shows the booking and server-computed analytics.</p>
+
+<h2>2. GC2 to Final improvements</h2>
+<p><b>Our upgrade is a server-enforced 10-minute seat hold, chosen under step 1, improved by a visible countdown and hold-to-booking persistence.</b></p>
+<p>This sentence declares the final target. The implemented foundation adds persisted holds, a shared availability query, safe hold retries and release/expiry. The browser countdown and atomic conversion into a booking remain integration work. The full upgrade will count through added server logic, changed bookability, visible feedback and a saved booking relation.</p>
+<p>GC2 received 105/100. We preserve the session-row lock, stale-price refusal with a fresh quote, original receipt on an identical retry, accepted business analysis and undated grading sessions. The reported 22-second cold start is addressed by a prepared ten-minute health-ping workflow and a pre-presentation warm-up. Its one-off request returned HTTP 200; recurring operation awaits merge.</p>
+
+<h2>3. Feature explanation and business decision</h2>
+<ol>
+<li><code>POST /api/holds</code> validates the retry UUID, session and positive quantity.</li>
+<li><code>createHold()</code> locks the session, reads server time and checks the shared free-seat count.</li>
+<li>Expiry is the earlier of ten minutes or the booking cutoff. <code>slotSelect()</code> subtracts only active, unexpired holds. Holding two of four seats leaves two; expiry restores four without a browser timer.</li>
+<li>Earlier Owner cutoffs shorten reservations; immediate closure releases them. Later cutoffs do not renew them.</li>
+<li><b>Pending integration:</b> the server validates the matching hold and commits its conversion with the booking in one transaction. The client countdown reports this server state.</li>
+</ol>
+<p><b>Decision with a number.</b> Keep the 10% commission as a pilot hypothesis. A PHP 2,700 standard seat gives PHP 270 to SlotDrop and PHP 2,430 to the studio before costs. The accepted four-week model sells 32 of 64 released seats and leaves PHP 1,132 after assumed support/operating costs; break-even is about 27 seats. Target at least that modeled break-even and expand only if both studio contribution and platform economics are positive. The downside and eight-displaced-direct-buyer sensitivity remain in the business case; these are modeled assumptions, not measured commercial results.</p>
+<div class="footer"><span>SlotDrop / working draft / no real payment or studio reservation</span><span>1 / 3</span></div>
+</section>
+
+<section class="sheet">
+<div class="eyebrow">Recorded save and persistence</div>
+<h2>4. Transaction flow</h2>
+<p>This is a real HTTP save against a disposable local PostgreSQL engine, not a completed browser hold-conversion proof. It uses the existing GC2 booking path. Receipt: <code>e9307380-5724-4bd2-9727-509bb35d8171</code>.</p>
+<ol>
+<li>The existing customer journey is Browse, Detail, Selection, Checkout and Confirmation. The captured API rehearsal selects session 1 with two seats.</li>
+<li><code>GET /api/pricing/quote?slotId=1&amp;quantity=2</code> returns a server buddy total of 513,000 centavos, or PHP 5,130.</li>
+<li><code>POST /api/bookings</code> sends the accepted total, stable request UUID, quantity and fictional guest details. The route calls <code>createBooking()</code>.</li>
+<li>The service locks the session, rechecks seats and deadline, computes the stored tier/commission and compares the accepted total. A stale amount returns <code>409 PRICE_CHANGED</code> and saves nothing.</li>
+<li>A valid request inserts the receipt snapshots and commits. The response is 201 with a booking UUID; <code>GET /api/bookings/:id</code> reads the same saved record with HTTP 200.</li>
+<li>Owner independently reads the matching row. Repeating the same request returns 200 with the original receipt. The controlled run has two bookings, three sold seats and one of four seats left.</li>
+</ol>
+<p class="small">The generic Final brief's wrong-total example expects 201. SlotDrop's <code>expectedTotalCentavos</code> is the customer's accepted amount, so a mismatch returns 409 with a fresh quote, preserving the behavior praised in GC2. <code>docs/refusals.md</code> records this difference and the subsequent explicit acceptance/201 readback. The team must retain this explanation in the final evidence.</p>
+
+<h2>5. Data handling</h2>
+<table><thead><tr><th>Table</th><th>Stored data and retrieval</th></tr></thead><tbody>
+<tr><td>providers</td><td>Studio identity, location and stable reference key; joined to the activity/session.</td></tr>
+<tr><td>services</td><td>Activity, inclusions, duration, active state and default cutoff; each belongs to a provider.</td></tr>
+<tr><td>slots</td><td>Activity FK, released capacity, prices, status and paired start/cutoff dates. Practice choices use null dates.</td></tr>
+<tr><td>bookings</td><td>Unique request key, quantity, fictional guest name/email and immutable receipt/time/fee snapshots. Retrieved by UUID; public responses omit contact details and retry keys.</td></tr>
+<tr><td>seat_holds</td><td>Unique retry key, session FK, quantity, creation/expiry and state. A unique booking FK is reserved for atomic conversion. Expired status is derived from server time.</td></tr>
+<tr><td>provider_applications</td><td>Separate pending studio/contact application; it does not publish inventory or create an account.</td></tr>
+</tbody></table>
+<p>SQL constraints check valid quantities, prices and receipt arithmetic. Holds, bookings and capacity edits lock the same session row. <code>006_seat_holds.sql</code> is additive and repeatable; it preserves existing receipts. The file-backed demo and production-container checks verify persistence across reopening/restarting. Secrets stay in environment variables.</p>
+
+<h3>Written bonus claim: Owner / analytics</h3>
+<p>We claim the Owner / analytics bonus in Final section 10. The API computes all five figures from persisted data. A controlled standard PHP 2,700 booking plus a two-seat PHP 5,130 buddy booking verifies:</p>
+<table><thead><tr><th>Orders</th><th>Platform revenue</th><th>AOV</th><th>Top activity</th><th>Nearly full</th></tr></thead><tbody>
+<tr><td>2</td><td>PHP 783</td><td>PHP 3,915</td><td>3 sold seats</td><td>1 session; 1/4 free</td></tr>
+</tbody></table>
+<p class="small">Total booking value is PHP 7,830; revenue here means SlotDrop commission. Active holds change availability but create no confirmed order or revenue. The live integrated Owner proof must still be refreshed before submission.</p>
+<div class="footer"><span>Evidence: docs/refusals.md and docs/evidence/final-readiness.json</span><span>2 / 3</span></div>
+</section>
+
+<section class="sheet">
+<div class="eyebrow">Technical reflection, architecture and release</div>
+<h2>6. Reflection</h2>
+<p>Testing exposed a deadline edge case: changing an Owner cutoff could leave an existing hold with a later expiry. The fix shortens the hold in the same transaction and never renews it when a deadline moves later. Another useful distinction is that a browser countdown does not release stock; the database timestamp and server query decide whether seats are still reserved.</p>
+<p>Single-process local tests also do not establish multi-connection locking. The foundation CI passed 164/164 tests, including the real PostgreSQL hold/booking race, as well as production-container restart persistence. Local capture separates the price acknowledgement from the server calculation, and holds from confirmed revenue. Each presenter still needs to supply and defend their own contribution and reflection.</p>
+<p>Next, integrate hold-aware quote/save with the countdown, repeat the uninterrupted customer journey and unaided phone test, then refresh the evidence on reviewed main. Commercially, the next step is a small studio pilot to measure incremental sales, direct-channel displacement and support cost before expanding.</p>
+
+<h2>System diagram and data flow</h2>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 150" role="img" aria-label="Browser exchanges JSON with Express, which uses SQL transactions with PostgreSQL">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536b80"/></marker></defs>
+<g fill="#edf2f6" stroke="#b6c7d3"><rect x="3" y="38" width="184" height="85" rx="9"/><rect x="256" y="38" width="188" height="85" rx="9"/><rect x="513" y="38" width="184" height="85" rx="9"/></g>
+<g fill="#263d55" text-anchor="middle" font-family="Arial,sans-serif"><text x="95" y="67" font-size="17" font-weight="700">Browser</text><text x="95" y="91" font-size="12">Customer pages + Owner</text><text x="350" y="67" font-size="17" font-weight="700">Express API</text><text x="350" y="91" font-size="12">Routes, services, repositories</text><text x="605" y="67" font-size="17" font-weight="700">PostgreSQL</text><text x="605" y="91" font-size="12">Slots, holds, bookings + data</text></g>
+<g stroke="#536b80" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"><line x1="197" y1="80" x2="245" y2="80"/><line x1="454" y1="80" x2="502" y2="80"/></g>
+<g fill="#536b80" text-anchor="middle" font-family="Arial,sans-serif" font-size="11"><text x="222" y="28">JSON / HTTP</text><text x="478" y="28">SQL / transaction</text></g>
+</svg>
+<p class="small">Requests move through a route, validated service and SQL repository; JSON returns the result or refusal. Hold creation/expiry is implemented. Countdown and atomic booking conversion are still pending integration.</p>
+
+<h2>Versioned stack</h2>
+<table><thead><tr><th>Component</th><th>Version / role</th></tr></thead><tbody>
+<tr><td>Frontend</td><td>HTML, CSS and ES-module JavaScript; no framework required.</td></tr>
+<tr><td>Node.js</td><td>22 configured for CI/Render; v24.19.0 used for this local capture.</td></tr>
+<tr><td>Express / pg / dotenv</td><td>5.3.0 / 8.23.1 / 18.0.9, pinned by package-lock.json.</td></tr>
+<tr><td>Database</td><td>PostgreSQL 16 in CI; Neon PostgreSQL in deployment. PGlite 0.5.12 for local demo/tests.</td></tr>
+<tr><td>Deployment</td><td>Render Singapore, main after CI; HTTP readiness at /api/health.</td></tr>
+</tbody></table>
+<div class="notice"><b>Before submission:</b> resolve the remaining integration checks, obtain teammate review, verify the deployed build and recurring pinger, collect final contributor evidence and tag that tested main commit <code>final-v1.0</code>. Do not submit this draft as a completed upgrade.</div>
+<p class="small"><a href="https://github.com/Frannaaa/slotdrop-gc2/pull/92">Backend PR #92</a> | <a href="https://github.com/Frannaaa/slotdrop-gc2/actions/runs/45460736875">164-test CI and restart proof</a> | <a href="https://docs.google.com/document/d/1IYKZaL7qv-mRI3WhzI2rk-raRmC2bQqmZRSAMDUWjO4/edit">Team execution guide</a><br>Full business model: docs/business.md. AI assistance and validation: AI-USAGE.md.</p>
+<div class="footer"><span>Document due Dec 1, 11:59 PM / defense Dec 2</span><span>3 / 3</span></div>
+</section></body></html>

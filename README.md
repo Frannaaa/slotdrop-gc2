@@ -29,6 +29,12 @@ The app is organized into [browser pages](public/), [Express routes and services
 
 Fran's Final foundation adds server-enforced seat holds while preserving the current booking journey. The countdown and hold-to-booking conversion are still teammate integration work. See [changes since GC2](docs/changes-since-gc2.md), the [hold API and handoff](docs/routes.md#seat-holds-and-teammate-handoff), and [actual local API captures](docs/refusals.md). The published `gc2-v1.0` tag is unchanged.
 
+The [three-page report draft](docs/SlotDrop_Final_Report_Draft.pdf) contains the six required sections, numerical decision, written Owner analytics claim, diagram and versions. Its [editable HTML](docs/SlotDrop_Final_Report_Draft.html) is generated with `node tools/build-final-report.mjs` after the recorded rehearsal. It is explicitly a draft until teammate integration and release checks pass.
+
+`npm run check:final` rehearses the API flow in a disposable local database and writes [the current integration status](docs/evidence/final-readiness.json). It verifies the five Owner figures and deliberately returns a nonzero exit while hold-aware quote/save is missing. Passing it does not substitute for the browser and unaided-user checks.
+
+Before presenting on Windows, run `pwsh -File tools/prepare-presentation.ps1 -OpenCode` from the project directory. It checks/starts the local backup, attempts a live warm-up, opens app/Owner and optionally VS Code source files. Use `-NoBrowser` for checks only. If local networking is restricted, run `npm run demo` in your own terminal and verify the displayed address before the defense. The helper stops only a server it started if startup verification fails.
+
 Use Node 22 or later.
 
 ```sh

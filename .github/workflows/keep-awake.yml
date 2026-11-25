@@ -9,6 +9,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/keep-awake.yml'
+      - 'tools/prepare-presentation.ps1'
+      - 'tools/check-final-readiness.mjs'
 
 permissions:
   contents: read
@@ -38,3 +40,16 @@ jobs:
           done
           echo '::error::Health route did not return HTTP 200. Check Render status and logs before presenting.'
           exit 1
+
+  deployed-readiness:
+    if: github.event_name != 'schedule'
+    needs: ping
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Inspect the existing public deployment without saving anything
+        run: node tools/check-gc2-readiness.mjs https://slotdrop-gc2-group-zx8j.onrender.com
