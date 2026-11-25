@@ -52,4 +52,17 @@ jobs:
         with:
           node-version: '22'
       - name: Inspect the existing public deployment without saving anything
-        run: node tools/check-gc2-readiness.mjs https://slotdrop-gc2-group-zx8j.onrender.com
+        shell: bash
+        run: |
+          for attempt in 1 2; do
+            echo "Read-only preflight attempt $attempt"
+            if node tools/check-gc2-readiness.mjs https://slotdrop-gc2-group-zx8j.onrender.com; then
+              echo "All public preflight checks passed on attempt $attempt." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if [ "$attempt" = "1" ]; then
+              echo '::warning::The first preflight failed. Its results remain above; retrying GET checks once after warm-up.'
+              sleep 5
+            fi
+          done
+          exit 1
