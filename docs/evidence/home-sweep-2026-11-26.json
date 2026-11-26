@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-11-26T05:59:35.314Z",
+  "sources": {
+    "homePR": 93,
+    "homeCommit": "86f1ec458f7b1a3e07da88536ca803e84d8fe681",
+    "holdPR": 92,
+    "holdCommit": "0f035dc77c944076810af88cffad1ccc8b20005f"
+  },
+  "environment": "Disposable local PGlite database, actual Express HTTP routes, headless Chrome with Playwright; no live writes",
+  "finding": {
+    "severity": "medium",
+    "path": "public/css/style.css",
+    "problem": "Home renders shared grouped session links, but their layout CSS was scoped to .browse-page in browse.css, which Home does not load. Dates, prices and cutoffs ran together as unstyled bulleted links.",
+    "fix": "Scope equivalent date-option layout to #featured: separate text rows, bounded wrapping, 44px minimum link height and keyboard focus styling."
+  },
+  "baselineHome": {
+    "mode": "baseline",
+    "checkedAt": "2026-11-26T05:57:57.681Z",
+    "checks": [
+      "Actual grouped API renders three distinct workshops, with each available session link",
+      "Featured session opens its actual Detail page and returns to Home",
+      "Real booking reduces Home availability from four to three; identical retry returns one saved receipt",
+      "Home has no horizontal overflow at 320, 390 and 1280 pixels",
+      "No dated inventory produces the explicit empty state with the practice-booking link",
+      "Network/API failure stays distinct from confirmed empty results and recovers on Retry"
+    ],
+    "pageErrors": [],
+    "status": "passed"
+  },
+  "combinedHomeAndHolds": {
+    "mode": "holds",
+    "checkedAt": "2026-11-26T05:59:35.314Z",
+    "checks": [
+      "Actual grouped API renders three distinct workshops, with each available session link",
+      "Featured session opens its actual Detail page and returns to Home",
+      "An actual persisted hold removes its fully reserved session from Home after refresh",
+      "Server-clock expiry restores the session without creating a booking",
+      "Real booking reduces Home availability from four to three; identical retry returns one saved receipt",
+      "Home has no horizontal overflow at 320, 390 and 1280 pixels",
+      "Every grouped date has a separate price/cutoff line and a tap target at least 44 pixels tall",
+      "No dated inventory produces the explicit empty state with the practice-booking link",
+      "Network/API failure stays distinct from confirmed empty results and recovers on Retry"
+    ],
+    "pageErrors": [],
+    "status": "passed"
+  },
+  "combinedSuite": {
+    "command": "node --test --test-concurrency=2 tests/*.test.js",
+    "total": 170,
+    "passed": 168,
+    "failed": 0,
+    "skipped": 2,
+    "skipReason": "Real PostgreSQL concurrency tests require TEST_DATABASE_URL; this local run used PGlite. PR #92 and #93 exact source heads each already passed PostgreSQL CI."
+  },
+  "existingTestHelper": {
+    "problem": "On main/PR #93, the PGlite fixture used query() for multi-statement migrations; four local migration tests failed.",
+    "resolution": "The existing test-helper adapter in PR #92 already uses exec() for unparameterized migration scripts. Retained and verified it; no new test-helper change in this sweep."
+  },
+  "releaseStatus": {
+    "main": "905b4c7dbaece6c121f48cf4d4d860ff8a215dd2",
+    "homeMerged": false,
+    "holdsMerged": false,
+    "countdownAndAtomicConversion": "Pending assigned teammate implementation",
+    "phoneUnaidedUserEvidence": "Still required; resized desktop browser checks are recorded above."
+  }
+}

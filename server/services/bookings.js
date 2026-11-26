@@ -1,11 +1,11 @@
 // Group assignment: Janelle (M3). Booking save (#15) and receipt readback (#16), per docs/routes.md.
 import { COMMISSION_BASIS_POINTS, MAX_SEATS } from '../config/business.js';
-import { ApiError, invalid, object, safeNumber } from '../lib/validation.js';
-import { SLOT_SELECT, slotResponse } from '../repositories/slots.js';
+import { ApiError, invalid, object, safeNumber, uuid } from '../lib/validation.js';
+import { findSlot } from '../repositories/slots.js';
+export { uuid } from '../lib/validation.js';
 import { checkBookable, priceQuote } from './pricing.js';
 
 const FIELDS = ['requestId', 'slotId', 'quantity', 'customerName', 'customerEmail', 'paymentMethod', 'expectedTotalCentavos'];
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PAYMENT_METHODS = ['mock_card', 'pay_on_site'];
 
@@ -28,11 +28,6 @@ function text(value, name, max) {
   if (trimmed.length < 1 || trimmed.length > max) invalid(name + ' must be 1-' + max + ' characters.');
   if (/[\u0000-\u001f\u007f]/.test(trimmed)) invalid(name + ' contains unsupported characters.');
   return trimmed;
-}
-
-export function uuid(value, name) {
-  if (typeof value !== 'string' || !UUID.test(value)) invalid(name + ' must be a UUID.');
-  return value.toLowerCase();
 }
 
 // Normalize once so an identical network retry compares equal to the saved request.
@@ -102,9 +97,8 @@ export async function createBooking(db, body, clock) {
       const raced = await findByRequestId(client, request.requestId);
       if (raced) return replay(raced, request);
       // 3. Recheck eligibility and confirmed seats after the lock, with the time read after the lock.
-      const { rows } = await client.query(SLOT_SELECT + ' WHERE sl.id=$1', [request.slotId]);
-      const slot = slotResponse(rows[0]);
       const now = clock();
+      const slot = await findSlot(client, request.slotId, now);
       checkBookable(slot, request.quantity, now);
       // 4-5. Server picks the tier and totals; the browser only acknowledges the amount it saw.
       const quote = priceQuote(slot, request.quantity, now, COMMISSION_BASIS_POINTS);

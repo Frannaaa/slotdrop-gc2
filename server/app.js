@@ -8,6 +8,7 @@ import { activityRouter } from './routes/activities.js';
 import { providerRouter } from './routes/providers.js';
 import { pricingRouter } from './routes/pricing.js';
 import { bookingRouter } from './routes/bookings.js';
+import { holdRouter } from './routes/holds.js';
 import { bookingRateLimiter } from './middleware/booking-rate-limit.js';
 import { ownerRouter } from './routes/owner.js';
 
@@ -23,6 +24,7 @@ export function createApp({
   app.use('/api/activities', activityRouter());
   app.use('/api/slots', slotRouter(db, clock));
   app.use('/api/pricing', pricingRouter(db, clock));
+  app.use('/api/holds', holdRouter(db, clock));
   app.use('/api', ownerRouter(db, clock));
   app.use('/api', providerRouter(db, clock));
   app.use('/api/bookings', bookingRateLimiter(bookingRateLimit));

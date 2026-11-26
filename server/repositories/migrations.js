@@ -32,6 +32,7 @@ export async function migrateDatabase(db) {
     "003_provider_applications.sql",
     "004_practice_sessions.sql",
     "005_demo_choice_variants.sql",
+    "006_seat_holds.sql",
   ]) {
     const sql = await readFile(
       new URL("../../db/migrations/" + name, import.meta.url),
