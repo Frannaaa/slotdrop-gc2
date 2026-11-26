@@ -12,7 +12,7 @@ const report = {
   environment: 'Disposable local database and actual HTTP routes; not a deployed release', node: process.version,
   backendReady: false, checks: [], exchanges: [],
   manualChecksStillRequired: ['Integrated browser countdown and complete booking journey',
-    'Phone-width and unaided-user evidence', 'Independent teammate review and reviewed-main deployment',
+    'Phone-width regression check; retain the completed GC2 outside-group evidence (no new tester or recording required)', 'Independent teammate review and reviewed-main deployment',
     'Enabled recurring health checks', 'Final report contributions and final-v1.0 on tested main'],
 };
 async function request(method, path, body) {
