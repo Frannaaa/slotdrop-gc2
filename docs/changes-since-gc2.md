@@ -2,7 +2,7 @@
 
 Our upgrade is a server-enforced 10-minute seat hold, chosen under step 1, improved by a visible countdown and hold-to-booking persistence.
 
-This is the declared final target. This branch implements Fran's backend foundation. The countdown, hold-aware accepted quote and atomic booking conversion remain assigned teammate work and must pass integration before the upgrade is claimed complete.
+This is the declared final target. Fran's backend foundation is merged and deployed. The countdown, hold-aware accepted quote and atomic booking conversion remain assigned teammate work and must pass integration before the upgrade is claimed complete.
 
 ## Implemented by Fran
 
@@ -11,7 +11,7 @@ This is the declared final target. This branch implements Fran's backend foundat
 - One slot query counts confirmed seats and active holds for discovery, Detail, ordinary quotes/bookings, Owner and low-stock metrics. Holds contribute no confirmed orders or revenue. Owner cannot shrink capacity below reservations.
 - Tests cover expiry, retries, cutoffs, undated grading sessions, migrations and database reopen. A real PostgreSQL booking/hold race runs in CI; it is skipped locally without `TEST_DATABASE_URL`.
 - Actual local HTTP captures and saved receipt/Owner readback are in [refusals](refusals.md). The accepted-total 409 behavior is explicitly distinguished from the brief's generic 201 example.
-- A ten-minute health-ping workflow is prepared. Scheduled checks activate only after it is merged to `main`; GitHub can delay schedules, so Fran must also open the app before presenting. An independent UptimeRobot monitor remains an option.
+- The ten-minute health-ping workflow is on main. Recurring execution still needs verification; Fran also opens the app before presenting and keeps the local fallback ready.
 - The Windows presentation helper prepares the local backup and source tabs. A repeatable Final API rehearsal verifies Owner analytics, records the missing conversion dependency and feeds a three-page project report with the required sections, diagram, versions and written bonus claim.
 
 ## Files
@@ -24,4 +24,7 @@ Release tooling also adds `tools/check-final-readiness.mjs`, `tools/build-final-
 
 ## Final acceptance still required
 
-Integrate the teammate work, run the uninterrupted browser journey and valid/expired outcomes, verify the five Owner figures, refresh release evidence and the 2-4 page report, and rehearse the 15-minute presentation. Claim Owner analytics in writing. Tag reviewed, tested and verified `main` as `final-v1.0` only after those checks pass.
+Integrate the teammate work, run the uninterrupted browser journey and valid/expired outcomes, verify the five Owner figures, refresh release evidence and the 2-4 page report, and rehearse the confirmed presentation length. The brief lists both 10+5 and 15+5 minutes; confirm class timing. Claim Owner analytics in writing. Tag reviewed, tested and verified `main` as `final-v1.0` only after those checks pass.
+
+
+[Final requirements audit](final-submission-audit.md) separates required submission items, existing GC2 evidence, team-plan decisions and wording that needs instructor confirmation. The feedback-response file and final-v1.0 are still pending.
