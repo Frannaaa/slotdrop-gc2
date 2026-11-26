@@ -1,6 +1,7 @@
 import { ApiError, integer, invalid, object, timestamp } from '../lib/validation.js';
 import { MAX_PRICE_CENTAVOS, MAX_SEATS } from '../config/business.js';
 import { findSlot } from '../repositories/slots.js';
+import { shortenHoldDeadlines } from '../repositories/holds.js';
 const fields = ['offerPriceCentavos','buddyPriceCentavos','capacity','bookingClosesAt','status'];
 function numeric(value, name, max) {
   if (typeof value !== 'number') invalid(name + ' must be a JSON integer.');
@@ -53,31 +54,34 @@ export async function editOffer(db, id, body, clock = () => new Date()) {
     // Booking must lock this same row before checking/inserting seats.
     const { rows: [slot] } = await client.query('SELECT sl.*,s.active AS service_active FROM slots sl JOIN services s ON s.id=sl.service_id WHERE sl.id=$1 FOR UPDATE OF sl', [id]);
     if (!slot) throw new ApiError(404, 'SLOT_NOT_FOUND', 'Session not found.');
-    const { rows: [sum] } = await client.query("SELECT COALESCE(SUM(quantity),0) AS sold FROM bookings WHERE slot_id=$1 AND status='confirmed'", [id]);
-    const sold = Number(sum.sold);
+    const now = clock();
+    const inventory = await findSlot(client, id, now);
+    const sold = inventory.confirmedSeats;
+    const reserved = sold + inventory.heldSeats;
     const offer = body.offerPriceCentavos === undefined ? slot.offer_price_centavos : body.offerPriceCentavos;
     const buddy = body.buddyPriceCentavos === undefined ? slot.buddy_price_centavos : body.buddyPriceCentavos;
     rates(slot.original_price_centavos, offer, buddy);
     const capacity = body.capacity === undefined ? slot.capacity : numeric(body.capacity, 'capacity', MAX_SEATS);
-    if (capacity < sold) throw new ApiError(409, 'CAPACITY_CONFLICT', 'Allocation cannot be lower than seats already booked.');
+    if (capacity < reserved) throw new ApiError(409, 'CAPACITY_CONFLICT', 'Allocation cannot be lower than seats already booked or actively held.');
     const status = body.status === undefined ? slot.status : body.status;
     if (!['open','paused','cancelled'].includes(status)) invalid('Invalid session status.');
     if (status === 'cancelled' && sold > 0) throw new ApiError(409, 'BOOKINGS_EXIST', 'Cannot cancel a session with confirmed bookings.');
+    if (status === 'cancelled' && inventory.heldSeats > 0) throw new ApiError(409, 'ACTIVE_HOLDS_EXIST', 'Wait for active holds to expire or be released before cancelling this session.');
     const start = slot.starts_at === null ? null : new Date(slot.starts_at);
     if (start === null && body.bookingClosesAt !== undefined) invalid('Practice bookings have no cutoff.');
     const cutoff = body.bookingClosesAt === undefined ? slot.booking_closes_at : timestamp(body.bookingClosesAt, 'bookingClosesAt');
     if (start !== null && new Date(cutoff) >= start) invalid('Booking cutoff must precede the session start.');
-    const now = clock();
     if (start !== null && start <= now) {
       throw new ApiError(409, 'SESSION_STARTED', 'This session has started. Its offer can no longer be edited.');
     }
     const closed = cutoff !== null && new Date(cutoff) <= now;
-    if (slot.status !== 'open' && status === 'open' && (closed || sold >= capacity || !slot.service_active || !slot.runs_as_scheduled)) {
+    if (slot.status !== 'open' && status === 'open' && (closed || reserved >= capacity || !slot.service_active || !slot.runs_as_scheduled)) {
       throw new ApiError(409, 'SESSION_NOT_BOOKABLE', start === null
         ? 'The activity must be active and have available seats before resuming sales.'
         : 'Set a future booking deadline and ensure the activity has available seats before resuming sales.');
     }
     await client.query('UPDATE slots SET offer_price_centavos=$2,buddy_price_centavos=$3,capacity=$4,status=$5,booking_closes_at=$6 WHERE id=$1', [id,offer,buddy,capacity,status,cutoff]);
-    return findSlot(client, id);
+    if (body.bookingClosesAt !== undefined) await shortenHoldDeadlines(client, id, cutoff, now);
+    return findSlot(client, id, now);
   }));
 }

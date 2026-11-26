@@ -808,3 +808,30 @@ body:not(.owner-page) .home-hero-photo figcaption a { color:inherit; text-decora
   body:not(.owner-page) .home-hero-copy h1 { font-size:clamp(2.45rem,9vw,3.5rem); }
   body:not(.owner-page) .home-hero-photo { min-height:0; aspect-ratio:16/11; border-radius:16px; }
 }
+
+/* Home uses the shared grouped card, including a separate link for each date. */
+#featured .session-options {
+  display: grid;
+  gap: .6rem;
+  margin: .25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+#featured .session-options li { min-width: 0; }
+#featured .session-options a {
+  display: grid;
+  gap: .3rem;
+  min-height: 44px;
+  padding: .75rem;
+  border: 1px solid var(--color-border);
+  border-radius: .65rem;
+  color: var(--color-ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+#featured .session-options a:hover,
+#featured .session-options a:focus-visible { border-color: var(--color-blue); }
+#featured .session-options a:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 3px; }
+#featured .session-options strong { color: var(--color-blue); text-decoration: underline; }
+#featured .session-options span { font-size: .9rem; }
+#featured .session-options small { font-size: .8rem; color: #545b53; }

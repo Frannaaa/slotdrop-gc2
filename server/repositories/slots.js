@@ -4,18 +4,29 @@ import { safeNumber } from '../lib/validation.js';
 import { studioReferences } from './reference-catalog.js';
 import { discountPercent } from '../../public/js/business-config.js';
 
-export const SLOT_SELECT = `SELECT sl.*, s.provider_id, s.name AS service_name, s.category,
+export const REMAINING_SEATS_SQL = 'sl.capacity - inventory.seats_booked - inventory.seats_held';
+
+// Arguments are internal SQL parameter references, never request values.
+// Exclude an own hold only after the caller validates its slot, quantity and expiry.
+export function slotSelect(nowSql = 'clock_timestamp()', ownHoldSql = 'NULL::uuid') {
+  return `SELECT sl.*, s.provider_id, s.name AS service_name, s.category,
   s.reference_key, s.activity_type, s.technique, s.inclusions, s.preparation_note, s.cancellation_note,
   s.duration_minutes, s.beginner_friendly, s.recurrence_note, s.active,
   s.default_booking_cutoff_minutes, p.name AS provider_name, p.city, p.area,
-  inventory.seats_booked
+  inventory.seats_booked, inventory.seats_held, ${REMAINING_SEATS_SQL} AS remaining_seats
   FROM slots sl
   JOIN services s ON s.id=sl.service_id
   JOIN providers p ON p.id=s.provider_id
   CROSS JOIN LATERAL (
-    SELECT COALESCE(SUM(b.quantity), 0) AS seats_booked
-    FROM bookings b WHERE b.slot_id=sl.id AND b.status='confirmed'
+    SELECT
+      (SELECT COALESCE(SUM(b.quantity), 0) FROM bookings b
+       WHERE b.slot_id=sl.id AND b.status='confirmed') AS seats_booked,
+      (SELECT COALESCE(SUM(h.quantity), 0) FROM seat_holds h
+       WHERE h.slot_id=sl.id AND h.status='active' AND h.expires_at > ${nowSql}
+         AND h.id IS DISTINCT FROM ${ownHoldSql}) AS seats_held
   ) inventory`;
+}
+export const SLOT_SELECT = slotSelect();
 export const SLOT_BOOKING_WINDOW = '(sl.starts_at IS NULL OR (sl.starts_at > $1 AND sl.starts_at < $2 AND sl.booking_closes_at > $1))';
 
 export function slotResponse(row) {
@@ -32,7 +43,8 @@ export function slotResponse(row) {
     startsAt: row.starts_at === null ? null : new Date(row.starts_at).toISOString(),
     demoVariant: row.starts_at === null ? number('demo_variant') : null,
     bookingClosesAt: row.booking_closes_at === null ? null : new Date(row.booking_closes_at).toISOString(),
-    capacity: number('capacity'), remainingSeats: number('capacity') - number('seats_booked'),
+    capacity: number('capacity'), remainingSeats: number('remaining_seats'),
+    confirmedSeats: number('seats_booked'), heldSeats: number('seats_held'),
     originalPriceCentavos, offerPriceCentavos,
     buddyPriceCentavos: row.buddy_price_centavos === null ? null : number('buddy_price_centavos'),
     discountPercent: discountPercent(originalPriceCentavos, offerPriceCentavos),
@@ -41,8 +53,8 @@ export function slotResponse(row) {
   };
 }
 
-export async function findSlot(db, id) {
-  const { rows } = await db.query(SLOT_SELECT + ' WHERE sl.id=$1', [id]);
+export async function findSlot(db, id, now = new Date(), ownHoldId = null) {
+  const { rows } = await db.query(slotSelect('$2', '$3::uuid') + ' WHERE sl.id=$1', [id, now, ownHoldId]);
   return rows[0] ? slotResponse(rows[0]) : null;
 }
 
@@ -61,7 +73,7 @@ export async function searchSlots(db, query) {
     where.push('sl.booking_closes_at <= $1', 'sl.capacity >= ' + partySize);
   } else {
     where.push(SLOT_BOOKING_WINDOW,
-      'sl.capacity - inventory.seats_booked >= ' + partySize);
+      REMAINING_SEATS_SQL + ' >= ' + partySize);
   }
   if (query.view === 'practice') where.push('sl.starts_at IS NULL');
   if (query.view === 'workshops') where.push('sl.starts_at IS NOT NULL');
@@ -96,7 +108,7 @@ export async function searchSlots(db, query) {
   const defaultOrder = closed && !query.sort ? 'sl.booking_closes_at DESC, sl.id DESC' : scheduleOrder;
   const order = query.sort === 'price-low' ? effectivePrice + ' ASC, ' + scheduleOrder
     : query.sort === 'price-high' ? effectivePrice + ' DESC, ' + scheduleOrder : defaultOrder;
-  const matching = SLOT_SELECT + ' WHERE ' + where.join(' AND ');
+  const matching = slotSelect('$1') + ' WHERE ' + where.join(' AND ');
   if (query.view === 'workshops') {
     const { rows } = await db.query(`
       WITH matching AS (${matching}),

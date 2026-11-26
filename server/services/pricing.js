@@ -44,7 +44,7 @@ export async function getQuote(db, query, now) {
   if (query.slotId === undefined || query.quantity === undefined) invalid('Provide slotId and quantity.');
   const slotId = integer(query.slotId, 'slotId');
   const quantity = integer(query.quantity, 'quantity', 1, MAX_SEATS);
-  const slot = await findSlot(db, slotId);
+  const slot = await findSlot(db, slotId, now);
   if (!slot) throw new ApiError(404, 'SLOT_NOT_FOUND', 'Session not found.');
   checkBookable(slot, quantity, now);
   return priceQuote(slot, quantity, now);

@@ -10,7 +10,7 @@ export function slotRouter(db, clock) {
   router.patch('/:id', async (req, res) => res.json(await editOffer(db, integer(req.params.id, 'id'), req.body, clock)));
   router.get('/', async (req, res) => res.json(await listSlots(db, req.query, clock())));
   router.get('/:id', async (req, res) => {
-    const result = await findSlot(db, integer(req.params.id, 'id'));
+    const result = await findSlot(db, integer(req.params.id, 'id'), clock());
     if (!result) throw new ApiError(404, 'SLOT_NOT_FOUND', 'Session not found.');
     res.json(result);
   });

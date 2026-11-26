@@ -2,6 +2,10 @@ export class ApiError extends Error {
   constructor(status, code, message, details) { super(message); this.status = status; this.code = code; if (details) this.details = details; }
 }
 export function invalid(message) { throw new ApiError(400, 'INVALID_INPUT', message); }
+export function uuid(value, name) {
+  if (typeof value !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) invalid(name + ' must be a UUID.');
+  return value.toLowerCase();
+}
 export function integer(value, name, min = 1, max = Number.MAX_SAFE_INTEGER) {
   if ((typeof value !== 'number' && typeof value !== 'string') || !/^\d+$/.test(String(value))) invalid(name + ' must be an integer.');
   const number = Number(value);

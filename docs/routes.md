@@ -9,6 +9,9 @@ Requests and responses use JSON with camelCase fields. The [schema](schema.md) l
 | GET /api/health | None | 200 {status:"ok",app:"SlotDrop"} | 503 if the production database or required tables are unavailable | Fran |
 | GET /api/slots | q, category, area, when, people, type, tag, sort, page, limit, view | 200 array (including `[]`) by default, for `view=practice` or `view=closed`; for `view=workshops`, 200 `{workshops: [{serviceId, sessions}], hasNextPage}` | 400 bad filter | Fran |
 | GET /api/slots/:id | Positive safe integer | 200 session | 400 malformed; 404 unknown | Fran |
+| POST /api/holds | requestId UUID, slotId and quantity JSON integers | 201 new hold; 200 identical retry, including expired/released state | 400 invalid; 404 unknown slot; 409 unavailable seats or reused key with different selection | Fran |
+| GET /api/holds/:id | UUID | 200 active/expired/released/converted hold | 400 malformed; 404 HOLD_NOT_FOUND | Fran |
+| DELETE /api/holds/:id | UUID | 200 released or already expired/released hold | 400 malformed; 404 unknown; 409 HOLD_CONVERTED | Fran |
 | POST /api/slots | Session fields below | 201 session | 400 invalid; 404 activity missing; 409 inactive activity or duplicate session | Fran |
 | PATCH /api/slots/:id | Allowed edits below | 200 session | 400 invalid; 404 unknown; 409 session started, or capacity/cancellation/resumption conflict | Fran |
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints,discoveryHours} | 500 unexpected failure | Fran |
@@ -50,7 +53,7 @@ List and detail use the same session shape:
 id, serviceId, providerId, providerName, serviceName, category, city, area,
 activityType, technique, inclusions, preparationNote, cancellationNote, studioReference,
 durationMinutes, beginnerFriendly, startsAt, bookingClosesAt, capacity,
-remainingSeats, originalPriceCentavos, offerPriceCentavos, buddyPriceCentavos,
+remainingSeats, confirmedSeats, heldSeats, originalPriceCentavos, offerPriceCentavos, buddyPriceCentavos,
 discountPercent, status, serviceActive, recurrenceNote, runsAsScheduled, defaultBookingCutoffMinutes
 ```
 
@@ -68,12 +71,13 @@ If bookingClosesAt is omitted, derive it from the activity default. Require now 
 
 PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClosesAt and status=open/paused/cancelled. Lock the session row and count confirmed booked quantities before updating.
 
-- Capacity cannot fall below confirmed seats.
+- Capacity cannot fall below confirmed seats plus active held seats.
 - A new standard offer cannot leave an incompatible buddy rate; update or disable the buddy rate in the same request.
 - A passed cutoff can close sales immediately.
+- Moving a cutoff earlier shortens active holds. Closing immediately releases them; moving the cutoff later never renews an existing hold.
 - Reopening paused or cancelled inventory requires an active activity, confirmation that the session will run and available seats. Dated offers must have a future cutoff and start. The service reads the current time after taking the row lock.
 - Practice offers accept price, capacity and status edits. Their dates are set by startup, and a cutoff edit returns 400.
-- Cancelling with confirmed bookings returns 409.
+- Cancelling with confirmed bookings or active holds returns 409.
 - Once the session starts, all offer edits return 409 SESSION_STARTED; the owner controls disable editing.
 - Changing the start time is unsupported and returns 400.
 - Existing receipt amounts and times stay unchanged.
@@ -81,6 +85,8 @@ PATCH accepts only offerPriceCentavos, buddyPriceCentavos, capacity, bookingClos
 All per-seat amounts are integers from 1 to 100,000,000 centavos. Require buddy < offer < regular when the buddy rate is enabled. The actual regular price must be checked with the provider; code cannot establish that it is genuine.
 
 ## Quote and booking contract
+
+`remainingSeats` excludes active holds for every ordinary quote or booking. The current browser journey remains hold-free until the assigned frontend and booking conversion work is integrated. `holdId` is not yet accepted by these two endpoints in Fran's foundation branch.
 
 [Pricing](../server/services/pricing.js) and [booking](../server/services/bookings.js) share the same availability check and price quote. `GET /api/pricing/quote` accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings reuses the same priceQuote() and checkBookable() functions.
 
@@ -153,3 +159,36 @@ The owner workspace stops waiting after 15 seconds, including while reading a re
 The [published studio catalog](../public/data/studio-research.json) is served by `GET /api/activities`. A profile combines that provider’s published details with its eligible demo offers via `GET /api/providers/:id`.
 
 `POST /api/provider-applications` takes `requestId`, optional `providerId`, `businessName`, `website`, `city`, `area`, `activityTypes`, `contactName`, `contactEmail`, `representativeRole`, `authorized` and `demoAcknowledged`. The server validates the public HTTPS URL, contact fields, supported activity types, representative role and the two confirmations. The serialized URL must fit the 2,048-character database limit. It saves a pending application and reuses its result for the same request and payload. The public readback exposes `id`, `status` and `createdAt`. [Application service](../server/services/providers.js) · [API tests](../tests/providers.test.js)
+
+
+## Seat holds and teammate handoff
+
+Fran's foundation implements `POST /api/holds`, `GET /api/holds/:id` and `DELETE /api/holds/:id`. These routes are available on the feature branch, not on the unchanged GC2 deployment until merged and deployed.
+
+Create body:
+
+```json
+{"requestId":"f2cd42de-3ab6-4aec-9425-5a2d631841de","slotId":1,"quantity":2}
+```
+
+The flat response is `{id, slotId, quantity, status, expiresAt, serverNow, remainingSeats}`. `id` is the hold UUID. Times are ISO UTC timestamps. `remainingSeats` is public availability after this hold, so it does not include the customer's reserved seats. A new hold returns 201; an identical request returns 200 with its current state. A reused key with a different slot/quantity returns 409 `REQUEST_KEY_CONFLICT`. Replaying an expired or released request does not reserve again or move its expiry. A new intentional reservation uses a new request ID.
+
+A hold is active only while its stored status is `active` and `expires_at > server time`. Otherwise its readback is `expired`, `released` or `converted`. Deleting an expired/released hold returns 200; deleting a converted one returns 409 `HOLD_CONVERTED`. Unknown IDs return 404 `HOLD_NOT_FOUND`; malformed UUIDs return 400. The server, not a browser countdown, releases expired inventory by excluding it from every availability query. Undated practice sessions remain reusable.
+
+### Janelle: quote and conversion integration
+
+This work is still pending in the foundation branch:
+
+1. Accept an optional UUID `holdId` on quote and booking. Keep ordinary GC2 callers working. Preserve the existing stale-price refusal and identical booking retry.
+2. Check an earlier saved booking before rejecting an old hold on a retry. Compare `holdId` as part of the normalized request identity, using the unique `seat_holds.booking_id` relation.
+3. For a new booking, lock the `slots` row before locking its hold row. After the lock, read the server clock and require the hold's slot, quantity and effective active status to match.
+4. After validating the hold, call `findSlot(client, slotId, now, holdId)` to exclude that own hold once from the available-seat calculation. Public reads omit this argument. Never exclude an unvalidated hold belonging to another selection.
+5. Use the same `checkBookable()` and `priceQuote()`. Insert the saved receipt and update the hold to `status='converted', booking_id=<saved id>` in the same checked-out transaction. Any refusal rolls both back. Return the saved hold relation on readback without exposing retry keys.
+6. Check expired/mismatched holds, other customers' holds, changed quotes, duplicate clicks and retries after conversion. Do not reimplement expiry or seat arithmetic in a second service.
+
+### Kat, Kaitlyn and Kirsten
+
+Kat creates/reuses one hold request key per chosen selection and hands `holdId`, `slotId` and quantity to Checkout. Kaitlyn uses `serverNow`/`expiresAt` for the countdown and always rechecks server state; client time never authorizes saving. Kirsten distinguishes `heldSeats`, `confirmedSeats` and `remainingSeats` in Browse/Owner. These client changes are pending teammate implementation.
+
+[Actual create/read/release/expiry captures](evidence/final-api.json) use disposable local data. Refresh the evidence after full integration.
+
