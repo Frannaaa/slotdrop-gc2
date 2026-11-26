@@ -8,6 +8,7 @@ Checked 26 November 2026 against the supplied instructor announcement, sections 
 - The first five pages of `SlotDrop_Final_Project_Combined_Brief.pdf` and the shared execution guide are working team plans. They do not override the instructor announcement.
 - This audit reads the supplied announcement and current connected evidence. It does not claim a fresh Canvas check. The referenced `final-demo-day-checklist.md` was not found in the available Library/Drive search; do not invent additional requirements from its title.
 - The original dates table and presentation section contradict each other. Keep those questions open below.
+- Fran confirmed on 26 November that Ma'am has approved Chonel's absence. This resolves the speaking-plan exception; preserve the five-presenter allocation.
 
 ## 1. Required software and demonstration
 
@@ -66,7 +67,7 @@ On the last page: system diagram and stack versions. The current report supplies
 
 ## 3. Presentation and day-of readiness
 - Cover business recap, system overview, live demo, upgrade, one-save system explanation, current improvements and future roadmap.
-- **The brief says every member speaks and contributes meaningfully in Q&A.** The working plan gives Chonel no speaking slot. That plan needs an instructor-approved exception or a revised speaking allocation; this audit does not invent an exception or silently change Fran's plan.
+- **Approved exception:** Fran confirmed on 26 November that Ma'am has approved Chonel not being present. Keep the five-presenter plan with no speaking slot for Chonel. The other five members speak and contribute meaningfully in Q&A.
 - Every presenter should explain their own code and the whole transaction, including where the server decides expiry, price and availability. Run the prescribed 60-second AI-code sweep for drifting fields, browser-owned totals and service bypasses.
 - Request the health route every ten minutes and open the site shortly before presenting. The GitHub pinger is on main, but **no scheduled execution appeared in the latest check**; PR/manual health checks are not proof of recurring execution.
 - Prepare the actual presentation laptop, current code, usable demo inventory and local fallback. Open the running app and Owner/database view in that order.
@@ -93,10 +94,9 @@ A second automation bonus is not required. The brief describes both criterion-ba
 ## 6. Questions that need authoritative clarification
 1. **Deadline:** the source says December 1, 2026, 11:59 PM, but calls it Monday. December 1, 2026 is **Tuesday**. Verify the final Canvas date/time; defense is listed for **Wednesday, December 2**.
 2. **Duration:** section 1 says **10 minutes + 5 Q&A**; section 8 says **15 + 5**. Confirm the duration before timing the final script.
-3. **Chonel's speaking exception:** the current five-presenter plan conflicts with the all-members rule unless the instructor approved an exception.
-4. **Wrong-total response:** ask whether the documented stale-accepted-price 409 contract is accepted for this Final's generic 201 example. GC2 feedback praised that 409 behavior; do not silently remove it or claim it returned 201.
-5. **Full GC2 feedback:** the supplied excerpt mentions two small Final items but contains only the cold-start action. Obtain any omitted comment rather than inventing it. The response file must cover every actual comment.
-6. **Submission location:** the supplied brief says the channel will be announced. Confirm the actual Canvas/upload destination.
+3. **Wrong-total response:** ask whether the documented stale-accepted-price 409 contract is accepted for this Final's generic 201 example. GC2 feedback praised that 409 behavior; do not silently remove it or claim it returned 201.
+4. **Full GC2 feedback:** the supplied excerpt mentions two small Final items but contains only the cold-start action. Obtain any omitted comment rather than inventing it. The response file must cover every actual comment.
+5. **Submission location:** the supplied brief says the channel will be announced. Confirm the actual Canvas/upload destination.
 
 ## 7. Immediate work by person
 | Person | Next concrete work |
@@ -105,7 +105,7 @@ A second automation bonus is not required. The brief describes both criterion-ba
 | Kat | Create/reuse the matching hold from Detail/Selection; pass ID/expiry/quantity; usable refusal and refresh recovery. |
 | Kaitlyn | Countdown, expiry lock/recovery, stable save/retry, Confirmation from saved ID; rehearse final flow. |
 | Kirsten | Changed-screen phone-width/state/Console regression, feedback-response file, Owner labels; independent review of #93 if following the agreed review pair. No mandatory new outsider recruitment. |
-| Chonel | Hand off/review Home #93 and supply presentation materials; confirm the speaking-plan exception with Fran. |
+| Chonel | Hand off/review Home #93 and supply presentation materials. Ma'am has approved his absence, as confirmed by Fran; no speaking slot is needed. |
 | Fran | Coordinate reviews/integration, confirm timing and speaking rule, verify recurring health checks/local backup, refresh final evidence/report, and tag/submit the tested final release. |
 
 ## Checked sources and evidence
