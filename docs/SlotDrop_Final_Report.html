@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SlotDrop Final Project Report</title>
+<style>
+@font-face{font-family:DM;src:url('../public/fonts/DMSans400.woff2')}@font-face{font-family:DM;src:url('../public/fonts/DMSans700.woff2');font-weight:700}
+@page{size:A4;margin:12mm}*{box-sizing:border-box}body{margin:0;color:#222a32;font:10pt/1.38 DM,Arial,sans-serif;background:#fff}
+.sheet{width:186mm;min-height:272mm;position:relative;padding-bottom:9mm;break-after:page}.sheet:last-child{break-after:auto}
+h1{font-size:25pt;line-height:1.06;margin:3mm 0 2mm;letter-spacing:-.5pt}h2{font-size:13pt;line-height:1.2;margin:5mm 0 2mm;color:#263d55}h3{font-size:10pt;margin:3mm 0 1mm}
+p{margin:0 0 2.5mm}ol{margin:1mm 0 3mm;padding-left:5mm}li{margin-bottom:1.5mm}a{color:#274c77;text-decoration:none}code{font:8.5pt Consolas,monospace;overflow-wrap:anywhere}
+.eyebrow{font-size:8pt;letter-spacing:.7pt;color:#596675}.sub{font-size:10pt;color:#596675}.status{padding:2.8mm 3mm;background:#f0f4f7;border-left:3px solid #627e95;margin:3mm 0;font-size:8.6pt;line-height:1.35}
+table{border-collapse:collapse;width:100%;font-size:9pt;line-height:1.3;margin:2mm 0 3mm}th{background:#eaf0f5;text-align:left;color:#263d55}td,th{padding:2mm 2.3mm;border-bottom:1px solid #d9e0e5;vertical-align:top}td:first-child{font-weight:700}.small{font-size:8.5pt;line-height:1.35}.footer{position:absolute;bottom:0;width:100%;border-top:1px solid #ccd6df;padding-top:2mm;font-size:8pt;color:#596675;display:flex;justify-content:space-between}.rule{background:#f0f4f7;padding:2.8mm 3mm;margin:2mm 0 3mm}svg{width:100%;height:auto;margin:2mm 0}
+@media screen{body{background:#e9edf0;padding:16px}.sheet{margin:0 auto 20px;background:#fff;padding:10mm;min-height:297mm;width:210mm;box-shadow:0 3px 16px #0002}.footer{width:calc(100% - 20mm);bottom:6mm}}
+</style></head><body>
+<section class="sheet">
+<div class="eyebrow">Group 1 / ITMGT 45.03 / 26 November 2026</div>
+<h1>SlotDrop<br>Final Project Report</h1>
+<div class="sub">Giving customers time to book without selling the same seat twice</div>
+<div class="status"><b>Implementation status.</b> PR #92 implements the hold APIs and shared availability rule. The countdown, hold-to-booking conversion and integrated phone test remain pending; the public app still runs GC2. This report distinguishes that work from the verified booking and hold evidence.</div>
+
+<h2>1. System overview</h2>
+<p>SlotDrop helps people near Katipunan find discounted workshop seats that a studio has released for sale. Customers browse activities, choose a session and quantity, review a server quote, and save a simulated booking. Studios control the released capacity, booking deadline and standard or buddy price through Owner. The Express API checks availability, calculates money in centavos and stores the booking in PostgreSQL. Confirmation retrieves that saved receipt by ID, while Owner shows bookings and five server-computed business figures.</p>
+
+<h2>2. GC2 to Final improvements</h2>
+<p><b>Our upgrade is a server-enforced 10-minute seat hold, chosen under step 1, improved by a visible countdown and hold-to-booking persistence.</b></p>
+<p>We chose this because a customer entering their details needs a short, dependable window to finish. The implemented hold changes bookability immediately: other customers cannot claim those seats until the hold expires or is released. It also adds persisted data and server logic, so the reservation survives a restart. The countdown and conversion will complete the visible feedback and saved-booking relation.</p>
+<p>GC2 earned 105/100. We retained the session-row lock, refusal of a stale accepted price with a fresh quote, and the original receipt on an identical retry. To address the reported 22-second cold start, we prepared a ten-minute health-ping workflow; its one-off check passed, but recurring operation starts only after merge.</p>
+
+<h2>3. Feature explanation and business decision</h2>
+<p><code>POST /api/holds</code> accepts a request UUID, session ID and positive quantity. In <code>server/services/holds.js</code>, <code>createHold()</code> locks the session row, checks the server clock and saves the reservation. Reusing the same request returns the same hold; it never starts another ten minutes.</p>
+<div class="rule"><b>Free seats = released capacity - confirmed seats - active, unexpired holds.</b><br>Expiry is the earlier of ten minutes and the booking cutoff. Holding two of four free seats leaves two; expiry restores four if nothing else changes.</div>
+<p>The shared <code>slotSelect()</code> query applies that count across discovery, quotes, bookings and Owner. Capacity edits use the same session lock. A hold creates no confirmed booking, commission or studio payout.</p>
+<p><b>Business decision.</b> Keep the 10% commission for a small pilot. One PHP 2,700 seat yields PHP 270 for SlotDrop and PHP 2,430 for the studio before costs. Our four-week model sells 32 of 64 released seats in 28 bookings: PHP 8,532 in fees less PHP 1,400 support and PHP 6,000 outreach/operations leaves PHP 1,132. Break-even is about 27 seats at the same mix. We would expand only if both sides earn a positive contribution after actual costs; these are assumptions, not sales results.</p>
+<div class="footer"><span>SlotDrop / Group 1 / Simulated bookings</span><span>1 / 3</span></div>
+</section>
+
+<section class="sheet">
+<div class="eyebrow">Following the saved booking</div>
+<h2>4. Transaction flow</h2>
+<p>The 25 November 2026 rehearsal used actual HTTP routes and a disposable local database. It recorded a two-seat booking for <b>Beginner Mug Handbuilding at Demo Clay Corner</b>, receipt <code>e9307380-5724-4bd2-9727-509bb35d8171</code>. This verifies the existing booking path; it does not prove hold conversion.</p>
+<ol>
+<li><b>UI:</b> The customer journey is Browse, Detail, Selection, Checkout and Confirmation. For the recorded API save, session 1 and quantity 2 were selected.</li>
+<li><b>API:</b> <code>GET /api/pricing/quote?slotId=1&amp;quantity=2</code> returned the buddy rate of PHP 2,565 per seat: <b>PHP 5,130</b> total, PHP 513 commission and PHP 4,617 studio payout.</li>
+<li><b>Service:</b> <code>POST /api/bookings</code> supplied fictional guest details, a stable request UUID and the accepted total of 513,000 centavos. <code>createBooking()</code> locked the session, checked seats and cutoff, then recalculated the price.</li>
+<li><b>Database and response:</b> The transaction inserted the booking with price, session-time and fee snapshots, committed, and returned HTTP 201 with its receipt UUID.</li>
+<li><b>UI readback:</b> Confirmation uses <code>GET /api/bookings/:id</code>, which returned the saved record with HTTP 200. Owner independently read the matching booking; an identical POST retry returned HTTP 200 and the same receipt.</li>
+</ol>
+<p class="small"><b>Price refusal:</b> SlotDrop returns <code>409 PRICE_CHANGED</code> with a fresh quote when <code>expectedTotalCentavos</code> differs from the server total, and saves nothing. The brief's generic wrong-total example expects 201; our documented contract preserves the GC2 behavior, then requires explicit acceptance of the fresh quote before a successful save. See <code>docs/refusals.md</code>.</p>
+
+<h2>5. Data handling</h2>
+<table>
+<thead><tr><th style="width:24%">Table</th><th>What we store and retrieve</th></tr></thead>
+<tbody>
+<tr><td>providers</td><td>Studio identity, location and reference key; linked to activities.</td></tr>
+<tr><td>services</td><td>Activity name, inclusions, duration, active state and default cutoff; belongs to a provider.</td></tr>
+<tr><td>slots</td><td>Activity link, released capacity, prices, status and paired start/cutoff dates. Undated practice choices use null dates.</td></tr>
+<tr><td>bookings</td><td>Unique request key, quantity, guest name/email and immutable price/time/fee snapshots. Public receipt lookup by UUID omits contact details and the retry key.</td></tr>
+<tr><td>seat_holds</td><td>Unique request key, session link, quantity, creation/expiry times and state. Expiry follows server time; a unique booking link is reserved for conversion.</td></tr>
+<tr><td>provider_applications</td><td>Pending studio/contact applications, kept separate from published inventory and accounts.</td></tr>
+</tbody></table>
+<p class="small">The additive <code>006_seat_holds.sql</code> migration preserves existing receipts. SQL constraints check quantities, prices and receipt arithmetic. Database reopen and container-restart checks verify persistence. Connection secrets stay in environment variables.</p>
+
+<h3>Owner / analytics bonus claim</h3>
+<p>We claim the Owner / analytics bonus. A controlled PHP 2,700 standard booking plus the PHP 5,130 buddy booking produced all five figures from persisted data:</p>
+<table><thead><tr><th>Bookings</th><th>Platform revenue</th><th>Average booking</th><th>Top activity</th><th>Nearly full</th></tr></thead>
+<tbody><tr><td>2</td><td>PHP 783</td><td>PHP 3,915</td><td>Mug handbuilding:<br>3 seats sold</td><td>1 session:<br>1 of 4 seats free</td></tr></tbody></table>
+<p class="small">Total booking value is PHP 7,830; platform revenue is only the PHP 783 commission. Holding the last seat reduced availability to zero without changing confirmed bookings or revenue. Releasing or expiring it restored one free seat.</p>
+<div class="footer"><span>Evidence: docs/evidence/final-readiness.json</span><span>2 / 3</span></div>
+</section>
+
+<section class="sheet">
+<div class="eyebrow">What the implementation taught us</div>
+<h2>6. Reflection</h2>
+<p>One bug appeared when Owner moved a booking cutoff earlier: an existing hold could still carry its old, later expiry. We fixed this by shortening affected holds in the same transaction as the cutoff edit. Moving the deadline later does not give customers a fresh reservation window. This made the rule consistent for customers and the studio.</p>
+<p>We also learned that a countdown cannot decide whether a seat is available. A closed tab or a paused browser must not leave inventory stuck; the database timestamp and server query release expired holds without waiting for the browser. Local tests alone could not prove that two database connections respect the same lock. The foundation passed <b>164/164 CI tests</b> at <code>f5ee131</code>, including the real PostgreSQL hold/booking race and container-restart persistence.</p>
+<p>The remaining blocker is specific: a quote containing <code>holdId</code> returned HTTP 400, <code>Unsupported quote field: holdId</code>. Next, the server must validate the customer's hold, count its seats once, and convert it atomically with the booking. We will connect the countdown, test both successful and expired checkout on a phone, obtain teammate review and verify the deployed build before tagging <code>final-v1.0</code>.</p>
+<p>Commercially, filling a seat is not enough if that buyer would otherwise have paid the studio directly. Our next step is a one-studio pilot that compares total studio sales, extra attendee costs and support spending. The model includes eight displaced direct buyers as a sensitivity, but we still need real observations.</p>
+
+<h2>System diagram and data flow</h2>
+<svg viewBox="0 0 700 143" role="img" aria-label="Browser exchanges JSON over HTTP with Express routes, services and repositories; Express exchanges transactional SQL with PostgreSQL.">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#536f88"/></marker></defs>
+<g fill="#edf3f7" stroke="#b3c6d6"><rect x="2" y="35" width="185" height="84" rx="9"/><rect x="255" y="35" width="190" height="84" rx="9"/><rect x="513" y="35" width="185" height="84" rx="9"/></g>
+<g stroke="#536f88" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"><line x1="198" y1="77" x2="244" y2="77"/><line x1="456" y1="77" x2="502" y2="77"/></g>
+<g text-anchor="middle" fill="#263d55" font-family="DM,Arial,sans-serif"><text x="94" y="64" font-size="17" font-weight="700">Browser</text><text x="94" y="88" font-size="12">Customer pages + Owner</text><text x="350" y="64" font-size="17" font-weight="700">Express API</text><text x="350" y="88" font-size="12">Routes / services / repositories</text><text x="605" y="64" font-size="17" font-weight="700">PostgreSQL</text><text x="605" y="88" font-size="12">Slots / holds / bookings</text><text x="221" y="24" font-size="11">JSON / HTTP</text><text x="479" y="24" font-size="11">SQL / transaction</text></g>
+</svg>
+<p class="small">A route validates the request, a service applies the booking rule, and a repository reads or writes SQL. Responses return the saved record or a refusal; the browser then updates the screen. The same availability query serves customer pages and Owner.</p>
+
+<h3>Versioned technology stack</h3>
+<table><thead><tr><th style="width:24%">Component</th><th>Version and use</th></tr></thead><tbody>
+<tr><td>Frontend</td><td>HTML, CSS and ES-module JavaScript; locally hosted DM Sans fonts.</td></tr>
+<tr><td>Node.js</td><td>22 configured for CI/Render; v24.19.0 used for the recorded local rehearsal.</td></tr>
+<tr><td>Server packages</td><td>Express 5.3.0 / pg 8.23.1 / dotenv 18.0.9, pinned by package-lock.json.</td></tr>
+<tr><td>Database</td><td>PostgreSQL 16 in CI; Neon PostgreSQL in deployment; PGlite 0.5.12 for local demo/tests.</td></tr>
+<tr><td>Hosting</td><td>Render, Singapore; deploy main after CI; readiness at <code>/api/health</code>.</td></tr>
+</tbody></table>
+<p class="small"><b>Source and evidence:</b> <a href="https://github.com/Frannaaa/slotdrop-gc2/pull/92">PR #92</a> / <code>docs/evidence/final-readiness.json</code> / <code>docs/refusals.md</code>.<br><b>Business assumptions:</b> <code>docs/business.md</code>. <b>AI assistance and validation:</b> <code>AI-USAGE.md</code>.<br>All bookings and payment methods in this build are simulated; they do not reserve a real studio seat.</p>
+<div class="footer"><span>Report revised 26 November 2026 / evidence dated 25 November 2026</span><span>3 / 3</span></div>
+</section>
+</body></html>
+

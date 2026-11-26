@@ -12,7 +12,7 @@ This is the declared final target. This branch implements Fran's backend foundat
 - Tests cover expiry, retries, cutoffs, undated grading sessions, migrations and database reopen. A real PostgreSQL booking/hold race runs in CI; it is skipped locally without `TEST_DATABASE_URL`.
 - Actual local HTTP captures and saved receipt/Owner readback are in [refusals](refusals.md). The accepted-total 409 behavior is explicitly distinguished from the brief's generic 201 example.
 - A ten-minute health-ping workflow is prepared. Scheduled checks activate only after it is merged to `main`; GitHub can delay schedules, so Fran must also open the app before presenting. An independent UptimeRobot monitor remains an option.
-- The Windows presentation helper prepares the local backup and source tabs. A repeatable Final API rehearsal verifies Owner analytics, records the missing conversion dependency and feeds a three-page report draft with the required sections, diagram, versions and written bonus claim.
+- The Windows presentation helper prepares the local backup and source tabs. A repeatable Final API rehearsal verifies Owner analytics, records the missing conversion dependency and feeds a three-page project report with the required sections, diagram, versions and written bonus claim.
 
 ## Files
 
@@ -20,7 +20,7 @@ This is the declared final target. This branch implements Fran's backend foundat
 
 Small booking/pricing edits in this branch connect the shared availability rule and UUID validator. Pricing policy, hold conversion and client behavior remain with their assigned owners.
 
-Release tooling also adds `tools/check-final-readiness.mjs`, `tools/build-final-report.mjs`, `tools/prepare-presentation.ps1`, `docs/evidence/final-readiness.json` and `docs/SlotDrop_Final_Report_Draft.{html,pdf}`. The existing health workflow now checks public pages/APIs on PR/manual runs; its scheduled runs still request health only.
+Release tooling also adds `tools/check-final-readiness.mjs`, `tools/build-final-report.mjs`, `tools/prepare-presentation.ps1`, `docs/evidence/final-readiness.json` and `tools/report-template.html` and `docs/SlotDrop_Final_Report.{html,pdf}`. The existing health workflow now checks public pages/APIs on PR/manual runs; its scheduled runs still request health only.
 
 ## Final acceptance still required
 
