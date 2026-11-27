@@ -4,8 +4,11 @@ import { ApiError, invalid, object, safeNumber, uuid } from '../lib/validation.j
 import { findSlot } from '../repositories/slots.js';
 export { uuid } from '../lib/validation.js';
 import { checkBookable, priceQuote } from './pricing.js';
+import { requireActiveHold } from './holds.js';
 
 const FIELDS = ['requestId', 'slotId', 'quantity', 'customerName', 'customerEmail', 'paymentMethod', 'expectedTotalCentavos'];
+// Optional: a seat hold from POST /api/holds. Omitted keeps the GC2 hold-free booking.
+const OPTIONAL_FIELDS = ['holdId'];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PAYMENT_METHODS = ['mock_card', 'pay_on_site'];
 
@@ -13,8 +16,9 @@ const PAYMENT_METHODS = ['mock_card', 'pay_on_site'];
 const RECEIPT_SELECT = `SELECT b.id,b.request_id,b.slot_id,b.quantity,b.customer_name,b.customer_email,
   b.payment_method,b.status,b.session_starts_at,sl.demo_variant,b.original_unit_price_centavos,b.offer_unit_price_centavos,
   b.unit_price_centavos,b.pricing_type,b.commission_basis_points,b.total_price_centavos,
-  b.platform_fee_centavos,b.provider_payout_centavos,b.created_at,s.name AS service_name,p.name AS provider_name
-  FROM bookings b JOIN slots sl ON sl.id=b.slot_id JOIN services s ON s.id=sl.service_id JOIN providers p ON p.id=s.provider_id`;
+  b.platform_fee_centavos,b.provider_payout_centavos,b.created_at,s.name AS service_name,p.name AS provider_name,h.id AS hold_id
+  FROM bookings b JOIN slots sl ON sl.id=b.slot_id JOIN services s ON s.id=sl.service_id JOIN providers p ON p.id=s.provider_id
+  LEFT JOIN seat_holds h ON h.booking_id=b.id`;
 
 function jsonInteger(value, name, min, max) {
   if (typeof value !== 'number' || !Number.isSafeInteger(value)) invalid(name + ' must be a JSON integer.');
@@ -32,7 +36,7 @@ function text(value, name, max) {
 
 // Normalize once so an identical network retry compares equal to the saved request.
 export function bookingRequest(body) {
-  object(body, FIELDS);
+  object(body, [...FIELDS, ...OPTIONAL_FIELDS]);
   for (const key of FIELDS) if (body[key] === undefined) invalid('Provide ' + key + '.');
   const customerEmail = text(body.customerEmail, 'customerEmail', 254);
   if (!EMAIL.test(customerEmail)) invalid('customerEmail must be a valid email address.');
@@ -44,7 +48,8 @@ export function bookingRequest(body) {
     customerName: text(body.customerName, 'customerName', 100),
     customerEmail,
     paymentMethod: body.paymentMethod,
-    expectedTotalCentavos: jsonInteger(body.expectedTotalCentavos, 'expectedTotalCentavos', 0, Number.MAX_SAFE_INTEGER)
+    expectedTotalCentavos: jsonInteger(body.expectedTotalCentavos, 'expectedTotalCentavos', 0, Number.MAX_SAFE_INTEGER),
+    holdId: body.holdId === undefined || body.holdId === null ? null : uuid(body.holdId, 'holdId')
   };
 }
 
@@ -60,6 +65,7 @@ export function receiptResponse(row) {
     unitPriceCentavos: number('unit_price_centavos'), pricingType: row.pricing_type,
     commissionBasisPoints: number('commission_basis_points'), totalPriceCentavos: number('total_price_centavos'),
     platformFeeCentavos: number('platform_fee_centavos'), providerPayoutCentavos: number('provider_payout_centavos'),
+    holdId: row.hold_id || null,
     createdAt: new Date(row.created_at).toISOString()
   };
 }
@@ -68,7 +74,8 @@ function sameRequest(row, request) {
   // Private fields are compared inside the server, never returned as a receipt.
   return safeNumber(row.slot_id) === request.slotId && safeNumber(row.quantity) === request.quantity
     && row.customer_name === request.customerName && row.customer_email === request.customerEmail
-    && row.payment_method === request.paymentMethod && safeNumber(row.total_price_centavos) === request.expectedTotalCentavos;
+    && row.payment_method === request.paymentMethod && safeNumber(row.total_price_centavos) === request.expectedTotalCentavos
+    && (row.hold_id || null) === request.holdId;
 }
 
 async function findByRequestId(client, requestId) {
@@ -98,7 +105,10 @@ export async function createBooking(db, body, clock) {
       if (raced) return replay(raced, request);
       // 3. Recheck eligibility and confirmed seats after the lock, with the time read after the lock.
       const now = clock();
-      const slot = await findSlot(client, request.slotId, now);
+      // 3a. Hold conversion: lock the hold after the slot (same order as release), then require
+      // matching slot/quantity and an active, unexpired status. Only then exclude it once from availability.
+      if (request.holdId) await requireActiveHold(client, request.holdId, request, now, { lock: true });
+      const slot = await findSlot(client, request.slotId, now, request.holdId);
       checkBookable(slot, request.quantity, now);
       // 4-5. Server picks the tier and totals; the browser only acknowledges the amount it saw.
       const quote = priceQuote(slot, request.quantity, now, COMMISSION_BASIS_POINTS);
@@ -113,6 +123,10 @@ export async function createBooking(db, body, clock) {
         [request.requestId, request.slotId, request.quantity, request.customerName, request.customerEmail, request.paymentMethod,
           slot.startsAt, quote.originalUnitPriceCentavos, quote.offerUnitPriceCentavos, quote.pricingType, quote.unitPriceCentavos,
           COMMISSION_BASIS_POINTS, quote.totalPriceCentavos, quote.platformFeeCentavos, quote.providerPayoutCentavos]);
+      // 7. Consume the hold in the same transaction: its seats move from held to booked, never counted twice.
+      if (request.holdId) {
+        await client.query("UPDATE seat_holds SET status='converted',booking_id=$2 WHERE id=$1 AND status='active'", [request.holdId, saved.id]);
+      }
       const { rows: [row] } = await client.query(RECEIPT_SELECT + ' WHERE b.id=$1', [saved.id]);
       return { status: 201, receipt: receiptResponse(row) };
     });
