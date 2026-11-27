@@ -1,0 +1,657 @@
+{
+  "reviewedSourceCommit": "94ab9eac473d1f5f3bc4ef0e9161db8a6f21878d",
+  "scope": "Disposable local fixture; actual browser pages and HTTP routes; no live writes",
+  "api": {
+    "checkedAt": "2026-11-27T13:49:22.96Z",
+    "sourceBaseCommit": "94ab9eac473d1f5f3bc4ef0e9161db8a6f21878d",
+    "environment": "Disposable local database and actual HTTP routes; not a deployed release",
+    "node": "v24.19.0",
+    "backendReady": true,
+    "checks": [
+      {
+        "name": "Standard/buddy save, receipt readback, identical retry and matching Owner rows",
+        "status": "passed"
+      },
+      {
+        "name": "All five server-computed Owner analytics figures match the controlled fixture",
+        "status": "passed"
+      },
+      {
+        "name": "Holds reserve/release/expire without selling seats or generating revenue",
+        "status": "passed"
+      },
+      {
+        "name": "Own-hold quote, mismatch refusal, atomic conversion, one seat count and expired-hold refusal",
+        "status": "passed"
+      }
+    ],
+    "exchanges": [
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "76d4d201-df7e-481c-a976-e392d3ad023c",
+          "slotId": 1,
+          "quantity": 1,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 270000
+        },
+        "status": 201,
+        "body": {
+          "id": "3d231d27-2672-41e4-b8f0-b7e423cc727b",
+          "slotId": 1,
+          "quantity": 1,
+          "paymentMethod": "mock_card",
+          "status": "confirmed",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner",
+          "sessionStartsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 270000,
+          "pricingType": "standard",
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 270000,
+          "platformFeeCentavos": 27000,
+          "providerPayoutCentavos": 243000,
+          "holdId": null,
+          "createdAt": "2026-11-27T13:49:23.035Z"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/pricing/quote?slotId=1&quantity=2",
+        "status": 200,
+        "body": {
+          "slotId": 1,
+          "quantity": 2,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 256500,
+          "pricingType": "buddy",
+          "groupSavingsCentavos": 27000,
+          "totalPriceCentavos": 513000,
+          "platformFeeCentavos": 51300,
+          "providerPayoutCentavos": 461700,
+          "discountPercent": 14.5,
+          "quotedAt": "2026-11-27T13:49:22.944Z"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "62a075d0-404e-4164-a326-dbe3fe5b4160",
+          "slotId": 1,
+          "quantity": 2,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 513000
+        },
+        "status": 201,
+        "body": {
+          "id": "7303bef3-6e40-4e69-9363-be6e60a83caf",
+          "slotId": 1,
+          "quantity": 2,
+          "paymentMethod": "mock_card",
+          "status": "confirmed",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner",
+          "sessionStartsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 256500,
+          "pricingType": "buddy",
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 513000,
+          "platformFeeCentavos": 51300,
+          "providerPayoutCentavos": 461700,
+          "holdId": null,
+          "createdAt": "2026-11-27T13:49:23.078Z"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/bookings/7303bef3-6e40-4e69-9363-be6e60a83caf",
+        "status": 200,
+        "body": {
+          "id": "7303bef3-6e40-4e69-9363-be6e60a83caf",
+          "slotId": 1,
+          "quantity": 2,
+          "paymentMethod": "mock_card",
+          "status": "confirmed",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner",
+          "sessionStartsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 256500,
+          "pricingType": "buddy",
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 513000,
+          "platformFeeCentavos": 51300,
+          "providerPayoutCentavos": 461700,
+          "holdId": null,
+          "createdAt": "2026-11-27T13:49:23.078Z"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "62a075d0-404e-4164-a326-dbe3fe5b4160",
+          "slotId": 1,
+          "quantity": 2,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 513000
+        },
+        "status": 200,
+        "body": {
+          "id": "7303bef3-6e40-4e69-9363-be6e60a83caf",
+          "slotId": 1,
+          "quantity": 2,
+          "paymentMethod": "mock_card",
+          "status": "confirmed",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner",
+          "sessionStartsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 256500,
+          "pricingType": "buddy",
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 513000,
+          "platformFeeCentavos": 51300,
+          "providerPayoutCentavos": 461700,
+          "holdId": null,
+          "createdAt": "2026-11-27T13:49:23.078Z"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/bookings",
+        "status": 200,
+        "body": [
+          {
+            "id": "7303bef3-6e40-4e69-9363-be6e60a83caf",
+            "slotId": 1,
+            "quantity": 2,
+            "status": "confirmed",
+            "sessionStartsAt": "2026-11-28T02:00:00Z",
+            "originalUnitPriceCentavos": 300000,
+            "offerUnitPriceCentavos": 270000,
+            "pricingType": "buddy",
+            "unitPriceCentavos": 256500,
+            "commissionBasisPoints": 1000,
+            "totalPriceCentavos": 513000,
+            "platformFeeCentavos": 51300,
+            "providerPayoutCentavos": 461700,
+            "createdAt": "2026-11-27T13:49:23.078Z",
+            "serviceName": "Beginner Mug Handbuilding",
+            "providerName": "Demo Clay Corner"
+          },
+          {
+            "id": "3d231d27-2672-41e4-b8f0-b7e423cc727b",
+            "slotId": 1,
+            "quantity": 1,
+            "status": "confirmed",
+            "sessionStartsAt": "2026-11-28T02:00:00Z",
+            "originalUnitPriceCentavos": 300000,
+            "offerUnitPriceCentavos": 270000,
+            "pricingType": "standard",
+            "unitPriceCentavos": 270000,
+            "commissionBasisPoints": 1000,
+            "totalPriceCentavos": 270000,
+            "platformFeeCentavos": 27000,
+            "providerPayoutCentavos": 243000,
+            "createdAt": "2026-11-27T13:49:23.035Z",
+            "serviceName": "Beginner Mug Handbuilding",
+            "providerName": "Demo Clay Corner"
+          }
+        ]
+      },
+      {
+        "method": "GET",
+        "path": "/api/metrics",
+        "status": 200,
+        "body": {
+          "bookingCount": 2,
+          "platformRevenueCentavos": 78300,
+          "averageOrderValueCentavos": 391500,
+          "topSellingService": {
+            "serviceId": 1,
+            "serviceName": "Beginner Mug Handbuilding",
+            "seatsSold": 3
+          },
+          "nearlyFullSessionCount": 1
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/holds",
+        "request": {
+          "requestId": "45ea95b4-159a-4c04-9f74-8afb612c5835",
+          "slotId": 1,
+          "quantity": 1
+        },
+        "status": 201,
+        "body": {
+          "id": "bce0517e-3c8c-43c6-ae41-b5caeddd4f26",
+          "slotId": 1,
+          "quantity": 1,
+          "status": "active",
+          "expiresAt": "2026-11-27T13:59:22.944Z",
+          "serverNow": "2026-11-27T13:49:22.944Z",
+          "remainingSeats": 0
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "395771ef-741b-47bf-8589-c6da3704169a",
+          "slotId": 1,
+          "quantity": 1,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 270000
+        },
+        "status": 409,
+        "body": {
+          "error": {
+            "code": "SLOT_UNAVAILABLE",
+            "message": "Only 0 seats are left for this session."
+          }
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/metrics",
+        "status": 200,
+        "body": {
+          "bookingCount": 2,
+          "platformRevenueCentavos": 78300,
+          "averageOrderValueCentavos": 391500,
+          "topSellingService": {
+            "serviceId": 1,
+            "serviceName": "Beginner Mug Handbuilding",
+            "seatsSold": 3
+          },
+          "nearlyFullSessionCount": 0
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/holds/bce0517e-3c8c-43c6-ae41-b5caeddd4f26",
+        "status": 200,
+        "body": {
+          "id": "bce0517e-3c8c-43c6-ae41-b5caeddd4f26",
+          "slotId": 1,
+          "quantity": 1,
+          "status": "released",
+          "expiresAt": "2026-11-27T13:59:22.944Z",
+          "serverNow": "2026-11-27T13:49:22.944Z",
+          "remainingSeats": 1
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/holds",
+        "request": {
+          "requestId": "09576bf6-d59e-4c45-89ed-8b62afa86df0",
+          "slotId": 1,
+          "quantity": 1
+        },
+        "status": 201,
+        "body": {
+          "id": "ce969662-2bd0-412e-bda0-434436052422",
+          "slotId": 1,
+          "quantity": 1,
+          "status": "active",
+          "expiresAt": "2026-11-27T13:59:22.944Z",
+          "serverNow": "2026-11-27T13:49:22.944Z",
+          "remainingSeats": 0
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/holds/ce969662-2bd0-412e-bda0-434436052422",
+        "status": 200,
+        "body": {
+          "id": "ce969662-2bd0-412e-bda0-434436052422",
+          "slotId": 1,
+          "quantity": 1,
+          "status": "expired",
+          "expiresAt": "2026-11-27T13:59:22.944Z",
+          "serverNow": "2026-11-27T13:59:22.944Z",
+          "remainingSeats": 1
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/holds",
+        "request": {
+          "requestId": "7ebae80e-2de1-4509-924a-594de41a41c0",
+          "slotId": 1,
+          "quantity": 1
+        },
+        "status": 201,
+        "body": {
+          "id": "143031f1-d2fb-4b53-81a9-928c5a503471",
+          "slotId": 1,
+          "quantity": 1,
+          "status": "active",
+          "expiresAt": "2026-11-27T14:09:22.944Z",
+          "serverNow": "2026-11-27T13:59:22.944Z",
+          "remainingSeats": 0
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/pricing/quote?slotId=1&quantity=1&holdId=143031f1-d2fb-4b53-81a9-928c5a503471",
+        "status": 200,
+        "body": {
+          "slotId": 1,
+          "quantity": 1,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 270000,
+          "pricingType": "standard",
+          "groupSavingsCentavos": 0,
+          "totalPriceCentavos": 270000,
+          "platformFeeCentavos": 27000,
+          "providerPayoutCentavos": 243000,
+          "discountPercent": 10,
+          "quotedAt": "2026-11-27T13:59:22.944Z",
+          "holdId": "143031f1-d2fb-4b53-81a9-928c5a503471",
+          "holdExpiresAt": "2026-11-27T14:09:22.944Z"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/pricing/quote?slotId=2&quantity=1&holdId=143031f1-d2fb-4b53-81a9-928c5a503471",
+        "status": 409,
+        "body": {
+          "error": {
+            "code": "HOLD_MISMATCH",
+            "message": "This seat hold is for a different session or quantity. Start a new reservation."
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "b466ce3f-2c79-420c-8b45-46b1f2e11273",
+          "slotId": 1,
+          "quantity": 1,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 270000,
+          "holdId": "143031f1-d2fb-4b53-81a9-928c5a503471"
+        },
+        "status": 201,
+        "body": {
+          "id": "6abea319-cea6-4c0b-bef3-b28f521a4b8c",
+          "slotId": 1,
+          "quantity": 1,
+          "paymentMethod": "mock_card",
+          "status": "confirmed",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner",
+          "sessionStartsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 270000,
+          "pricingType": "standard",
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 270000,
+          "platformFeeCentavos": 27000,
+          "providerPayoutCentavos": 243000,
+          "holdId": "143031f1-d2fb-4b53-81a9-928c5a503471",
+          "createdAt": "2026-11-27T13:49:23.298Z"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/slots/1",
+        "status": 200,
+        "body": {
+          "id": 1,
+          "serviceId": 1,
+          "providerId": 1,
+          "studioReference": null,
+          "providerName": "Demo Clay Corner",
+          "serviceName": "Beginner Mug Handbuilding",
+          "category": "creative",
+          "activityType": "pottery",
+          "technique": "handbuilding",
+          "inclusions": [
+            "materials",
+            "painting",
+            "firing"
+          ],
+          "preparationNote": "Demo terms: make and decorate a mug. Firing is included; collection timing would be confirmed by the provider.",
+          "cancellationNote": "Course demo: cancellations and rescheduling are unavailable.",
+          "city": "Quezon City",
+          "area": "Katipunan",
+          "durationMinutes": 120,
+          "beginnerFriendly": true,
+          "startsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "bookingClosesAt": "2026-11-27T23:00:00Z",
+          "capacity": 4,
+          "remainingSeats": 0,
+          "confirmedSeats": 4,
+          "heldSeats": 0,
+          "originalPriceCentavos": 300000,
+          "offerPriceCentavos": 270000,
+          "buddyPriceCentavos": 256500,
+          "discountPercent": 10,
+          "status": "open",
+          "serviceActive": true,
+          "recurrenceNote": "Fictional demo: recurring weekly sessions",
+          "runsAsScheduled": true,
+          "defaultBookingCutoffMinutes": 180
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/holds/143031f1-d2fb-4b53-81a9-928c5a503471",
+        "status": 409,
+        "body": {
+          "error": {
+            "code": "HOLD_CONVERTED",
+            "message": "This hold has already become a saved booking."
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "b466ce3f-2c79-420c-8b45-46b1f2e11273",
+          "slotId": 1,
+          "quantity": 1,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 270000,
+          "holdId": "143031f1-d2fb-4b53-81a9-928c5a503471"
+        },
+        "status": 200,
+        "body": {
+          "id": "6abea319-cea6-4c0b-bef3-b28f521a4b8c",
+          "slotId": 1,
+          "quantity": 1,
+          "paymentMethod": "mock_card",
+          "status": "confirmed",
+          "serviceName": "Beginner Mug Handbuilding",
+          "providerName": "Demo Clay Corner",
+          "sessionStartsAt": "2026-11-28T02:00:00Z",
+          "demoVariant": null,
+          "originalUnitPriceCentavos": 300000,
+          "offerUnitPriceCentavos": 270000,
+          "unitPriceCentavos": 270000,
+          "pricingType": "standard",
+          "commissionBasisPoints": 1000,
+          "totalPriceCentavos": 270000,
+          "platformFeeCentavos": 27000,
+          "providerPayoutCentavos": 243000,
+          "holdId": "143031f1-d2fb-4b53-81a9-928c5a503471",
+          "createdAt": "2026-11-27T13:49:23.298Z"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/holds",
+        "request": {
+          "requestId": "6aa34f2a-e9f8-4c7c-ac1b-b64eef070891",
+          "slotId": 2,
+          "quantity": 1
+        },
+        "status": 201,
+        "body": {
+          "id": "6ef40b58-41a2-4778-aca3-82cbd57983a4",
+          "slotId": 2,
+          "quantity": 1,
+          "status": "active",
+          "expiresAt": "2026-11-27T14:19:22.944Z",
+          "serverNow": "2026-11-27T14:09:22.944Z",
+          "remainingSeats": 5
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/bookings",
+        "request": {
+          "requestId": "59a94e5d-b640-46ff-b0ea-8b44c9e04373",
+          "slotId": 2,
+          "quantity": 1,
+          "customerName": "Final rehearsal fixture",
+          "customerEmail": "final-rehearsal@example.com",
+          "paymentMethod": "mock_card",
+          "expectedTotalCentavos": 95000,
+          "holdId": "6ef40b58-41a2-4778-aca3-82cbd57983a4"
+        },
+        "status": 409,
+        "body": {
+          "error": {
+            "code": "HOLD_EXPIRED",
+            "message": "Your 10-minute seat hold expired, so the seats were released. Start a new reservation."
+          }
+        }
+      }
+    ],
+    "manualChecksStillRequired": [
+      "V2 four live proofs: complete flow, saved readback, visible USP with two outcomes, refusal with nothing saved",
+      "V2 seven tinker checks and phone-width regression; retain GC2 outsider evidence (no new tester or recording required)",
+      "Independent teammate review and reviewed-main deployment",
+      "Recent scheduled health-ping success and responsive first click; local fallback ready",
+      "Exactly two-page V2 reflection PDF and AI-USAGE current through Dec 1; final-v1.0 on tested main"
+    ],
+    "ownerBonus": {
+      "verified": true,
+      "metrics": {
+        "bookingCount": 2,
+        "platformRevenueCentavos": 78300,
+        "averageOrderValueCentavos": 391500,
+        "topSellingService": {
+          "serviceId": 1,
+          "serviceName": "Beginner Mug Handbuilding",
+          "seatsSold": 3
+        },
+        "nearlyFullSessionCount": 1
+      },
+      "totalBookingValueCentavos": 783000,
+      "receiptIds": [
+        "3d231d27-2672-41e4-b8f0-b7e423cc727b",
+        "7303bef3-6e40-4e69-9363-be6e60a83caf"
+      ],
+      "remainingSeats": 1,
+      "capacity": 4
+    }
+  },
+  "browser": {
+    "checkedAt": "2026-11-27T13:49:00.003Z",
+    "sourceCommit": "94ab9eac473d1f5f3bc4ef0e9161db8a6f21878d",
+    "environment": "Actual Chromium pages and HTTP routes; disposable PGlite fixture, never deployed data",
+    "checks": [
+      {
+        "name": "Back midway through the flow",
+        "status": "passed",
+        "path": "/selection.html",
+        "bookings": 0
+      },
+      {
+        "name": "Empty selection and checkout refuse without saving",
+        "status": "passed"
+      },
+      {
+        "name": "Manually typed invalid quantities identify Quantity and save nothing",
+        "status": "passed",
+        "messages": {
+          "0": "Quantity: Choose a whole number from 1 to 100.",
+          "-3": "Quantity: Choose a whole number from 1 to 100.",
+          "999999999999999999999": "Quantity: Choose a whole number from 1 to 100.",
+          "abc": "Quantity: Choose a whole number from 1 to 100.",
+          "(empty)": "Quantity: Choose a whole number from 1 to 100."
+        }
+      },
+      {
+        "name": "Rapid duplicate Confirm saves exactly one booking",
+        "status": "passed",
+        "receiptId": "34c15a4b-04da-47d0-b818-0b06daf598e3",
+        "bookingPosts": 1
+      },
+      {
+        "name": "Back after a saved booking returns to usable Selection",
+        "status": "passed",
+        "path": "/selection.html"
+      },
+      {
+        "name": "Confirmation refresh reads the saved ID without a new save",
+        "status": "passed",
+        "receiptId": "34c15a4b-04da-47d0-b818-0b06daf598e3",
+        "bookingPosts": 1
+      },
+      {
+        "name": "Direct good and bad Detail links recover correctly",
+        "status": "passed"
+      },
+      {
+        "name": "Unmatched search shows a recoverable empty state",
+        "status": "passed"
+      },
+      {
+        "name": "Selection, Checkout and receipt fit 320 and 390 px",
+        "status": "passed"
+      },
+      {
+        "name": "No uncaught browser JavaScript errors",
+        "status": "passed"
+      }
+    ],
+    "pageErrors": [],
+    "uspIntegration": {
+      "status": "pending",
+      "observedStatus": 404,
+      "observedMessage": "Seat hold not found. Start a new reservation.",
+      "required": "Kat's Selection hold creation/handoff and Kaitlyn's visible countdown/expiry. Backend conversion passed the separate API check."
+    },
+    "passed": 10,
+    "failed": 0
+  }
+}
