@@ -1,0 +1,18 @@
+{
+  "pageCount": 2,
+  "pageSize": "A4",
+  "fontFamily": "Times New Roman",
+  "fontSizes": [
+    10.0
+  ],
+  "fonts": [
+    "/AAAAAA+TimesNewRomanPS-BoldMT",
+    "/AAAAAA+TimesNewRomanPSMT",
+    "/Helvetica"
+  ],
+  "bodyLeadingPoints": 10,
+  "lineSpacing": 1,
+  "wordCount": 1467,
+  "pdfBytes": 97289,
+  "visualInspection": "Required after rendering"
+}
