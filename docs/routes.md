@@ -17,8 +17,8 @@ Requests and responses use JSON with camelCase fields. The [schema](schema.md) l
 | GET /api/owner/catalog | None | 200 {services,slots,commissionBasisPoints,discoveryHours} | 500 unexpected failure | Fran |
 | GET /api/bookings | None | 200 non-contact booking summaries | 500 unexpected failure | Fran |
 | GET /api/metrics | None | 200 metrics object | 500 unexpected failure | Fran |
-| GET /api/pricing/quote | slotId, quantity | 200 quote | 400 invalid/missing/extra field; 404 unknown; 409 SLOT_UNAVAILABLE | Janelle |
-| POST /api/bookings | Booking fields below | 201 created; 200 identical retry | 400 invalid; 404 unknown slot; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT; 429 RATE_LIMITED with Retry-After | Janelle |
+| GET /api/pricing/quote | slotId, quantity, optional holdId | 200 quote (plus holdId, holdExpiresAt when held) | 400 invalid/missing/extra field; 404 unknown slot or HOLD_NOT_FOUND; 409 SLOT_UNAVAILABLE/HOLD_MISMATCH/HOLD_EXPIRED/HOLD_RELEASED/HOLD_CONVERTED | Janelle |
+| POST /api/bookings | Booking fields below, optional holdId | 201 created (hold converted); 200 identical retry | 400 invalid; 404 unknown slot or HOLD_NOT_FOUND; 409 SLOT_UNAVAILABLE/PRICE_CHANGED/REQUEST_KEY_CONFLICT/HOLD_MISMATCH/HOLD_EXPIRED/HOLD_RELEASED/HOLD_CONVERTED; 429 RATE_LIMITED with Retry-After | Janelle |
 | GET /api/bookings/:id | UUID | 200 saved receipt | 400 malformed; 404 BOOKING_NOT_FOUND | Janelle |
 | GET /api/activities | Optional q, type, area, tag | 200 sourced research with an offerings array | 400 bad filter | Fran |
 | GET /api/providers/:id | Positive safe integer | 200 public studio reference and eligible demo slots | 400 malformed; 404 unknown or legacy fixture | Fran |
@@ -86,7 +86,7 @@ All per-seat amounts are integers from 1 to 100,000,000 centavos. Require buddy 
 
 ## Quote and booking contract
 
-`remainingSeats` excludes active holds for every ordinary quote or booking. The current browser journey remains hold-free until the assigned frontend and booking conversion work is integrated. `holdId` is not yet accepted by these two endpoints in Fran's foundation branch.
+`remainingSeats` excludes active holds for every ordinary quote or booking. Both endpoints accept an optional `holdId`; without it they behave exactly as in GC2. With it, the server validates the hold and excludes only that own hold once (see Janelle's section below).
 
 [Pricing](../server/services/pricing.js) and [booking](../server/services/bookings.js) share the same availability check and price quote. `GET /api/pricing/quote` accepts only slotId (positive integer) and quantity (1–100), each once. Price fields such as unitPriceCentavos or pricingType in the query return 400. A session that is inactive, paused, cancelled, not confirmed to run, outside the discovery window, past its cutoff or short of seats returns 409 SLOT_UNAVAILABLE. Prices always come from the slots table, never from the browser or published studio prices. POST /api/bookings reuses the same priceQuote() and checkBookable() functions.
 
@@ -177,14 +177,14 @@ A hold is active only while its stored status is `active` and `expires_at > serv
 
 ### Janelle: quote and conversion integration
 
-This work is still pending in the foundation branch:
+Implemented in [pricing.js](../server/services/pricing.js), [bookings.js](../server/services/bookings.js) and `requireActiveHold()` in [holds.js](../server/services/holds.js). Tests: [hold-conversion.test.js](../tests/hold-conversion.test.js).
 
-1. Accept an optional UUID `holdId` on quote and booking. Keep ordinary GC2 callers working. Preserve the existing stale-price refusal and identical booking retry.
-2. Check an earlier saved booking before rejecting an old hold on a retry. Compare `holdId` as part of the normalized request identity, using the unique `seat_holds.booking_id` relation.
-3. For a new booking, lock the `slots` row before locking its hold row. After the lock, read the server clock and require the hold's slot, quantity and effective active status to match.
-4. After validating the hold, call `findSlot(client, slotId, now, holdId)` to exclude that own hold once from the available-seat calculation. Public reads omit this argument. Never exclude an unvalidated hold belonging to another selection.
-5. Use the same `checkBookable()` and `priceQuote()`. Insert the saved receipt and update the hold to `status='converted', booking_id=<saved id>` in the same checked-out transaction. Any refusal rolls both back. Return the saved hold relation on readback without exposing retry keys.
-6. Check expired/mismatched holds, other customers' holds, changed quotes, duplicate clicks and retries after conversion. Do not reimplement expiry or seat arithmetic in a second service.
+- `GET /api/pricing/quote?slotId=1&quantity=2&holdId=<uuid>` returns the normal quote plus `holdId` and `holdExpiresAt`.
+- `POST /api/bookings` accepts optional `holdId` (UUID). The receipt and `GET /api/bookings/:id` return `holdId` (null for hold-free bookings).
+- Order in one transaction: earlier request key → lock slot → lock hold → server clock → require same slot and quantity and an active, unexpired hold → `findSlot(client, slotId, now, holdId)` → `checkBookable()` / `priceQuote()` → compare `expectedTotalCentavos` → insert booking → set hold `converted` with `booking_id`. Any refusal rolls back both, so a stale-price refusal leaves the hold active.
+- Refusals: 404 `HOLD_NOT_FOUND`; 409 `HOLD_MISMATCH` (other session or quantity), `HOLD_EXPIRED`, `HOLD_RELEASED`, `HOLD_CONVERTED`. Each message tells the customer to start a new reservation.
+- `holdId` is part of the retry identity: the identical body returns the saved receipt (200) even after the hold expires; the same `requestId` with a different or missing `holdId` returns 409 `REQUEST_KEY_CONFLICT`.
+- Frontend: send the same `holdId` in quote and booking, keep one `requestId` per Confirm attempt, and on `HOLD_EXPIRED` show the message and create a new hold.
 
 ### Kat, Kaitlyn and Kirsten
 

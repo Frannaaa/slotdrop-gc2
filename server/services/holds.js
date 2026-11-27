@@ -64,6 +64,21 @@ export async function createHold(db, body, clock = () => new Date()) {
   }
 }
 
+// Janelle (M3): shared hold check for quote and booking conversion.
+// Booking callers must already hold the slot lock; pass lock=true to lock the hold row too.
+export async function requireActiveHold(db, holdId, request, now, { lock = false } = {}) {
+  const { rows: [row] } = await db.query('SELECT * FROM seat_holds WHERE id=$1' + (lock ? ' FOR UPDATE' : ''), [holdId]);
+  if (!row) throw new ApiError(404, 'HOLD_NOT_FOUND', 'Seat hold not found. Start a new reservation.');
+  if (safeNumber(row.slot_id) !== request.slotId || safeNumber(row.quantity) !== request.quantity) {
+    throw new ApiError(409, 'HOLD_MISMATCH', 'This seat hold is for a different session or quantity. Start a new reservation.');
+  }
+  const status = holdStatus(row, now);
+  if (status === 'converted') throw new ApiError(409, 'HOLD_CONVERTED', 'This hold has already become a saved booking.');
+  if (status === 'released') throw new ApiError(409, 'HOLD_RELEASED', 'This seat hold was released. Start a new reservation.');
+  if (status === 'expired') throw new ApiError(409, 'HOLD_EXPIRED', 'Your 10-minute seat hold expired, so the seats were released. Start a new reservation.');
+  return row;
+}
+
 export async function getHold(db, id, now) {
   const row = await findHold(db, uuid(id, 'id'));
   if (!row) throw new ApiError(404, 'HOLD_NOT_FOUND', 'Seat hold not found.');
