@@ -1,68 +1,92 @@
 # Final V2 execution checklist
 
-Updated 27 November 2026 from Ma'am Nirel Marie M. Ibarra's 2:19 PM announcement and the supplied V2 assignment. This replaces the earlier audit of V1 requirements. Historical GC2 evidence remains unchanged.
+Updated 28 November 2026 from Ma'am Nirel Marie M. Ibarra's Nov 27 V2 announcement, the supplied assignment and verified project status. Historical GC2 evidence remains unchanged.
 
-## What the group submits
+## Submission and defense
 
-| Item | Current requirement | Owner/status |
-|---|---|---|
-| Working prototype | Visible, demonstrable USP: server-enforced ten-minute workshop seat hold; improve ONE highest-impact GC2 comment | Hold API deployed. Countdown and atomic conversion pending teammate integration. |
-| Group reflection | Exactly 2 pages, PDF, Times New Roman 10 pt, single spacing; end with a numerical business decision | Fran: rewritten source and renderer in this PR; group reviews implementation status before submission |
-| Repository | Reviewed main, `final-v1.0`, deployed link OR runnable README; AI-USAGE current through Dec 1 | Fran releases after independent review and final checks. GC2 tag stays fixed. |
-| Deadline | December 1, 11:59 PM | Use date; supplied announcement's weekday label is inconsistent with the 2026 calendar. |
-| Defense | December 2, SOM 205, 15 minutes plus 5 minutes Q&A; slides and live demo mandatory | Five presenters. Fran confirmed Ma'am approved Chonel's absence. |
-| Availability | Working app through December 5 | Keep practice sessions and deployed/local instructions usable. |
-| Peer ballot | Rank the other three groups, give reasons on published grounds, sign and submit in the room | Missing/incomplete ballot caps this component at 2.75. |
+| Item | Requirement and current status |
+| --- | --- |
+| Prototype | A visible USP and ONE highest-impact GC2 feedback choice. Home PR93, V2/browser fixes PR94 and hold-aware quote/atomic conversion PR95 are merged. Kat/Kaitlyn's visible Selection/Checkout hold handoff and countdown remain pending. |
+| Reflection | Exactly two pages, PDF, Times New Roman 10 pt, single spacing. Fran owns the complete shared paper. Current PDF/source/previews are in PR96 and need Janelle's independent review. |
+| Repository | Reviewed, tested main tagged `final-v1.0`; deployed link OR runnable README; AI-USAGE current through Dec 1. The final tag is not yet created. Keep `gc2-v1.0` fixed. |
+| Deadline | December 1, 11:59 PM PHT. Use the date because the supplied announcement's weekday is inconsistent with the 2026 calendar. |
+| Defense | December 2, SOM 205, 15-minute presentation/live demo and 5-minute Q&A. Slides and live demo are required. Five presenters; Chonel's absence is teacher-approved. |
+| Availability | Keep the app usable through December 5. |
+| Peer ballot | Rank the other three groups, give concrete reasons on demo/business/explanation, sign and submit in the room. An incomplete or missing ballot scores 2.75 for this 10% component. |
 
-Cancelled: `docs/refusals.md`, `docs/changes-since-gc2.md`, `docs/gc2-feedback-response.md`, the old declaration/step checklist and six-section report. Existing old documents are reference history, not work to extend. No second outsider tester, new GC2 video, React migration, accounts or real payment is required.
+Cancelled deliverables: `docs/refusals.md`, `docs/changes-since-gc2.md`, `docs/gc2-feedback-response.md`, the old declaration/step checklist and the six-section technical report. Existing old files remain reference history. Final does not add a second outside-group tester, a new GC2 video, a React migration, accounts or real payment.
+
+## Verified implementation
+
+Reviewed group main is `00feaa5f8186f3d98db9470ba9acd228d02ee91d`. Main CI passed and Render deployed the same commit.
+
+- PR93: Fran independently reviewed, approved and merged Chonel's Home implementation. Grouped cards, full booking/receipt/Owner read-back, Home empty/error/retry and mobile checks passed. Chonel retains authorship.
+- PR94: Janelle approved the V2 clarification and browser Back/quantity fixes, and it was merged.
+- PR95: Fran reviewed and merged Janelle's hold-aware quote and atomic conversion. A matching hold is accepted by quote and booking. The former unsupported-holdId HTTP 400 is resolved.
+- PR96: the updated single reflection, sources and measured page previews pass CI on the reviewed head. New changes require fresh exact-head CI and Janelle's independent review before merge.
+- The hold server owns expiry. It ends a reservation at the earlier of ten minutes or the studio cutoff. Effective expiry removes held seats from availability even if the old row still exists.
+- Saving inserts one booking and converts its hold in one transaction. Remaining availability is computed from capacity, confirmed bookings and active unexpired holds.
 
 ## One feedback choice
 
-The actual GC2 comment is the approximately 22-second cold start. GC2 scored 105/100 and praised existing locks, stale-price refusal, identical retries and the financial model. Prioritize reliable first access. Do not invent an additional criticism.
+The actual prioritized GC2 comment is the approximately 22-second cold start. GC2 scored 105/100 and praised the lock, stale-price refusal, identical retry behavior and financial model. Do not invent another criticism.
 
-Current implementation: health route, ten-minute configured health-ping schedule, presentation warm-up and tested local fallback. Automatic scheduled run 45928020576 on Nov 27 at 10:23 AM PHT logged `attempt 1: HTTP 200`; run 45883779764 also succeeded. Observed execution does not prove perfectly continuous ten-minute uptime. Check recent logs and actual first-load responsiveness before the defense.
+Implemented response: health route, ten-minute ping schedule, presentation warm-up and local fallback. Scheduled run 45928020576 on Nov 27 at 10:23 AM PHT logged `attempt 1: HTTP 200`; run 45883779764 also succeeded. Observed runs establish execution, not guaranteed continuous warmth. Check recent logs and the actual first click before choosing the defense environment.
 
-## Code handoffs and internal deadlines, PHT
+## Current handoffs
 
-| Member | Concrete finish | Deadline/reviewer |
-|---|---|---|
-| Janelle | Accept matching `holdId` in quote/save; validate session/quantity/status/expiry; exclude own hold exactly once; atomically consume hold and decrement stock; retain stable retry receipt and stale-price refusal | API contract Nov 27, 5 PM; PR by 8 PM. Fran reviews. |
-| Kat | Create/reuse the hold in Selection; preserve session, quantity, hold ID and expiry into Checkout; display the reservation; handle invalid quantities and expired/full sessions | PR Nov 27, 8 PM. Kaitlyn reviews. |
-| Kaitlyn | Show visible countdown using server expiry; block expired submit with reason and recovery; send same hold and stable request ID; keep receipt refresh/Back/double-submit correct | PR Nov 27, 8 PM. Kat reviews. |
-| Kirsten | Review Home PR93; shared hold/expiry/empty states and Owner labels at 320/390 px; draft one substantive question for another group | PR/review Nov 27, 8 PM. Chonel reviews styles; Fran integrates. No feedback-response file. |
-| Chonel | Finish Home PR93 handoff, verify its links and server availability; pass slides formatting and final assets to five presenters | Nov 27, 8 PM. Kirsten reviews. Approved absence is unchanged. |
-| Fran | Hold DB/APIs and Owner, cold-start mitigation, integration/QA, two-page reflection, run sheet, reviewed release and tag | Captain fixes in PR94; integrate after paired reviews. Janelle independently reviews PR94. |
+| Member | Concrete finish | Review/status |
+| --- | --- | --- |
+| Janelle | Support Kat/Kaitlyn's quote/save contract; independently review the current reflection/preparation PR96 | PR95 is merged. PR94 review is complete. |
+| Kat | Create/reuse a server hold in Selection; preserve session, quantity, hold ID and expiry into Checkout; show recoverable invalid/expired/full states | Visible handoff pending. Kaitlyn reviews. |
+| Kaitlyn | Show the server-based countdown; preserve the same hold and booking request identity; show expiry refusal/recovery; retain correct Back, receipt refresh and duplicate-confirm behavior | Visible integration pending. Kat reviews. |
+| Kirsten | Check shared reservation/expiry/error states and Owner labels at 320/390 px; prepare one question for another group | Home review/merge is complete. Fran/Janelle cover style reviews during Chonel's absence. |
+| Chonel | Home code/status handoff complete; existing editable assets can be shared if available | PR93 merged and live. No new Home implementation, video, personal reflection section or defense speaking slot is assigned. Unavailable Nov 28–Dec 3. |
+| Fran | Integrate reviewed changes, verify four proofs/seven tinker cases, maintain the single paper and disclosure, prepare content/run sheet, release and submit the reviewed build | PR94 is merged. Current paper is in PR96. Slide content and visual directions are prepared; actual deck assembly is deferred at Fran's request. |
 
-Everyone: send 2 specific reflection bullets by Nov 27, 8 PM: one actual change/breakage and one lesson or next decision. No duplicate individual reports.
-Paired reviews by Nov 28 noon; integrated tinker checks and all four proofs by Nov 28, 8 PM.
-Reflection, slides and three question cards ready Nov 29, 8 PM.
-Run two complete 15-minute rehearsals plus Q&A on Nov 30; choose exact time together. Complete three full-flow proof runs before release.
+Fran writes the complete group reflection with Codex assistance. Separate member sections or two reflection bullets are not required. Teammates may correct project facts.
 
-## What must be visible
+Existing team targets: paired reviews Nov 28 noon; integrated tinker checks and four proofs Nov 28, 8 PM; reflection/slides/question cards Nov 29, 8 PM; two timed 15-minute rehearsals plus Q&A Nov 30. Original code PR target was Nov 27, 8 PM; visible hold integration remains open.
 
-1. One uninterrupted customer transaction from discovery to Confirmation.
-2. Saved ID read back in Confirmation/Owner and the actual seat change.
-3. The USP produces two correct outcomes: active hold can complete, expired hold refuses and releases availability. Prepare the expired state beforehand; demonstrate the feature in under one minute.
-4. A refusal with a named reason on screen and no new saved record.
+## Four live proofs
 
-A static badge or description is insufficient. Currently `holdId` quote is HTTP 400, so the integrated USP is not ready. Preserve that failing gate until Janelle's implementation passes.
+1. Complete one uninterrupted customer transaction.
+2. Refresh/read the saved booking ID and match it in Owner, with the actual change in available seats.
+3. Run the visible USP with two correct outcomes: active hold converts; expired hold refuses and releases availability. Prepare expiry beforehand and run the feature itself in under one minute.
+4. Show a named refusal on screen and verify no new booking was saved.
 
-## Live marking and optional bonus
+Backend API coverage does not complete the visible proof. Keep the frontend integration gate open until a customer can see and finish the same reservation journey.
 
-| Component | Weight |
-|---|---:|
-| Live demo | 35% |
-| Business alignment | 20% |
-| System explanation | 15% |
-| Q&A: answer AND ask | 20% |
-| Peer ranking | 10% |
+## Integrated tinker checks and rehearsal
 
-Owner analytics is the only optional +5 bonus: claim on a slide/reflection and show the five server-computed figures. Automation bonus is cancelled. Live explanations must name the rule file, trace one real save screen → route → service → database, and explain wrong-total handling. The numerical pilot decision is 10% commission, modeled break-even about 27 of 64 released seats, with actual studio contribution checked before expanding.
+Run the seven V2 checks after integrating the final frontend:
+- Back mid-flow.
+- Refresh the saved receipt.
+- Empty selection.
+- Manually entered invalid quantities.
+- Repeated Confirm.
+- Direct valid and invalid Detail links.
+- Unmatched search.
+
+Also verify Back after a successful save, 320/390 px layouts, hold mismatch/expiry, a retry after the original deadline, and cutoff edits. Run the complete 15 minutes aloud twice with a timer. The team's release target also includes three uninterrupted full booking flows on the final build.
+
+## Presentation and bonus
+
+The grading weights remain 35% live demo, 20% business alignment, 15% system explanation, 20% answering AND asking in Q&A, and 10% peer ranking.
+
+[Slide content and visual directions](final-slide-content-and-visual-directions.md) contains exact copy, layouts, speaker timings and live-proof cues. It is a brief, not a finished deck.
+
+Owner analytics is the only optional +5 bonus. The reflection and slide brief explicitly claim it. Show five server-computed figures: booking count, platform fee revenue, average booking value, top-selling workshop and nearly full sessions. The automation bonus is cancelled.
+
+Explain one actual save from browser handler to route to function to database. Name `server/services/holds.js` and `server/services/bookings.js`, explain wrong-total refusal and own the AI-assisted code. The numerical business decision is a 10% commission for a one-studio pilot, with modeled break-even around 27 of 64 released seats. Expand only after actual studio contribution and platform margin are positive.
 
 ## Release gates still open
 
-- Janelle, Kat and Kaitlyn's integrated hold flow; rerun own-hold, expiry, mismatch and retry tests.
-- Independent review of PR94 and PR93, exact-head CI, merge reviewed changes.
-- Seven V2 tinker cases on integrated main and final deployed/local rehearsal.
-- Refresh reflection's honest pending-status paragraph once integration is proved; collect teammate corrections.
-- Slides, twice-timed rehearsal, question cards, signed in-room ballot, final-v1.0 and Canvas upload by deadline.
+- Kat/Kaitlyn's visible hold/countdown integration, independent reviews and exact-head CI.
+- Janelle's independent review of the updated reflection/preparation PR96.
+- All four live proofs and integrated tinker checks on the final deployed/local build.
+- Update the reflection's honest frontend-status paragraph only after that visible proof passes.
+- Build slides later from the prepared content, run two timed rehearsals, prepare questions and the in-room signed ballot.
+- Tag reviewed/tested main `final-v1.0` and upload the required reflection/repository/link on Canvas by December 1, 11:59 PM.
+
+Both group and individual Canvas submissions remain pending. The individual recording and its React/Supabase repository are separate from these group deliverables.
