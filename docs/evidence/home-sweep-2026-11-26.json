@@ -61,6 +61,11 @@
     "homeMerged": false,
     "holdsMerged": false,
     "countdownAndAtomicConversion": "Pending assigned teammate implementation",
-    "phoneUnaidedUserEvidence": "Still required; resized desktop browser checks are recorded above."
+    "phoneUnaidedUserEvidence": "Completed for GC2 on 16 November (docs/challenges.md). Final specifies no second outside-group participant or new recording; recheck updated flow and phone-width usability."
+  },
+  "requirementClarification": {
+    "date": "2026-11-26",
+    "source": "Final Project Phase 2, section 2, rows 1 and 7",
+    "correction": "Supersedes the earlier claim that new phone/unaided-user evidence was a separate release requirement. Source-head and runtime observations above remain historical captures."
   }
 }
