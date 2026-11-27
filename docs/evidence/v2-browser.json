@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-11-27T06:58:05.417Z",
+  "sourceCommit": "9cb05bb98d04ab96bdcfa0bd3a7e3513c27995eb",
+  "environment": "Actual Chromium pages and HTTP routes; disposable PGlite fixture, never deployed data",
+  "checks": [
+    {
+      "name": "Back midway through the flow",
+      "status": "passed",
+      "path": "/selection.html",
+      "bookings": 0
+    },
+    {
+      "name": "Empty selection and checkout refuse without saving",
+      "status": "passed"
+    },
+    {
+      "name": "Manually typed invalid quantities identify Quantity and save nothing",
+      "status": "passed",
+      "messages": {
+        "0": "Quantity: Choose a whole number from 1 to 100.",
+        "-3": "Quantity: Choose a whole number from 1 to 100.",
+        "999999999999999999999": "Quantity: Choose a whole number from 1 to 100.",
+        "abc": "Quantity: Choose a whole number from 1 to 100.",
+        "(empty)": "Quantity: Choose a whole number from 1 to 100."
+      }
+    },
+    {
+      "name": "Rapid duplicate Confirm saves exactly one booking",
+      "status": "passed",
+      "receiptId": "7d32c7a6-3ef5-43cb-ae25-231bf01afa04",
+      "bookingPosts": 1
+    },
+    {
+      "name": "Back after a saved booking returns to usable Selection",
+      "status": "passed",
+      "path": "/selection.html"
+    },
+    {
+      "name": "Confirmation refresh reads the saved ID without a new save",
+      "status": "passed",
+      "receiptId": "7d32c7a6-3ef5-43cb-ae25-231bf01afa04",
+      "bookingPosts": 1
+    },
+    {
+      "name": "Direct good and bad Detail links recover correctly",
+      "status": "passed"
+    },
+    {
+      "name": "Unmatched search shows a recoverable empty state",
+      "status": "passed"
+    },
+    {
+      "name": "Selection, Checkout and receipt fit 320 and 390 px",
+      "status": "passed"
+    },
+    {
+      "name": "No uncaught browser JavaScript errors",
+      "status": "passed"
+    }
+  ],
+  "pageErrors": [],
+  "uspIntegration": {
+    "status": "pending",
+    "observedStatus": 400,
+    "observedMessage": "Unsupported quote field: holdId",
+    "required": "Kat hold creation/handoff; Kaitlyn visible countdown/expiry; Janelle validated quote and atomic conversion. Tinker passes do not establish the integrated USP."
+  },
+  "passed": 10,
+  "failed": 0
+}

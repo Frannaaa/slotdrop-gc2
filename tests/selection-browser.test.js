@@ -147,3 +147,37 @@ test("Selection keeps session details visible when quote fails and allows retry"
   assert.equal(status.textContent, "");
   assert.equal(quoteCalls, 6);
 });
+
+test("invalid typed quantity names the field without leaving session details loading", async () => {
+  handlers.clear();
+  elements.clear();
+  const source = (await readFile(new URL("../public/js/selection.js", import.meta.url), "utf8"))
+    .replace(/^import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];\s*/m, "")
+    .replace(/\ntry\s*\{\s*const params = pageParameters[\s\S]*$/, "");
+  let requests = 0;
+  const context = {
+    document: { querySelector: selector => getElement(selector.replace("#", "")) },
+    URLSearchParams,
+    location: { assign() {} },
+    positive(value) {
+      if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))
+          || Number(value) < 1 || Number(value) > 100)
+        throw new Error("Choose a whole number from 1 to 100.");
+      return Number(value);
+    },
+    request: async () => { requests++; throw new Error("Unexpected request for invalid quantity"); },
+    money() {}, date() {}, hasBookingTotal() {},
+    notice(element, message) { element.textContent = message; },
+  };
+  runInNewContext(source + "\nslotId = 1;", context);
+  getElement("chosenSession").textContent = "Saved session details";
+  for (const value of ["0", "-3", "999999999999999999999", "abc", ""]) {
+    getElement("quantity").value = value;
+    await handlers.get("quantity:input")();
+    assert.match(getElement("status").textContent, /^Quantity:/);
+    assert.equal(getElement("chosenSession").textContent, "Saved session details");
+    assert.equal(getElement("continue").disabled, true);
+    assert.equal(getElement("summary").textContent, "");
+  }
+  assert.equal(requests, 0);
+});

@@ -27,11 +27,19 @@ The app is organized into [browser pages](public/), [Express routes and services
 
 ## Run locally
 
-Fran's Final foundation adds server-enforced seat holds while preserving the current booking journey. The countdown and hold-to-booking conversion are still teammate integration work. See [changes since GC2](docs/changes-since-gc2.md), the [hold API and handoff](docs/routes.md#seat-holds-and-teammate-handoff), and [actual local API captures](docs/refusals.md). The published `gc2-v1.0` tag is unchanged.
+## Final submission V2, 27 November update
 
-The [three-page project report](docs/SlotDrop_Final_Report.pdf) contains the six required sections, the recorded booking and commission amounts, the pilot break-even decision, the written Owner analytics claim, and the system diagram and versions. Rebuild its [editable HTML](docs/SlotDrop_Final_Report.html) with `node tools/build-final-report.mjs`; the prose and layout live in `tools/report-template.html`. Print A4 with CSS page size, headers/footers off and background graphics on, then inspect all three PDF pages. The report states the current integration limits; refresh that status and the evidence after the countdown and atomic conversion are verified.
+The current brief replaces the older Final document list. Submit the [two-page group reflection PDF](docs/SlotDrop_Final_Reflection.pdf), this repository on reviewed main with `final-v1.0`, an AI disclosure current through December 1, and the deployed link or the local instructions below by **December 1, 11:59 PM**. Bring slides and a working system to **SOM 205 on December 2** for **15 minutes plus 5 minutes of Q&A**. Keep the app usable through December 5.
 
-`npm run check:final` rehearses the API flow in a disposable local database and writes [the current integration status](docs/evidence/final-readiness.json). It verifies the five Owner figures and deliberately returns a nonzero exit while hold-aware quote/save is missing. Passing it does not substitute for the browser and unaided-user checks.
+Use [the V2 execution checklist](docs/final-submission-audit.md), [timed run sheet](docs/final-v2-run-sheet.md) and [testing checklist](docs/final-testing-requirements.md). The older report, refusal document, changes document and GC2-feedback-response document are historical references, not required V2 submissions. No new outsider test or GC2 recording is required.
+
+Our USP is a server-enforced ten-minute workshop seat hold. The hold API is deployed; the visible countdown and atomic hold-to-booking conversion remain teammate integration work. See [the API handoff](docs/routes.md#seat-holds-and-teammate-handoff). The reflection states this limit and must be refreshed after integration; do not represent API-only evidence as the finished live USP.
+
+We chose ONE actual GC2 comment: the approximately 22-second cold start. Health pings are configured every ten minutes; successful automatic executions and HTTP 200 have been observed. Warm and test the site before the defense and keep the local backup ready. A scheduled pinger does not guarantee uninterrupted responsiveness.
+
+`npm run check:final` rehearses APIs in a disposable database and intentionally fails while hold-aware quote/save is absent. `node tools/check-v2-browser.mjs` exercises V2 tinker cases against real browser pages and a disposable database; install Playwright separately for this optional development check. It never writes to the deployed database. Current validation and remaining limits are in [the V2 QA note](docs/qa-v2-2026-11-27.md).
+
+Rebuild the reflection on Windows with `py tools/build-final-reflection.py` after installing ReportLab, pypdf and pypdfium2. Its [editable source](docs/SlotDrop_Final_Reflection.source.json) uses exactly two pages, Times New Roman 10 pt and single spacing. The automated layout check and page previews accompany the PDF; inspect both pages after changing the prose.
 
 Before presenting on Windows, run `pwsh -File tools/prepare-presentation.ps1 -OpenCode` from the project directory. It checks/starts the local backup, attempts a live warm-up, opens app/Owner and optionally VS Code source files. Use `-NoBrowser` for checks only. If local networking is restricted, run `npm run demo` in your own terminal and verify the displayed address before the defense. The helper stops only a server it started if startup verification fails.
 

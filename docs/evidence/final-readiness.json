@@ -380,7 +380,7 @@
   ],
   "manualChecksStillRequired": [
     "Integrated browser countdown and complete booking journey",
-    "Phone-width and unaided-user evidence",
+    "Phone-width regression check; retain completed GC2 outside-group evidence (no new tester or recording required)",
     "Independent teammate review and reviewed-main deployment",
     "Enabled recurring health checks",
     "Final report contributions and final-v1.0 on tested main"
@@ -405,5 +405,10 @@
     ],
     "remainingSeats": 1,
     "capacity": 4
+  },
+  "requirementClarification": {
+    "date": "2026-11-26",
+    "source": "Final Project Phase 2, section 2, rows 1 and 7; docs/challenges.md, outside-group phone test completed 16 November",
+    "correction": "The earlier manual-check label overstated the requirement. No second outside-group participant or new recording is specified. Recheck the updated flow and phone-width usability; retain the existing GC2 recording. Captured HTTP responses and checkedAt are unchanged."
   }
 }
