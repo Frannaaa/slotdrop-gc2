@@ -12,8 +12,7 @@
   ],
   "bodyLeadingPoints": 10,
   "lineSpacing": 1,
-  "wordCount": 1430,
-  "pdfBytes": 97320,
-  "visualInspection": "Both final pages inspected in Poppler and PDFium: readable, no clipping, overlap or missing text.",
-  "visuallyInspectedAt": "2026-11-27T13:56:00.213Z"
+  "wordCount": 1501,
+  "pdfBytes": 97617,
+  "visualInspection": "Passed: both Poppler-rendered pages inspected on 2026-11-27; no clipping, overflow or missing final numerical decision."
 }
