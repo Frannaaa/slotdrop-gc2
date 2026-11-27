@@ -2,7 +2,7 @@
 <!-- Group assignment: Cholo. See README.md#team. -->
 <html lang="en">
   <head>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Nearby activities. Released seats. | SlotDrop</title>
@@ -40,8 +40,12 @@
           <a href="/browse.html">See all sessions</a>
         </div>
         <p id="status" role="status"></p>
+        <p id="empty-state" class="empty-state" hidden>
+          No dated workshops have open seats right now.
+          <a href="/browse.html#practice-sessions">Browse all sessions and practice bookings</a>.
+        </p>
         <button id="retry" class="text-button" type="button" hidden>
-          Refresh activities
+          Refresh workshops
         </button>
         <div id="featured" class="activity-grid"></div>
       </section>
