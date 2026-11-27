@@ -3,7 +3,7 @@
   "pageSize": "A4",
   "fontFamily": "Times New Roman",
   "fontSizes": [
-    10.0
+    10
   ],
   "fonts": [
     "/AAAAAA+TimesNewRomanPS-BoldMT",
@@ -14,5 +14,6 @@
   "lineSpacing": 1,
   "wordCount": 1467,
   "pdfBytes": 97289,
-  "visualInspection": "Required after rendering"
+  "visualInspection": "Both rendered pages inspected: readable body, no clipping or overflow; complete numerical decision on page 2.",
+  "visuallyInspectedAt": "2026-11-27T06:59:46.129Z"
 }
