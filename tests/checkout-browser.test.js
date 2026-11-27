@@ -75,7 +75,7 @@ test('429 checkout shows the wait message, retries the same booking, and opens i
     URLSearchParams,
     location: {
       search: '?slotId=1&quantity=1',
-      assign(url) { destination = url; },
+      replace(url) { destination = url; },
     },
     retryLimitedBooking: async (path, options, {maxRetries, onWait}) => {
       assert.equal(maxRetries, 1);
@@ -223,7 +223,7 @@ test('checkout verifies the quote and preserves one request through confirmation
 
     location: {
       search: '?slotId=1&quantity=1',
-      assign() {
+      replace() {
         if (navigationFails) throw new Error('Navigation was interrupted');
         navigationStarted = true;
       },

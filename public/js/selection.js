@@ -17,16 +17,17 @@ async function refresh() {
   next.disabled = true;
   summary.textContent = "";
   notice(status, "Checking price and seats...");
-  notice(chosenSession, "Loading session details...");
 
   let count;
 
   try {
     count = positive(quantity.value, 100);
   } catch (error) {
-    if (current === generation) notice(status, error.message, true);
+    if (current === generation) notice(status, "Quantity: " + error.message, true);
     return;
   }
+
+  notice(chosenSession, "Loading session details...");
 
   const sessionRequest = request("/api/slots/" + slotId)
     .then(slot => {
