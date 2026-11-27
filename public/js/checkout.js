@@ -173,8 +173,8 @@ form.addEventListener("submit", async (event) => {
       throw new Error("Invalid booking response.");
     }
 
-    // Clear the retry request once the Confirmation redirect is scheduled.
-    location.assign("/confirmation.html?id=" + encodeURIComponent(receipt.id));
+    // Replace the submitted form so Back cannot restore its locked saving state.
+    location.replace("/confirmation.html?id=" + encodeURIComponent(receipt.id));
     navigating = true;
     clear();
   } catch (error) {

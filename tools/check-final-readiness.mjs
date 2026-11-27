@@ -11,9 +11,9 @@ const report = {
   checkedAt: new Date().toISOString(), sourceBaseCommit: 'd7d5a49d915b053b0599e267b39c8663c7dd9ba0',
   environment: 'Disposable local database and actual HTTP routes; not a deployed release', node: process.version,
   backendReady: false, checks: [], exchanges: [],
-  manualChecksStillRequired: ['Integrated browser countdown and complete booking journey',
-    'Phone-width regression check; retain the completed GC2 outside-group evidence (no new tester or recording required)', 'Independent teammate review and reviewed-main deployment',
-    'Enabled recurring health checks', 'Final report contributions and final-v1.0 on tested main'],
+  manualChecksStillRequired: ['V2 four live proofs: complete flow, saved readback, visible USP with two outcomes, refusal with nothing saved',
+    'V2 seven tinker checks and phone-width regression; retain GC2 outsider evidence (no new tester or recording required)', 'Independent teammate review and reviewed-main deployment',
+    'Recent scheduled health-ping success and responsive first click; local fallback ready', 'Exactly two-page V2 reflection PDF and AI-USAGE current through Dec 1; final-v1.0 on tested main'],
 };
 async function request(method, path, body) {
   const response = await fetch(f.base + path, {

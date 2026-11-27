@@ -1,13 +1,25 @@
-# Final Phase 2: testing requirement clarification
+# Final V2 testing, 27 November 2026
 
-Checked against the supplied Final Project Phase 2 brief on 26 November 2026.
+V2 supersedes the earlier Final checklist. Retain the completed November 16 GC2 outside-group iPhone test and matching saved receipt; Final requires no second outsider or new recording.
 
-- Section 2, row 1 says the existing Browse → Select → Confirm → Save flow is done when a stranger completes it on the group's laptop without click-by-click instructions.
-- Section 2, row 7 requires loading, empty and error states, phone-width usability, working buttons and a clean Console.
-- The brief does not specify a second outside-group participant, a repeat recruitment exercise or a new user-test recording for the Final.
+## Seven instructor tinker checks
 
-The group already completed an outside-group iPhone test on **16 November**. Its **65.5-second recording** shows Home → Browse → Detail → Selection → Checkout → Confirmation and Owner. The saved one-seat Bumi & Ashe booking was **PHP 2,880**, reference `fbbfb294-20de-4e33-847b-15bc41e42eb9`; the separate read-only check matched that receipt and its Owner record. See [the existing evidence](challenges.md#separate-outside-group-phone-test--16-november).
+1. Navigate Back midway through a booking and continue normally.
+2. Refresh Confirmation; read the existing saved receipt by ID without creating another booking.
+3. Open Selection/Checkout without a chosen session; show a useful refusal and save nothing.
+4. Type zero, a negative value, a huge value or letters as quantity. Identify Quantity, refuse the action and save nothing.
+5. Click Confirm rapidly more than once; one request identity produces one booking, one seat decrement and one receipt.
+6. Open good and bad Detail links directly; render the good session or an understandable recovery state.
+7. Search for a phrase that matches nothing; show an empty state with recovery.
 
-Retain that GC2 evidence. Rehearse the current integrated flow after adding the hold/countdown: a successful save, expiry/refusal, receipt readback, seat counts, phone width and Console. The team can perform that regression check; this is not a new outsider-recruitment requirement.
+Also check Back after a completed save, 320/390 px layouts and uncaught browser errors. Run against the changed integrated build, then repeat relevant checks on reviewed main. Keep practice sessions usable through December 5. This does not add load or security testing requirements.
 
-A fresh user trial can be useful, but it is optional unless the instructor separately requests one. Earlier assistant-authored checklist labels calling new phone/unaided-user evidence a mandatory Final release gate were too broad and are superseded by this clarification.
+## Four mandatory live proofs
+
+Show the full transaction uninterrupted; read the saved ID in Confirmation/Owner and show seats changed; run the visible USP with two different correct outcomes; run a refusal with its reason visible and show no extra record was saved.
+
+For the hold USP, prepare an expired hold before the slot. Do not make the room wait ten minutes. API-only success is insufficient: hold status/countdown, availability and successful/expired outcomes must be on screen. Hold-aware quote/save remains an integration gate.
+
+`node tools/check-v2-browser.mjs` uses an isolated fixture and a real browser. Its report separates tinker passes from the pending USP. `npm run check:final` intentionally exits nonzero while hold conversion is absent.
+
+Run two full 15-minute rehearsals out loud, with named speakers and a five-minute Q&A practice. Complete three successful full-flow rehearsals on the final build, check first-click responsiveness, and bring a tested local fallback.
