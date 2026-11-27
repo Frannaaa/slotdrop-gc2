@@ -750,6 +750,88 @@ body:not(.owner-page) .activity-card.closed-card .button.secondary:hover {
 }
 
 
+/* Home is an entry point to Browse. Keep both routes to the full catalog
+   obvious without turning the featured workshop cards into the only path. */
+body:not(.owner-page) .home-hero-actions {
+  display: grid;
+  justify-items: start;
+  gap: .75rem;
+  width: 100%;
+}
+body:not(.owner-page) .home-hero-actions .home-primary-cta {
+  min-height: 58px;
+  max-width: 100%;
+  display: inline-flex;
+  gap: .8rem;
+  padding: 1rem 1.6rem;
+  font-size: 1.08rem;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 7px 18px rgba(48, 72, 219, .15);
+}
+body:not(.owner-page) .home-hero-actions .home-primary-cta:hover {
+  box-shadow: 0 9px 20px rgba(48, 72, 219, .22);
+}
+body:not(.owner-page) .home-hero-actions .home-steps {
+  color: #60665b;
+  font-size: .84rem;
+  line-height: 1.55;
+}
+body:not(.owner-page) .home-hero-actions .home-steps span {
+  padding: 0 .28rem;
+  color: #3048db;
+  font-weight: 700;
+}
+body:not(.owner-page) .home-featured .section-heading {
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+body:not(.owner-page) .home-featured-heading {
+  display: grid;
+  gap: .3rem;
+}
+body:not(.owner-page) .home-featured-heading p {
+  color: #5d635a;
+  font-size: .9rem;
+}
+body:not(.owner-page) .home-featured .home-see-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  min-height: 50px;
+  padding: .75rem 1.15rem;
+  border: 2px solid var(--color-blue);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--color-blue);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+body:not(.owner-page) .home-featured .home-see-all:hover {
+  background: #e9edff;
+  border-color: #2437b0;
+  color: #2437b0;
+}
+@media (max-width: 760px) {
+  body:not(.owner-page) .home-featured .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  body:not(.owner-page) .home-featured .home-see-all {
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  body:not(.owner-page) .home-hero-actions {
+    justify-items: stretch;
+  }
+  body:not(.owner-page) .home-hero-actions .home-primary-cta {
+    width: 100%;
+  }
+}
+
 /* Editorial Home hero with credited studio photo. */
 body:not(.owner-page) .home-hero {
   max-width: none;

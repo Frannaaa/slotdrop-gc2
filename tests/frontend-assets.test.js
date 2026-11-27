@@ -135,3 +135,16 @@ test('demo-choice label across Checkout and Owner is not silently replaced with 
   assert.match(owner, /slot\.startsAt === null \? practiceChoiceLabel\(slot\)/);
   assert.match(owner, /row\.sessionStartsAt === null \? practiceChoiceLabel\(row\)/);
 });
+
+test('Home prominently links to the full Browse flow', async () => {
+  const html = await readFile(resolve(publicRoot, 'index.html'), 'utf8');
+  const css = await readFile(resolve(publicRoot, 'css/style.css'), 'utf8');
+  assert.match(html, /<a class="button home-primary-cta" href="\/browse\.html">Browse workshops/);
+  assert.match(html, /<a class="home-see-all" href="\/browse\.html">View all workshops/);
+  assert.match(html, /Browse sessions[\s\S]*Choose seats[\s\S]*Confirm booking/);
+  assert.ok((html.match(/href="\/browse\.html"/g) || []).length >= 3,
+    'Navigation, primary hero CTA and featured-section CTA should lead to Browse');
+  assert.match(css, /\.home-hero-actions \.home-primary-cta\s*\{\s*min-height:\s*58px/);
+  assert.match(css, /\.home-featured \.home-see-all\s*\{[\s\S]*?min-height:\s*50px/);
+  assert.match(css, /\.home-featured \.home-see-all\s*\{[\s\S]*?width:\s*100%/);
+});

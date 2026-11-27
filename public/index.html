@@ -25,8 +25,11 @@
         <div class="home-hero-copy">
           <p class="eyebrow">Nearby creative workshops</p>
           <h1>A free evening.<br /><span>An open seat.</span></h1>
-          <p>Find open seats in workshops that are already scheduled to run. Bring a friend for a lower price on eligible sessions.</p>
-          <a class="button" href="/browse.html">Explore workshops</a>
+          <p>Compare workshop options, dates and prices, then choose a session to book. Bring a friend for a lower price on eligible sessions.</p>
+          <div class="home-hero-actions">
+            <a class="button home-primary-cta" href="/browse.html">Browse workshops <span aria-hidden="true">→</span></a>
+            <p class="home-steps">Browse sessions <span aria-hidden="true">›</span> Choose seats <span aria-hidden="true">›</span> Confirm booking</p>
+          </div>
         </div>
         <figure class="home-hero-photo">
           <img src="/images/workshops/laro-mug.webp" alt="Hands shaping a mug at a pottery workshop" width="720" height="405" fetchpriority="high" />
@@ -34,10 +37,13 @@
         </figure>
       </section>
 
-      <section>
+      <section class="home-featured" aria-labelledby="featured-title">
         <div class="section-heading">
-          <h2>Released seats near you</h2>
-          <a href="/browse.html">See all sessions</a>
+          <div class="home-featured-heading">
+            <h2 id="featured-title">Featured workshops</h2>
+            <p>Take a look, or browse the full list to compare your options.</p>
+          </div>
+          <a class="home-see-all" href="/browse.html">View all workshops <span aria-hidden="true">→</span></a>
         </div>
         <p id="status" role="status"></p>
         <p id="empty-state" class="empty-state" hidden>
