@@ -1,6 +1,6 @@
 # Final V2 execution checklist
 
-Updated 28 November 2026 from Ma'am Nirel Marie M. Ibarra's Nov 27 V2 announcement, the supplied assignment and verified project status. Historical GC2 evidence remains unchanged.
+Updated 28 November 2026 after Kat's Selection handoff. Grounded in Ma'am Nirel Marie M. Ibarra's Nov 27 V2 announcement, the supplied assignment and verified project status. Historical GC2 evidence remains unchanged.
 
 ## Submission and defense
 
@@ -33,20 +33,24 @@ The actual prioritized GC2 comment is the approximately 22-second cold start. GC
 
 Implemented response: health route, ten-minute ping schedule, presentation warm-up and local fallback. Scheduled run 45928020576 on Nov 27 at 10:23 AM PHT logged `attempt 1: HTTP 200`; run 45883779764 also succeeded. Observed runs establish execution, not guaranteed continuous warmth. Check recent logs and the actual first click before choosing the defense environment.
 
+## Selection-to-Checkout contract
+
+[The exact receiving contract and acceptance matrix](final-hold-handoff.md) distinguishes the five browser fields from API fields. The current Checkout parser rejects the held URL before fetching; quote/save also need the same holdId. The gap was reproduced against the real parser. Kaitlyn owns these receiving updates; Kat does not need to expand her Selection PR. Kat's local implementation/results remain reported, not independently verified.
+
 ## Current handoffs
 
 | Member | Concrete finish | Review/status |
 | --- | --- | --- |
 | Janelle | Support Kat/Kaitlyn's quote/save contract; independently review the current reflection/preparation PR96 | PR95 is merged. PR94 review is complete. |
-| Kat | Create/reuse a server hold in Selection; preserve session, quantity, hold ID and expiry into Checkout; show recoverable invalid/expired/full states | Visible handoff pending. Kaitlyn reviews. |
-| Kaitlyn | Show the server-based countdown; preserve the same hold and booking request identity; show expiry refusal/recovery; retain correct Back, receipt refresh and duplicate-confirm behavior | Visible integration pending. Kat reviews. |
+| Kat | Selection hold implementation and tests reported complete; publish the Selection-only PR carrying slotId, quantity, holdId, expiresAt and serverNow | Awaiting publication/independent review. Kaitlyn reviews. Kat reviews Checkout. |
+| Kaitlyn | Own Checkout/Confirmation receiving the five browser fields, authoritative hold revalidation/countdown, same-hold quote/save and stable retry/receipt | [Issue 97](https://github.com/Frannaaa/slotdrop-gc2/issues/97). PR target Nov 29 noon; Kat reviews by 2 PM. |
 | Kirsten | Check shared reservation/expiry/error states and Owner labels at 320/390 px; prepare one question for another group | Home review/merge is complete. Fran/Janelle cover style reviews during Chonel's absence. |
-| Chonel | Home code/status handoff complete; existing editable assets can be shared if available | PR93 merged and live. No new Home implementation, video, personal reflection section or defense speaking slot is assigned. Unavailable Nov 28–Dec 3. |
+| Chonel | All required Home work complete; original authorship retained | PR93 merged/live and Home issue 3 closed. No new task during approved absence. Fran owns remaining Home/integration/style-review follow-ups and later presentation coordination. |
 | Fran | Integrate reviewed changes, verify four proofs/seven tinker cases, maintain the single paper and disclosure, prepare content/run sheet, release and submit the reviewed build | PR94 is merged. Current paper is in PR96. Slide content and visual directions are prepared; actual deck assembly is deferred at Fran's request. |
 
 Fran writes the complete group reflection with Codex assistance. Separate member sections or two reflection bullets are not required. Teammates may correct project facts.
 
-Existing team targets: paired reviews Nov 28 noon; integrated tinker checks and four proofs Nov 28, 8 PM; reflection/slides/question cards Nov 29, 8 PM; two timed 15-minute rehearsals plus Q&A Nov 30. Original code PR target was Nov 27, 8 PM; visible hold integration remains open.
+Current finishing targets, PHT: Kat publishes Selection tonight, Nov 28; Kaitlyn Checkout PR Nov 29 noon; paired review and Janelle's PR96 review Nov 29, 2 PM; Fran integrated tinker/four-proof checks Nov 29, 8 PM, after reviews and CI. Two timed 15-minute rehearsals plus Q&A remain Nov 30. Slide content is prepared; actual deck assembly remains deferred at Fran's request. The original Nov 27/28 code/review targets are superseded by this finishing sequence.
 
 ## Four live proofs
 
