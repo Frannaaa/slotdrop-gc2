@@ -12,8 +12,7 @@
   ],
   "bodyLeadingPoints": 10,
   "lineSpacing": 1,
-  "wordCount": 1467,
-  "pdfBytes": 97289,
-  "visualInspection": "Both rendered pages inspected: readable body, no clipping or overflow; complete numerical decision on page 2.",
-  "visuallyInspectedAt": "2026-11-27T06:59:46.129Z"
+  "wordCount": 1501,
+  "pdfBytes": 97617,
+  "visualInspection": "Passed: both Poppler-rendered pages inspected on 2026-11-27; no clipping, overflow or missing final numerical decision."
 }
